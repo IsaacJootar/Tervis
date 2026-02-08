@@ -227,10 +227,11 @@ class WorkspaceDashboard extends Component
     $ttCount = $this->getModelCount('App\Models\TetanusVaccination');
     $deliveryCount = $this->getModelCount('App\Models\Delivery');
     $postnatalCount = $this->getModelCount('App\Models\PostnatalRecord');
+    $followUpCount = $this->getModelCount('App\Models\AntenatalFollowUpAssessment');
     $this->cardStatus['anc'] = [
       'enabled' => $this->hasAntenatalRegistration,
-      'count' => $ttCount + $deliveryCount + $postnatalCount,
-      'label' => 'Activities',
+      'count' => $ttCount + $deliveryCount + $postnatalCount + $followUpCount,
+      'label' => 'Total ANC Visits',
       'requires' => 'ANC Registration'
     ];
 
@@ -378,7 +379,7 @@ class WorkspaceDashboard extends Component
   // ============================================
   public function backToPatientWorkspace()
   {
-    return redirect()->route('patient.workspace');
+    return redirect()->route('patient-workspace');
   }
 
   // ============================================
