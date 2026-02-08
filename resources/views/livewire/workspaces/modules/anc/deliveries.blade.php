@@ -815,6 +815,76 @@
                             </div>
                         </div>
 
+                        <!-- Baby Details -->
+                        <div class="card mb-4">
+                            <div class="card-header d-flex align-items-center justify-content-between">
+                                <h5 class="card-title mb-0"><span class="badge text-bg-info">Baby Details</span></h5>
+                                <button type="button" class="btn btn-sm btn-outline-primary" wire:click="addBaby">
+                                    <i class="bx bx-plus me-1"></i>Add Baby
+                                </button>
+                            </div>
+                            <div class="card-body">
+                                @foreach ($babies as $index => $baby)
+                                    <div class="border rounded p-3 mb-3">
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <h6 class="mb-0">Baby {{ $index + 1 }}</h6>
+                                            @if (count($babies) > 1)
+                                                <button type="button" class="btn btn-sm btn-outline-danger"
+                                                    wire:click="removeBaby({{ $index }})">
+                                                    Remove
+                                                </button>
+                                            @endif
+                                        </div>
+                                        <div class="row g-3">
+                                            <div class="col-md-4">
+                                                <label class="form-label">First Name</label>
+                                                <input type="text" class="form-control"
+                                                    wire:model="babies.{{ $index }}.first_name">
+                                                @error('babies.' . $index . '.first_name')
+                                                    <span class="text-danger">{{ $message }}</span>
+                                                @enderror
+                                            </div>
+                                            <div class="col-md-4">
+                                                <label class="form-label">Last Name</label>
+                                                <input type="text" class="form-control"
+                                                    wire:model="babies.{{ $index }}.last_name">
+                                                @error('babies.' . $index . '.last_name')
+                                                    <span class="text-danger">{{ $message }}</span>
+                                                @enderror
+                                            </div>
+                                            <div class="col-md-4">
+                                                <label class="form-label">Sex <span class="text-danger">*</span></label>
+                                                <select class="form-select" wire:model="babies.{{ $index }}.gender">
+                                                    <option value="">Select...</option>
+                                                    <option value="Male">Male</option>
+                                                    <option value="Female">Female</option>
+                                                </select>
+                                                @error('babies.' . $index . '.gender')
+                                                    <span class="text-danger">{{ $message }}</span>
+                                                @enderror
+                                            </div>
+                                            <div class="col-md-4">
+                                                <label class="form-label">Birth Weight (kg)</label>
+                                                <input type="number" step="0.1" class="form-control"
+                                                    wire:model="babies.{{ $index }}.birth_weight">
+                                                @error('babies.' . $index . '.birth_weight')
+                                                    <span class="text-danger">{{ $message }}</span>
+                                                @enderror
+                                            </div>
+                                            <div class="col-md-4">
+                                                <label class="form-label">Birth Order</label>
+                                                <input type="number" min="1" class="form-control"
+                                                    wire:model="babies.{{ $index }}.birth_order">
+                                                @error('babies.' . $index . '.birth_order')
+                                                    <span class="text-danger">{{ $message }}</span>
+                                                @enderror
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+
                         <!-- Delivery Personnel -->
                         <div class="card mb-4">
                             <div class="card-header">

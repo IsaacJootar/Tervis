@@ -39,6 +39,7 @@ class Deliveries extends Component
   public $lmp, $edd, $pregnancy_number;
   public $delivery_id, $modal_flag = false;
   public $states, $lgas, $wards;
+  public $babies = [];
 
   protected $rules = [
     'patientId' => 'required',
@@ -90,6 +91,12 @@ class Deliveries extends Component
     'officer_name' => 'required|string|max:255',
     'officer_role' => 'required|string|max:255',
     'officer_designation' => 'required|string|max:255',
+    'babies' => 'required|array|min:1',
+    'babies.*.first_name' => 'nullable|string|max:255',
+    'babies.*.last_name' => 'nullable|string|max:255',
+    'babies.*.gender' => 'required|in:Male,Female',
+    'babies.*.birth_weight' => 'nullable|numeric|min:0.5|max:6',
+    'babies.*.birth_order' => 'nullable|integer|min:1|max:10',
   ];
 
   public function mount($patientId)
@@ -163,6 +170,31 @@ class Deliveries extends Component
     $this->autoFillDeliveryMonth();
   }
 
+  public function addBaby(): void
+  {
+    $this->babies[] = [
+      'first_name' => '',
+      'last_name' => $this->last_name,
+      'gender' => null,
+      'birth_weight' => null,
+      'birth_order' => count($this->babies) + 1,
+    ];
+  }
+
+  public function removeBaby(int $index): void
+  {
+    if (count($this->babies) <= 1) {
+      return;
+    }
+
+    unset($this->babies[$index]);
+    $this->babies = array_values($this->babies);
+
+    foreach ($this->babies as $i => $baby) {
+      $this->babies[$i]['birth_order'] = $i + 1;
+    }
+  }
+
   private function validatePatientAccess()
   {
     $patient = Patient::with(['facility', 'activeAntenatalRegistration'])->find($this->patientId);
@@ -210,10 +242,20 @@ class Deliveries extends Component
     $this->cl_sex = $this->getAgeRangeFromAge($this->patient_age) ?? $this->patient->age_group;
     $this->cl_phone = $this->patient->phone ?? null;
     $activeAnc = $this->patient->activeAntenatalRegistration;
-    if ($activeAnc) {
-      $this->lmp = $activeAnc->lmp?->format('Y-m-d');
-      $this->edd = $activeAnc->edd?->format('Y-m-d');
-      $this->pregnancy_number = $activeAnc->pregnancy_number;
+      if ($activeAnc) {
+        $this->lmp = $activeAnc->lmp?->format('Y-m-d');
+        $this->edd = $activeAnc->edd?->format('Y-m-d');
+        $this->pregnancy_number = $activeAnc->pregnancy_number;
+      }
+
+    if (empty($this->babies)) {
+      $this->babies = [[
+        'first_name' => '',
+        'last_name' => $this->last_name,
+        'gender' => $this->baby_sex,
+        'birth_weight' => $this->weight,
+        'birth_order' => 1,
+      ]];
     }
   }
 
@@ -222,6 +264,7 @@ class Deliveries extends Component
     DB::beginTransaction();
     try {
       $this->autoFillDeliveryMonth();
+      $this->hydrateDeliveryBabyFields();
       $this->validate();
 
       $existingDelivery = Delivery::where('patient_id', $this->patientId)
@@ -234,9 +277,9 @@ class Deliveries extends Component
         return;
       }
 
-      $data = array_diff_key($this->all(), [
-        'patientId' => '',
-        'patient' => '',
+        $data = array_diff_key($this->all(), [
+          'patientId' => '',
+          'patient' => '',
         'patient_din' => '',
         'middle_name' => '',
         'patient_phone' => '',
@@ -251,9 +294,10 @@ class Deliveries extends Component
         'lgas' => '',
         'wards' => '',
         'hasAccess' => '',
-        'accessError' => '',
-        'activation_time' => ''
-      ]);
+          'accessError' => '',
+          'activation_time' => '',
+          'babies' => ''
+        ]);
 
         $data['patient_id'] = $this->patientId;
         $delivery = Delivery::create($data);
@@ -335,11 +379,36 @@ class Deliveries extends Component
       $this->breastfeeding = $delivery->breastfeeding;
       $this->postpartum = $delivery->postpartum;
       $this->took_del = $delivery->took_del;
-      $this->officer_name = $delivery->officer_name;
-      $this->officer_role = $delivery->officer_role;
-      $this->officer_designation = $delivery->officer_designation;
-      $this->modal_flag = true;
-      $this->dispatch('open-main-modal');
+        $this->officer_name = $delivery->officer_name;
+        $this->officer_role = $delivery->officer_role;
+        $this->officer_designation = $delivery->officer_designation;
+
+        $linkedBabies = LinkedChild::where('parent_patient_id', $this->patientId)
+          ->whereDate('date_of_birth', $delivery->dodel)
+          ->orderBy('birth_order')
+          ->get();
+
+        if ($linkedBabies->isNotEmpty()) {
+          $this->babies = $linkedBabies->map(function ($child, $index) {
+            return [
+              'first_name' => $child->first_name,
+              'last_name' => $child->last_name,
+              'gender' => $child->gender,
+              'birth_weight' => $child->birth_weight,
+              'birth_order' => $child->birth_order ?: ($index + 1),
+            ];
+          })->values()->toArray();
+        } else {
+          $this->babies = [[
+            'first_name' => '',
+            'last_name' => $this->last_name,
+            'gender' => $delivery->baby_sex,
+            'birth_weight' => $delivery->weight,
+            'birth_order' => 1,
+          ]];
+        }
+        $this->modal_flag = true;
+        $this->dispatch('open-main-modal');
 
       DB::commit();
     } catch (Exception $e) {
@@ -357,6 +426,7 @@ class Deliveries extends Component
         'patientId' => '',
       ]);
       $this->autoFillDeliveryMonth();
+      $this->hydrateDeliveryBabyFields();
       $this->validate($rules);
 
       $delivery = Delivery::findOrFail($this->delivery_id);
@@ -378,7 +448,8 @@ class Deliveries extends Component
         'wards' => '',
         'hasAccess' => '',
           'accessError' => '',
-          'activation_time' => ''
+          'activation_time' => '',
+          'babies' => ''
         ]));
         $this->syncLinkedChildFromDelivery($delivery);
 
@@ -476,6 +547,7 @@ class Deliveries extends Component
       'breastfeeding',
       'postpartum',
       'took_del',
+      'babies',
       'delivery_id',
       'modal_flag',
     ]);
@@ -490,6 +562,21 @@ class Deliveries extends Component
       } catch (Exception $e) {
         // ignore invalid date
       }
+    }
+  }
+
+  private function hydrateDeliveryBabyFields(): void
+  {
+    if (empty($this->babies)) {
+      return;
+    }
+
+    $firstBaby = $this->babies[0] ?? [];
+    if (!empty($firstBaby['gender'])) {
+      $this->baby_sex = $firstBaby['gender'];
+    }
+    if (array_key_exists('birth_weight', $firstBaby)) {
+      $this->weight = $firstBaby['birth_weight'];
     }
   }
 
@@ -509,7 +596,7 @@ class Deliveries extends Component
 
   private function syncLinkedChildFromDelivery(Delivery $delivery): void
   {
-    if (!$delivery->baby_sex || !$delivery->dodel) {
+    if (!$delivery->dodel) {
       return;
     }
 
@@ -519,37 +606,50 @@ class Deliveries extends Component
       return;
     }
 
-    $existingChild = LinkedChild::where('parent_patient_id', $delivery->patient_id)
-      ->whereDate('date_of_birth', $delivery->dodel)
-      ->where('gender', $delivery->baby_sex)
-      ->first();
-
-    $userId = Auth::id();
-    $updatePayload = [
-      'gender' => $delivery->baby_sex,
-      'date_of_birth' => $delivery->dodel,
-      'birth_weight' => $delivery->weight,
-      'facility_id' => $delivery->facility_id,
-      'updated_by' => $userId,
-      'notes' => 'Auto linked from delivery #' . $delivery->id,
-    ];
-
-    if ($existingChild) {
-      $existingChild->update($updatePayload);
-      return;
-    }
-
     $motherLastName = $this->last_name ?: $delivery->patient?->last_name;
+    $userId = Auth::id();
 
-    LinkedChild::create(array_merge($updatePayload, [
-      'linked_child_id' => LinkedChild::generateLinkedChildID(),
-      'parent_patient_id' => $delivery->patient_id,
-      'first_name' => 'Baby',
-      'last_name' => $motherLastName,
-      'relationship' => 'Mother',
-      'is_active' => true,
-      'created_by' => $userId,
-    ]));
+    foreach ($this->babies as $index => $baby) {
+      $gender = $baby['gender'] ?? null;
+      if (!$gender) {
+        continue;
+      }
+
+      $birthOrder = $baby['birth_order'] ?? ($index + 1);
+      $existingChild = LinkedChild::where('parent_patient_id', $delivery->patient_id)
+        ->whereDate('date_of_birth', $delivery->dodel)
+        ->where('gender', $gender)
+        ->where('birth_order', $birthOrder)
+        ->first();
+
+      $updatePayload = [
+        'gender' => $gender,
+        'date_of_birth' => $delivery->dodel,
+        'birth_weight' => $baby['birth_weight'] ?? null,
+        'birth_order' => $birthOrder,
+        'facility_id' => $delivery->facility_id,
+        'updated_by' => $userId,
+        'notes' => 'Auto linked from delivery #' . $delivery->id,
+      ];
+
+      if ($existingChild) {
+        $existingChild->update($updatePayload);
+        continue;
+      }
+
+      $firstName = $baby['first_name'] ?: ('Baby ' . ($index + 1));
+      $lastName = $baby['last_name'] ?: $motherLastName;
+
+      LinkedChild::create(array_merge($updatePayload, [
+        'linked_child_id' => LinkedChild::generateLinkedChildID(),
+        'parent_patient_id' => $delivery->patient_id,
+        'first_name' => $firstName,
+        'last_name' => $lastName,
+        'relationship' => 'Mother',
+        'is_active' => true,
+        'created_by' => $userId,
+      ]));
+    }
   }
 
   public function render()

@@ -1,50 +1,60 @@
-# Handoff Notes (2026-02-07)
+# Handoff Notes (2026-02-08)
 
 ## Summary
-- Attendance module moved into module folder and restyled to a Vuexy-like profile layout.
-- ANC Tetanus Vaccinations module moved into ANC module folder, route updated, and view restyled to match Attendance while keeping CRUD + modal.
-- NHIS labels updated to "NHIS Subscriber" / "NHIS Non-Subscriber" in Attendance and Workspace Dashboard.
+- ANC module fully organized under ANC Workspace with TT, Delivery, Postnatal, and Follow-up Assessment as internal activities.
+- Follow-up Assessment is now full CRUD (model/migration/livewire/view), uses TT-style layout, mobile fixes, and strict validation formats.
+- ANC Workspace card replaces standalone ANC activity cards; card now shows Total ANC Visits (TT + Delivery + Postnatal + Follow-up).
+- Back buttons in ANC activities now return to ANC Workspace; dashboard back returns to Patient Activations.
 
 ## Key Decisions
 - Keep DataTable default markup (same as registers) in modules; avoid partials for now.
-- Modules follow the 6-pattern plan (module-per-card, route per module, single-module workflow, consistent patient context, module activity logging later, card->module mapping).
+- ANC is a single workspace that hosts multiple activities (Follow-up Assessment, TT, Delivery, Postnatal).
+- Follow-up Assessment is a full CRUD activity (not a static form).
 - Attendance is read-only; no modal.
-- Tetanus Vaccinations uses modal create/edit + delete.
 
 ## Files Changed
-- `app/Livewire/Workspaces/Modules/Attendance.php` (view path to `attendance/index`)
-- `resources/views/livewire/workspaces/modules/attendance/index.blade.php`
-  - Vuexy-style header, patient overview panel, DataTable layout, NHIS label change.
+- `app/Livewire/Workspaces/WorkspaceDashboard.php`
+  - ANC card shows Total ANC Visits and includes follow-up count.
+  - `backToPatientWorkspace()` route now `patient-workspace`.
 - `resources/views/livewire/workspaces/workspace-dashboard.blade.php`
-  - NHIS label change.
-- `app/Livewire/Workspaces/Modules/ANC/TetanusVaccinations.php`
-  - Namespace + view path updated.
+  - Back label now “Back to Patient Activations”.
+- `resources/views/livewire/partials/workspace-card.blade.php`
+  - Cards always active (no disabled blur).
+- `app/Livewire/Workspaces/Modules/ANC/AncOverview.php`
+  - New ANC Workspace hub (patient access + quick links).
+- `resources/views/livewire/workspaces/modules/anc/index.blade.php`
+  - ANC Workspace landing page.
+- `app/Livewire/Workspaces/Modules/ANC/FollowUpAssessment.php`
+  - Full CRUD, validation formats, officer fields stored + original officer displayed on edit.
+- `app/Models/AntenatalFollowUpAssessment.php`
+  - Fillable/casts for follow-up activity.
+- `database/migrations/2026_02_08_000000_create_antenatal_follow_up_assessments_table.php`
+  - Follow-up table with officer fields.
+- `resources/views/livewire/workspaces/modules/anc/follow-up-assessment.blade.php`
+  - TT-style layout, mobile fixes, unified form section, action buttons, officer block.
+- `resources/views/livewire/workspaces/modules/anc/deliveries.blade.php`
+  - Back label “Back to ANC Workspace”.
+- `resources/views/livewire/workspaces/modules/anc/postnatal.blade.php`
+  - Back label “Back to ANC Workspace”.
 - `resources/views/livewire/workspaces/modules/anc/tetanus-vaccinations.blade.php`
-  - Vuexy-style layout, DataTable + CRUD + modal retained.
-- `app/Livewire/Registers/TetanusRegister.php`
-  - Renamed/moved from `TetanusVaccinations.php`, namespace/class/view updated.
+  - Back label “Back to ANC Workspace”.
+  - Access card link now `patient-workspace`, label “Back to Patient Activations”.
 - `routes/web.php`
-  - Import updated to `App\Livewire\Workspaces\Modules\ANC\TetanusVaccinations`
-  - ANC TT route now: `/workspaces/{patientId}/anc/tetanus-vaccinations`
+  - ANC workspace route: `/workspaces/{patientId}/anc` named `workspaces-antenatal`.
+  - Follow-up route: `/workspaces/{patientId}/anc/follow-up-assessment` named `workspaces-antenatal-followup`.
 
 ## Folder Moves
 - `app/Livewire/Workspaces/Antenatal/TetanusVaccinations.php`
   -> `app/Livewire/Workspaces/Modules/ANC/TetanusVaccinations.php`
 - `resources/views/livewire/workspaces/antenatal/tetanus-vaccinations.blade.php`
   -> `resources/views/livewire/workspaces/modules/anc/tetanus-vaccinations.blade.php`
-- Deleted empty Antenatal folders.
+- Follow-up assessment moved from registers into ANC module as full CRUD.
 
 ## Open Items / Next Steps
-1. Verify `backToDashboard()` in `app/Livewire/Workspaces/Modules/ANC/TetanusVaccinations.php` points to correct route (currently `patient.dashboard`).
-2. Decide if ANC should have a landing page listing internal activities (Tetanus, Postnatal, Delivery, Follow-up Assessment).
-3. Confirm UI in browser (Attendance + Tetanus) and adjust layout if needed.
+1. Run UI check on ANC Workspace + Follow-up modal on mobile (button visibility + table action buttons).
+2. Confirm any remaining dashboard cards that should be enabled/disabled by business rules (currently all active).
+3. Start next module (user to choose).
 
 ## Notes
 - IDE tabs may still point to old paths (e.g., `workspaces/antenatal/...`). Close/reopen correct files.
-## Next Step (Suggested)
-1. Verify ANC Tetanus `backToDashboard()` route in `app/Livewire/Workspaces/Modules/ANC/TetanusVaccinations.php` (currently `patient.dashboard`).
-2. Open Attendance and ANC Tetanus in browser to confirm layout + CRUD works.
-3. Decide if ANC landing page is needed for Follow-up Assessments and other ANC activities.
-## Multi-Activity Module Note
-- Some modules will contain multiple CRUD activities (multiple tables + modals) in one module.
-- Plan to group by sections or tabs/accordion to keep the page clean.
+- Multi-activity modules should group activities by tabs/sections later to avoid long pages.
