@@ -1,0 +1,148 @@
+{
+  "menu": [
+    {
+      "url": "/core/facility-admin-dashboard",
+      "name": "Dashboard",
+      "icon": "menu-icon icon-base ti tabler-smart-home",
+      "slug": "facility-admin-dashboard"
+    },
+    {
+      "name": "Data Officers",
+      "icon": "menu-icon icon-base ti tabler-users",
+      "slug": "create-data-officers",
+      "submenu": [
+        {
+          "url": "/core/create-data-officers",
+          "name": "Create Officer Account",
+          "slug": "/core/create-data-officers"
+        },
+        {
+          "url": "/core/update-officer-designation",
+          "name": "Change Designation",
+          "slug": "update-officer-designation"
+        },
+        {
+          "url": "/core/disable-data-officer-account",
+          "name": "Disable Accounts",
+          "slug": "disable-data-officer-account"
+        },
+        {
+          "url": "/core/facility-departments",
+          "name": "Facility Departments",
+          "slug": "facility-departments"
+        }
+      ]
+    },
+    {
+      "name": "Patient Management",
+      "icon": "menu-icon icon-base ti tabler-user-heart",
+      "slug": "facility-patients",
+      "submenu": [
+        {
+          "url": "/core/facility-patients",
+          "name": "All Patients",
+          "slug": "facility-patients"
+        },
+        {
+          "url": "#",
+          "name": "Discharge Management",
+          "slug": "#"
+        }
+      ]
+    },
+    {
+      "name": "Appointments",
+      "icon": "menu-icon icon-base ti tabler-calendar",
+      "slug": "patient-appointments",
+      "submenu": [
+        {
+          "url": "/core/patient-appointments",
+          "name": "Patient Appointments",
+          "slug": "patient-appointments"
+        }
+      ]
+    },
+    {
+      "name": "Facility Resources",
+      "icon": "menu-icon icon-base ti tabler-building",
+      "slug": "facility-admin-resources",
+      "submenu": [
+        {
+          "url": "#",
+          "name": "Room Management",
+          "slug": "#"
+        },
+        {
+          "url": "#",
+          "name": "Facility Inventory",
+          "slug": "#"
+        }
+      ]
+    },
+    {
+      "name": "Facility Finances",
+      "icon": "menu-icon icon-base ti tabler-currency-dollar",
+      "slug": "facility-admin-finance",
+      "submenu": [
+        {
+          "url": "#",
+          "name": "Payments Records",
+          "slug": "#"
+        },
+        {
+          "url": "#",
+          "name": "Audit Trail",
+          "slug": "#"
+        }
+      ]
+    },
+    {
+      "url": "/analytics/real-time-dashboard",
+      "name": "Real-time Dashboard",
+      "icon": "menu-icon icon-base ti tabler-chart-line",
+      "slug": "real-time-dashboard"
+    },
+    {
+      "url": "/analytics/risk-dashboard",
+      "name": "Risk Assessment",
+      "icon": "menu-icon icon-base ti tabler-alert-circle",
+      "slug": "risk-assessment"
+    },
+    {
+      "url": "/analytics/risk-dashboard",
+      "name": "Diagnostic Assistant",
+      "icon": "menu-icon icon-base ti tabler-stethoscope",
+      "slug": "risk-dashboard"
+    },
+    {
+      "url": "/analytics/health-trends-dashboard",
+      "name": "health & Predictive trends",
+      "icon": "menu-icon icon-base ti tabler-chart-histogram",
+      "slug": "health & Predictive trends"
+    },
+    {
+      "name": "Reports & Analytics",
+      "icon": "menu-icon icon-base ti tabler-chart-bar",
+      "slug": "facility-admin-reports",
+      "submenu": [
+        {
+          "url": "/core/facility-reports",
+          "name": "Maternal Reports",
+          "slug": "facility-admin-finance"
+        }
+      ]
+    },
+    {
+      "name": "Facility Settings",
+      "icon": "menu-icon icon-base ti tabler-settings",
+      "slug": "facility-admin-settings",
+      "submenu": [
+        {
+          "url": "#",
+          "name": "General Settings",
+          "slug": "#"
+        }
+      ]
+    }
+  ]
+}

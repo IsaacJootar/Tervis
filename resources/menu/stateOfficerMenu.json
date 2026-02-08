@@ -1,0 +1,138 @@
+{
+  "menu": [
+    {
+      "url": "/core/state-officer-dashboard",
+      "name": "Dashboard",
+      "icon": "menu-icon icon-base ti tabler-smart-home",
+      "slug": "state-officer-dashboard"
+    },
+    {
+      "name": "Patient Management",
+      "icon": "menu-icon icon-base ti tabler-user-heart",
+      "slug": "facility-patients",
+      "submenu": [
+        {
+          "url": "#",
+          "name": "All State Patients",
+          "slug": "facility-patients"
+        },
+        {
+          "url": "#",
+          "name": "Discharge Data",
+          "slug": "#"
+        }
+      ]
+    },
+    {
+      "name": "Appointments",
+      "icon": "menu-icon icon-base ti tabler-calendar",
+      "slug": "patient-appointments",
+      "submenu": [
+        {
+          "url": "#",
+          "name": "Patient Appointments",
+          "slug": "patient-appointments"
+        }
+      ]
+    },
+    {
+      "name": "Facility Resources",
+      "icon": "menu-icon icon-base ti tabler-building",
+      "slug": "facility-admin-resources",
+      "submenu": [
+        {
+          "url": "#",
+          "name": "Facility Inventory",
+          "slug": "#"
+        }
+      ]
+    },
+    {
+      "name": "Facility Finances",
+      "icon": "menu-icon icon-base ti tabler-currency-dollar",
+      "slug": "facility-admin-finance",
+      "submenu": [
+        {
+          "url": "#",
+          "name": "Payments Records",
+          "slug": "#"
+        },
+        {
+          "url": "#",
+          "name": "Audit Trail",
+          "slug": "#"
+        }
+      ]
+    },
+    {
+      "url": "/analytics/batch-diagnostics-dashboard",
+      "name": "Batch Diagnostics",
+      "icon": "menu-icon icon-base ti tabler-chart-histogram",
+      "slug": "batch-diagnostics-dashboard"
+    },
+    {
+      "url": "/analytics/batch-predictive-dashboard",
+      "name": "Batch Predictive",
+      "icon": "menu-icon icon-base ti tabler-chart-histogram",
+      "slug": "batch-predictive-dashboard"
+    },
+    {
+      "url": "/analytics/real-time-dashboard",
+      "name": "Real-time Dashboard",
+      "icon": "menu-icon icon-base ti tabler-chart-line",
+      "slug": "real-time-dashboard"
+    },
+    {
+      "url": "/analytics/risk-dashboard",
+      "name": "Risk Assessment",
+      "icon": "menu-icon icon-base ti tabler-alert-circle",
+      "slug": "risk-assessment"
+    },
+    {
+      "url": "/analytics/risk-dashboard",
+      "name": "Diagnostic Assistant",
+      "icon": "menu-icon icon-base ti tabler-stethoscope",
+      "slug": "risk-dashboard"
+    },
+    {
+      "url": "/analytics/health-trends-dashboard",
+      "name": "health & Predictive trends",
+      "icon": "menu-icon icon-base ti tabler-chart-histogram",
+      "slug": "health & Predictive trends"
+    },
+    {
+      "name": "Reports & Analytics",
+      "icon": "menu-icon icon-base ti tabler-chart-bar",
+      "slug": "facility-admin-reports",
+      "submenu": [
+        {
+          "url": "/core/facility-reports",
+          "name": "Maternal Reports",
+          "slug": "facility-admin-finance"
+        },
+        {
+          "url": "/analytics/mpdsr-report-dashboard",
+          "name": "MPDSR Dashboard",
+          "slug": "mpdsr-report-dashboard"
+        },
+        {
+          "url": "/analytics/monthly-report-dashboard",
+          "name": "Monthly NHMIS Report",
+          "slug": "monthly-report-dashboard"
+        }
+      ]
+    },
+    {
+      "name": "Facility Settings",
+      "icon": "menu-icon icon-base ti tabler-settings",
+      "slug": "facility-admin-settings",
+      "submenu": [
+        {
+          "url": "#",
+          "name": "General Settings",
+          "slug": "#"
+        }
+      ]
+    }
+  ]
+}

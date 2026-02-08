@@ -1,0 +1,40 @@
+{
+  "menu": [
+    {
+      "url": "/patient/patient-dashboard",
+      "name": "Dashboard",
+      "icon": "menu-icon icon-base ti tabler-smart-home",
+      "slug": "patient/patient-dashboard"
+    },
+    {
+      "url": "/patient/patient-profile",
+      "name": "My Profile",
+      "icon": "menu-icon icon-base ti tabler-user",
+      "slug": "patient-profile"
+    },
+    {
+      "url": "/patient/patient-antenatal",
+      "name": "Antenatal Records",
+      "icon": "menu-icon icon-base ti tabler-stethoscope",
+      "slug": "patient-antenatal"
+    },
+    {
+      "url": "/patient/patient-deliveries",
+      "name": "My Deliveries",
+      "icon": "menu-icon icon-base ti tabler-baby-carriage",
+      "slug": "patient-deliveries"
+    },
+    {
+      "url": "/patient/patient-postnatal",
+      "name": "Postnatal Care",
+      "icon": "menu-icon icon-base ti tabler-heart-handshake",
+      "slug": "patient-postnatal"
+    },
+    {
+      "url": "/patient/patient-tetanus",
+      "name": "Tetanus Records",
+      "icon": "menu-icon icon-base ti tabler-vaccine",
+      "slug": "patient-tetanus"
+    }
+  ]
+}

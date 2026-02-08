@@ -1,0 +1,2117 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NHMIS Monthly Summary Report - Complete (All 187 Fields)</title>
+  <style>
+    /* Basic CSS for readability and print layout */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      padding: 15px;
+      background: #f5f5f5;
+      font-size: 10px
+    }
+
+    .container {
+      max-width: 1800px;
+      margin: 0 auto;
+      background: white;
+      padding: 25px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1)
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 20px;
+      border-bottom: 3px solid #2c5f2d;
+      padding-bottom: 15px
+    }
+
+    .header h1 {
+      color: #2c5f2d;
+      font-size: 18px;
+      margin-bottom: 5px;
+      text-transform: uppercase;
+      font-weight: bold
+    }
+
+    .header h2 {
+      color: #555;
+      font-size: 14px;
+      font-weight: bold
+    }
+
+    .header .version {
+      color: #888;
+      font-size: 10px;
+      margin-top: 5px
+    }
+
+    .header .code {
+      text-align: right;
+      font-weight: bold;
+      margin-top: 8px;
+      font-size: 11px
+    }
+
+    .info {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-bottom: 20px;
+      padding: 12px;
+      background: #f9f9f9;
+      border: 2px solid #ddd
+    }
+
+    .info div {
+      display: flex;
+      flex-direction: column
+    }
+
+    .info label {
+      font-weight: bold;
+      margin-bottom: 3px;
+      font-size: 9px;
+      color: #333
+    }
+
+    .info .val {
+      padding: 5px;
+      border: 1px solid #ccc;
+      border-radius: 2px;
+      background: white;
+      min-height: 24px;
+      font-size: 10px
+    }
+
+    .sec {
+      margin-bottom: 25px;
+      page-break-inside: avoid
+    }
+
+    .st {
+      background: #2c5f2d;
+      color: white;
+      padding: 8px 12px;
+      font-weight: bold;
+      font-size: 11px;
+      margin-bottom: 10px;
+      text-transform: uppercase
+    }
+
+    .sst {
+      background: #d4a574;
+      color: #333;
+      padding: 6px 12px;
+      font-weight: bold;
+      font-size: 10px;
+      margin-bottom: 8px;
+      margin-top: 12px
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 12px;
+      font-size: 9px
+    }
+
+    th,
+    td {
+      border: 1px solid #666;
+      padding: 4px 3px
+    }
+
+    th {
+      background: #e8e8e8;
+      font-weight: bold;
+      text-align: center;
+      font-size: 8px
+    }
+
+    .fn {
+      font-weight: 500;
+      padding-left: 6px;
+      font-size: 9px
+    }
+
+    .dc {
+      text-align: center;
+      font-weight: bold;
+      min-width: 35px;
+      background: #fff
+    }
+
+    .tc {
+      background: #fffacd;
+      text-align: center;
+      font-weight: bold
+    }
+
+    .ah {
+      background: #d4a574 !important;
+      font-size: 8px;
+      font-weight: bold
+    }
+
+    .gh {
+      background: #f0e6d6 !important;
+      font-size: 7px
+    }
+
+    .rn {
+      background: #f5f5f5;
+      text-align: center;
+      font-weight: bold;
+      width: 30px;
+      font-size: 9px
+    }
+
+    .ec {
+      background: #e8e8e8
+    }
+
+    .sig {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 25px;
+      margin-top: 30px
+    }
+
+    .si {
+      border: 1px solid #ccc;
+      padding: 12px;
+      background: #f9f9f9
+    }
+
+    .si strong {
+      display: block;
+      margin-bottom: 8px;
+      color: #2c5f2d;
+      font-size: 10px
+    }
+
+    .si p {
+      margin-bottom: 6px;
+      font-size: 9px
+    }
+
+    .sl {
+      border-bottom: 1px solid #333;
+      display: inline-block;
+      min-width: 200px;
+      padding: 2px
+    }
+
+    @media print {
+      body {
+        padding: 0;
+        background: white
+      }
+
+      .container {
+        box-shadow: none;
+        padding: 15px
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+
+    <div class="header">
+      <h1>National Health Management Information System</h1>
+      <h2>Health Facility Monthly Summary Form</h2>
+      <p class="version">(Version, 2019)</p>
+      <p class="code">NHMIS/HF/MSF</p>
+    </div>
+
+    <div class="info">
+      <div><label>Identification:</label>
+        <div class="val"></div>
+      </div>
+      <div><label>Month:</label>
+        <div class="val"></div>
+      </div>
+      <div><label>Year:</label>
+        <div class="val"></div>
+      </div>
+      <div><label>Period:</label>
+        <div class="val"></div>
+      </div>
+      <div><label>Health Facility:</label>
+        <div class="val"></div>
+      </div>
+      <div><label>L.G.A:</label>
+        <div class="val"></div>
+      </div>
+      <div><label>State:</label>
+        <div class="val"></div>
+      </div>
+      <div><label>Number of Beds:</label>
+        <div class="val"></div>
+      </div>
+    </div>
+
+    <div class="sec">
+      <div class="st">1. Health Facility Attendance</div>
+      <table>
+        <thead>
+          <tr>
+            <th rowspan="2" class="rn">#</th>
+            <th rowspan="2">Service Description</th>
+            <th colspan="8" class="ah">Male</th>
+            <th colspan="8" class="ah">Female</th>
+            <th rowspan="2">Total</th>
+          </tr>
+          <tr>
+            <th class="gh">0-28d</th>
+            <th class="gh">29d-11m</th>
+            <th class="gh">1-4y</th>
+            <th class="gh">5-9y</th>
+            <th class="gh">10-14y</th>
+            <th class="gh">15-19y</th>
+            <th class="gh">20-39y</th>
+            <th class="gh">40+y</th>
+            <th class="gh">0-28d</th>
+            <th class="gh">29d-11m</th>
+            <th class="gh">1-4y</th>
+            <th class="gh">5-9y</th>
+            <th class="gh">10-14y</th>
+            <th class="gh">15-19y</th>
+            <th class="gh">20-39y</th>
+            <th class="gh">40+y</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="rn">1</td>
+            <td class="fn">General Attendance</td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="tc"></td>
+          </tr>
+          <tr>
+            <td class="rn">2</td>
+            <td class="fn">Old Attendance (Return)</td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="tc"></td>
+          </tr>
+          <tr>
+            <td class="rn">3</td>
+            <td class="fn">Inpatient care (IPT)</td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="tc"></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="sec">
+      <div class="st">2. Inpatient Care (OPT)</div>
+      <table>
+        <thead>
+          <tr>
+            <th rowspan="2" class="rn">#</th>
+            <th rowspan="2">Description</th>
+            <th colspan="8" class="ah">Male</th>
+            <th colspan="8" class="ah">Female</th>
+            <th rowspan="2">Total</th>
+          </tr>
+          <tr>
+            <th class="gh">0-28d</th>
+            <th class="gh">29d-11m</th>
+            <th class="gh">1-4y</th>
+            <th class="gh">5-9y</th>
+            <th class="gh">10-14y</th>
+            <th class="gh">15-19y</th>
+            <th class="gh">20-39y</th>
+            <th class="gh">40+y</th>
+            <th class="gh">0-28d</th>
+            <th class="gh">29d-11m</th>
+            <th class="gh">1-4y</th>
+            <th class="gh">5-9y</th>
+            <th class="gh">10-14y</th>
+            <th class="gh">15-19y</th>
+            <th class="gh">20-39y</th>
+            <th class="gh">40+y</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="rn">4</td>
+            <td class="fn">Persons admitted</td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="tc"></td>
+          </tr>
+          <tr>
+            <td class="rn">5</td>
+            <td class="fn">Inpatient discharges</td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="tc"></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="sec">
+      <div class="st">3. Morbidity (Deaths)</div>
+      <table>
+        <thead>
+          <tr>
+            <th rowspan="2" class="rn">#</th>
+            <th rowspan="2">Death Category</th>
+            <th colspan="8" class="ah">Male</th>
+            <th colspan="8" class="ah">Female</th>
+            <th rowspan="2">Total</th>
+          </tr>
+          <tr>
+            <th class="gh">0-28d</th>
+            <th class="gh">29d-11m</th>
+            <th class="gh">1-4y</th>
+            <th class="gh">5-9y</th>
+            <th class="gh">10-14y</th>
+            <th class="gh">15-19y</th>
+            <th class="gh">20-39y</th>
+            <th class="gh">40+y</th>
+            <th class="gh">0-28d</th>
+            <th class="gh">29d-11m</th>
+            <th class="gh">1-4y</th>
+            <th class="gh">5-9y</th>
+            <th class="gh">10-14y</th>
+            <th class="gh">15-19y</th>
+            <th class="gh">20-39y</th>
+            <th class="gh">40+y</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="rn">6</td>
+            <td class="fn">Death among in/out-patient (both children/pregnant by age)</td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="tc"></td>
+          </tr>
+          <tr>
+            <td class="rn">7</td>
+            <td class="fn">Maternal Mortality</td>
+            <td colspan="8" class="ec"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="tc"></td>
+          </tr>
+          <tr>
+            <td class="rn">8</td>
+            <td class="fn">Deaths of women of child bearing age (pregnancy related deaths)</td>
+            <td colspan="8" class="ec"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="tc"></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="sec">
+      <div class="st">4. Causes of Deaths</div>
+      <table>
+        <thead>
+          <tr>
+            <th class="rn">#</th>
+            <th>Maternal Death Causes</th>
+            <th>Post-partum Haemorrhage</th>
+            <th>Sepsis</th>
+            <th>Obstructed Labour</th>
+            <th>Abortion</th>
+            <th>Malaria</th>
+            <th>Anaemia</th>
+            <th>HIV</th>
+            <th>Other</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="rn">9</td>
+            <td class="fn">Confirmed maternal deaths due to:</td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+          </tr>
+        </tbody>
+      </table>
+      <table>
+        <thead>
+          <tr>
+            <th class="rn">#</th>
+            <th>Neonatal Death Causes</th>
+            <th>Prematurity</th>
+            <th>Neonatal Tetanus</th>
+            <th>Congenital Malformation</th>
+            <th>Other</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="rn">10</td>
+            <td class="fn">Confirmed neonatal deaths due to:</td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+          </tr>
+        </tbody>
+      </table>
+      <table>
+        <thead>
+          <tr>
+            <th class="rn">#</th>
+            <th>Under-5 Death Causes</th>
+            <th>Malaria</th>
+            <th>Pneumonia</th>
+            <th>Malnutrition</th>
+            <th>Other</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="rn">11</td>
+            <td class="fn">Confirmed under 5 deaths due to:</td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="sec">
+      <div class="st">5. Maternal Health (Ante-Natal Care)</div>
+      <table>
+        <thead>
+          <tr>
+            <th class="rn">#</th>
+            <th>ANC Service Indicator</th>
+            <th>10-14 yrs</th>
+            <th>15-19 yrs</th>
+            <th>20-39 yrs</th>
+            <th>40+ yrs</th>
+            <th>Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="rn">12</td>
+            <td class="fn">Antenatal attendance 1st visit pregnant women</td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="tc"></td>
+          </tr>
+          <tr>
+            <td class="rn">13</td>
+            <td class="fn">Antenatal attendance re-visit</td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="tc"></td>
+          </tr>
+          <tr>
+            <td class="rn">14</td>
+            <td class="fn">Pregnant women that attended antenatal clinic for 4th visit</td>
+            <td colspan="2" class="dc">Below 20y</td>
+            <td colspan="2" class="dc">20+ y</td>
+            <td class="tc"></td>
+          </tr>
+          <tr>
+            <td class="rn">15</td>
+            <td class="fn">Pregnant women that attended antenatal clinic for 8th visit</td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="tc"></td>
+          </tr>
+          <tr>
+            <td class="rn">16</td>
+            <td class="fn">Pregnant women counselled on Family Planning (FP)</td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="tc"></td>
+          </tr>
+          <tr>
+            <td class="rn">17</td>
+            <td class="fn">Pregnant women counselled on HIV/AIDS</td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="tc"></td>
+          </tr>
+          <tr>
+            <td class="rn">18</td>
+            <td class="fn">Pregnant women counselled on Maternal Nutrition during ANC</td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="tc"></td>
+          </tr>
+          <tr>
+            <td class="rn">19</td>
+            <td class="fn">ANC syphilis test done</td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="tc"></td>
+          </tr>
+          <tr>
+            <td class="rn">20</td>
+            <td class="fn">ANC syphilis test positive</td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="tc"></td>
+          </tr>
+          <tr>
+            <td class="rn">21</td>
+            <td class="fn">ANC syphilis test treated</td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="tc"></td>
+          </tr>
+          <tr>
+            <td class="rn">22</td>
+            <td class="fn">ANC Hepatitis B test done</td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="tc"></td>
+          </tr>
+          <tr>
+            <td class="rn">23</td>
+            <td class="fn">ANC Hepatitis B test positive</td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="tc"></td>
+          </tr>
+          <tr>
+            <td class="rn">24</td>
+            <td class="fn">ANC Hepatitis B cases referred for treatment</td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="tc"></td>
+          </tr>
+          <tr>
+            <td class="rn">25</td>
+            <td class="fn">ANC Hepatitis C test done</td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="tc"></td>
+          </tr>
+          <tr>
+            <td class="rn">26</td>
+            <td class="fn">ANC Hepatitis C test positive</td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="tc"></td>
+          </tr>
+          <tr>
+            <td class="rn">27</td>
+            <td class="fn">ANC Hepatitis C cases referred for treatment</td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="tc"></td>
+          </tr>
+          <tr>
+            <td class="rn">28</td>
+            <td class="fn">Pregnant women who received malaria intermittent preventive treatment first dose (IPT1)</td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="tc"></td>
+          </tr>
+          <tr>
+            <td class="rn">29</td>
+            <td class="fn">Pregnant women who received malaria intermittent preventive treatment second dose (IPT2)</td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="tc"></td>
+          </tr>
+          <tr>
+            <td class="rn">30</td>
+            <td class="fn">Pregnant women who received malaria intermittent preventive treatment third dose (IPT3)</td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="tc"></td>
+          </tr>
+          <tr>
+            <td class="rn">31</td>
+            <td class="fn">Pregnant women who received malaria intermittent preventive treatment more than third dose
+              (IPT>=4)</td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="tc"></td>
+          </tr>
+          <tr>
+            <td class="rn">32</td>
+            <td class="fn">Pregnant women who received TT2/Tetanus Toxoid Booster</td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="tc"></td>
+          </tr>
+          <tr>
+            <td class="rn">33</td>
+            <td class="fn">Pregnant women who received Td 2 plus / Booster</td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="tc"></td>
+          </tr>
+          <tr>
+            <td class="rn">34</td>
+            <td class="fn">Pregnant women who received Iron/Folate supplement</td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="tc"></td>
+          </tr>
+          <tr>
+            <td class="rn">35</td>
+            <td class="fn">Number of pregnant women referred</td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="tc"></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="sec">
+      <div class="st">6. Maternal Health (Labour and Delivery)</div>
+      <table>
+        <thead>
+          <tr>
+            <th class="rn">#</th>
+            <th>Service Indicator</th>
+            <th>10-14 yrs</th>
+            <th>15-19 yrs</th>
+            <th>20-39 yrs</th>
+            <th>40+ yrs</th>
+            <th>Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="rn">36</td>
+            <td class="fn">Total Deliveries in the facility (Live + Still)</td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="tc"></td>
+          </tr>
+          <tr>
+            <td class="rn">37</td>
+            <td class="fn">Deliveries by Skilled Birth Attendant (SBA)</td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="tc"></td>
+          </tr>
+          <tr>
+            <td class="rn">38</td>
+            <td class="fn">Live Births</td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="tc"></td>
+          </tr>
+          <tr>
+            <td class="rn">39</td>
+            <td class="fn">Still Births (Macerated & Fresh)</td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="tc"></td>
+          </tr>
+          <tr>
+            <td class="rn">40</td>
+            <td class="fn">Assisted Deliveries (Vacuum/Forceps)</td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="tc"></td>
+          </tr>
+          <tr>
+            <td class="rn">41</td>
+            <td class="fn">Caesarean Sections (CS)</td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="tc"></td>
+          </tr>
+          <tr>
+            <td class="rn">42</td>
+            <td class="fn">Postpartum Haemorrhage (PPH) cases</td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="tc"></td>
+          </tr>
+          <tr>
+            <td class="rn">43</td>
+            <td class="fn">Eclampsia/Pre-Eclampsia cases</td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="tc"></td>
+          </tr>
+          <tr>
+            <td class="rn">44</td>
+            <td class="fn">Maternal Deaths (within 42 days of delivery)</td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="tc"></td>
+          </tr>
+          <tr>
+            <td class="rn">45</td>
+            <td class="fn">Women counselled on Exclusive Breastfeeding (EBF)</td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="tc"></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="sec">
+      <div class="st">7. Maternal Health (Post-Natal Care)</div>
+      <table>
+        <thead>
+          <tr>
+            <th class="rn">#</th>
+            <th>Service Indicator</th>
+            <th>10-14 yrs</th>
+            <th>15-19 yrs</th>
+            <th>20-39 yrs</th>
+            <th>40+ yrs</th>
+            <th>Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="rn">46</td>
+            <td class="fn">Newborns (0-28 days) seen for PNC check</td>
+            <td class="dc" colspan="4"></td>
+            <td class="tc"></td>
+          </tr>
+          <tr>
+            <td class="rn">47</td>
+            <td class="fn">Women seen for PNC check within 48 hours</td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="tc"></td>
+          </tr>
+          <tr>
+            <td class="rn">48</td>
+            <td class="fn">Women seen for PNC check between 3-7 days</td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="tc"></td>
+          </tr>
+          <tr>
+            <td class="rn">49</td>
+            <td class="fn">Women seen for PNC check between 8 days-6 weeks</td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="tc"></td>
+          </tr>
+          <tr>
+            <td class="rn">50</td>
+            <td class="fn">PNC clients screened for Postpartum Depression</td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="tc"></td>
+          </tr>
+          <tr>
+            <td class="rn">51</td>
+            <td class="fn">Women counselled on Family Planning (FP) during PNC</td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="tc"></td>
+          </tr>
+          <tr>
+            <td class="rn">52</td>
+            <td class="fn">Women provided with a Family Planning Method during PNC</td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="tc"></td>
+          </tr>
+          <tr>
+            <td class="rn">53</td>
+            <td class="fn">Women seen with Puerperal Sepsis (post-delivery infection)</td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="tc"></td>
+          </tr>
+          <tr>
+            <td class="rn">54</td>
+            <td class="fn">Women seen with Puerperal Sepsis and treated</td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="tc"></td>
+          </tr>
+          <tr>
+            <td class="rn">55</td>
+            <td class="fn">PNC clients referred to other services</td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="tc"></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="sec">
+      <div class="st">8. Child Health (Immunization & Nutrition)</div>
+      <div class="sst">8.1 Immunization (Fields 56-85)</div>
+      <table>
+        <thead>
+          <tr>
+            <th class="rn">#</th>
+            <th>Antigen</th>
+            <th>Male (M)</th>
+            <th>Female (F)</th>
+            <th>Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="rn">56</td>
+            <td class="fn">BCG</td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="tc"></td>
+          </tr>
+          <tr>
+            <td class="rn">57</td>
+            <td class="fn">OPV0</td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="tc"></td>
+          </tr>
+          <tr>
+            <td class="rn">58</td>
+            <td class="fn">OPV1</td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="tc"></td>
+          </tr>
+          <tr>
+            <td class="rn">59</td>
+            <td class="fn">OPV2</td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="tc"></td>
+          </tr>
+          <tr>
+            <td class="rn">60</td>
+            <td class="fn">OPV3</td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="tc"></td>
+          </tr>
+          <tr>
+            <td class="rn">61</td>
+            <td class="fn">PENTA 1</td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="tc"></td>
+          </tr>
+          <tr>
+            <td class="rn">62</td>
+            <td class="fn">PENTA 2</td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="tc"></td>
+          </tr>
+          <tr>
+            <td class="rn">63</td>
+            <td class="fn">PENTA 3</td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="tc"></td>
+          </tr>
+          <tr>
+            <td class="rn">64</td>
+            <td class="fn">PCV 1</td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="tc"></td>
+          </tr>
+          <tr>
+            <td class="rn">65</td>
+            <td class="fn">PCV 2</td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="tc"></td>
+          </tr>
+          <tr>
+            <td class="rn">66</td>
+            <td class="fn">PCV 3</td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="tc"></td>
+          </tr>
+          <tr>
+            <td class="rn">67</td>
+            <td class="fn">IPV 1</td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="tc"></td>
+          </tr>
+          <tr>
+            <td class="rn">68</td>
+            <td class="fn">IPV 2</td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="tc"></td>
+          </tr>
+          <tr>
+            <td class="rn">69</td>
+            <td class="fn">Measles Containing Vaccine 1 (MCV 1)</td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="tc"></td>
+          </tr>
+          <tr>
+            <td class="rn">70</td>
+            <td class="fn">Measles Containing Vaccine 2 (MCV 2)</td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="tc"></td>
+          </tr>
+          <tr>
+            <td class="rn">71</td>
+            <td class="fn">Yellow Fever (YF)</td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="tc"></td>
+          </tr>
+          <tr>
+            <td class="rn">72</td>
+            <td class="fn">Newborns receiving Hepatitis B zero dose (Hep B0)</td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="tc"></td>
+          </tr>
+          <tr>
+            <td class="rn">73</td>
+            <td class="fn">HPV (Human Papillomavirus) 1st Dose (for 9-14yr girls)</td>
+            <td class="ec"></td>
+            <td class="dc"></td>
+            <td class="tc"></td>
+          </tr>
+          <tr>
+            <td class="rn">74</td>
+            <td class="fn">HPV 2nd Dose (for 9-14yr girls)</td>
+            <td class="ec"></td>
+            <td class="dc"></td>
+            <td class="tc"></td>
+          </tr>
+          <tr>
+            <td class="rn">75</td>
+            <td class="fn">Children (0-11 months) fully immunized</td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="tc"></td>
+          </tr>
+          <tr>
+            <td class="rn">76</td>
+            <td class="fn">Total number of children 12-23 months fully immunized</td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="tc"></td>
+          </tr>
+          <tr>
+            <td class="rn">77</td>
+            <td class="fn">Children (0-59 months) given Vitamin A (1st dose - 6 months)</td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="tc"></td>
+          </tr>
+          <tr>
+            <td class="rn">78</td>
+            <td class="fn">Children (12-59 months) given Vitamin A (2nd dose - 12 months)</td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="tc"></td>
+          </tr>
+          <tr>
+            <td class="rn">79</td>
+            <td class="fn">Children (12-59 months) given Deworming tablets</td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="tc"></td>
+          </tr>
+          <tr>
+            <td class="rn">80</td>
+            <td class="fn">Children (0-11 months) defaulters tracked and brought back</td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="tc"></td>
+          </tr>
+          <tr>
+            <td class="rn">81</td>
+            <td class="fn">Children (0-11 months) immunized outside routine session</td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="tc"></td>
+          </tr>
+          <tr>
+            <td class="rn">82</td>
+            <td class="fn">Number of RI sessions held</td>
+            <td colspan="3" class="dc"></td>
+          </tr>
+          <tr>
+            <td class="rn">83</td>
+            <td class="fn">Number of mobile/outreach sessions held</td>
+            <td colspan="3" class="dc"></td>
+          </tr>
+          <tr>
+            <td class="rn">84</td>
+            <td class="fn">Children immunized with only BCG</td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="tc"></td>
+          </tr>
+          <tr>
+            <td class="rn">85</td>
+            <td class="fn">Children immunized with only OPV0</td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="tc"></td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="sst">8.2 Nutrition (Fields 86-99)</div>
+      <table>
+        <thead>
+          <tr>
+            <th class="rn">#</th>
+            <th>Nutrition Indicator</th>
+            <th>Value</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="rn">86</td>
+            <td class="fn">Children (0-5 months) exclusively breastfed</td>
+            <td class="dc"></td>
+          </tr>
+          <tr>
+            <td class="rn">87</td>
+            <td class="fn">Children (6-23 months) fed appropriately (minimum dietary diversity)</td>
+            <td class="dc"></td>
+          </tr>
+          <tr>
+            <td class="rn">88</td>
+            <td class="fn">Children (0-59 months) screened for acute malnutrition (MUAC)</td>
+            <td class="dc"></td>
+          </tr>
+          <tr>
+            <td class="rn">89</td>
+            <td class="fn">Children (0-59 months) with Severe Acute Malnutrition (SAM) new cases</td>
+            <td class="dc"></td>
+          </tr>
+          <tr>
+            <td class="rn">90</td>
+            <td class="fn">Children (0-59 months) with Moderate Acute Malnutrition (MAM) new cases</td>
+            <td class="dc"></td>
+          </tr>
+          <tr>
+            <td class="rn">91</td>
+            <td class="fn">Children (0-59 months) with SAM admitted to CMAM (OTP)</td>
+            <td class="dc"></td>
+          </tr>
+          <tr>
+            <td class="rn">92</td>
+            <td class="fn">Children (0-59 months) with SAM discharged from CMAM (OTP) - Recovered</td>
+            <td class="dc"></td>
+          </tr>
+          <tr>
+            <td class="rn">93</td>
+            <td class="fn">Children (0-59 months) with SAM discharged from CMAM (OTP) - Defaulted</td>
+            <td class="dc"></td>
+          </tr>
+          <tr>
+            <td class="rn">94</td>
+            <td class="fn">Children (0-59 months) with SAM discharged from CMAM (OTP) - Died</td>
+            <td class="dc"></td>
+          </tr>
+          <tr>
+            <td class="rn">95</td>
+            <td class="fn">Children (0-59 months) with MAM admitted to SFP</td>
+            <td class="dc"></td>
+          </tr>
+          <tr>
+            <td class="rn">96</td>
+            <td class="fn">Children (0-59 months) with MAM discharged from SFP - Recovered</td>
+            <td class="dc"></td>
+          </tr>
+          <tr>
+            <td class="rn">97</td>
+            <td class="fn">Children (0-59 months) with MAM discharged from SFP - Defaulted</td>
+            <td class="dc"></td>
+          </tr>
+          <tr>
+            <td class="rn">98</td>
+            <td class="fn">Children (0-59 months) with MAM discharged from SFP - Died</td>
+            <td class="dc"></td>
+          </tr>
+          <tr>
+            <td class="rn">99</td>
+            <td class="fn">Pregnant and Lactating Women (PLW) admitted to PLW nutrition program</td>
+            <td class="dc"></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="sec">
+      <div class="st">9. Integrated Management of Childhood Illnesses (IMCI) & Family Planning</div>
+      <div class="sst">9.1 IMCI (Fields 100-118)</div>
+      <table>
+        <thead>
+          <tr>
+            <th class="rn">#</th>
+            <th>IMCI Indicator</th>
+            <th colspan="2">0-2 months</th>
+            <th colspan="2">2 months - 5 years</th>
+            <th rowspan="2">Total</th>
+          </tr>
+          <tr>
+            <th></th>
+            <th></th>
+            <th>Male</th>
+            <th>Female</th>
+            <th>Male</th>
+            <th>Female</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="rn">100</td>
+            <td class="fn">Children assessed by IMCI guidelines</td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="tc"></td>
+          </tr>
+          <tr>
+            <td class="rn">101</td>
+            <td class="fn">Confirmed Pneumonia cases</td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="tc"></td>
+          </tr>
+          <tr>
+            <td class="rn">102</td>
+            <td class="fn">Confirmed Diarrhoea cases</td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="tc"></td>
+          </tr>
+          <tr>
+            <td class="rn">103</td>
+            <td class="fn">Confirmed Malaria cases (children under 5)</td>
+            <td class="ec" colspan="2"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="tc"></td>
+          </tr>
+          <tr>
+            <td class="rn">104</td>
+            <td class="fn">Confirmed Severe Malnutrition cases (children under 5)</td>
+            <td class="ec" colspan="2"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="tc"></td>
+          </tr>
+          <tr>
+            <td class="rn">105</td>
+            <td class="fn">Fever (Malaria) cases treated with Artemisinin-based Combination Therapy (ACT)</td>
+            <td class="ec" colspan="2"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="tc"></td>
+          </tr>
+          <tr>
+            <td class="rn">106</td>
+            <td class="fn">Diarrhoea cases treated with Oral Rehydration Salts (ORS) and Zinc</td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="tc"></td>
+          </tr>
+          <tr>
+            <td class="rn">107</td>
+            <td class="fn">Children with severe classification referred to a higher level</td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="tc"></td>
+          </tr>
+          <tr>
+            <td class="rn">108</td>
+            <td class="fn">Children seen with Neonatal Sepsis</td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="ec" colspan="2"></td>
+            <td class="tc"></td>
+          </tr>
+          <tr>
+            <td class="rn">109</td>
+            <td class="fn">Children seen with Neonatal Jaundice</td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="ec" colspan="2"></td>
+            <td class="tc"></td>
+          </tr>
+          <tr>
+            <td class="rn">110</td>
+            <td class="fn">Children seen with birth asphyxia</td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="ec" colspan="2"></td>
+            <td class="tc"></td>
+          </tr>
+          <tr>
+            <td class="rn">111</td>
+            <td class="fn">Children with neonatal tetanus (0-28 days)</td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="ec" colspan="2"></td>
+            <td class="tc"></td>
+          </tr>
+          <tr>
+            <td class="rn">112</td>
+            <td class="fn">Children with severe pneumonia treated with antibiotics</td>
+            <td class="ec" colspan="2"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="tc"></td>
+          </tr>
+          <tr>
+            <td class="rn">113</td>
+            <td class="fn">Children referred to a higher level of care</td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="tc"></td>
+          </tr>
+          <tr>
+            <td class="rn">114</td>
+            <td class="fn">Children with Sickle Cell Disease (SCD) screened (newborns)</td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="ec" colspan="2"></td>
+            <td class="tc"></td>
+          </tr>
+          <tr>
+            <td class="rn">115</td>
+            <td class="fn">Children with SCD receiving prophylactic Penicillin</td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="tc"></td>
+          </tr>
+          <tr>
+            <td class="rn">116</td>
+            <td class="fn">Children with SCD receiving Hydroxyurea</td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="tc"></td>
+          </tr>
+          <tr>
+            <td class="rn">117</td>
+            <td class="fn">Children with SCD referred for specialized care</td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="tc"></td>
+          </tr>
+          <tr>
+            <td class="rn">118</td>
+            <td class="fn">Children (0-59m) seen with Non-TB chest infection</td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="tc"></td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="sst">9.2 Family Planning (Fields 119-135)</div>
+      <table>
+        <thead>
+          <tr>
+            <th class="rn">#</th>
+            <th>Family Planning Method</th>
+            <th>10-14 yrs</th>
+            <th>15-19 yrs</th>
+            <th>20-24 yrs</th>
+            <th>25-49 yrs</th>
+            <th>Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="rn">119</td>
+            <td class="fn">New Acceptors (NA) - All Methods</td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="tc"></td>
+          </tr>
+          <tr>
+            <td class="rn">120</td>
+            <td class="fn">Total Current Users (CU) - All Methods</td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="tc"></td>
+          </tr>
+          <tr>
+            <td class="rn">121</td>
+            <td class="fn">NA: Oral Contraceptive Pills (OCPs)</td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="tc"></td>
+          </tr>
+          <tr>
+            <td class="rn">122</td>
+            <td class="fn">NA: Injectables (DMPA-IM)</td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="tc"></td>
+          </tr>
+          <tr>
+            <td class="rn">123</td>
+            <td class="fn">NA: Injectables (DMPA-SC)</td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="tc"></td>
+          </tr>
+          <tr>
+            <td class="rn">124</td>
+            <td class="fn">NA: Implants (Jadelle/Implanon)</td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="tc"></td>
+          </tr>
+          <tr>
+            <td class="rn">125</td>
+            <td class="fn">NA: Intra-Uterine Devices (IUD)</td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="tc"></td>
+          </tr>
+          <tr>
+            <td class="rn">126</td>
+            <td class="fn">NA: Female Sterilization/Tubal Ligation</td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="tc"></td>
+          </tr>
+          <tr>
+            <td class="rn">127</td>
+            <td class="fn">NA: Male Condoms</td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="tc"></td>
+          </tr>
+          <tr>
+            <td class="rn">128</td>
+            <td class="fn">NA: Lactational Amenorrhea Method (LAM)</td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="tc"></td>
+          </tr>
+          <tr>
+            <td class="rn">129</td>
+            <td class="fn">Number of Female Sterilization procedures performed</td>
+            <td class="dc" colspan="4"></td>
+            <td class="tc"></td>
+          </tr>
+          <tr>
+            <td class="rn">130</td>
+            <td class="fn">Number of IUD insertions performed</td>
+            <td class="dc" colspan="4"></td>
+            <td class="tc"></td>
+          </tr>
+          <tr>
+            <td class="rn">131</td>
+            <td class="fn">Number of Implant insertions performed</td>
+            <td class="dc" colspan="4"></td>
+            <td class="tc"></td>
+          </tr>
+          <tr>
+            <td class="rn">132</td>
+            <td class="fn">Number of clients who discontinued FP (all methods)</td>
+            <td class="dc" colspan="4"></td>
+            <td class="tc"></td>
+          </tr>
+          <tr>
+            <td class="rn">133</td>
+            <td class="fn">Number of clients referred to other services (e.g., HIV testing)</td>
+            <td class="dc" colspan="4"></td>
+            <td class="tc"></td>
+          </tr>
+          <tr>
+            <td class="rn">134</td>
+            <td class="fn">Number of clients with side effects managed</td>
+            <td class="dc" colspan="4"></td>
+            <td class="tc"></td>
+          </tr>
+          <tr>
+            <td class="rn">135</td>
+            <td class="fn">Number of FP clients who received counselling only</td>
+            <td class="dc" colspan="4"></td>
+            <td class="tc"></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+
+    <div class="sec">
+      <div class="st">10. Malaria, Tuberculosis, HIV/AIDS, STI, & Hepatitis</div>
+      <div class="sst">10.1 Malaria (Fields 136-141)</div>
+      <table>
+        <thead>
+          <tr>
+            <th class="rn">#</th>
+            <th>Indicator</th>
+            <th>Male</th>
+            <th>Female</th>
+            <th>Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="rn">136</td>
+            <td class="fn">Confirmed Malaria cases (all ages)</td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="tc"></td>
+          </tr>
+          <tr>
+            <td class="rn">137</td>
+            <td class="fn">Malaria cases treated with Artemisinin-based Combination Therapy (ACT)</td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="tc"></td>
+          </tr>
+          <tr>
+            <td class="rn">138</td>
+            <td class="fn">Total number of pregnant women who received LLIN at ANC</td>
+            <td class="ec"></td>
+            <td class="dc"></td>
+            <td class="tc"></td>
+          </tr>
+          <tr>
+            <td class="rn">139</td>
+            <td class="fn">Total number of children 0-59 months who received LLIN</td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="tc"></td>
+          </tr>
+          <tr>
+            <td class="rn">140</td>
+            <td class="fn">Confirmed Malaria cases (children under 5) treated with ACT</td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="tc"></td>
+          </tr>
+          <tr>
+            <td class="rn">141</td>
+            <td class="fn">Non-Malaria Fever cases</td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="tc"></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="sst">10.2 Tuberculosis Services (Fields 142-147)</div>
+      <table>
+        <thead>
+          <tr>
+            <th class="rn">#</th>
+            <th>Indicator</th>
+            <th>Male</th>
+            <th>Female</th>
+            <th>Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="rn">142</td>
+            <td class="fn">Total number of TB suspects identified</td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="tc"></td>
+          </tr>
+          <tr>
+            <td class="rn">143</td>
+            <td class="fn">New TB cases (all forms) registered for treatment</td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="tc"></td>
+          </tr>
+          <tr>
+            <td class="rn">144</td>
+            <td class="fn">TB patients on DOTs</td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="tc"></td>
+          </tr>
+          <tr>
+            <td class="rn">145</td>
+            <td class="fn">TB/HIV co-infected cases</td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="tc"></td>
+          </tr>
+          <tr>
+            <td class="rn">146</td>
+            <td class="fn">Children (0-59 months) with TB</td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="tc"></td>
+          </tr>
+          <tr>
+            <td class="rn">147</td>
+            <td class="fn">DR-TB (Drug Resistant TB) suspects identified</td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="tc"></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="sst">10.3 HIV/AIDS and PMTCT (Fields 148-163)</div>
+      <table>
+        <thead>
+          <tr>
+            <th class="rn">#</th>
+            <th>Indicator</th>
+            <th>Male</th>
+            <th>Female</th>
+            <th>Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="rn">148</td>
+            <td class="fn">Individuals tested for HIV (non-ANC)</td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="tc"></td>
+          </tr>
+          <tr>
+            <td class="rn">149</td>
+            <td class="fn">Individuals newly diagnosed HIV positive (non-ANC)</td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="tc"></td>
+          </tr>
+          <tr>
+            <td class="rn">150</td>
+            <td class="fn">New patients enrolled on ART (Anti-Retroviral Therapy)</td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="tc"></td>
+          </tr>
+          <tr>
+            <td class="rn">151</td>
+            <td class="fn">Total number of patients currently receiving ART</td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="tc"></td>
+          </tr>
+          <tr>
+            <td class="rn">152</td>
+            <td class="fn">HIV positive clients started on Isoniazid Preventive Therapy (IPT)</td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="tc"></td>
+          </tr>
+          <tr>
+            <td class="rn">153</td>
+            <td class="fn">Mothers tested for HIV at ANC first visit</td>
+            <td class="ec"></td>
+            <td class="dc"></td>
+            <td class="tc"></td>
+          </tr>
+          <tr>
+            <td class="rn">154</td>
+            <td class="fn">Mothers newly diagnosed HIV positive at ANC first visit</td>
+            <td class="ec"></td>
+            <td class="dc"></td>
+            <td class="tc"></td>
+          </tr>
+          <tr>
+            <td class="rn">155</td>
+            <td class="fn">HIV positive pregnant women who received ARV for PMTCT</td>
+            <td class="ec"></td>
+            <td class="dc"></td>
+            <td class="tc"></td>
+          </tr>
+          <tr>
+            <td class="rn">156</td>
+            <td class="fn">HIV exposed infants receiving ARV Prophylaxis</td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="tc"></td>
+          </tr>
+          <tr>
+            <td class="rn">157</td>
+            <td class="fn">Infants tested for HIV by PCR (6 weeks - EID)</td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="tc"></td>
+          </tr>
+          <tr>
+            <td class="rn">158</td>
+            <td class="fn">Infants with positive HIV PCR test results</td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="tc"></td>
+          </tr>
+          <tr>
+            <td class="rn">159</td>
+            <td class="fn">Infants with positive HIV PCR enrolled on ART</td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="tc"></td>
+          </tr>
+          <tr>
+            <td class="rn">160</td>
+            <td class="fn">HIV positive mothers who received PNC HIV testing</td>
+            <td class="ec"></td>
+            <td class="dc"></td>
+            <td class="tc"></td>
+          </tr>
+          <tr>
+            <td class="rn">161</td>
+            <td class="fn">HIV positive mothers newly diagnosed during PNC</td>
+            <td class="ec"></td>
+            <td class="dc"></td>
+            <td class="tc"></td>
+          </tr>
+          <tr>
+            <td class="rn">162</td>
+            <td class="fn">HIV positive mothers referred for other services</td>
+            <td class="ec"></td>
+            <td class="dc"></td>
+            <td class="tc"></td>
+          </tr>
+          <tr>
+            <td class="rn">163</td>
+            <td class="fn">HIV positive clients referred for other services (non-maternal)</td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="tc"></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="sst">10.4 Sexually Transmitted Infections (STI) & Hepatitis (Fields 164-169)</div>
+      <table>
+        <thead>
+          <tr>
+            <th class="rn">#</th>
+            <th>Indicator</th>
+            <th>Male</th>
+            <th>Female</th>
+            <th>Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="rn">164</td>
+            <td class="fn">STI cases seen (Syphilis, Gonorrhea, Chlamydia, etc.)</td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="tc"></td>
+          </tr>
+          <tr>
+            <td class="rn">165</td>
+            <td class="fn">STI cases treated with appropriate regimen</td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="tc"></td>
+          </tr>
+          <tr>
+            <td class="rn">166</td>
+            <td class="fn">Non-ANC Hepatitis B (HBV) screening done</td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="tc"></td>
+          </tr>
+          <tr>
+            <td class="rn">167</td>
+            <td class="fn">Non-ANC Hepatitis B (HBV) cases referred for treatment</td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="tc"></td>
+          </tr>
+          <tr>
+            <td class="rn">168</td>
+            <td class="fn">Non-ANC Hepatitis C (HCV) screening done</td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="tc"></td>
+          </tr>
+          <tr>
+            <td class="rn">169</td>
+            <td class="fn">Non-ANC Hepatitis C (HCV) cases referred for treatment</td>
+            <td class="dc"></td>
+            <td class="dc"></td>
+            <td class="tc"></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="sst">10.5 Non-Communicable Diseases (NCDs) & Other Services (Fields 170-185)</div>
+      <table>
+        <thead>
+          <tr>
+            <th class="rn">#</th>
+            <th>Indicator</th>
+            <th>Value</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="rn">170</td>
+            <td class="fn">New cases of Hypertension diagnosed (all ages)</td>
+            <td class="dc"></td>
+          </tr>
+          <tr>
+            <td class="rn">171</td>
+            <td class="fn">New cases of Diabetes Mellitus diagnosed (all ages)</td>
+            <td class="dc"></td>
+          </tr>
+          <tr>
+            <td class="rn">172</td>
+            <td class="fn">NCD patients receiving treatment/care (Hypertension, Diabetes, etc.)</td>
+            <td class="dc"></td>
+          </tr>
+          <tr>
+            <td class="rn">173</td>
+            <td class="fn">New Cancer Screening Clients (e.g. Cervical, Breast)</td>
+            <td class="dc"></td>
+          </tr>
+          <tr>
+            <td class="rn">174</td>
+            <td class="fn">Cases of Road Traffic Accident (RTA) attended to</td>
+            <td class="dc"></td>
+          </tr>
+          <tr>
+            <td class="rn">175</td>
+            <td class="fn">Cases of other injuries/trauma attended to</td>
+            <td class="dc"></td>
+          </tr>
+          <tr>
+            <td class="rn">176</td>
+            <td class="fn">Mental Health disorder cases seen</td>
+            <td class="dc"></td>
+          </tr>
+          <tr>
+            <td class="rn">177</td>
+            <td class="fn">Obstetric Fistula cases identified and referred</td>
+            <td class="dc"></td>
+          </tr>
+          <tr>
+            <td class="rn">178</td>
+            <td class="fn">Neglected Tropical Diseases (NTD) cases reported</td>
+            <td class="dc"></td>
+          </tr>
+          <tr>
+            <td class="rn">179</td>
+            <td class="fn">Clients with Adverse Drug Reaction (ADR) reported</td>
+            <td class="dc"></td>
+          </tr>
+          <tr>
+            <td class="rn">180</td>
+            <td class="fn">ADR cases reported to National Pharmacovigilance Centre</td>
+            <td class="dc"></td>
+          </tr>
+          <tr>
+            <td class="rn">181</td>
+            <td class="fn">Stock-outs of essential commodities reported (Yes/No)</td>
+            <td class="dc"></td>
+          </tr>
+          <tr>
+            <td class="rn">182</td>
+            <td class="fn">Functional Laboratory Services available (Yes/No)</td>
+            <td class="dc"></td>
+          </tr>
+          <tr>
+            <td class="rn">183</td>
+            <td class="fn">Number of patients referred out of the facility</td>
+            <td class="dc"></td>
+          </tr>
+          <tr>
+            <td class="rn">184</td>
+            <td class="fn">Number of patients referred into the facility</td>
+            <td class="dc"></td>
+          </tr>
+          <tr>
+            <td class="rn">185</td>
+            <td class="fn">Functional Emergency Obstetric and Newborn Care (EmONC) services (Yes/No)</td>
+            <td class="dc"></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="sec">
+      <div class="st">11. Form Authentication</div>
+      <div class="sig">
+        <div class="si">
+          <strong>186. Completed by:</strong>
+          <p>Name: <span class="sl"></span></p>
+          <p>Designation: <span class="sl"></span></p>
+          <p>Signature/Date: <span class="sl"></span></p>
+        </div>
+        <div class="si">
+          <strong>187. Verified by:</strong>
+          <p>Name: <span class="sl"></span></p>
+          <p>Designation: <span class="sl"></span></p>
+          <p>Signature/Date: <span class="sl"></span></p>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top:30px;padding-top:15px;border-top:1px solid #ccc;text-align:center;color:#666;font-size:9px">
+      <p><strong>National Health Management Information System (NHMIS)</strong></p>
+      <p>Federal Ministry of Health, Nigeria</p>
+      <p style="margin-top:8px;color:#999">This template contains ALL 187 numbered fields for monthly reporting (Version
+        2019)</p>
+    </div>
+
+  </div>
+</body>
+
+</html>

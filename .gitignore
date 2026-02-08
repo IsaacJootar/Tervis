@@ -1,0 +1,56 @@
+# ===============================
+# ENV (NEVER PUSH)
+# ===============================
+.env
+.env.*
+!.env.example
+
+# ===============================
+# DEPENDENCIES
+# ===============================
+/vendor
+/node_modules
+
+# ===============================
+# LARAVEL RUNTIME FILES
+# ===============================
+/storage/app/public
+/storage/framework/
+/storage/logs/
+/bootstrap/cache
+
+# keys
+/storage/*.key
+
+# ===============================
+# BUILD FILES
+# ===============================
+/public/build
+/public/hot
+
+# ===============================
+# IDE / SYSTEM
+# ===============================
+.phpunit.cache
+.phpunit.result.cache
+.phpactor.json
+/.fleet
+/.idea
+/.nova
+/.vscode
+/.zed
+
+docker-compose.override.yml
+Homestead.json
+Homestead.yaml
+npm-debug.log
+yarn-error.log
+/auth.json
+
+# ===============================
+# KEEP TEMPLATE ASSETS
+# ===============================
+!/public/assets
+!/public/assets/*
+
+!/resources/assets/vendor/js/template-customizer.js
