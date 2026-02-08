@@ -3,7 +3,7 @@
 
 @php
     $status = isset($key) && is_string($key) ? ($cardStatus[$key] ?? ['enabled' => false, 'count' => 0, 'label' => 'Records']) : ['enabled' => false, 'count' => 0, 'label' => 'Records'];
-    $isEnabled = $status['enabled'] ?? false;
+    $isEnabled = true;
     $count = $status['count'] ?? 0;
     $label = $status['label'] ?? 'Records';
     $requires = $status['requires'] ?? null;

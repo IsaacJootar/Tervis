@@ -51,7 +51,7 @@
                         <button wire:click="backToDashboard" type="button"
                             class="btn btn-primary px-4 py-2 d-inline-flex align-items-center">
                             <i class="bx bx-arrow-back me-2"></i>
-                            Back to Dashboard
+                            Back to ANC Workspace
                         </button>
                     </div>
                 </div>

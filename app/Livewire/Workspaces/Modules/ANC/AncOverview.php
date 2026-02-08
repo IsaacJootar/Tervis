@@ -118,4 +118,9 @@ class AncOverview extends Component
   {
     return view('livewire.workspaces.modules.anc.index')->layout('layouts.dataOfficerLayout');
   }
+
+  public function placeholder()
+  {
+    return view('placeholder');
+  }
 }

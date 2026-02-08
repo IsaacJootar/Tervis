@@ -20,7 +20,7 @@
                         <p class="text-muted mb-4">{{ $accessError }}</p>
                         <div class="d-flex justify-content-center gap-2">
                             <a href="{{ route('patient-workspace') }}" class="btn btn-primary">
-                                <i class="bx bx-search me-1"></i>Go to Patient Workspace
+                                <i class="bx bx-search me-1"></i>Back to Patient Activations
                             </a>
 
                         </div>
@@ -109,7 +109,7 @@
                                         <button wire:click="backToPatientWorkspace" type="button"
                                             class="btn btn-primary px-4 py-2 d-inline-flex align-items-center workspace-back-btn">
                                             <i class="bx bx-arrow-back me-2"></i>
-                                            Back to Patient Workspace
+                                            Back to Patient Activations
                                         </button>
                                     </div>
                                 </div>

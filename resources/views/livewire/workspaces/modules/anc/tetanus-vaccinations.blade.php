@@ -19,8 +19,8 @@
                         <h3 class="text-danger mb-3">Access Denied</h3>
                         <p class="text-muted mb-4">{{ $accessError }}</p>
                         <div class="d-flex justify-content-center gap-2">
-                            <a href="{{ route('patient.workspace') }}" class="btn btn-primary">
-                                <i class="bx bx-search me-1"></i>Go to Patient Workspace
+                            <a href="{{ route('patient-workspace') }}" class="btn btn-primary">
+                                <i class="bx bx-search me-1"></i>Back to Patient Activations
                             </a>
                             <a href="{{ route('din.activations') }}" class="btn btn-outline-success">
                                 <i class="bx bx-check-shield me-1"></i>DIN Activation
@@ -63,7 +63,7 @@
                         <button wire:click="backToDashboard" type="button"
                             class="btn btn-primary px-4 py-2 d-inline-flex align-items-center">
                             <i class="bx bx-arrow-back me-2"></i>
-                            Back to Dashboard
+                            Back to ANC Workspace
                         </button>
                     </div>
                 </div>

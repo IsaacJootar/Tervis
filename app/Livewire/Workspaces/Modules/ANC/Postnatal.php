@@ -535,4 +535,9 @@ class Postnatal extends Component
   {
     return redirect()->route('workspaces-antenatal', ['patientId' => $this->patientId]);
   }
+
+  public function placeholder()
+  {
+    return view('placeholder');
+  }
 }

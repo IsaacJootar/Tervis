@@ -17,6 +17,7 @@ use Illuminate\Database\QueryException;
 use Illuminate\Validation\ValidationException;
 use App\Models\Registrations\DinActivation;
 use App\Models\AntenatalFollowUpAssessment;
+use Illuminate\Validation\Rule;
 use Livewire\Attributes\Lazy;
 use Livewire\Attributes\Layout;
 
@@ -45,15 +46,15 @@ class FollowUpAssessment extends Component
     'facility_id' => 'required|exists:facilities,id',
     'month_year' => 'required|date',
     'visit_date' => 'required|date',
-    'bp' => 'nullable|string|max:20',
+    'bp' => ['nullable', 'regex:/^\d{2,3}\/\d{2,3}$/'],
     'pcv' => 'nullable|numeric|min:0|max:100',
     'weight' => 'nullable|numeric|min:0|max:300',
     'fundal_height' => 'nullable|numeric|min:0|max:60',
     'presentation_position' => 'nullable|string|max:50',
     'relation_to_brim' => 'nullable|string|max:50',
     'fetal_heart_rate' => 'nullable|integer|min:50|max:250',
-    'urine_test' => 'nullable|string|max:50',
-    'oedema' => 'nullable|string|max:10',
+    'urine_test' => 'nullable|in:Trace/Nil,Trace/Trace,+/Nil,Nil/+, +/+, ++/+, ++/++, +++/++,+/Trace,Nil/Trace,Trace/+,Nil/Nil',
+    'oedema' => 'nullable|in:none,+,++,+++',
     'clinical_remarks' => 'nullable|string|max:2000',
     'special_delivery_instructions' => 'nullable|string|max:2000',
     'next_return_date' => 'nullable|date',
@@ -172,6 +173,7 @@ class FollowUpAssessment extends Component
     try {
       $this->autoFillMonthYear();
       $this->validate();
+      $this->validateBpRange();
 
       $data = array_diff_key($this->all(), [
         'patientId' => '',
@@ -196,6 +198,9 @@ class FollowUpAssessment extends Component
 
       $data['patient_id'] = $this->patientId;
       $data['facility_id'] = $this->facility_id;
+      $data['officer_name'] = $this->officer_name;
+      $data['officer_role'] = $this->officer_role;
+      $data['officer_designation'] = $this->officer_designation;
 
       AntenatalFollowUpAssessment::create($data);
 
@@ -254,6 +259,9 @@ class FollowUpAssessment extends Component
       $this->rhesus = $assessment->rhesus;
       $this->kahn_vdrl = $assessment->kahn_vdrl;
       $this->antimalarials_therapy = $assessment->antimalarials_therapy;
+      $this->officer_name = $assessment->officer_name ?: $this->officer_name;
+      $this->officer_role = $assessment->officer_role ?: $this->officer_role;
+      $this->officer_designation = $assessment->officer_designation ?: $this->officer_designation;
       $this->modal_flag = true;
       $this->dispatch('open-main-modal');
 
@@ -274,9 +282,10 @@ class FollowUpAssessment extends Component
       ]);
       $this->autoFillMonthYear();
       $this->validate($rules);
+      $this->validateBpRange();
 
       $assessment = AntenatalFollowUpAssessment::findOrFail($this->assessment_id);
-      $assessment->update(array_diff_key($this->all(), [
+      $data = array_diff_key($this->all(), [
         'patientId' => '',
         'patient' => '',
         'patient_din' => '',
@@ -295,7 +304,11 @@ class FollowUpAssessment extends Component
         'lmp' => '',
         'edd' => '',
         'pregnancy_number' => '',
-      ]));
+      ]);
+      $data['officer_name'] = $this->officer_name;
+      $data['officer_role'] = $this->officer_role;
+      $data['officer_designation'] = $this->officer_designation;
+      $assessment->update($data);
 
       DB::commit();
       toastr()->success('Follow-up assessment updated.');
@@ -376,6 +389,27 @@ class FollowUpAssessment extends Component
     $this->mount($this->patientId);
   }
 
+  private function validateBpRange(): void
+  {
+    if (!$this->bp) return;
+
+    $parts = explode('/', $this->bp);
+    if (count($parts) !== 2) {
+      throw ValidationException::withMessages([
+        'bp' => 'Blood pressure must be in the format 120/80.',
+      ]);
+    }
+
+    $systolic = (int) $parts[0];
+    $diastolic = (int) $parts[1];
+
+    if ($systolic < 50 || $systolic > 250 || $diastolic < 30 || $diastolic > 150) {
+      throw ValidationException::withMessages([
+        'bp' => 'Blood pressure values are out of range.',
+      ]);
+    }
+  }
+
   public function backToDashboard()
   {
     return redirect()->route('workspaces-antenatal', ['patientId' => $this->patientId]);
@@ -395,5 +429,10 @@ class FollowUpAssessment extends Component
       'lga_name' => $this->lga_name,
       'ward_name' => $this->ward_name,
     ])->layout('layouts.dataOfficerLayout');
+  }
+
+  public function placeholder()
+  {
+    return view('placeholder');
   }
 }

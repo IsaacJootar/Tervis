@@ -12,6 +12,7 @@ use Livewire\Component;
 use App\Models\Delivery;
 use App\Models\Facility;
 use App\Models\Antenatal;
+use App\Models\LinkedChild;
 use App\Models\Registrations\DinActivation;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
@@ -254,8 +255,9 @@ class Deliveries extends Component
         'activation_time' => ''
       ]);
 
-      $data['patient_id'] = $this->patientId;
-      Delivery::create($data);
+        $data['patient_id'] = $this->patientId;
+        $delivery = Delivery::create($data);
+        $this->syncLinkedChildFromDelivery($delivery);
 
       DB::commit();
       toastr()->success('Delivery record created successfully.');
@@ -358,9 +360,9 @@ class Deliveries extends Component
       $this->validate($rules);
 
       $delivery = Delivery::findOrFail($this->delivery_id);
-      $delivery->update(array_diff_key($this->all(), [
-        'patientId' => '',
-        'patient' => '',
+        $delivery->update(array_diff_key($this->all(), [
+          'patientId' => '',
+          'patient' => '',
         'patient_din' => '',
         'middle_name' => '',
         'patient_phone' => '',
@@ -375,9 +377,10 @@ class Deliveries extends Component
         'lgas' => '',
         'wards' => '',
         'hasAccess' => '',
-        'accessError' => '',
-        'activation_time' => ''
-      ]));
+          'accessError' => '',
+          'activation_time' => ''
+        ]));
+        $this->syncLinkedChildFromDelivery($delivery);
 
       DB::commit();
       toastr()->success('Delivery record updated successfully.');
@@ -504,6 +507,51 @@ class Deliveries extends Component
     return null;
   }
 
+  private function syncLinkedChildFromDelivery(Delivery $delivery): void
+  {
+    if (!$delivery->baby_sex || !$delivery->dodel) {
+      return;
+    }
+
+    $stillBirth = strtolower((string) $delivery->still_birth) === 'yes';
+    $babyDead = strtolower((string) $delivery->baby_dead) === 'yes';
+    if ($stillBirth || $babyDead) {
+      return;
+    }
+
+    $existingChild = LinkedChild::where('parent_patient_id', $delivery->patient_id)
+      ->whereDate('date_of_birth', $delivery->dodel)
+      ->where('gender', $delivery->baby_sex)
+      ->first();
+
+    $userId = Auth::id();
+    $updatePayload = [
+      'gender' => $delivery->baby_sex,
+      'date_of_birth' => $delivery->dodel,
+      'birth_weight' => $delivery->weight,
+      'facility_id' => $delivery->facility_id,
+      'updated_by' => $userId,
+      'notes' => 'Auto linked from delivery #' . $delivery->id,
+    ];
+
+    if ($existingChild) {
+      $existingChild->update($updatePayload);
+      return;
+    }
+
+    $motherLastName = $this->last_name ?: $delivery->patient?->last_name;
+
+    LinkedChild::create(array_merge($updatePayload, [
+      'linked_child_id' => LinkedChild::generateLinkedChildID(),
+      'parent_patient_id' => $delivery->patient_id,
+      'first_name' => 'Baby',
+      'last_name' => $motherLastName,
+      'relationship' => 'Mother',
+      'is_active' => true,
+      'created_by' => $userId,
+    ]));
+  }
+
   public function render()
   {
     $deliveries = Delivery::with('patient', 'facility')
@@ -525,5 +573,10 @@ class Deliveries extends Component
   public function backToDashboard()
   {
     return redirect()->route('workspaces-antenatal', ['patientId' => $this->patientId]);
+  }
+
+  public function placeholder()
+  {
+    return view('placeholder');
   }
 }
