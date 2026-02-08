@@ -1,52 +1,28 @@
 {
   "menu": [
     {
-      "url": "/registers/data-officer-dashboard",
-      "name": "Dashboard",
-      "icon": "menu-icon icon-base ti tabler-smart-home",
-      "slug": "data-officer-dashboard"
-    },
-    {
       "url": "/workspaces/patient-workspace",
       "name": "Patient Workspace",
       "icon": "menu-icon icon-base ti tabler-user",
       "slug": "patient-workspace"
     },
     {
-      "url": "/registers/daily-attendance-register",
-      "name": "Daily Attendance",
-      "icon": "menu-icon icon-base ti tabler-calendar",
-      "slug": "daily-attendance-register"
+      "url": "/registers/general-patients-register",
+      "name": "General Patients Register",
+      "icon": "menu-icon icon-base ti tabler-users",
+      "slug": "general-patients-register"
     },
     {
       "url": "/registers/antenatal-register",
-      "name": "Obstetric Register",
+      "name": "Antenatal Register",
       "icon": "menu-icon icon-base ti tabler-clipboard-heart",
       "slug": "antenatal-register"
     },
     {
-      "url": "/registers/tetanus-register",
-      "name": "Vaccines(TT) Register",
-      "icon": "menu-icon icon-base ti tabler-vaccine",
-      "slug": "tetanus-register"
-    },
-    {
-      "url": "/registers/delivery-register",
-      "name": "Delivery Register",
-      "icon": "menu-icon icon-base ti tabler-baby-carriage",
-      "slug": "delivery-register"
-    },
-    {
-      "url": "/registers/post-natal-register",
-      "name": "Post Natal Register",
-      "icon": "menu-icon icon-base ti tabler-stethoscope",
-      "slug": "post-natal-register"
-    },
-    {
-      "url": "/registers/clinical-notes-register",
-      "name": "Tests / Clinical Notes",
-      "icon": "menu-icon icon-base ti tabler-notes",
-      "slug": "clinical-notes-register"
+      "url": "/registers/family-planning-register",
+      "name": "Family Planning Register",
+      "icon": "menu-icon icon-base ti tabler-clipboard-list",
+      "slug": "family-planning-register"
     }
   ]
 }

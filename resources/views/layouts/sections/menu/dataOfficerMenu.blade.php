@@ -15,7 +15,7 @@
     <!-- ! Hide app brand if navbar-full -->
     @if (!isset($navbarFull))
         <div class="app-brand demo">
-            <a href="{{ url('/registers/data-officer-dashboard') }}" class="app-brand-link">
+            <a href="{{ url('/workspaces/patient-workspace') }}" class="app-brand-link">
                 <span class="app-brand-logo demo">@include('_partials.macros')</span>
                 <span class="app-brand-text demo menu-text fw-bold ms-3">{{ config('variables.templateName') }} <small
                         class="text-muted">[Data Officer]</small></span>

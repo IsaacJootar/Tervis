@@ -50,7 +50,7 @@ class UserRoleMiddleware
 
       'Data Officer' => [
         'prefixes' => ['registers', 'workspaces'],
-        'index'     => 'data-officer-dashboard',
+        'index'     => 'patient-workspace',
       ],
 
       'Verification Officer' => [

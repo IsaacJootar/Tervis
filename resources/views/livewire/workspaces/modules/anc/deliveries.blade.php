@@ -817,8 +817,12 @@
 
                         <!-- Baby Details -->
                         <div class="card mb-4">
-                            <div class="card-header d-flex align-items-center justify-content-between">
-                                <h5 class="card-title mb-0"><span class="badge text-bg-info">Baby Details</span></h5>
+                            <div class="card-header d-flex align-items-center justify-content-between flex-wrap gap-2">
+                                <div>
+                                    <h5 class="card-title mb-1"><span class="badge text-bg-info">Baby Details</span>
+                                    </h5>
+                                    <small class="text-muted">Linked to Immunization & Nutrition records</small>
+                                </div>
                                 <button type="button" class="btn btn-sm btn-outline-primary" wire:click="addBaby">
                                     <i class="bx bx-plus me-1"></i>Add Baby
                                 </button>
@@ -1062,7 +1066,6 @@
 
     @include('_partials.datatables-init')
 </div>
-
 
 
 

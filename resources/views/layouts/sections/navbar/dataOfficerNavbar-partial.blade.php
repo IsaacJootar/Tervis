@@ -6,7 +6,7 @@
 
 @if (isset($navbarFull))
     <div class="navbar-brand app-brand demo d-none d-xl-flex py-0 me-4 ms-0">
-        <a href="{{ url('/data-officer-dashboard') }}" class="app-brand-link">
+        <a href="{{ url('/workspaces/patient-workspace') }}" class="app-brand-link">
             <span class="app-brand-logo demo">
                 <img src="{{ asset('assets/img/logo.png') }}" alt="Logo" height="32">
             </span>
@@ -59,9 +59,9 @@
                 <div class="dropdown-menu-header border-bottom">
                     <div class="dropdown-header d-flex align-items-center py-3">
                         <h5 class="text-body mb-0 me-auto">Register Shortcuts</h5>
-                        <a href="{{ url('/registers/data-officer-dashboard') }}"
+                        <a href="{{ url('/workspaces/patient-workspace') }}"
                             class="dropdown-shortcuts-add text-muted" data-bs-toggle="tooltip" data-bs-placement="top"
-                            title="Dashboard">
+                            title="Patient Workspace">
                             <i class="icon-base ti tabler-sm ti-home text-muted"></i>
                         </a>
                     </div>
@@ -78,29 +78,21 @@
                         </div>
                         <div class="dropdown-shortcuts-item col">
                             <span class="dropdown-shortcuts-icon bg-label-success rounded-circle mb-2">
-                                <i class="icon-base ti tabler-baby-carriage fs-4"></i>
+                                <i class="icon-base ti tabler-users fs-4"></i>
                             </span>
-                            <a href="{{ url('/registers/delivery-register') }}" class="stretched-link">Delivery
-                                Register</a>
-                            <small class="text-muted mb-0">Birth Records</small>
+                            <a href="{{ url('/registers/general-patients-register') }}" class="stretched-link">General
+                                Patients Register</a>
+                            <small class="text-muted mb-0">Patient Records</small>
                         </div>
                     </div>
                     <div class="row row-bordered g-0">
                         <div class="dropdown-shortcuts-item col">
                             <span class="dropdown-shortcuts-icon bg-label-info rounded-circle mb-2">
-                                <i class="icon-base ti tabler-stethoscope fs-4"></i>
+                                <i class="icon-base ti tabler-clipboard-list fs-4"></i>
                             </span>
-                            <a href="{{ url('/registers/post-natal-register') }}" class="stretched-link">Post Natal
-                                Register</a>
-                            <small class="text-muted mb-0">Postnatal Care</small>
-                        </div>
-                        <div class="dropdown-shortcuts-item col">
-                            <span class="dropdown-shortcuts-icon bg-label-warning rounded-circle mb-2">
-                                <i class="icon-base ti tabler-notes fs-4"></i>
-                            </span>
-                            <a href="{{ url('/registers/clinical-notes-register') }}" class="stretched-link">Tests /
-                                Clinical Notes</a>
-                            <small class="text-muted mb-0">Lab & Clinical Notes</small>
+                            <a href="{{ url('/registers/family-planning-register') }}" class="stretched-link">Family
+                                Planning Register</a>
+                            <small class="text-muted mb-0">Family Planning</small>
                         </div>
                     </div>
                 </div>

@@ -79,9 +79,9 @@
                             <span class="dropdown-shortcuts-icon bg-label-success rounded-circle mb-2">
                                 <i class="icon-base ti tabler-baby-carriage fs-4"></i>
                             </span>
-                            <a href="{{ url('/registers/delivery-register') }}" class="stretched-link">Delivery
-                                Register</a>
-                            <small class="text-muted mb-0">Birth Records</small>
+                            <a href="{{ url('/registers/general-patients-register') }}" class="stretched-link">General
+                                Patients Register</a>
+                            <small class="text-muted mb-0">Patient Records</small>
                         </div>
                     </div>
                     <div class="row row-bordered g-0">
@@ -89,17 +89,17 @@
                             <span class="dropdown-shortcuts-icon bg-label-info rounded-circle mb-2">
                                 <i class="icon-base ti tabler-stethoscope fs-4"></i>
                             </span>
-                            <a href="{{ url('/registers/post-natal-register') }}" class="stretched-link">Post Natal
-                                Register</a>
-                            <small class="text-muted mb-0">Postnatal Care</small>
+                            <a href="{{ url('/registers/family-planning-register') }}" class="stretched-link">Family
+                                Planning Register</a>
+                            <small class="text-muted mb-0">Family Planning</small>
                         </div>
                         <div class="dropdown-shortcuts-item col">
                             <span class="dropdown-shortcuts-icon bg-label-warning rounded-circle mb-2">
                                 <i class="icon-base ti tabler-notes fs-4"></i>
                             </span>
-                            <a href="{{ url('/registers/clinical-notes-register') }}" class="stretched-link">Tests /
-                                Clinical Notes</a>
-                            <small class="text-muted mb-0">Lab & Clinical Notes</small>
+                            <a href="{{ url('/registers/family-planning-register') }}" class="stretched-link">Family
+                                Planning Register</a>
+                            <small class="text-muted mb-0">Family Planning</small>
                         </div>
                     </div>
                 </div>

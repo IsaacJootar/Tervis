@@ -29,7 +29,6 @@ use App\Livewire\Patient\PatientAntenatal;
 use App\Livewire\Patient\PatientDashboard;
 use App\Livewire\Patient\PatientPostnatal;
 use App\Livewire\Patient\PatientDeliveries;
-use App\Livewire\Registers\TetanusRegister;
 use App\Livewire\Core\StateOfficerDashboard;
 use App\Livewire\Analytics\RealTimeDashboard;
 use App\Livewire\Core\FacilityAdminDashboard;
@@ -47,12 +46,9 @@ use App\Livewire\Workspaces\Modules\ANC\AncOverview;
 use App\Livewire\Workspaces\Modules\ANC\FollowUpAssessment;
 use App\Livewire\Analytics\MpdsrReportDashboard;
 use App\Livewire\Core\DisableDataOfficerAccount;
-use App\Livewire\Registers\DataOfficerDashboard;
 use App\Livewire\Analytics\HealthTrendsDashboard;
-use App\Livewire\Registers\ClinicalNotesRegister;
 use App\Livewire\Analytics\MonthlyReportDashboard;
 use App\Livewire\Registers\FamilyPlanningRegister;
-use App\Livewire\Registers\DailyAttendanceRegister;
 use App\Livewire\Registers\GeneralPatientsRegister;
 use App\Livewire\Analytics\BatchDiagnosticDashboard;
 use App\Livewire\Analytics\BatchPredictiveDashboard;
@@ -153,11 +149,6 @@ Route::middleware(['auth', 'role.redirect'])->prefix('workspaces')->group(functi
 
 // Registers routes with middleware
 Route::middleware(['auth', 'role.redirect'])->prefix('registers')->group(function () {
-  Route::get('/data-officer-dashboard', DataOfficerDashboard::class)->name('data-officer-dashboard');
-  Route::get('/daily-attendance-register', DailyAttendanceRegister::class)->name('daily-attendance-register');
-  Route::get('/clinical-notes-register', ClinicalNotesRegister::class)->name('clinical-notes-register');
-  Route::get('/tetanus-register', TetanusRegister::class)->name('tetanus-register');
-
   //3 Tier Entry Points
   Route::get('/antenatal-register', AntenatalRegister::class)->name('antenatal-register');
   Route::get('/general-patients-register', GeneralPatientsRegister::class)

@@ -61,7 +61,7 @@ class Login extends Component
         'State Data Administrator' => 'state-officer-dashboard',
         'LGA Officer' => 'lga-officer-dashboard',
         'Facility Administrator' => 'facility-admin-dashboard',
-        'Data Officer' => 'data-officer-dashboard',
+        'Data Officer' => 'patient-workspace',
         'Verification Officer' => 'din-activations',
         'Patient' => 'patient-dashboard'
       ];
