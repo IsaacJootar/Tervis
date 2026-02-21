@@ -17,7 +17,7 @@ use App\Livewire\Patient\PatientProfile;
 //
 use App\Livewire\Patient\PatientTetanus;
 use App\Livewire\Analytics\RiskDashboard;
-use App\Livewire\Core\CreateDataofficers;
+use App\Livewire\Core\CreateDataOfficers;
 
 //
 use App\Livewire\Core\FacilityDepartments;
@@ -44,6 +44,8 @@ use App\Livewire\Workspaces\Modules\ANC\Deliveries;
 use App\Livewire\Workspaces\Modules\ANC\Postnatal;
 use App\Livewire\Workspaces\Modules\ANC\AncOverview;
 use App\Livewire\Workspaces\Modules\ANC\FollowUpAssessment;
+use App\Livewire\Workspaces\Modules\Child\Immunizations;
+use App\Livewire\Workspaces\Modules\Child\Nutrition;
 use App\Livewire\Analytics\MpdsrReportDashboard;
 use App\Livewire\Core\DisableDataOfficerAccount;
 use App\Livewire\Analytics\HealthTrendsDashboard;
@@ -58,11 +60,12 @@ use App\Livewire\Workspaces\Modules\ANC\TetanusVaccinations;
 // Login
 Route::get('/login', Login::class)->name('login');
 
-// Central Admin, this is like our main central system for the tenenacy. I wil improve this module later
-//Route::middleware(['auth', 'role.redirect'])->prefix('central')->group(function () {
-Route::get('/central/create-administrators', CreateAdministrators::class)->name('create-administrators');
-Route::get('/central/create-facility', CreateFacility::class)->name('create-facility');
-Route::get('/central/central-admin-dashboard', CentralAdminDashboard::class)->name('central-admin-dashboard');
+// Central Admin, this is like our main central system for the tenancy
+Route::middleware(['auth', 'role.redirect'])->prefix('central')->group(function () {
+  Route::get('/create-administrators', CreateAdministrators::class)->name('create-administrators');
+  Route::get('/create-facility', CreateFacility::class)->name('create-facility');
+  Route::get('/central-admin-dashboard', CentralAdminDashboard::class)->name('central-admin-dashboard');
+});
 
 
 // Core (system) routes with middleware
@@ -142,6 +145,12 @@ Route::middleware(['auth', 'role.redirect'])->prefix('workspaces')->group(functi
 
   Route::get('/{patientId}/anc/postnatal', Postnatal::class)
     ->name('workspaces-antenatal-postnatal');
+
+  Route::get('/{patientId}/child-health/nutrition', Nutrition::class)
+    ->name('workspaces-child-health-nutrition');
+
+  Route::get('/{patientId}/child-health/immunizations', Immunizations::class)
+    ->name('workspaces-child-health-immunizations');
 });
 
 

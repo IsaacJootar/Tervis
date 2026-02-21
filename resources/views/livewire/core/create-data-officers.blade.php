@@ -1,6 +1,6 @@
 @php use Carbon\Carbon; @endphp
 @section('title', 'Create Data Officer')
-<div x-data="{ role: @entangle('role').live, state_id: @entangle('state_id').live }">
+<div>
 
     <!-- Hero Card Header -->
     <div class="row mb-5">

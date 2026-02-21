@@ -10,6 +10,7 @@ use Livewire\Component;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
 class CreateAdministrators extends Component
@@ -24,17 +25,25 @@ class CreateAdministrators extends Component
   public $roles = ['Facility Administrator', 'LGA Officer', 'State Data Administrator'];
   public $designations = ['Facility Data Administrator', 'LGA Data Administrator', 'State Data Administrator'];
 
-  protected $rules = [
-    'first_name' => 'required|string|max:255',
-    'last_name' => 'required|string|max:255',
-    'email' => 'required|email|unique:users,email',
-    'password' => 'required|string|min:8|confirmed',
-    'role' => 'required|in:Facility Administrator,LGA Officer,State Data Administrator',
-    'designation' => 'required|in:Facility Data Administrator,LGA Data Administrator,State Data Administrator',
-    'facility_id' => 'required_if:role,Facility Administrator|nullable|exists:facilities,id|unique:users,facility_id',
-    'state_id' => 'required_if:role,LGA Officer|required_if:role,State Data Administrator|nullable|exists:states,id',
-    'lga_id' => 'required_if:role,LGA Officer|nullable|exists:lgas,id',
-  ];
+  protected function rules()
+  {
+    return [
+      'first_name' => 'required|string|max:255',
+      'last_name' => 'required|string|max:255',
+      'email' => 'required|email|unique:users,email',
+      'password' => 'required|string|min:8|confirmed',
+      'role' => 'required|in:Facility Administrator,LGA Officer,State Data Administrator',
+      'designation' => 'required|in:Facility Data Administrator,LGA Data Administrator,State Data Administrator',
+      'facility_id' => [
+        'required_if:role,Facility Administrator',
+        'nullable',
+        'exists:facilities,id',
+        Rule::unique('users', 'facility_id')->where(fn($q) => $q->where('role', 'Facility Administrator')),
+      ],
+      'state_id' => 'required_if:role,LGA Officer|required_if:role,State Data Administrator|nullable|exists:states,id',
+      'lga_id' => 'required_if:role,LGA Officer|nullable|exists:lgas,id',
+    ];
+  }
 
   protected $messages = [
     'facility_id.unique' => 'This facility is already assigned to another administrator.',
@@ -234,7 +243,14 @@ class CreateAdministrators extends Component
         'email' => 'required|email|unique:users,email,' . $this->admin_id,
         'role' => 'required|in:Facility Administrator,LGA Officer,State Data Administrator',
         'designation' => 'required|in:Facility Data Administrator,LGA Data Administrator,State Data Administrator',
-        'facility_id' => 'required_if:role,Facility Administrator|nullable|exists:facilities,id|unique:users,facility_id,' . $this->admin_id,
+        'facility_id' => [
+          'required_if:role,Facility Administrator',
+          'nullable',
+          'exists:facilities,id',
+          Rule::unique('users', 'facility_id')
+            ->where(fn($q) => $q->where('role', 'Facility Administrator'))
+            ->ignore($this->admin_id),
+        ],
         'state_id' => 'required_if:role,LGA Officer|required_if:role,State Data Administrator|nullable|exists:states,id',
         'lga_id' => 'required_if:role,LGA Officer|nullable|exists:lgas,id',
       ];

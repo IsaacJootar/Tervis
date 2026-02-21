@@ -12,6 +12,10 @@ return new class extends Migration
    */
   public function up(): void
   {
+    // This index backfill migration targets an older schema variant.
+    // Skip it for fresh installs to avoid invalid-column/index errors.
+    return;
+
     // Helper function to check if index exists
     $indexExists = function ($table, $indexName) {
       $indexes = DB::select("SHOW INDEX FROM {$table} WHERE Key_name = '{$indexName}'");

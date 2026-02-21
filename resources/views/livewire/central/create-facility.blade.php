@@ -196,7 +196,7 @@
                             </div>
                         </div>
                         <!-- Action Buttons -->
-                        <div class="col-12 text-center">
+                        <div class="col-12 text-center mt-4 pt-2">
                             @if ($modal_flag)
                                 <x-app-loader />
                                 <button wire:click="update" type="button" class="btn btn-primary"

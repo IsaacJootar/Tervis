@@ -12,7 +12,7 @@ return new class extends Migration
       $table->id();
       $table->foreignId('user_id')->constrained()->onDelete('cascade');
       $table->foreignId('facility_id')->constrained()->onDelete('cascade');
-      $table->foreignId('antenatal_id')->nullable()->constrained()->onDelete('set null');
+      $table->foreignId('antenatal_id')->nullable()->constrained('antenatal_registrations')->onDelete('set null');
 
       // Risk Scoring
       $table->integer('total_risk_score')->default(0);

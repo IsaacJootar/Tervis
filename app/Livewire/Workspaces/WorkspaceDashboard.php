@@ -193,7 +193,7 @@ class WorkspaceDashboard extends Component
     if (!$this->patient) return;
 
     try {
-      $this->linkedChildren = $this->patient->children ?? collect();
+      $this->linkedChildren = $this->patient->linkedChildren ?? collect();
       $this->hasLinkedChildren = $this->linkedChildren->count() > 0;
     } catch (\Exception $e) {
       $this->linkedChildren = collect();
@@ -236,7 +236,7 @@ class WorkspaceDashboard extends Component
     ];
 
     // Card 6: Immunizations (Child Health)
-    $immunizationCount = $this->getModelCount('App\Models\Immunization');
+    $immunizationCount = $this->getModelCount('App\Models\ImmunizationRecord');
     $this->cardStatus['immunizations'] = [
       'enabled' => $this->hasLinkedChildren,
       'count' => $immunizationCount,
@@ -245,7 +245,7 @@ class WorkspaceDashboard extends Component
     ];
 
     // Card 7: Nutrition (Child Health)
-    $nutritionCount = $this->getModelCount('App\Models\NutritionAssessment');
+    $nutritionCount = $this->getModelCount('App\Models\NutritionRecord');
     $this->cardStatus['nutrition'] = [
       'enabled' => $this->hasLinkedChildren,
       'count' => $nutritionCount,

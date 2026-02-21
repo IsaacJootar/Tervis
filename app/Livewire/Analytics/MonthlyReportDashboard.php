@@ -9,6 +9,8 @@ use App\Models\Facility;
 use App\Models\Delivery;
 use App\Models\Antenatal;
 use App\Models\ClinicalNote;
+use App\Models\ImmunizationRecord;
+use App\Models\NutritionRecord;
 use App\Models\PostnatalRecord;
 use App\Models\DailyAttendance;
 use App\Services\DataScopeService;
@@ -428,12 +430,32 @@ class MonthlyReportDashboard extends Component
     $immunizationData['tt4'] = $tetanus->where('current_tt_dose', 'TT4')->count();
     $immunizationData['tt5'] = $tetanus->where('current_tt_dose', 'TT5')->count();
 
-    // Other immunizations (BCG, OPV, Penta, etc.) - would need immunization table
-    $immunizationData['bcg'] = 0;
-    $immunizationData['opv0'] = 0;
-    $immunizationData['opv1'] = 0;
-    $immunizationData['penta1'] = 0;
-    // ... etc
+    $childImm = ImmunizationRecord::whereIn('facility_id', $facilityIds)
+      ->whereBetween('visit_date', [$startDate, $endDate])
+      ->get();
+
+    $immunizationData['bcg'] = $childImm->whereNotNull('bcg_date')->count();
+    $immunizationData['opv0'] = $childImm->whereNotNull('opv0_date')->count();
+    $immunizationData['opv1'] = $childImm->whereNotNull('opv1_date')->count();
+    $immunizationData['opv2'] = $childImm->whereNotNull('opv2_date')->count();
+    $immunizationData['opv3'] = $childImm->whereNotNull('opv3_date')->count();
+    $immunizationData['penta1'] = $childImm->whereNotNull('penta1_date')->count();
+    $immunizationData['penta2'] = $childImm->whereNotNull('penta2_date')->count();
+    $immunizationData['penta3'] = $childImm->whereNotNull('penta3_date')->count();
+    $immunizationData['pcv1'] = $childImm->whereNotNull('pcv1_date')->count();
+    $immunizationData['pcv2'] = $childImm->whereNotNull('pcv2_date')->count();
+    $immunizationData['pcv3'] = $childImm->whereNotNull('pcv3_date')->count();
+    $immunizationData['ipv1'] = $childImm->whereNotNull('ipv1_date')->count();
+    $immunizationData['ipv2'] = $childImm->whereNotNull('ipv2_date')->count();
+    $immunizationData['mcv1'] = $childImm->whereNotNull('mr1_date')->count();
+    $immunizationData['mcv2'] = $childImm->whereNotNull('mr2_date')->count();
+    $immunizationData['yf'] = $childImm->whereNotNull('yf_date')->count();
+    $immunizationData['hepb0'] = $childImm->whereNotNull('hepb0_date')->count();
+    $immunizationData['rota1'] = $childImm->whereNotNull('rota1_date')->count();
+    $immunizationData['rota2'] = $childImm->whereNotNull('rota2_date')->count();
+    $immunizationData['mena'] = $childImm->whereNotNull('mena_date')->count();
+    $immunizationData['vita1'] = $childImm->whereNotNull('vita1_date')->count();
+    $immunizationData['vita2'] = $childImm->whereNotNull('vita2_date')->count();
 
     return $immunizationData;
   }
@@ -445,14 +467,33 @@ class MonthlyReportDashboard extends Component
   {
     $childHealthData = [];
 
-    // From clinical notes or separate child health records
+    $nutrition = NutritionRecord::whereIn('facility_id', $facilityIds)
+      ->whereBetween('visit_date', [$startDate, $endDate])
+      ->get();
+
+    // MONTHLY SUMMARY MAPPING ANCHORS:
+    // - `exclusive_breastfeeding`: age_group=0-5 months + infant_feeding=Exclusive BF
+    // - `sam_admissions`: muac_class=Red + admission_status=Admitted HP OTP
+    // - `mnp_given`: mnp_given=true
+    // - `not_growing_well`: growth_status=Not Growing Well
     $childHealthData['birth_registrations'] = 0;
-    $childHealthData['exclusive_breastfeeding'] = 0;
+    $childHealthData['exclusive_breastfeeding'] = $nutrition
+      ->where('age_group', '0-5 months')
+      ->where('infant_feeding', 'Exclusive BF')
+      ->count();
+    $childHealthData['muac_screened'] = $nutrition->whereNotNull('muac_value_mm')->count();
+    $childHealthData['sam_new_cases'] = $nutrition->where('muac_class', 'Red')->count();
+    $childHealthData['mam_new_cases'] = $nutrition->where('muac_class', 'Yellow')->count();
     $childHealthData['vitamin_a'] = 0;
     $childHealthData['deworming'] = 0;
-    $childHealthData['sam_admissions'] = 0;
+    $childHealthData['sam_admissions'] = $nutrition
+      ->where('muac_class', 'Red')
+      ->where('admission_status', 'Admitted HP OTP')
+      ->count();
     $childHealthData['diarrhoea_cases'] = 0;
     $childHealthData['pneumonia_cases'] = 0;
+    $childHealthData['mnp_given'] = $nutrition->where('mnp_given', true)->count();
+    $childHealthData['not_growing_well'] = $nutrition->where('growth_status', 'Not Growing Well')->count();
 
     return $childHealthData;
   }

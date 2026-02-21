@@ -12,6 +12,7 @@ return new class extends Migration
       $table->id();
       $table->string('first_name', 100);
       $table->string('last_name', 100);
+      $table->string('username', 100)->unique();
       $table->string('email', 150)->unique();
       $table->string('phone', 20)->nullable();
       $table->string('password');
@@ -24,14 +25,15 @@ return new class extends Migration
         'LGA Administrator',
         'Facility Administrator',
         'Data Officer',
+        'Verification Officer',
         'Patient'
       ]);
       $table->string('designation', 100)->nullable();
 
       // Scope fields for data access control
-      $table->foreignId('facility_id')->nullable()->constrained('facilities')->onDelete('set null');
-      $table->foreignId('lga_id')->nullable()->constrained('lgas')->onDelete('set null');
-      $table->foreignId('state_id')->nullable()->constrained('states')->onDelete('set null');
+      $table->unsignedBigInteger('facility_id')->nullable();
+      $table->unsignedBigInteger('lga_id')->nullable();
+      $table->unsignedBigInteger('state_id')->nullable();
 
       $table->boolean('is_active')->default(true);
       $table->rememberToken();

@@ -20,10 +20,10 @@ return new class extends Migration
       $table->string('phone', 20);
       $table->string('email', 150)->nullable();
 
-      $table->foreignId('state_id')->nullable()->constrained('states')->onDelete('set null');
-      $table->foreignId('lga_id')->nullable()->constrained('lgas')->onDelete('set null');
-      $table->foreignId('ward_id')->nullable()->constrained('wards')->onDelete('set null');
-      $table->foreignId('facility_id')->constrained('facilities')->onDelete('cascade');
+      $table->unsignedBigInteger('state_id')->nullable();
+      $table->unsignedBigInteger('lga_id')->nullable();
+      $table->unsignedBigInteger('ward_id')->nullable();
+      $table->unsignedBigInteger('facility_id')->nullable();
 
       $table->date('registration_date')->default(now());
       $table->boolean('is_active')->default(true);

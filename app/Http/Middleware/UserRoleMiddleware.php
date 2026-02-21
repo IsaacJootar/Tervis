@@ -33,6 +33,11 @@ class UserRoleMiddleware
         'index'     => 'central-admin-dashboard',
       ],
 
+      'Central Administrator' => [
+        'prefixes' => ['central', 'core'],
+        'index'     => 'central-admin-dashboard',
+      ],
+
       'State Data Administrator' => [
         'prefixes' => ['core', 'analytics'],
         'index'     => 'state-officer-dashboard',

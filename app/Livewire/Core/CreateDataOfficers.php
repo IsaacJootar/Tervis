@@ -129,7 +129,7 @@ class CreateDataOfficers extends Component
     $user = User::select('id', 'first_name', 'last_name', 'email', 'username', 'designation', 'facility_id', 'role')
       ->findOrFail($id);
 
-    if ($user->role !== 'Data Officer' || $user->facility_id !== $this->facility_id) {
+    if (!in_array($user->role, ['Data Officer', 'Verification Officer']) || $user->facility_id !== $this->facility_id) {
       abort(403, 'Unauthorized: This Data Officer does not belong to your facility.');
     }
 
@@ -153,7 +153,7 @@ class CreateDataOfficers extends Component
         'last_name' => 'required|string|max:255',
         'email' => 'nullable|email',
         'username' => 'required|string|unique:users,username,' . $this->data_officer_id,
-        'designation' => 'required|in:Nurse,Doctor,Midwife,Lab Attendant',
+        'designation' => 'required|in:Nurse,Doctor,Midwife,Lab Attendant,Verification Officer,Volunteer',
       ];
 
       if ($this->password) {
@@ -174,18 +174,20 @@ class CreateDataOfficers extends Component
       $this->validate($rules);
 
       $user = User::findOrFail($this->data_officer_id);
-      if ($user->role !== 'Data Officer' || $user->facility_id !== $this->facility_id) {
+      if (!in_array($user->role, ['Data Officer', 'Verification Officer']) || $user->facility_id !== $this->facility_id) {
         DB::rollBack();
         abort(403, 'Unauthorized: This Data Officer does not belong to your facility.');
       }
 
       // Update user with optimized data
+      $role = ($this->designation === 'Verification Officer') ? 'Verification Officer' : 'Data Officer';
+
       $updateData = [
         'first_name' => $this->first_name,
         'last_name' => $this->last_name,
         'email' => $this->email ?: null,
         'username' => $this->username,
-        'role' => 'Data Officer',
+        'role' => $role,
         'designation' => $this->designation,
         'facility_id' => $this->facility_id,
         'updated_at' => now(),
@@ -228,7 +230,7 @@ class CreateDataOfficers extends Component
     DB::beginTransaction();
     try {
       $user = User::findOrFail($id);
-      if ($user->role !== 'Data Officer' || $user->facility_id !== $this->facility_id) {
+      if (!in_array($user->role, ['Data Officer', 'Verification Officer']) || $user->facility_id !== $this->facility_id) {
         DB::rollBack();
         abort(403, 'Unauthorized: This Data Officer does not belong to your facility.');
       }
@@ -302,7 +304,7 @@ class CreateDataOfficers extends Component
     $dataOfficers = Cache::remember("data_officers_facility_{$this->facility_id}", 300, function () {
       return User::select('id', 'first_name', 'last_name', 'email', 'username', 'designation', 'facility_id', 'role')
         ->with(['facility:id,name'])
-        ->where('role', 'Data Officer')
+        ->whereIn('role', ['Data Officer', 'Verification Officer'])
         ->where('facility_id', $this->facility_id)
         ->latest()
         ->take(50)

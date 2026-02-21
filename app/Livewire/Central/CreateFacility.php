@@ -101,6 +101,7 @@ class CreateFacility extends Component
         'name' => $this->name,
         'state_id' => $this->state,
         'lga_id' => $this->lga,
+        'ward_id' => $this->ward,
         'state' => $stateName,
         'lga' => $lgaName,
         'ward' => $wardName,
@@ -142,7 +143,7 @@ class CreateFacility extends Component
     $this->updatedState($this->state); // Load LGAs
     $this->lga = $facility->lga_id;
     $this->updatedLga($this->lga); // Load Wards
-    $this->ward = Ward::where('name', $facility->ward)->first()->id ?? null; // Assuming ward names are unique per LGA
+    $this->ward = $facility->ward_id ?: (Ward::where('name', $facility->ward)->where('lga_id', $facility->lga_id)->first()->id ?? null);
     $this->address = $facility->address;
     $this->phone = $facility->phone;
     $this->email = $facility->email;
@@ -178,6 +179,7 @@ class CreateFacility extends Component
         'name' => $this->name,
         'state_id' => $this->state,
         'lga_id' => $this->lga,
+        'ward_id' => $this->ward,
         'state' => $stateName,
         'lga' => $lgaName,
         'ward' => $wardName,

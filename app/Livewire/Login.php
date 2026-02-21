@@ -57,7 +57,8 @@ class Login extends Component
 
       // Define role-based redirect paths
       $roleRoutes = [
-        'Central Administrator' => 'central-officer-dashboard',
+        'Central Admin' => 'central-admin-dashboard',
+        'Central Administrator' => 'central-admin-dashboard',
         'State Data Administrator' => 'state-officer-dashboard',
         'LGA Officer' => 'lga-officer-dashboard',
         'Facility Administrator' => 'facility-admin-dashboard',

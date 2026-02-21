@@ -255,7 +255,7 @@ class LinkedChild extends Model
   public function latestImmunizationRecord()
   {
     return $this->hasOne(ImmunizationRecord::class, 'linked_child_id')
-      ->latest('date_administered');
+      ->latest('visit_date');
   }
 
   // ============================================
