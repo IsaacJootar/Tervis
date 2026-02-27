@@ -164,8 +164,8 @@
                         <h5 class="modal-title text-white">
                             {{ $record_id ? 'Edit Nutrition Record' : 'Record Child Nutrition' }}
                         </h5>
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
-                            aria-label="Close"></button>
+                        <button wire:click="exit" type="button" class="btn-close btn-close-white"
+                            data-bs-dismiss="modal" aria-label="Close" onclick="setTimeout(() => location.reload(), 300)"></button>
                     </div>
                     <div class="modal-body">
                         <form wire:submit.prevent="{{ $record_id ? 'update' : 'store' }}">
@@ -370,8 +370,8 @@
                                     </div>
 
                                     <div class="d-flex justify-content-end gap-2 mt-4">
-                                        <button type="button" class="btn btn-outline-secondary"
-                                            data-bs-dismiss="modal">Cancel</button>
+                                        <button wire:click="exit" type="button" class="btn btn-outline-secondary"
+                                            data-bs-dismiss="modal" onclick="setTimeout(() => location.reload(), 300)">Cancel</button>
                                         <button type="submit" class="btn btn-primary">
                                             <span wire:loading.remove wire:target="store,update">
                                                 {{ $record_id ? 'Update Record' : 'Save Record' }}

@@ -51,7 +51,7 @@
                 </div>
 
                 {{-- Hero Content --}}
-                <div class="hero-content d-flex justify-content-between align-items-start flex-wrap gap-3">
+                <div class="hero-content">
 
                     <div class="hero-text">
                         <h4 class="hero-title mb-2" style="color: white; font-size: 28px;">
@@ -87,7 +87,7 @@
                     </div>
 
                     {{-- CTA Button --}}
-                    <div class="demo-inline-spacing">
+                    <div class="demo-inline-spacing mt-3">
                         <button type="button"
                             class="btn btn-lg btn-dark px-5 py-3 d-inline-flex align-items-center shadow"
                             style="border-radius: 8px;" data-bs-toggle="modal" data-bs-target="#dinVerificationModal"

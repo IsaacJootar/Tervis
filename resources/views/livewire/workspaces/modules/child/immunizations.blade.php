@@ -166,8 +166,8 @@
                         <h5 class="modal-title text-white">
                             {{ $record_id ? 'Edit Immunization Record' : 'Record Child Immunization' }}
                         </h5>
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
-                            aria-label="Close"></button>
+                        <button wire:click="exit" type="button" class="btn-close btn-close-white"
+                            data-bs-dismiss="modal" aria-label="Close" onclick="setTimeout(() => location.reload(), 300)"></button>
                     </div>
                     <div class="modal-body">
                         <form wire:submit.prevent="{{ $record_id ? 'update' : 'store' }}">
@@ -230,35 +230,78 @@
                                         </h6>
                                     </div>
 
-                                    @php
-                                        $groups = [
-                                            'At Birth' => [['hepb0_date', 'HepB0'], ['opv0_date', 'OPV0']],
-                                            '6 Weeks' => [['bcg_date', 'BCG'], ['opv1_date', 'OPV1'], ['penta1_date', 'PENTA1'], ['pcv1_date', 'PCV1'], ['rota1_date', 'ROTA1']],
-                                            '10 Weeks' => [['opv2_date', 'OPV2'], ['penta2_date', 'PENTA2'], ['pcv2_date', 'PCV2'], ['rota2_date', 'ROTA2'], ['ipv1_date', 'IPV1']],
-                                            '14 Weeks' => [['opv3_date', 'OPV3'], ['penta3_date', 'PENTA3'], ['pcv3_date', 'PCV3'], ['mr1_date', 'MR1'], ['yf_date', 'YF']],
-                                            '9 Months' => [['mr2_date', 'MR2'], ['mena_date', 'MenA'], ['yf2_date', 'YF2'], ['slea_date', 'SLEA']],
-                                            'Vitamin A' => [['vita1_date', 'VitA1'], ['vita2_date', 'VitA2']],
-                                            'Other' => [['ipv2_date', 'IPV2']],
-                                        ];
-                                    @endphp
-
-                                    @foreach ($groups as $groupLabel => $fields)
-                                        <div class="mb-3">
-                                            <span class="badge bg-label-primary">{{ $groupLabel }}</span>
-                                            <div class="row g-3 mt-0">
-                                                @foreach ($fields as $field)
-                                                    <div class="col-md-3">
-                                                        <label class="form-label">{{ $field[1] }}</label>
-                                                        <input type="date" class="form-control"
-                                                            wire:model="{{ $field[0] }}">
-                                                        @error($field[0])
-                                                            <small class="text-danger">{{ $message }}</small>
-                                                        @enderror
-                                                    </div>
-                                                @endforeach
-                                            </div>
-                                        </div>
-                                    @endforeach
+                                    <div class="table-responsive">
+                                        <table class="table table-bordered vax-entry-table">
+                                            <thead>
+                                                <tr class="table-dark text-center">
+                                                    <th colspan="2">At Birth</th>
+                                                    <th colspan="5">6 Weeks</th>
+                                                    <th colspan="5">10 Weeks</th>
+                                                    <th colspan="5">14 Weeks</th>
+                                                    <th colspan="4">9 Months</th>
+                                                    <th colspan="2">Vit A</th>
+                                                    <th colspan="1">Extra</th>
+                                                </tr>
+                                                <tr class="text-center">
+                                                    <th>HepB0</th>
+                                                    <th>OPV0</th>
+                                                    <th>BCG</th>
+                                                    <th>OPV1</th>
+                                                    <th>PENTA1</th>
+                                                    <th>PCV1</th>
+                                                    <th>ROTA1</th>
+                                                    <th>OPV2</th>
+                                                    <th>PENTA2</th>
+                                                    <th>PCV2</th>
+                                                    <th>ROTA2</th>
+                                                    <th>IPV1</th>
+                                                    <th>OPV3</th>
+                                                    <th>PENTA3</th>
+                                                    <th>PCV3</th>
+                                                    <th>MR1</th>
+                                                    <th>YF</th>
+                                                    <th>MR2</th>
+                                                    <th>MenA</th>
+                                                    <th>YF2</th>
+                                                    <th>SLEA</th>
+                                                    <th>VitA1</th>
+                                                    <th>VitA2</th>
+                                                    <th>IPV2</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td><input type="date" class="form-control form-control-sm" wire:model="hepb0_date"></td>
+                                                    <td><input type="date" class="form-control form-control-sm" wire:model="opv0_date"></td>
+                                                    <td><input type="date" class="form-control form-control-sm" wire:model="bcg_date"></td>
+                                                    <td><input type="date" class="form-control form-control-sm" wire:model="opv1_date"></td>
+                                                    <td><input type="date" class="form-control form-control-sm" wire:model="penta1_date"></td>
+                                                    <td><input type="date" class="form-control form-control-sm" wire:model="pcv1_date"></td>
+                                                    <td><input type="date" class="form-control form-control-sm" wire:model="rota1_date"></td>
+                                                    <td><input type="date" class="form-control form-control-sm" wire:model="opv2_date"></td>
+                                                    <td><input type="date" class="form-control form-control-sm" wire:model="penta2_date"></td>
+                                                    <td><input type="date" class="form-control form-control-sm" wire:model="pcv2_date"></td>
+                                                    <td><input type="date" class="form-control form-control-sm" wire:model="rota2_date"></td>
+                                                    <td><input type="date" class="form-control form-control-sm" wire:model="ipv1_date"></td>
+                                                    <td><input type="date" class="form-control form-control-sm" wire:model="opv3_date"></td>
+                                                    <td><input type="date" class="form-control form-control-sm" wire:model="penta3_date"></td>
+                                                    <td><input type="date" class="form-control form-control-sm" wire:model="pcv3_date"></td>
+                                                    <td><input type="date" class="form-control form-control-sm" wire:model="mr1_date"></td>
+                                                    <td><input type="date" class="form-control form-control-sm" wire:model="yf_date"></td>
+                                                    <td><input type="date" class="form-control form-control-sm" wire:model="mr2_date"></td>
+                                                    <td><input type="date" class="form-control form-control-sm" wire:model="mena_date"></td>
+                                                    <td><input type="date" class="form-control form-control-sm" wire:model="yf2_date"></td>
+                                                    <td><input type="date" class="form-control form-control-sm" wire:model="slea_date"></td>
+                                                    <td><input type="date" class="form-control form-control-sm" wire:model="vita1_date"></td>
+                                                    <td><input type="date" class="form-control form-control-sm" wire:model="vita2_date"></td>
+                                                    <td><input type="date" class="form-control form-control-sm" wire:model="ipv2_date"></td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <small class="text-muted d-block mb-2">
+                                        Register-aligned schedule: enter only vaccine dates already administered.
+                                    </small>
 
                                     <div class="row g-3">
                                         <div class="col-12">
@@ -299,8 +342,8 @@
                                     </div>
 
                                     <div class="d-flex justify-content-end gap-2 mt-4">
-                                        <button type="button" class="btn btn-outline-secondary"
-                                            data-bs-dismiss="modal">Cancel</button>
+                                        <button wire:click="exit" type="button" class="btn btn-outline-secondary"
+                                            data-bs-dismiss="modal" onclick="setTimeout(() => location.reload(), 300)">Cancel</button>
                                         <button type="submit" class="btn btn-primary">
                                             <span wire:loading.remove wire:target="store,update">
                                                 {{ $record_id ? 'Update Record' : 'Save Record' }}
@@ -355,22 +398,32 @@
                 .bg-clinical-dark {
                     background-color: #2c3e50;
                 }
+
+                .vax-entry-table th,
+                .vax-entry-table td {
+                    white-space: nowrap;
+                    min-width: 110px;
+                    text-align: center;
+                    vertical-align: middle;
+                }
             </style>
         @endonce
 
         @push('scripts')
             <script>
                 document.addEventListener('livewire:initialized', () => {
+                    const modalElement = document.getElementById('immunizationModal');
+
                     Livewire.on('open-main-modal', () => {
-                        const modal = document.getElementById('immunizationModal');
-                        const inst = bootstrap.Modal.getInstance(modal) || new bootstrap.Modal(modal);
+                        const inst = bootstrap.Modal.getInstance(modalElement) || new bootstrap.Modal(modalElement);
                         inst.show();
                     });
 
                     Livewire.on('close-modals', () => {
-                        const modal = bootstrap.Modal.getInstance(document.getElementById('immunizationModal'));
+                        const modal = bootstrap.Modal.getInstance(modalElement);
                         if (modal) modal.hide();
                     });
+
                 });
             </script>
         @endpush

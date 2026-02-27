@@ -29,10 +29,10 @@
                             </span>
                         </div>
                         <div class="mt-3">
-                            <button class="btn btn-light btn-lg rounded-pill shadow-sm d-inline-flex align-items-center"
-                                style="border: 1px solid #ddd; padding: 12px 24px;" data-bs-toggle="modal"
+                            <button class="btn btn-lg btn-dark px-5 py-3 d-inline-flex align-items-center shadow"
+                                style="border-radius: 8px;" data-bs-toggle="modal"
                                 data-bs-target="#facilityModal" type="button" title="Create New Facility">
-                                <i class="bx bx-buildings me-2" style="font-size: 20px;"></i>
+                                <i class="bx bx-buildings me-2 text-white" style="font-size: 20px;"></i>
                                 Create New Facility
                             </button>
                         </div>

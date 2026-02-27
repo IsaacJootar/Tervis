@@ -502,6 +502,18 @@ class Nutrition extends Component
     return redirect()->route('workspace-dashboard', ['patientId' => $this->patientId]);
   }
 
+  public function exit(): void
+  {
+    $this->resetForm();
+    $this->closeModalAndRefresh();
+  }
+
+  public function closeModalAndRefresh(): void
+  {
+    $this->dispatch('close-modals');
+    $this->js('window.location.reload()');
+  }
+
   public function render()
   {
     $records = NutritionRecord::with('linkedChild')
