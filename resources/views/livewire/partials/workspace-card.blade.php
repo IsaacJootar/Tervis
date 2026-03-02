@@ -3,7 +3,9 @@
 
 @php
     $status = isset($key) && is_string($key) ? ($cardStatus[$key] ?? ['enabled' => false, 'count' => 0, 'label' => 'Records']) : ['enabled' => false, 'count' => 0, 'label' => 'Records'];
-    $isEnabled = true;
+    $routeExists = (bool) ($status['route_exists'] ?? true);
+    $isEnabled = (bool) ($status['enabled'] ?? false) && $routeExists;
+    $isHidden = !$routeExists;
     $count = $status['count'] ?? 0;
     $label = $status['label'] ?? 'Records';
     $requires = $status['requires'] ?? null;
@@ -29,6 +31,7 @@
     $iconSvg = $iconMap[$key] ?? '<svg viewBox="0 0 24 24" class="icon-svg" aria-hidden="true"><circle cx="12" cy="12" r="7"></circle><path d="M12 8v4"></path></svg>';
 @endphp
 
+@if (!$isHidden)
 <div class="col-md-4 col-lg-3 mb-4">
     <div class="card h-100 shadow-sm workspace-card accent-{{ $color }} {{ !$isEnabled ? 'card-disabled' : '' }}"
         @if ($isEnabled) wire:click="navigateToWorkspace('{{ $key }}')" style="cursor: pointer;"
@@ -75,6 +78,7 @@
         @endif
     </div>
 </div>
+@endif
 @once
     <style>
         .workspace-card {
@@ -218,3 +222,4 @@
         }
     </style>
 @endonce
+

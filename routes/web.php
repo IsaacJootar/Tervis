@@ -46,6 +46,7 @@ use App\Livewire\Workspaces\Modules\ANC\AncOverview;
 use App\Livewire\Workspaces\Modules\ANC\FollowUpAssessment;
 use App\Livewire\Workspaces\Modules\Child\Immunizations;
 use App\Livewire\Workspaces\Modules\Child\Nutrition;
+use App\Livewire\Workspaces\Modules\Child\ActivityRegister;
 use App\Livewire\Analytics\MpdsrReportDashboard;
 use App\Livewire\Core\DisableDataOfficerAccount;
 use App\Livewire\Analytics\HealthTrendsDashboard;
@@ -151,6 +152,9 @@ Route::middleware(['auth', 'role.redirect'])->prefix('workspaces')->group(functi
 
   Route::get('/{patientId}/child-health/immunizations', Immunizations::class)
     ->name('workspaces-child-health-immunizations');
+
+  Route::get('/{patientId}/child-health/activity-register', ActivityRegister::class)
+    ->name('workspaces-child-health-activity-register');
 });
 
 
@@ -170,7 +174,7 @@ Route::middleware(['auth', 'role.redirect'])->prefix('registers')->group(functio
 
 // Home redirect
 Route::get('/', function () {
-  return redirect()->route('test'); // a route just be here for now, am coming
+  return redirect()->route('login'); // a route just be here for now, am coming
 });
 
 
@@ -181,5 +185,8 @@ Route::post('/logout', function () {
   Auth::logout();
   request()->session()->invalidate();
   request()->session()->regenerateToken();
-  return redirect()->route('test');
+  return redirect()->route('login');
 })->name('logout');
+
+
+

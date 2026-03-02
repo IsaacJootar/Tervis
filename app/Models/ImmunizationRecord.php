@@ -24,6 +24,7 @@ class ImmunizationRecord extends Model
     'pcv2_date',
     'rota2_date',
     'ipv1_date',
+    'rota3_date',
     'opv3_date',
     'penta3_date',
     'pcv3_date',
@@ -36,6 +37,7 @@ class ImmunizationRecord extends Model
     'vita1_date',
     'vita2_date',
     'ipv2_date',
+    'hpv_date',
   ];
 
   public const VACCINE_LABELS = [
@@ -51,6 +53,7 @@ class ImmunizationRecord extends Model
     'pcv2_date' => 'PCV2',
     'rota2_date' => 'ROTA2',
     'ipv1_date' => 'IPV1',
+    'rota3_date' => 'ROTA3',
     'opv3_date' => 'OPV3',
     'penta3_date' => 'PENTA3',
     'pcv3_date' => 'PCV3',
@@ -63,6 +66,7 @@ class ImmunizationRecord extends Model
     'vita1_date' => 'VitA1',
     'vita2_date' => 'VitA2',
     'ipv2_date' => 'IPV2',
+    'hpv_date' => 'HPV',
   ];
 
   protected $fillable = [
@@ -89,6 +93,7 @@ class ImmunizationRecord extends Model
     'pcv2_date',
     'rota2_date',
     'ipv1_date',
+    'rota3_date',
     'opv3_date',
     'penta3_date',
     'pcv3_date',
@@ -101,6 +106,7 @@ class ImmunizationRecord extends Model
     'vita1_date',
     'vita2_date',
     'ipv2_date',
+    'hpv_date',
     'comments',
     'summary_map',
     'officer_name',
@@ -123,6 +129,7 @@ class ImmunizationRecord extends Model
     'pcv2_date' => 'date',
     'rota2_date' => 'date',
     'ipv1_date' => 'date',
+    'rota3_date' => 'date',
     'opv3_date' => 'date',
     'penta3_date' => 'date',
     'pcv3_date' => 'date',
@@ -135,6 +142,7 @@ class ImmunizationRecord extends Model
     'vita1_date' => 'date',
     'vita2_date' => 'date',
     'ipv2_date' => 'date',
+    'hpv_date' => 'date',
     'summary_map' => 'array',
   ];
 
@@ -178,3 +186,4 @@ class ImmunizationRecord extends Model
     return $lastField ? self::VACCINE_LABELS[$lastField] : null;
   }
 }
+

@@ -453,9 +453,11 @@ class MonthlyReportDashboard extends Component
     $immunizationData['hepb0'] = $childImm->whereNotNull('hepb0_date')->count();
     $immunizationData['rota1'] = $childImm->whereNotNull('rota1_date')->count();
     $immunizationData['rota2'] = $childImm->whereNotNull('rota2_date')->count();
+    $immunizationData['rota3'] = $childImm->whereNotNull('rota3_date')->count();
     $immunizationData['mena'] = $childImm->whereNotNull('mena_date')->count();
     $immunizationData['vita1'] = $childImm->whereNotNull('vita1_date')->count();
     $immunizationData['vita2'] = $childImm->whereNotNull('vita2_date')->count();
+    $immunizationData['hpv'] = $childImm->whereNotNull('hpv_date')->count();
 
     return $immunizationData;
   }
@@ -586,3 +588,4 @@ class MonthlyReportDashboard extends Component
     ])->layout($layout);
   }
 }
+

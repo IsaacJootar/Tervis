@@ -24,7 +24,7 @@
         </div>
     @else
         <div class="mb-3">
-            <span class="badge bg-label-primary text-uppercase">Child Immunization Register</span>
+            <span class="badge bg-label-primary text-uppercase">Child Immunization</span>
         </div>
 
         <div class="card mb-4 tt-hero">
@@ -101,10 +101,16 @@
                                 <h5 class="mb-0">Immunization Records</h5>
                                 <small class="text-muted">{{ count($records) }} Total</small>
                             </div>
-                            <button type="button" class="btn btn-success" data-bs-toggle="modal"
-                                data-bs-target="#immunizationModal">
-                                <i class="bx bx-plus me-1"></i>Record Immunization
-                            </button>
+                            <div class="d-flex gap-2">
+                                <a href="{{ route('workspaces-child-health-activity-register', ['patientId' => $patientId]) }}"
+                                    class="btn btn-outline-primary">
+                                    <i class="bx bx-list-check me-1"></i>Activity Register
+                                </a>
+                                <button type="button" class="btn btn-success" data-bs-toggle="modal"
+                                    data-bs-target="#immunizationModal">
+                                    <i class="bx bx-plus me-1"></i>Immunization Register
+                                </button>
+                            </div>
                         </div>
                     </div>
                     <div class="card-datatable table-responsive pt-0" wire:ignore>
@@ -164,7 +170,7 @@
                 <div class="modal-content">
                     <div class="modal-header bg-clinical-dark text-white">
                         <h5 class="modal-title text-white">
-                            {{ $record_id ? 'Edit Immunization Record' : 'Record Child Immunization' }}
+                            {{ $record_id ? 'Edit Immunization Record' : 'Immunization Register' }}
                         </h5>
                         <button wire:click="exit" type="button" class="btn-close btn-close-white"
                             data-bs-dismiss="modal" aria-label="Close" onclick="setTimeout(() => location.reload(), 300)"></button>
@@ -240,7 +246,7 @@
                                                     <th colspan="5">14 Weeks</th>
                                                     <th colspan="4">9 Months</th>
                                                     <th colspan="2">Vit A</th>
-                                                    <th colspan="1">Extra</th>
+                                                    <th colspan="3">Extra</th>
                                                 </tr>
                                                 <tr class="text-center">
                                                     <th>HepB0</th>
@@ -267,6 +273,8 @@
                                                     <th>VitA1</th>
                                                     <th>VitA2</th>
                                                     <th>IPV2</th>
+                                                    <th>ROTA3</th>
+                                                    <th>HPV</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -295,6 +303,8 @@
                                                     <td><input type="date" class="form-control form-control-sm" wire:model="vita1_date"></td>
                                                     <td><input type="date" class="form-control form-control-sm" wire:model="vita2_date"></td>
                                                     <td><input type="date" class="form-control form-control-sm" wire:model="ipv2_date"></td>
+                                                    <td><input type="date" class="form-control form-control-sm" wire:model="rota3_date"></td>
+                                                    <td><input type="date" class="form-control form-control-sm" wire:model="hpv_date"></td>
                                                 </tr>
                                             </tbody>
                                         </table>
@@ -431,3 +441,7 @@
 
     @include('_partials.datatables-init')
 </div>
+
+
+
+

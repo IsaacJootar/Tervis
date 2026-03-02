@@ -7,6 +7,7 @@ use App\Models\Facility;
 use App\Models\Registrations\DinActivation;
 use Livewire\Component;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Route;
 use Carbon\Carbon;
 use Livewire\Attributes\Lazy;
 use Livewire\Attributes\Layout;
@@ -325,6 +326,44 @@ class WorkspaceDashboard extends Component
       'count' => $activityCount,
       'label' => 'Activities'
     ];
+
+    $this->applyRouteAvailabilityToCardStatus();
+  }
+
+  private function getWorkspaceRoutes(): array
+  {
+    return [
+      'attendance' => 'workspaces-attendance',
+      'assessments' => 'workspaces-assessments',
+      'anc' => 'workspaces-antenatal',
+      'immunizations' => 'workspaces-child-health-immunizations',
+      'nutrition' => 'workspaces-child-health-nutrition',
+      'laboratory' => 'workspaces-laboratory',
+      'prescriptions' => 'workspaces-prescriptions',
+      'invoices' => 'workspaces-invoices',
+      'appointments' => 'workspaces-appointments',
+      'referrals' => 'workspaces-referrals',
+      'reminders' => 'workspaces-reminders',
+      'family_planning' => 'workspaces-family-planning',
+      'visits' => 'workspaces-visits',
+      'activities' => 'workspaces-activities',
+    ];
+  }
+
+  private function applyRouteAvailabilityToCardStatus(): void
+  {
+    foreach ($this->getWorkspaceRoutes() as $workspace => $routeName) {
+      if (!isset($this->cardStatus[$workspace])) {
+        $this->cardStatus[$workspace] = [
+          'enabled' => false,
+          'count' => 0,
+          'label' => 'Records',
+        ];
+      }
+
+      $this->cardStatus[$workspace]['route_name'] = $routeName;
+      $this->cardStatus[$workspace]['route_exists'] = Route::has($routeName);
+    }
   }
 
   // ============================================
@@ -350,25 +389,17 @@ class WorkspaceDashboard extends Component
   // ============================================
   public function navigateToWorkspace($workspace)
   {
-    $routes = [
-      'attendance' => 'workspaces-attendance',
-      'assessments' => 'workspaces-assessments',
-      'anc' => 'workspaces-antenatal',
-      'immunizations' => 'workspaces-child-health-immunizations',
-      'nutrition' => 'workspaces-child-health-nutrition',
-      'laboratory' => 'workspaces-laboratory',
-      'prescriptions' => 'workspaces-prescriptions',
-      'invoices' => 'workspaces-invoices',
-      'appointments' => 'workspaces-appointments',
-      'referrals' => 'workspaces-referrals',
-      'reminders' => 'workspaces-reminders',
-      'family_planning' => 'workspaces-family-planning',
-      'visits' => 'workspaces-visits',
-      'activities' => 'workspaces-activities',
-    ];
+    $routeName = $this->getWorkspaceRoutes()[$workspace] ?? null;
+    $isEnabled = (bool) ($this->cardStatus[$workspace]['enabled'] ?? false);
+    $routeExists = $routeName ? Route::has($routeName) : false;
 
-    if (isset($routes[$workspace]) && ($this->cardStatus[$workspace]['enabled'] ?? false)) {
-      return redirect()->route($routes[$workspace], ['patientId' => $this->patientId]);
+    if ($routeName && $routeExists && $isEnabled) {
+      return redirect()->route($routeName, ['patientId' => $this->patientId]);
+    }
+
+    if (!$routeExists) {
+      toastr()->warning('This workspace module is not available yet.');
+      return;
     }
 
     toastr()->warning('This workspace is not available for this patient.');
@@ -406,3 +437,4 @@ class WorkspaceDashboard extends Component
     ]);
   }
 }
+

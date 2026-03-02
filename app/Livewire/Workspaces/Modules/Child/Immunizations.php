@@ -37,10 +37,10 @@ class Immunizations extends Component
   public $immunization_card_no, $follow_up_address, $follow_up_phone, $comments;
 
   public $hepb0_date, $opv0_date, $bcg_date, $opv1_date, $penta1_date, $pcv1_date, $rota1_date;
-  public $opv2_date, $penta2_date, $pcv2_date, $rota2_date, $ipv1_date;
+  public $opv2_date, $penta2_date, $pcv2_date, $rota2_date, $ipv1_date, $rota3_date;
   public $opv3_date, $penta3_date, $pcv3_date, $mr1_date, $yf_date;
   public $mr2_date, $mena_date, $yf2_date, $slea_date;
-  public $vita1_date, $vita2_date, $ipv2_date;
+  public $vita1_date, $vita2_date, $ipv2_date, $hpv_date;
 
   protected $rules = [
     'patientId' => 'required',
@@ -63,6 +63,7 @@ class Immunizations extends Component
     'pcv2_date' => 'nullable|date|before_or_equal:today',
     'rota2_date' => 'nullable|date|before_or_equal:today',
     'ipv1_date' => 'nullable|date|before_or_equal:today',
+    'rota3_date' => 'nullable|date|before_or_equal:today',
     'opv3_date' => 'nullable|date|before_or_equal:today',
     'penta3_date' => 'nullable|date|before_or_equal:today',
     'pcv3_date' => 'nullable|date|before_or_equal:today',
@@ -75,6 +76,7 @@ class Immunizations extends Component
     'vita1_date' => 'nullable|date|before_or_equal:today',
     'vita2_date' => 'nullable|date|before_or_equal:today',
     'ipv2_date' => 'nullable|date|before_or_equal:today',
+    'hpv_date' => 'nullable|date|before_or_equal:today',
     'comments' => 'nullable|string|max:2000',
   ];
 
@@ -236,6 +238,7 @@ class Immunizations extends Component
       'pcv2_date',
       'rota2_date',
       'ipv1_date',
+      'rota3_date',
       'opv3_date',
       'penta3_date',
       'pcv3_date',
@@ -279,6 +282,7 @@ class Immunizations extends Component
       'pcv2_date' => $this->pcv2_date,
       'rota2_date' => $this->rota2_date,
       'ipv1_date' => $this->ipv1_date,
+      'rota3_date' => $this->rota3_date,
       'opv3_date' => $this->opv3_date,
       'penta3_date' => $this->penta3_date,
       'pcv3_date' => $this->pcv3_date,
@@ -291,6 +295,7 @@ class Immunizations extends Component
       'vita1_date' => $this->vita1_date,
       'vita2_date' => $this->vita2_date,
       'ipv2_date' => $this->ipv2_date,
+      'hpv_date' => $this->hpv_date,
       'comments' => $this->comments,
       'summary_map' => $this->buildSummaryMap(),
       'officer_name' => $this->officer_name,
@@ -359,6 +364,7 @@ class Immunizations extends Component
     $this->pcv2_date = $record->pcv2_date?->format('Y-m-d');
     $this->rota2_date = $record->rota2_date?->format('Y-m-d');
     $this->ipv1_date = $record->ipv1_date?->format('Y-m-d');
+    $this->rota3_date = $record->rota3_date?->format('Y-m-d');
     $this->opv3_date = $record->opv3_date?->format('Y-m-d');
     $this->penta3_date = $record->penta3_date?->format('Y-m-d');
     $this->pcv3_date = $record->pcv3_date?->format('Y-m-d');
@@ -371,6 +377,7 @@ class Immunizations extends Component
     $this->vita1_date = $record->vita1_date?->format('Y-m-d');
     $this->vita2_date = $record->vita2_date?->format('Y-m-d');
     $this->ipv2_date = $record->ipv2_date?->format('Y-m-d');
+    $this->hpv_date = $record->hpv_date?->format('Y-m-d');
     $this->comments = $record->comments;
 
     $this->modal_flag = true;
@@ -475,6 +482,7 @@ class Immunizations extends Component
       'pcv2_date',
       'rota2_date',
       'ipv1_date',
+      'rota3_date',
       'opv3_date',
       'penta3_date',
       'pcv3_date',
@@ -487,6 +495,7 @@ class Immunizations extends Component
       'vita1_date',
       'vita2_date',
       'ipv2_date',
+      'hpv_date',
       'comments',
       'modal_flag',
     ]);
@@ -554,3 +563,4 @@ class Immunizations extends Component
     return view('placeholder');
   }
 }
+
