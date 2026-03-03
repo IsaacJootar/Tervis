@@ -53,6 +53,44 @@ class ActivityRegister extends Component
   public const WHO_BOYS_MEDIAN = [3.3, 4.5, 5.6, 6.4, 7.0, 7.5, 7.9, 8.3, 8.6, 8.9, 9.2, 9.4, 9.6, 9.9, 10.1, 10.3, 10.5, 10.7, 10.9, 11.1, 11.3, 11.5, 11.8, 12.0, 12.2];
   public const WHO_BOYS_MINUS2 = [2.5, 3.4, 4.3, 5.0, 5.6, 6.0, 6.4, 6.7, 6.9, 7.1, 7.4, 7.6, 7.7, 8.0, 8.2, 8.4, 8.6, 8.7, 8.9, 9.1, 9.2, 9.4, 9.7, 9.9, 10.1];
 
+  public const AEFI_REACTION_CODES = [
+    1 => 'Anaphylaxis',
+    2 => 'Anaphylactic Shock',
+    3 => 'Dizziness',
+    4 => 'Headache',
+    5 => 'Fainting/Syncope',
+    6 => 'Seizures/Convulsion',
+    7 => 'Loss of Vision',
+    8 => 'Local Reaction',
+    9 => 'Site Induration',
+    10 => 'Abscess at Injection Site',
+    11 => 'Rash/Urticaria',
+    12 => 'Lymph Node Enlargement',
+    13 => 'Abd Cramps',
+    14 => 'Vomiting',
+    15 => 'Diarrhoea',
+    16 => 'Bleeding',
+    17 => 'Muscle Pain',
+    18 => 'Joint Pain',
+    19 => 'Fever (<38c)',
+    20 => 'Fever (>=38c)',
+    21 => 'Persistent Cries (>3hrs)',
+    22 => 'Acute Flaccid Paralysis (AFP)',
+    23 => 'Unconsciousness',
+    24 => 'Sepsis',
+    25 => 'Encephalopathy',
+    26 => 'Neck Stiffness',
+    27 => 'Facial Paralysis',
+    28 => 'Others',
+  ];
+
+  public const AEFI_OUTCOME_CODES = [
+    1 => 'Recovered',
+    2 => 'Hospitalized',
+    3 => 'Disability',
+    4 => 'Died',
+  ];
+
   public $patientId;
   public $patient;
 
@@ -71,6 +109,8 @@ class ActivityRegister extends Component
   public $vaccination_notes = [];
   public $weight_entries = [];
   public $breastfeeding_entries = [];
+  public $aefi_period, $aefi_type, $aefi_sia_campaign;
+  public $aefi_cases = [];
 
   public $weight_entry_date, $weight_entry_age_months, $weight_entry_kg, $weight_entry_notes;
 
@@ -93,6 +133,22 @@ class ActivityRegister extends Component
     'weight_entries.*.notes' => 'nullable|string|max:255',
     'breastfeeding_entries' => 'nullable|array',
     'breastfeeding_entries.*' => 'nullable|in:E,P,BW,NO',
+    'aefi_period' => 'nullable|string|max:50',
+    'aefi_type' => 'nullable|in:Routine Immunization,SIA',
+    'aefi_sia_campaign' => 'nullable|string|max:120',
+    'aefi_cases' => 'nullable|array',
+    'aefi_cases.*.age_y' => 'nullable|integer|min:0|max:18',
+    'aefi_cases.*.age_m' => 'nullable|integer|min:0|max:11',
+    'aefi_cases.*.last_immunization_date' => 'nullable|date',
+    'aefi_cases.*.reaction_code' => 'nullable|integer|min:1|max:28',
+    'aefi_cases.*.type' => 'nullable|in:Minor,Serious',
+    'aefi_cases.*.outcome_code' => 'nullable|integer|min:1|max:4',
+    'aefi_cases.*.vaccine' => 'nullable|string|max:120',
+    'aefi_cases.*.vaccine_batch_no' => 'nullable|string|max:60',
+    'aefi_cases.*.diluent_batch_no' => 'nullable|string|max:60',
+    'aefi_cases.*.onset_interval' => 'nullable|string|max:60',
+    'aefi_cases.*.reported_date' => 'nullable|date',
+    'aefi_cases.*.notes' => 'nullable|string|max:500',
     'comments' => 'nullable|string|max:2000',
   ];
 
@@ -203,7 +259,7 @@ class ActivityRegister extends Component
 
     public function setActiveTab(string $tab): void
   {
-    if (!in_array($tab, ['child', 'vaccination', 'weight', 'breastfeeding'], true)) {
+    if (!in_array($tab, ['child', 'vaccination', 'weight', 'breastfeeding', 'aefi'], true)) {
       return;
     }
 
@@ -260,6 +316,7 @@ class ActivityRegister extends Component
 
     $this->breastfeeding_entries = $bfValues;
     $this->weight_entries = $this->normalizeWeightEntries($this->weight_entries);
+    $this->initializeAefiCases();
   }
 
   private function normalizeVaccinationDates(array $values): array
@@ -308,8 +365,7 @@ class ActivityRegister extends Component
   }
   private function hasPendingWeightEntryInput(): bool
   {
-    return filled($this->weight_entry_date)
-      || filled($this->weight_entry_age_months)
+    return filled($this->weight_entry_age_months)
       || filled($this->weight_entry_kg)
       || filled(trim((string) $this->weight_entry_notes));
   }
@@ -370,6 +426,77 @@ class ActivityRegister extends Component
     return $normalized;
   }
 
+  private function initializeAefiCases(): void
+  {
+    $defaults = [];
+    foreach (range(1, 8) as $slot) {
+      $index = $slot - 1;
+      $case = (array) ($this->aefi_cases[$index] ?? []);
+      $defaults[$index] = [
+        'age_y' => $case['age_y'] ?? null,
+        'age_m' => $case['age_m'] ?? null,
+        'last_immunization_date' => $case['last_immunization_date'] ?? null,
+        'reaction_code' => $case['reaction_code'] ?? null,
+        'type' => $case['type'] ?? null,
+        'outcome_code' => $case['outcome_code'] ?? null,
+        'vaccine' => $case['vaccine'] ?? null,
+        'vaccine_batch_no' => $case['vaccine_batch_no'] ?? null,
+        'diluent_batch_no' => $case['diluent_batch_no'] ?? null,
+        'onset_interval' => $case['onset_interval'] ?? null,
+        'reported_date' => $case['reported_date'] ?? null,
+        'notes' => $case['notes'] ?? null,
+      ];
+    }
+
+    $this->aefi_cases = $defaults;
+  }
+
+  private function normalizeAefiCases(array $cases): array
+  {
+    return collect($cases)
+      ->map(function ($case) {
+        $case = (array) $case;
+
+        return [
+          'age_y' => isset($case['age_y']) && $case['age_y'] !== '' ? (int) $case['age_y'] : null,
+          'age_m' => isset($case['age_m']) && $case['age_m'] !== '' ? (int) $case['age_m'] : null,
+          'last_immunization_date' => $case['last_immunization_date'] ?? null,
+          'reaction_code' => isset($case['reaction_code']) && $case['reaction_code'] !== '' ? (int) $case['reaction_code'] : null,
+          'type' => $case['type'] ?? null,
+          'outcome_code' => isset($case['outcome_code']) && $case['outcome_code'] !== '' ? (int) $case['outcome_code'] : null,
+          'vaccine' => trim((string) ($case['vaccine'] ?? '')),
+          'vaccine_batch_no' => trim((string) ($case['vaccine_batch_no'] ?? '')),
+          'diluent_batch_no' => trim((string) ($case['diluent_batch_no'] ?? '')),
+          'onset_interval' => trim((string) ($case['onset_interval'] ?? '')),
+          'reported_date' => $case['reported_date'] ?? null,
+          'notes' => trim((string) ($case['notes'] ?? '')),
+        ];
+      })
+      ->values()
+      ->all();
+  }
+
+  private function validateAefiDatesAgainstDob(): void
+  {
+    $child = $this->currentChild();
+    if (!$child || !$child->date_of_birth) {
+      return;
+    }
+
+    $dob = $child->date_of_birth->format('Y-m-d');
+
+    foreach ($this->normalizeAefiCases($this->aefi_cases) as $index => $case) {
+      foreach (['last_immunization_date', 'reported_date'] as $field) {
+        $value = $case[$field] ?? null;
+        if ($value && $value < $dob) {
+          throw ValidationException::withMessages([
+            "aefi_cases.$index.$field" => 'AEFI date cannot be earlier than child DOB.',
+          ]);
+        }
+      }
+    }
+  }
+
   private function validateVaccineDatesAgainstDob(): void
   {
     $child = $this->currentChild();
@@ -392,6 +519,7 @@ class ActivityRegister extends Component
     $vaccinationDates = $this->normalizeVaccinationDates($this->vaccination_dates);
     $weightEntries = $this->normalizeWeightEntries($this->weight_entries);
     $breastfeedingEntries = $this->normalizeBreastfeedingEntries($this->breastfeeding_entries);
+    $aefiCases = $this->normalizeAefiCases($this->aefi_cases);
 
     return [
       'vaccines_completed' => collect($vaccinationDates)->filter(fn($date) => !empty($date))->count(),
@@ -399,6 +527,7 @@ class ActivityRegister extends Component
       'weight_entries_count' => count($weightEntries),
       'breastfeeding_months_logged' => collect($breastfeedingEntries)->filter(fn($value) => !empty($value))->count(),
       'exclusive_bf_months' => collect($breastfeedingEntries)->filter(fn($value) => $value === 'E')->count(),
+      'aefi_reported_cases' => collect($aefiCases)->filter(fn($case) => !empty($case['vaccine']))->count(),
     ];
   }
 
@@ -417,6 +546,10 @@ class ActivityRegister extends Component
       'vaccination_notes' => $this->normalizeVaccinationNotes($this->vaccination_notes),
       'weight_entries' => $this->normalizeWeightEntries($this->weight_entries),
       'breastfeeding_entries' => $this->normalizeBreastfeedingEntries($this->breastfeeding_entries),
+      'aefi_period' => $this->aefi_period,
+      'aefi_type' => $this->aefi_type,
+      'aefi_sia_campaign' => $this->aefi_sia_campaign,
+      'aefi_cases' => $this->normalizeAefiCases($this->aefi_cases),
       'comments' => $this->comments,
       'summary_map' => $this->buildSummaryMap(),
       'officer_name' => $this->officer_name,
@@ -434,6 +567,7 @@ class ActivityRegister extends Component
       $this->commitPendingWeightEntryIfPresent();
       $this->validate();
       $this->validateVaccineDatesAgainstDob();
+      $this->validateAefiDatesAgainstDob();
 
       $record = ChildHealthActivityRecord::create($this->payload());
 
@@ -474,6 +608,10 @@ class ActivityRegister extends Component
     $this->vaccination_notes = (array) ($record->vaccination_notes ?? []);
     $this->weight_entries = (array) ($record->weight_entries ?? []);
     $this->breastfeeding_entries = (array) ($record->breastfeeding_entries ?? []);
+    $this->aefi_period = $record->aefi_period;
+    $this->aefi_type = $record->aefi_type;
+    $this->aefi_sia_campaign = $record->aefi_sia_campaign;
+    $this->aefi_cases = (array) ($record->aefi_cases ?? []);
     $this->comments = $record->comments;
 
     $this->initializeFormCollections();
@@ -493,6 +631,7 @@ class ActivityRegister extends Component
       $this->commitPendingWeightEntryIfPresent();
       $this->validate($rules);
       $this->validateVaccineDatesAgainstDob();
+      $this->validateAefiDatesAgainstDob();
 
       $record = ChildHealthActivityRecord::where('facility_id', $this->facility_id)
         ->where('patient_id', $this->patientId)
@@ -570,6 +709,10 @@ class ActivityRegister extends Component
       'vaccination_notes',
       'weight_entries',
       'breastfeeding_entries',
+      'aefi_period',
+      'aefi_type',
+      'aefi_sia_campaign',
+      'aefi_cases',
       'weight_entry_date',
       'weight_entry_age_months',
       'weight_entry_kg',
@@ -628,6 +771,10 @@ class ActivityRegister extends Component
       $this->vaccination_notes = [];
       $this->weight_entries = [];
       $this->breastfeeding_entries = [];
+      $this->aefi_period = null;
+      $this->aefi_type = null;
+      $this->aefi_sia_campaign = null;
+      $this->aefi_cases = [];
       $this->comments = null;
       $this->initializeFormCollections();
       return;
@@ -640,6 +787,10 @@ class ActivityRegister extends Component
     $this->vaccination_notes = (array) ($record->vaccination_notes ?? []);
     $this->weight_entries = (array) ($record->weight_entries ?? []);
     $this->breastfeeding_entries = (array) ($record->breastfeeding_entries ?? []);
+    $this->aefi_period = $record->aefi_period;
+    $this->aefi_type = $record->aefi_type;
+    $this->aefi_sia_campaign = $record->aefi_sia_campaign;
+    $this->aefi_cases = (array) ($record->aefi_cases ?? []);
     $this->comments = $record->comments;
     $this->weight_entry_date = $this->visit_date;
     $this->initializeFormCollections();
@@ -700,6 +851,8 @@ class ActivityRegister extends Component
       'whoBoysMedian' => self::WHO_BOYS_MEDIAN,
       'whoBoysMinus2' => self::WHO_BOYS_MINUS2,
       'chartWeightEntries' => $this->chartWeightEntriesFromDatabase(),
+      'aefiReactionCodes' => self::AEFI_REACTION_CODES,
+      'aefiOutcomeCodes' => self::AEFI_OUTCOME_CODES,
     ])->layout('layouts.dataOfficerLayout');
   }
 
@@ -708,6 +861,18 @@ class ActivityRegister extends Component
     return view('placeholder');
   }
 }
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

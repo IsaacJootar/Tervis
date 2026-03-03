@@ -24,11 +24,13 @@
         </div>
     @else
         <div class="d-flex flex-wrap justify-content-end gap-2 mb-3">
-            <button wire:click="backToImmunizations" type="button" class="btn btn-outline-primary">
-                <i class="bx bx-injection me-1"></i>Back to Immunizations
+            <button wire:click="backToImmunizations" type="button" class="btn btn-outline-primary" wire:loading.attr="disabled" wire:target="backToImmunizations">
+                <span wire:loading.remove wire:target="backToImmunizations"><i class="bx bx-injection me-1"></i>Back to Immunizations</span>
+                <span wire:loading wire:target="backToImmunizations"><span class="spinner-border spinner-border-sm me-1"></span>Opening...</span>
             </button>
-            <button wire:click="backToDashboard" type="button" class="btn btn-primary">
-                <i class="bx bx-arrow-back me-1"></i>Back to Workspace
+            <button wire:click="backToDashboard" type="button" class="btn btn-primary" wire:loading.attr="disabled" wire:target="backToDashboard">
+                <span wire:loading.remove wire:target="backToDashboard"><i class="bx bx-arrow-back me-1"></i>Back to Workspace</span>
+                <span wire:loading wire:target="backToDashboard"><span class="spinner-border spinner-border-sm me-1"></span>Opening...</span>
             </button>
         </div>
 
@@ -36,7 +38,10 @@
             <div class="card-header bg-clinical-dark text-white d-flex justify-content-between align-items-center">
                 <h5 class="mb-0 text-white">{{ $record_id ? 'Edit Activity Register' : 'Activity Register' }}</h5>
                 @if ($record_id)
-                    <button wire:click="exit" type="button" class="btn btn-sm btn-outline-light">New Entry</button>
+                    <button wire:click="exit" type="button" class="btn btn-sm btn-outline-light" wire:loading.attr="disabled" wire:target="exit">
+                        <span wire:loading.remove wire:target="exit">New Entry</span>
+                        <span wire:loading wire:target="exit"><span class="spinner-border spinner-border-sm me-1"></span>Resetting...</span>
+                    </button>
                 @endif
             </div>
             <div class="card-body px-3 px-lg-4">
@@ -73,6 +78,11 @@
                         <li class="nav-item">
                             <button type="button" class="nav-link {{ $active_tab === 'breastfeeding' ? 'active' : '' }}" wire:click="setActiveTab('breastfeeding')">
                                 <span aria-hidden="true">&#129329;</span> Breastfeeding
+                            </button>
+                        </li>
+                        <li class="nav-item">
+                            <button type="button" class="nav-link {{ $active_tab === 'aefi' ? 'active' : '' }}" wire:click="setActiveTab('aefi')">
+                                <span aria-hidden="true">&#9888;</span> AEFI
                             </button>
                         </li>
                     </ul>
@@ -167,7 +177,10 @@
                                     <div class="col-md-3"><label class="form-label">Date of Visit</label><input type="date" class="form-control" wire:model="weight_entry_date"></div>
                                     <div class="col-md-3"><label class="form-label">Age (months)</label><input type="number" class="form-control" min="0" max="60" step="0.1" wire:model="weight_entry_age_months"></div>
                                     <div class="col-md-3"><label class="form-label">Weight (kg)</label><input type="number" class="form-control" min="0.5" max="40" step="0.1" wire:model="weight_entry_kg"></div>
-                                    <div class="col-md-3 d-grid"><button type="button" class="btn btn-primary" wire:click="addWeightEntry">Add Record</button></div>
+                                    <div class="col-md-3 d-grid"><button type="button" class="btn btn-primary" wire:click="addWeightEntry" wire:loading.attr="disabled" wire:target="addWeightEntry">
+                                        <span wire:loading.remove wire:target="addWeightEntry">Add Record</span>
+                                        <span wire:loading wire:target="addWeightEntry"><span class="spinner-border spinner-border-sm me-1"></span>Adding...</span>
+                                    </button></div>
                                     <div class="col-12"><label class="form-label">Notes</label><input type="text" class="form-control" placeholder="Clinical remarks" wire:model="weight_entry_notes"></div>
                                     <div class="col-12"><small class="text-muted">Workflow: 1) Click Add Record. 2) Click Save/Update Record to persist. Chart plots saved database records for this child.</small></div>
                                 </div>
@@ -249,9 +262,105 @@
                         </div>
                     </div>
 
+                                        <div class="register-section {{ $active_tab === 'aefi' ? 'active' : '' }}">
+                        <div class="card mb-3">
+                            <div class="card-header bg-label-primary"><h6 class="mb-0">AEFI - Adverse Events Following Immunization</h6></div>
+                            <div class="card-body">
+                                <div class="aefi-codes-box mt-2 mb-3">
+                                    <div class="fw-semibold mb-1">Reaction Type Codes (1-28)</div>
+                                    <div class="small text-muted">Outcome Codes: 1=Recovered, 2=Hospitalized, 3=Disability, 4=Died.</div>
+                                </div>
+
+                                <div class="row g-3 mb-3">
+                                    <div class="col-md-4">
+                                        <label class="form-label">Period of Reporting</label>
+                                        <input type="text" class="form-control" wire:model="aefi_period" placeholder="e.g. Jan - Mar 2026">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label">Routine Immunization / SIA</label>
+                                        <select class="form-select" wire:model="aefi_type">
+                                            <option value="">Select</option>
+                                            <option value="Routine Immunization">Routine Immunization</option>
+                                            <option value="SIA">SIA</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label">SIA Campaign (if applicable)</label>
+                                        <input type="text" class="form-control" wire:model="aefi_sia_campaign" placeholder="Campaign name">
+                                    </div>
+                                </div>
+
+                                <div class="table-responsive">
+                                    <table class="table table-bordered table-sm aefi-entry-table">
+                                        <thead>
+                                            <tr class="table-light text-center">
+                                                <th>Case</th>
+                                                <th>Age Y</th>
+                                                <th>Age M</th>
+                                                <th>Last Immunization Date</th>
+                                                <th>Reaction Code</th>
+                                                <th>Type</th>
+                                                <th>Outcome</th>
+                                                <th>Suspect Vaccine</th>
+                                                <th>Vaccine Batch</th>
+                                                <th>Diluent Batch</th>
+                                                <th>Onset Interval</th>
+                                                <th>Reported Date</th>
+                                                <th>Notes</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (range(1, 8) as $slot)
+                                                @php $slotIndex = $slot - 1; @endphp
+                                                <tr>
+                                                    <td class="fw-semibold">{{ $slot }}</td>
+                                                    <td><input type="number" min="0" max="18" class="form-control form-control-sm" wire:model="aefi_cases.{{ $slotIndex }}.age_y"></td>
+                                                    <td><input type="number" min="0" max="11" class="form-control form-control-sm" wire:model="aefi_cases.{{ $slotIndex }}.age_m"></td>
+                                                    <td><input type="date" class="form-control form-control-sm" wire:model="aefi_cases.{{ $slotIndex }}.last_immunization_date"></td>
+                                                    <td>
+                                                        <select class="form-select form-select-sm" wire:model="aefi_cases.{{ $slotIndex }}.reaction_code">
+                                                            <option value="">Code</option>
+                                                            @foreach ($aefiReactionCodes as $code => $label)
+                                                                <option value="{{ $code }}">{{ $code }} - {{ $label }}</option>
+                                                            @endforeach
+                                                        </select>
+                                                    </td>
+                                                    <td>
+                                                        <select class="form-select form-select-sm" wire:model="aefi_cases.{{ $slotIndex }}.type">
+                                                            <option value="">Select</option>
+                                                            <option value="Minor">Minor</option>
+                                                            <option value="Serious">Serious</option>
+                                                        </select>
+                                                    </td>
+                                                    <td>
+                                                        <select class="form-select form-select-sm" wire:model="aefi_cases.{{ $slotIndex }}.outcome_code">
+                                                            <option value="">Code</option>
+                                                            @foreach ($aefiOutcomeCodes as $code => $label)
+                                                                <option value="{{ $code }}">{{ $code }} - {{ $label }}</option>
+                                                            @endforeach
+                                                        </select>
+                                                    </td>
+                                                    <td><input type="text" class="form-control form-control-sm" wire:model="aefi_cases.{{ $slotIndex }}.vaccine"></td>
+                                                    <td><input type="text" class="form-control form-control-sm" wire:model="aefi_cases.{{ $slotIndex }}.vaccine_batch_no"></td>
+                                                    <td><input type="text" class="form-control form-control-sm" wire:model="aefi_cases.{{ $slotIndex }}.diluent_batch_no"></td>
+                                                    <td><input type="text" class="form-control form-control-sm" wire:model="aefi_cases.{{ $slotIndex }}.onset_interval"></td>
+                                                    <td><input type="date" class="form-control form-control-sm" wire:model="aefi_cases.{{ $slotIndex }}.reported_date"></td>
+                                                    <td><input type="text" class="form-control form-control-sm" wire:model="aefi_cases.{{ $slotIndex }}.notes"></td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="d-flex justify-content-end gap-2 mt-4 pb-2">
-                        <button wire:click="exit" type="button" class="btn btn-outline-secondary">Cancel</button>
-                        <button type="submit" class="btn btn-primary">
+                        <button wire:click="exit" type="button" class="btn btn-outline-secondary" wire:loading.attr="disabled" wire:target="exit">
+                            <span wire:loading.remove wire:target="exit">Cancel</span>
+                            <span wire:loading wire:target="exit"><span class="spinner-border spinner-border-sm me-1"></span>Closing...</span>
+                        </button>
+                        <button type="submit" class="btn btn-primary" wire:loading.attr="disabled" wire:target="store,update">
                             <span wire:loading.remove wire:target="store,update">{{ $record_id ? 'Update Record' : 'Save Record' }}</span>
                             <span wire:loading wire:target="store,update"><span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>Processing...</span>
                         </button>
@@ -267,8 +376,9 @@
                         <h5 class="mb-0">Activity Records</h5>
                         <small class="text-muted">{{ count($records) }} Total</small>
                     </div>
-                    <button type="button" class="btn btn-success" wire:click="openCreateModal">
-                        <i class="bx bx-plus me-1"></i>New Activity Register
+                    <button type="button" class="btn btn-success" wire:click="openCreateModal" wire:loading.attr="disabled" wire:target="openCreateModal">
+                        <span wire:loading.remove wire:target="openCreateModal"><i class="bx bx-plus me-1"></i>New Activity Register</span>
+                        <span wire:loading wire:target="openCreateModal"><span class="spinner-border spinner-border-sm me-1"></span>Preparing...</span>
                     </button>
                 </div>
             </div>
@@ -287,8 +397,14 @@
                                 <td>{{ $record->breastfeeding_months_logged }}</td>
                                 <td>
                                     <div class="d-flex gap-1">
-                                        <button type="button" class="btn btn-sm btn-light text-dark border" wire:click="edit({{ $record->id }})">Edit</button>
-                                        <button type="button" class="btn btn-sm btn-light text-dark border" wire:click="delete({{ $record->id }})">Delete</button>
+                                        <button type="button" class="btn btn-sm btn-light text-dark border" wire:click="edit({{ $record->id }})" wire:loading.attr="disabled" wire:target="edit({{ $record->id }})">
+                                            <span wire:loading.remove wire:target="edit({{ $record->id }})">Edit</span>
+                                            <span wire:loading wire:target="edit({{ $record->id }})"><span class="spinner-border spinner-border-sm"></span></span>
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-light text-dark border" wire:click="delete({{ $record->id }})" wire:loading.attr="disabled" wire:target="delete({{ $record->id }})">
+                                            <span wire:loading.remove wire:target="delete({{ $record->id }})">Delete</span>
+                                            <span wire:loading wire:target="delete({{ $record->id }})"><span class="spinner-border spinner-border-sm"></span></span>
+                                        </button>
                                     </div>
                                 </td>
                             </tr>
@@ -315,6 +431,8 @@
                 .weight-chart-wrap { height: 320px; }
                 .bf-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 12px; }
                 .bf-entry { background: #f8fafc; border: 1px solid #e5e7eb; border-radius: 8px; padding: 10px; }
+                .aefi-codes-box { border: 1px solid #fed7aa; background: #fff7ed; border-radius: 10px; padding: 10px 12px; }
+                .aefi-entry-table th, .aefi-entry-table td { white-space: nowrap; min-width: 120px; vertical-align: middle; }
                 .chart-legend { display: flex; flex-wrap: wrap; gap: 18px; font-size: 12px; color: #6b7280; }
                 .legend-line { display: inline-block; width: 20px; height: 2px; margin-right: 6px; vertical-align: middle; }
                 .legend-line.child { background: #0d9488; }
@@ -468,6 +586,15 @@
         @endonce
     @endif
 </div>
+
+
+
+
+
+
+
+
+
 
 
 

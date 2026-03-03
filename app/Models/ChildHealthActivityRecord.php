@@ -26,6 +26,10 @@ class ChildHealthActivityRecord extends Model
     'vaccination_notes',
     'weight_entries',
     'breastfeeding_entries',
+    'aefi_period',
+    'aefi_type',
+    'aefi_sia_campaign',
+    'aefi_cases',
     'comments',
     'summary_map',
     'officer_name',
@@ -40,6 +44,7 @@ class ChildHealthActivityRecord extends Model
     'vaccination_notes' => 'array',
     'weight_entries' => 'array',
     'breastfeeding_entries' => 'array',
+    'aefi_cases' => 'array',
     'summary_map' => 'array',
   ];
 
@@ -77,3 +82,4 @@ class ChildHealthActivityRecord extends Model
       ->count();
   }
 }
+

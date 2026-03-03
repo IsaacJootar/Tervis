@@ -97,3 +97,16 @@
 3. Immunization records should reference `linked_child_id` (from `linked_children.linked_child_id` or numeric `id`—choose one and be consistent).
 4. The Immunization page should list linked children for the mother/patient and allow selecting a child before recording immunization.
 5. Nutrition module follows same pattern as Immunization: select linked child → record nutrition assessment → show table.
+
+## Update (2026-03-03)
+- Child Health `Activity Register` remains the route/module name internally, but the Immunizations-page CTA label is now **Vaccination Schedule**.
+- Monthly report aggregation now reads from `TetanusVaccination`, `ImmunizationRecord`, `NutritionRecord`, and `ChildHealthActivityRecord`.
+- Immunization totals now merge Immunization Register + Vaccination Schedule vaccine dates with deduplication by child and dose date.
+- Mapped child vaccine fields: `bcg`, `opv0`, `opv1`, `opv2`, `opv3`, `penta1`, `penta2`, `penta3`, `pcv1`, `pcv2`, `pcv3`, `ipv1`, `ipv2`, `mcv1`, `mcv2`, `yf`, `hepb0`, `rota1`, `rota2`, `rota3`, `mena`, `vita1`, `vita2`, `hpv`.
+- Child-health mapping now includes Vaccination Schedule contributions for `exclusive_breastfeeding` and `vitamin_a`, plus supplemental payload counters: `weight_monitoring_entries`, `aefi_reported_cases`.
+- Monthly report UI notes were updated to reflect active merged immunization/child-health mapping.
+- Validation run after wiring passed:
+  - `php -l app/Livewire/Analytics/MonthlyReportDashboard.php`
+  - `php -l resources/views/livewire/analytics/monthly-report-dashboard.blade.php`
+  - `php artisan test` (`2 passed`)
+

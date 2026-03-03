@@ -45,10 +45,9 @@
                         </div>
                     </div>
                     <div class="ms-lg-auto">
-                        <button wire:click="backToDashboard" type="button"
-                            class="btn btn-primary px-4 py-2 d-inline-flex align-items-center">
-                            <i class="bx bx-arrow-back me-2"></i>
-                            Back to Workspace
+                        <button wire:click="backToDashboard" type="button" class="btn btn-primary px-4 py-2 d-inline-flex align-items-center" wire:loading.attr="disabled" wire:target="backToDashboard">
+                            <span wire:loading.remove wire:target="backToDashboard"><i class="bx bx-arrow-back me-2"></i>Back to Workspace</span>
+                            <span wire:loading wire:target="backToDashboard"><span class="spinner-border spinner-border-sm me-1"></span>Opening...</span>
                         </button>
                     </div>
                 </div>
@@ -104,11 +103,10 @@
                             <div class="d-flex gap-2">
                                 <a href="{{ route('workspaces-child-health-activity-register', ['patientId' => $patientId]) }}"
                                     class="btn btn-outline-primary">
-                                    <i class="bx bx-list-check me-1"></i>Activity Register
-                                </a>
-                                <button type="button" class="btn btn-success" data-bs-toggle="modal"
-                                    data-bs-target="#immunizationModal">
-                                    <i class="bx bx-plus me-1"></i>Immunization Register
+                                    <i class="bx bx-list-check me-1"></i>Vaccination Schedule</a>
+                                <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#immunizationModal" wire:click="exit" wire:loading.attr="disabled" wire:target="exit">
+                                    <span wire:loading.remove wire:target="exit"><i class="bx bx-plus me-1"></i>Immunization Register</span>
+                                    <span wire:loading wire:target="exit"><span class="spinner-border spinner-border-sm me-1"></span>Preparing...</span>
                                 </button>
                             </div>
                         </div>
@@ -137,9 +135,15 @@
                                             <div class="d-flex gap-1">
                                                 <button type="button" class="btn btn-sm btn-light text-dark border"
                                                     data-bs-toggle="modal" data-bs-target="#immunizationModal"
-                                                    wire:click="edit({{ $record->id }})">Edit</button>
+                                                    wire:click="edit({{ $record->id }})" wire:loading.attr="disabled" wire:target="edit({{ $record->id }})">
+                                                    <span wire:loading.remove wire:target="edit({{ $record->id }})">Edit</span>
+                                                    <span wire:loading wire:target="edit({{ $record->id }})"><span class="spinner-border spinner-border-sm"></span></span>
+                                                </button>
                                                 <button type="button" class="btn btn-sm btn-light text-dark border"
-                                                    wire:click="delete({{ $record->id }})">Delete</button>
+                                                    wire:click="delete({{ $record->id }})" wire:loading.attr="disabled" wire:target="delete({{ $record->id }})">
+                                                    <span wire:loading.remove wire:target="delete({{ $record->id }})">Delete</span>
+                                                    <span wire:loading wire:target="delete({{ $record->id }})"><span class="spinner-border spinner-border-sm"></span></span>
+                                                </button>
                                             </div>
                                         </td>
                                     </tr>
@@ -172,8 +176,7 @@
                         <h5 class="modal-title text-white">
                             {{ $record_id ? 'Edit Immunization Record' : 'Immunization Register' }}
                         </h5>
-                        <button wire:click="exit" type="button" class="btn-close btn-close-white"
-                            data-bs-dismiss="modal" aria-label="Close" onclick="setTimeout(() => location.reload(), 300)"></button>
+                        <button wire:click="exit" type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close" onclick="setTimeout(() => location.reload(), 300)" wire:loading.attr="disabled" wire:target="exit"></button>
                     </div>
                     <div class="modal-body">
                         <form wire:submit.prevent="{{ $record_id ? 'update' : 'store' }}">
@@ -229,12 +232,26 @@
                                         </div>
                                     </div>
 
-                                    <hr class="my-4">
-                                    <div class="mb-2">
-                                        <h6 class="text-secondary border-bottom pb-2">
-                                            <i class="bx bx-injection me-1"></i>Vaccine Dates
-                                        </h6>
-                                    </div>
+                                    <ul class="nav nav-tabs mt-4 mb-3" role="tablist">
+                                        <li class="nav-item" role="presentation">
+                                            <button type="button" class="nav-link active" data-bs-toggle="tab" data-bs-target="#imm-vaccine-tab" role="tab">
+                                                <i class="bx bx-injection me-1"></i>Vaccine Dates
+                                            </button>
+                                        </li>
+                                        <li class="nav-item" role="presentation">
+                                            <button type="button" class="nav-link" data-bs-toggle="tab" data-bs-target="#imm-aefi-tab" role="tab">
+                                                <i class="bx bx-error-circle me-1"></i>AEFI
+                                            </button>
+                                        </li>
+                                    </ul>
+
+                                    <div class="tab-content">
+                                        <div class="tab-pane fade show active" id="imm-vaccine-tab" role="tabpanel">
+                                            <div class="mb-2">
+                                                <h6 class="text-secondary border-bottom pb-2">
+                                                    <i class="bx bx-injection me-1"></i>Vaccine Dates
+                                                </h6>
+                                            </div>
 
                                     <div class="table-responsive">
                                         <table class="table table-bordered vax-entry-table">
@@ -320,6 +337,110 @@
                                         </div>
                                     </div>
 
+                                        </div>
+
+                                        <div class="tab-pane fade" id="imm-aefi-tab" role="tabpanel">
+                                            <div class="mb-2">
+                                                <h6 class="text-secondary border-bottom pb-2">
+                                                    <i class="bx bx-error-circle me-1"></i>AEFI - Adverse Events Following Immunization
+                                                </h6>
+                                            </div>
+
+                                            <div class="aefi-codes-box mb-3">
+                                                <div class="fw-semibold mb-2">Reaction Type Codes (1-28)</div>
+                                                <div class="small text-muted mb-1">
+                                                    1=Anaphylaxis, 2=Anaphylactic Shock, 3=Dizziness, 4=Headache, 5=Fainting/Syncope, 6=Seizures/Convulsion, 7=Loss of Vision, 8=Local Reaction, 9=Site Induration, 10=Abscess at Injection Site,
+                                                    11=Rash/Urticaria, 12=Lymph Node Enlargement, 13=Abd Cramps, 14=Vomiting, 15=Diarrhoea, 16=Bleeding, 17=Muscle Pain, 18=Joint Pain, 19=Fever (&lt;38c), 20=Fever (&gt;=38c),
+                                                    21=Persistent Cries (&gt;3hrs), 22=AFP, 23=Unconsciousness, 24=Sepsis, 25=Encephalopathy, 26=Neck Stiffness, 27=Facial Paralysis, 28=Others.
+                                                </div>
+                                                <div class="small text-muted">
+                                                    Outcome Codes: 1=Recovered, 2=Hospitalized, 3=Disability, 4=Died.
+                                                </div>
+                                            </div>
+
+                                            <div class="row g-3 mb-3">
+                                                <div class="col-md-4">
+                                                    <label class="form-label">Period of Reporting</label>
+                                                    <input type="text" class="form-control" wire:model="aefi_period" placeholder="e.g. Jan - Mar 2026">
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <label class="form-label">Routine Immunization / SIA</label>
+                                                    <select class="form-select" wire:model="aefi_type">
+                                                        <option value="">Select</option>
+                                                        <option value="Routine Immunization">Routine Immunization</option>
+                                                        <option value="SIA">SIA</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <label class="form-label">SIA Campaign (if applicable)</label>
+                                                    <input type="text" class="form-control" wire:model="aefi_sia_campaign" placeholder="Campaign name">
+                                                </div>
+                                            </div>
+
+                                            <div class="table-responsive">
+                                                <table class="table table-bordered table-sm aefi-entry-table">
+                                                    <thead>
+                                                        <tr class="table-dark text-center">
+                                                            <th>Case</th>
+                                                            <th>Age Y</th>
+                                                            <th>Age M</th>
+                                                            <th>Last Immunization Date</th>
+                                                            <th>Reaction Code</th>
+                                                            <th>Type</th>
+                                                            <th>Outcome</th>
+                                                            <th>Suspect Vaccine</th>
+                                                            <th>Vaccine Batch</th>
+                                                            <th>Diluent Batch</th>
+                                                            <th>Onset Interval</th>
+                                                            <th>Reported Date</th>
+                                                            <th>Notes</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        @foreach (range(1, 8) as $slot)
+                                                            @php $slotIndex = $slot - 1; @endphp
+                                                            <tr>
+                                                                <td class="fw-semibold">{{ $slot }}</td>
+                                                                <td><input type="number" min="0" max="18" class="form-control form-control-sm" wire:model="aefi_cases.{{ $slotIndex }}.age_y"></td>
+                                                                <td><input type="number" min="0" max="11" class="form-control form-control-sm" wire:model="aefi_cases.{{ $slotIndex }}.age_m"></td>
+                                                                <td><input type="date" class="form-control form-control-sm" wire:model="aefi_cases.{{ $slotIndex }}.last_immunization_date"></td>
+                                                                <td>
+                                                                    <select class="form-select form-select-sm" wire:model="aefi_cases.{{ $slotIndex }}.reaction_code">
+                                                                        <option value="">Code</option>
+                                                                        @foreach ($aefiReactionCodes as $code => $label)
+                                                                            <option value="{{ $code }}">{{ $code }} - {{ $label }}</option>
+                                                                        @endforeach
+                                                                    </select>
+                                                                </td>
+                                                                <td>
+                                                                    <select class="form-select form-select-sm" wire:model="aefi_cases.{{ $slotIndex }}.type">
+                                                                        <option value="">Select</option>
+                                                                        <option value="Minor">Minor</option>
+                                                                        <option value="Serious">Serious</option>
+                                                                    </select>
+                                                                </td>
+                                                                <td>
+                                                                    <select class="form-select form-select-sm" wire:model="aefi_cases.{{ $slotIndex }}.outcome_code">
+                                                                        <option value="">Code</option>
+                                                                        @foreach ($aefiOutcomeCodes as $code => $label)
+                                                                            <option value="{{ $code }}">{{ $code }} - {{ $label }}</option>
+                                                                        @endforeach
+                                                                    </select>
+                                                                </td>
+                                                                <td><input type="text" class="form-control form-control-sm" wire:model="aefi_cases.{{ $slotIndex }}.vaccine"></td>
+                                                                <td><input type="text" class="form-control form-control-sm" wire:model="aefi_cases.{{ $slotIndex }}.vaccine_batch_no"></td>
+                                                                <td><input type="text" class="form-control form-control-sm" wire:model="aefi_cases.{{ $slotIndex }}.diluent_batch_no"></td>
+                                                                <td><input type="text" class="form-control form-control-sm" wire:model="aefi_cases.{{ $slotIndex }}.onset_interval"></td>
+                                                                <td><input type="date" class="form-control form-control-sm" wire:model="aefi_cases.{{ $slotIndex }}.reported_date"></td>
+                                                                <td><input type="text" class="form-control form-control-sm" wire:model="aefi_cases.{{ $slotIndex }}.notes"></td>
+                                                            </tr>
+                                                        @endforeach
+</tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+
                                     <hr class="my-4">
                                     <div class="mb-3">
                                         <h6 class="text-secondary border-bottom pb-2">
@@ -352,9 +473,11 @@
                                     </div>
 
                                     <div class="d-flex justify-content-end gap-2 mt-4">
-                                        <button wire:click="exit" type="button" class="btn btn-outline-secondary"
-                                            data-bs-dismiss="modal" onclick="setTimeout(() => location.reload(), 300)">Cancel</button>
-                                        <button type="submit" class="btn btn-primary">
+                                        <button wire:click="exit" type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" onclick="setTimeout(() => location.reload(), 300)" wire:loading.attr="disabled" wire:target="exit">
+                                            <span wire:loading.remove wire:target="exit">Cancel</span>
+                                            <span wire:loading wire:target="exit"><span class="spinner-border spinner-border-sm me-1"></span>Closing...</span>
+                                        </button>
+                                        <button type="submit" class="btn btn-primary" wire:loading.attr="disabled" wire:target="store,update">
                                             <span wire:loading.remove wire:target="store,update">
                                                 {{ $record_id ? 'Update Record' : 'Save Record' }}
                                             </span>
@@ -409,11 +532,35 @@
                     background-color: #2c3e50;
                 }
 
+                .register-tabs .nav-link {
+                    font-weight: 600;
+                }
+
+                .register-tabs .nav-link.active {
+                    color: #7c2d12;
+                    border-color: #fed7aa #fed7aa #fff;
+                    background: #fff7ed;
+                }
+
                 .vax-entry-table th,
                 .vax-entry-table td {
                     white-space: nowrap;
                     min-width: 110px;
                     text-align: center;
+                    vertical-align: middle;
+                }
+
+                .aefi-codes-box {
+                    border: 1px solid #fed7aa;
+                    background: #fff7ed;
+                    border-radius: 10px;
+                    padding: 12px 14px;
+                }
+
+                .aefi-entry-table th,
+                .aefi-entry-table td {
+                    white-space: nowrap;
+                    min-width: 120px;
                     vertical-align: middle;
                 }
             </style>
@@ -441,6 +588,15 @@
 
     @include('_partials.datatables-init')
 </div>
+
+
+
+
+
+
+
+
+
 
 
 

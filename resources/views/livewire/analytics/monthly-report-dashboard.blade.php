@@ -704,8 +704,7 @@
                 </div>
                 <div class="alert alert-info m-2 mb-0">
                     <i class="bx bx-info-circle me-2"></i>
-                    <small>Other immunizations (BCG, OPV, Penta, PCV, Measles, etc.) require dedicated immunization
-                        records table</small>
+                    <small>Immunization totals now combine Immunization Register and Vaccination Schedule entries (deduplicated by child and dose date)</small>
                 </div>
             </div>
         </div>
@@ -758,8 +757,7 @@
                 </div>
                 <div class="alert alert-warning m-2 mb-0">
                     <i class="bx bx-error me-2"></i>
-                    <small>Complete child health metrics require dedicated child health module or clinical notes
-                        text comprehension-will be back</small>
+                    <small>Child health now combines Nutrition and Vaccination Schedule for mapped NHMIS indicators; unmapped indicators remain pending source fields</small>
                 </div>
             </div>
         </div>
@@ -1042,3 +1040,4 @@
     }
 </style>
 </div>
+

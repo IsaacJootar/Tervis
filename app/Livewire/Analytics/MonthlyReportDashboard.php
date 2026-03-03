@@ -9,6 +9,7 @@ use App\Models\Facility;
 use App\Models\Delivery;
 use App\Models\Antenatal;
 use App\Models\ClinicalNote;
+use App\Models\ChildHealthActivityRecord;
 use App\Models\ImmunizationRecord;
 use App\Models\NutritionRecord;
 use App\Models\PostnatalRecord;
@@ -416,7 +417,38 @@ class MonthlyReportDashboard extends Component
   // ============================================================================
   private function getImmunizationData($facilityIds, $startDate, $endDate)
   {
-    $immunizationData = [];
+    $immunizationData = [
+      'td_pregnant' => 0,
+      'tt1' => 0,
+      'tt2' => 0,
+      'tt3' => 0,
+      'tt4' => 0,
+      'tt5' => 0,
+      'bcg' => 0,
+      'opv0' => 0,
+      'opv1' => 0,
+      'opv2' => 0,
+      'opv3' => 0,
+      'penta1' => 0,
+      'penta2' => 0,
+      'penta3' => 0,
+      'pcv1' => 0,
+      'pcv2' => 0,
+      'pcv3' => 0,
+      'ipv1' => 0,
+      'ipv2' => 0,
+      'mcv1' => 0,
+      'mcv2' => 0,
+      'yf' => 0,
+      'hepb0' => 0,
+      'rota1' => 0,
+      'rota2' => 0,
+      'rota3' => 0,
+      'mena' => 0,
+      'vita1' => 0,
+      'vita2' => 0,
+      'hpv' => 0,
+    ];
 
     // Tetanus vaccinations
     $tetanus = TetanusVaccination::whereIn('facility_id', $facilityIds)
@@ -430,34 +462,95 @@ class MonthlyReportDashboard extends Component
     $immunizationData['tt4'] = $tetanus->where('current_tt_dose', 'TT4')->count();
     $immunizationData['tt5'] = $tetanus->where('current_tt_dose', 'TT5')->count();
 
+    $seenDoseFingerprints = [];
+
+    $immunizationFieldToKey = [
+      'bcg_date' => 'bcg',
+      'opv0_date' => 'opv0',
+      'opv1_date' => 'opv1',
+      'opv2_date' => 'opv2',
+      'opv3_date' => 'opv3',
+      'penta1_date' => 'penta1',
+      'penta2_date' => 'penta2',
+      'penta3_date' => 'penta3',
+      'pcv1_date' => 'pcv1',
+      'pcv2_date' => 'pcv2',
+      'pcv3_date' => 'pcv3',
+      'ipv1_date' => 'ipv1',
+      'ipv2_date' => 'ipv2',
+      'mr1_date' => 'mcv1',
+      'mr2_date' => 'mcv2',
+      'yf_date' => 'yf',
+      'hepb0_date' => 'hepb0',
+      'rota1_date' => 'rota1',
+      'rota2_date' => 'rota2',
+      'rota3_date' => 'rota3',
+      'mena_date' => 'mena',
+      'vita1_date' => 'vita1',
+      'vita2_date' => 'vita2',
+      'hpv_date' => 'hpv',
+    ];
+
     $childImm = ImmunizationRecord::whereIn('facility_id', $facilityIds)
       ->whereBetween('visit_date', [$startDate, $endDate])
       ->get();
 
-    $immunizationData['bcg'] = $childImm->whereNotNull('bcg_date')->count();
-    $immunizationData['opv0'] = $childImm->whereNotNull('opv0_date')->count();
-    $immunizationData['opv1'] = $childImm->whereNotNull('opv1_date')->count();
-    $immunizationData['opv2'] = $childImm->whereNotNull('opv2_date')->count();
-    $immunizationData['opv3'] = $childImm->whereNotNull('opv3_date')->count();
-    $immunizationData['penta1'] = $childImm->whereNotNull('penta1_date')->count();
-    $immunizationData['penta2'] = $childImm->whereNotNull('penta2_date')->count();
-    $immunizationData['penta3'] = $childImm->whereNotNull('penta3_date')->count();
-    $immunizationData['pcv1'] = $childImm->whereNotNull('pcv1_date')->count();
-    $immunizationData['pcv2'] = $childImm->whereNotNull('pcv2_date')->count();
-    $immunizationData['pcv3'] = $childImm->whereNotNull('pcv3_date')->count();
-    $immunizationData['ipv1'] = $childImm->whereNotNull('ipv1_date')->count();
-    $immunizationData['ipv2'] = $childImm->whereNotNull('ipv2_date')->count();
-    $immunizationData['mcv1'] = $childImm->whereNotNull('mr1_date')->count();
-    $immunizationData['mcv2'] = $childImm->whereNotNull('mr2_date')->count();
-    $immunizationData['yf'] = $childImm->whereNotNull('yf_date')->count();
-    $immunizationData['hepb0'] = $childImm->whereNotNull('hepb0_date')->count();
-    $immunizationData['rota1'] = $childImm->whereNotNull('rota1_date')->count();
-    $immunizationData['rota2'] = $childImm->whereNotNull('rota2_date')->count();
-    $immunizationData['rota3'] = $childImm->whereNotNull('rota3_date')->count();
-    $immunizationData['mena'] = $childImm->whereNotNull('mena_date')->count();
-    $immunizationData['vita1'] = $childImm->whereNotNull('vita1_date')->count();
-    $immunizationData['vita2'] = $childImm->whereNotNull('vita2_date')->count();
-    $immunizationData['hpv'] = $childImm->whereNotNull('hpv_date')->count();
+    foreach ($childImm as $record) {
+      foreach ($immunizationFieldToKey as $field => $metricKey) {
+        $this->incrementUniqueDoseCount(
+          $immunizationData,
+          $seenDoseFingerprints,
+          $metricKey,
+          $record->patient_id,
+          $record->linked_child_id,
+          $record->{$field} ?? null
+        );
+      }
+    }
+
+    $activityFieldToKey = [
+      'bcg' => 'bcg',
+      'hepbo' => 'hepb0',
+      'opv0' => 'opv0',
+      'opv1' => 'opv1',
+      'opv2' => 'opv2',
+      'opv3' => 'opv3',
+      'penta1' => 'penta1',
+      'penta2' => 'penta2',
+      'penta3' => 'penta3',
+      'pcv1' => 'pcv1',
+      'pcv2' => 'pcv2',
+      'pcv3' => 'pcv3',
+      'rota1' => 'rota1',
+      'rota2' => 'rota2',
+      'rota3' => 'rota3',
+      'ipv1' => 'ipv1',
+      'ipv2' => 'ipv2',
+      'measles1' => 'mcv1',
+      'measles2' => 'mcv2',
+      'yfever' => 'yf',
+      'mening' => 'mena',
+      'vita1' => 'vita1',
+      'vita2' => 'vita2',
+    ];
+
+    $activityRecords = ChildHealthActivityRecord::whereIn('facility_id', $facilityIds)
+      ->whereBetween('visit_date', [$startDate, $endDate])
+      ->get(['patient_id', 'linked_child_id', 'vaccination_dates']);
+
+    foreach ($activityRecords as $record) {
+      $vaccinationDates = (array) ($record->vaccination_dates ?? []);
+      foreach ($activityFieldToKey as $field => $metricKey) {
+        $this->incrementUniqueDoseCount(
+          $immunizationData,
+          $seenDoseFingerprints,
+          $metricKey,
+          $record->patient_id,
+          $record->linked_child_id,
+          $vaccinationDates[$field] ?? null
+        );
+      }
+    }
 
     return $immunizationData;
   }
@@ -473,20 +566,45 @@ class MonthlyReportDashboard extends Component
       ->whereBetween('visit_date', [$startDate, $endDate])
       ->get();
 
+    $activityRecords = ChildHealthActivityRecord::whereIn('facility_id', $facilityIds)
+      ->whereBetween('visit_date', [$startDate, $endDate])
+      ->get(['patient_id', 'linked_child_id', 'vaccination_dates', 'weight_entries', 'breastfeeding_entries', 'aefi_cases']);
+
     // MONTHLY SUMMARY MAPPING ANCHORS:
-    // - `exclusive_breastfeeding`: age_group=0-5 months + infant_feeding=Exclusive BF
+    // - `exclusive_breastfeeding`: union of Nutrition (0-5 months + Exclusive BF) and Activity Register E entries
     // - `sam_admissions`: muac_class=Red + admission_status=Admitted HP OTP
-    // - `mnp_given`: mnp_given=true
+    // - `vitamin_a`: unique VitA1/VitA2 dose dates from Immunization + Activity Register
     // - `not_growing_well`: growth_status=Not Growing Well
-    $childHealthData['birth_registrations'] = 0;
-    $childHealthData['exclusive_breastfeeding'] = $nutrition
-      ->where('age_group', '0-5 months')
-      ->where('infant_feeding', 'Exclusive BF')
-      ->count();
+    $childHealthData['birth_registrations'] = $activityRecords->pluck('linked_child_id')->filter()->unique()->count();
+
+    $exclusiveChildren = [];
+    foreach ($nutrition as $record) {
+      if ($record->age_group === '0-5 months' && $record->infant_feeding === 'Exclusive BF') {
+        $exclusiveChildren[$this->buildSubjectKey($record->patient_id, $record->linked_child_id)] = true;
+      }
+    }
+    foreach ($activityRecords as $record) {
+      $bfEntries = (array) ($record->breastfeeding_entries ?? []);
+      $hasExclusive = collect($bfEntries)->contains(fn($value) => $value === 'E');
+      if ($hasExclusive) {
+        $exclusiveChildren[$this->buildSubjectKey($record->patient_id, $record->linked_child_id)] = true;
+      }
+    }
+
+    $childHealthData['exclusive_breastfeeding'] = count($exclusiveChildren);
     $childHealthData['muac_screened'] = $nutrition->whereNotNull('muac_value_mm')->count();
     $childHealthData['sam_new_cases'] = $nutrition->where('muac_class', 'Red')->count();
     $childHealthData['mam_new_cases'] = $nutrition->where('muac_class', 'Yellow')->count();
-    $childHealthData['vitamin_a'] = 0;
+
+    $vitaminASets = [];
+    $this->collectVitaminADosesFromImmunizationRecords($vitaminASets, $facilityIds, $startDate, $endDate);
+    foreach ($activityRecords as $record) {
+      $dates = (array) ($record->vaccination_dates ?? []);
+      $this->collectDoseFingerprint($vitaminASets, $record->patient_id, $record->linked_child_id, $dates['vita1'] ?? null);
+      $this->collectDoseFingerprint($vitaminASets, $record->patient_id, $record->linked_child_id, $dates['vita2'] ?? null);
+    }
+
+    $childHealthData['vitamin_a'] = count($vitaminASets);
     $childHealthData['deworming'] = 0;
     $childHealthData['sam_admissions'] = $nutrition
       ->where('muac_class', 'Red')
@@ -497,7 +615,83 @@ class MonthlyReportDashboard extends Component
     $childHealthData['mnp_given'] = $nutrition->where('mnp_given', true)->count();
     $childHealthData['not_growing_well'] = $nutrition->where('growth_status', 'Not Growing Well')->count();
 
+    // Supplemental metrics from Vaccination Schedule register (not rendered in NHMIS rows yet).
+    $childHealthData['weight_monitoring_entries'] = $activityRecords
+      ->sum(fn($record) => count((array) ($record->weight_entries ?? [])));
+    $childHealthData['aefi_reported_cases'] = $activityRecords
+      ->sum(fn($record) => collect((array) ($record->aefi_cases ?? []))
+        ->filter(fn($case) => !empty(trim((string) ($case['vaccine'] ?? ''))))
+        ->count());
+
     return $childHealthData;
+  }
+  private function incrementUniqueDoseCount(array &$metrics, array &$seenFingerprints, string $metricKey, $patientId, $linkedChildId, $dateValue): void
+  {
+    $normalizedDate = $this->normalizeDateToKey($dateValue);
+    if (!$normalizedDate) {
+      return;
+    }
+
+    $fingerprint = implode('|', [
+      $metricKey,
+      $this->buildSubjectKey($patientId, $linkedChildId),
+      $normalizedDate,
+    ]);
+
+    if (isset($seenFingerprints[$fingerprint])) {
+      return;
+    }
+
+    $seenFingerprints[$fingerprint] = true;
+    $metrics[$metricKey] = ($metrics[$metricKey] ?? 0) + 1;
+  }
+
+  private function collectVitaminADosesFromImmunizationRecords(array &$doseSet, array $facilityIds, $startDate, $endDate): void
+  {
+    $vitaminARecords = ImmunizationRecord::whereIn('facility_id', $facilityIds)
+      ->whereBetween('visit_date', [$startDate, $endDate])
+      ->get(['patient_id', 'linked_child_id', 'vita1_date', 'vita2_date']);
+
+    foreach ($vitaminARecords as $record) {
+      $this->collectDoseFingerprint($doseSet, $record->patient_id, $record->linked_child_id, $record->vita1_date);
+      $this->collectDoseFingerprint($doseSet, $record->patient_id, $record->linked_child_id, $record->vita2_date);
+    }
+  }
+
+  private function collectDoseFingerprint(array &$doseSet, $patientId, $linkedChildId, $dateValue): void
+  {
+    $normalizedDate = $this->normalizeDateToKey($dateValue);
+    if (!$normalizedDate) {
+      return;
+    }
+
+    $doseSet[$this->buildSubjectKey($patientId, $linkedChildId) . '|' . $normalizedDate] = true;
+  }
+
+  private function buildSubjectKey($patientId, $linkedChildId): string
+  {
+    if (!empty($linkedChildId)) {
+      return 'child:' . $linkedChildId;
+    }
+
+    return 'patient:' . ($patientId ?? 'unknown');
+  }
+
+  private function normalizeDateToKey($dateValue): ?string
+  {
+    if (empty($dateValue)) {
+      return null;
+    }
+
+    if ($dateValue instanceof \DateTimeInterface) {
+      return Carbon::instance($dateValue)->format('Y-m-d');
+    }
+
+    try {
+      return Carbon::parse($dateValue)->format('Y-m-d');
+    } catch (\Throwable $e) {
+      return null;
+    }
   }
 
   // ============================================================================

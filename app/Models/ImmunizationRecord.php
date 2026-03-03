@@ -107,6 +107,10 @@ class ImmunizationRecord extends Model
     'vita2_date',
     'ipv2_date',
     'hpv_date',
+    'aefi_period',
+    'aefi_type',
+    'aefi_sia_campaign',
+    'aefi_cases',
     'comments',
     'summary_map',
     'officer_name',
@@ -143,6 +147,7 @@ class ImmunizationRecord extends Model
     'vita2_date' => 'date',
     'ipv2_date' => 'date',
     'hpv_date' => 'date',
+    'aefi_cases' => 'array',
     'summary_map' => 'array',
   ];
 
@@ -186,4 +191,5 @@ class ImmunizationRecord extends Model
     return $lastField ? self::VACCINE_LABELS[$lastField] : null;
   }
 }
+
 

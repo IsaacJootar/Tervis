@@ -22,6 +22,43 @@ use Livewire\Component;
 #[Lazy]
 class Immunizations extends Component
 {
+  public const AEFI_REACTION_CODES = [
+    1 => 'Anaphylaxis',
+    2 => 'Anaphylactic Shock',
+    3 => 'Dizziness',
+    4 => 'Headache',
+    5 => 'Fainting/Syncope',
+    6 => 'Seizures/Convulsion',
+    7 => 'Loss of Vision',
+    8 => 'Local Reaction',
+    9 => 'Site Induration',
+    10 => 'Abscess at Injection Site',
+    11 => 'Rash/Urticaria',
+    12 => 'Lymph Node Enlargement',
+    13 => 'Abd Cramps',
+    14 => 'Vomiting',
+    15 => 'Diarrhoea',
+    16 => 'Bleeding',
+    17 => 'Muscle Pain',
+    18 => 'Joint Pain',
+    19 => 'Fever (<38c)',
+    20 => 'Fever (>=38c)',
+    21 => 'Persistent Cries (>3hrs)',
+    22 => 'Acute Flaccid Paralysis (AFP)',
+    23 => 'Unconsciousness',
+    24 => 'Sepsis',
+    25 => 'Encephalopathy',
+    26 => 'Neck Stiffness',
+    27 => 'Facial Paralysis',
+    28 => 'Others',
+  ];
+
+  public const AEFI_OUTCOME_CODES = [
+    1 => 'Recovered',
+    2 => 'Hospitalized',
+    3 => 'Disability',
+    4 => 'Died',
+  ];
   public $patientId;
   public $patient;
 
@@ -41,6 +78,8 @@ class Immunizations extends Component
   public $opv3_date, $penta3_date, $pcv3_date, $mr1_date, $yf_date;
   public $mr2_date, $mena_date, $yf2_date, $slea_date;
   public $vita1_date, $vita2_date, $ipv2_date, $hpv_date;
+  public $aefi_period, $aefi_type, $aefi_sia_campaign;
+  public $aefi_cases = [];
 
   protected $rules = [
     'patientId' => 'required',
@@ -77,6 +116,22 @@ class Immunizations extends Component
     'vita2_date' => 'nullable|date|before_or_equal:today',
     'ipv2_date' => 'nullable|date|before_or_equal:today',
     'hpv_date' => 'nullable|date|before_or_equal:today',
+    'aefi_period' => 'nullable|string|max:50',
+    'aefi_type' => 'nullable|in:Routine Immunization,SIA',
+    'aefi_sia_campaign' => 'nullable|string|max:120',
+    'aefi_cases' => 'nullable|array',
+    'aefi_cases.*.age_y' => 'nullable|integer|min:0|max:18',
+    'aefi_cases.*.age_m' => 'nullable|integer|min:0|max:11',
+    'aefi_cases.*.last_immunization_date' => 'nullable|date',
+    'aefi_cases.*.reaction_code' => 'nullable|integer|min:1|max:28',
+    'aefi_cases.*.type' => 'nullable|in:Minor,Serious',
+    'aefi_cases.*.outcome_code' => 'nullable|integer|min:1|max:4',
+    'aefi_cases.*.vaccine' => 'nullable|string|max:120',
+    'aefi_cases.*.vaccine_batch_no' => 'nullable|string|max:60',
+    'aefi_cases.*.diluent_batch_no' => 'nullable|string|max:60',
+    'aefi_cases.*.onset_interval' => 'nullable|string|max:60',
+    'aefi_cases.*.reported_date' => 'nullable|date',
+    'aefi_cases.*.notes' => 'nullable|string|max:500',
     'comments' => 'nullable|string|max:2000',
   ];
 
@@ -108,6 +163,7 @@ class Immunizations extends Component
 
     $this->visit_date = now()->format('Y-m-d');
     $this->autoFillMonthYear();
+    $this->initializeAefiCases();
 
     $this->validatePatientAccess();
     if ($this->hasAccess) {
@@ -192,6 +248,77 @@ class Immunizations extends Component
     }
   }
 
+
+  private function initializeAefiCases(): void
+  {
+    $defaults = [];
+    foreach (range(1, 8) as $slot) {
+      $index = $slot - 1;
+      $case = (array) ($this->aefi_cases[$index] ?? []);
+      $defaults[$index] = [
+        'age_y' => $case['age_y'] ?? null,
+        'age_m' => $case['age_m'] ?? null,
+        'last_immunization_date' => $case['last_immunization_date'] ?? null,
+        'reaction_code' => $case['reaction_code'] ?? null,
+        'type' => $case['type'] ?? null,
+        'outcome_code' => $case['outcome_code'] ?? null,
+        'vaccine' => $case['vaccine'] ?? null,
+        'vaccine_batch_no' => $case['vaccine_batch_no'] ?? null,
+        'diluent_batch_no' => $case['diluent_batch_no'] ?? null,
+        'onset_interval' => $case['onset_interval'] ?? null,
+        'reported_date' => $case['reported_date'] ?? null,
+        'notes' => $case['notes'] ?? null,
+      ];
+    }
+
+    $this->aefi_cases = $defaults;
+  }
+
+  private function normalizeAefiCases(array $cases): array
+  {
+    $normalized = collect($cases)
+      ->map(function ($case) {
+        $case = (array) $case;
+        return [
+          'age_y' => isset($case['age_y']) && $case['age_y'] !== '' ? (int) $case['age_y'] : null,
+          'age_m' => isset($case['age_m']) && $case['age_m'] !== '' ? (int) $case['age_m'] : null,
+          'last_immunization_date' => $case['last_immunization_date'] ?? null,
+          'reaction_code' => isset($case['reaction_code']) && $case['reaction_code'] !== '' ? (int) $case['reaction_code'] : null,
+          'type' => $case['type'] ?? null,
+          'outcome_code' => isset($case['outcome_code']) && $case['outcome_code'] !== '' ? (int) $case['outcome_code'] : null,
+          'vaccine' => trim((string) ($case['vaccine'] ?? '')),
+          'vaccine_batch_no' => trim((string) ($case['vaccine_batch_no'] ?? '')),
+          'diluent_batch_no' => trim((string) ($case['diluent_batch_no'] ?? '')),
+          'onset_interval' => trim((string) ($case['onset_interval'] ?? '')),
+          'reported_date' => $case['reported_date'] ?? null,
+          'notes' => trim((string) ($case['notes'] ?? '')),
+        ];
+      })
+      ->values()
+      ->all();
+
+    return $normalized;
+  }
+
+  private function validateAefiDatesAgainstDob(): void
+  {
+    $child = $this->currentChild();
+    if (!$child || !$child->date_of_birth) {
+      return;
+    }
+
+    $dob = $child->date_of_birth->format('Y-m-d');
+    foreach ($this->normalizeAefiCases($this->aefi_cases) as $index => $case) {
+      foreach (['last_immunization_date', 'reported_date'] as $field) {
+        $value = $case[$field] ?? null;
+        if ($value && $value < $dob) {
+          throw ValidationException::withMessages([
+            "aefi_cases.$index.$field" => 'AEFI date cannot be earlier than child DOB.',
+          ]);
+        }
+      }
+    }
+  }
   private function autoFillMonthYear(): void
   {
     if ($this->visit_date) {
@@ -253,6 +380,10 @@ class Immunizations extends Component
       ->filter(fn($field) => !empty($this->{$field}))
       ->count();
 
+    $map['aefi_reported_cases'] = collect($this->normalizeAefiCases($this->aefi_cases))
+      ->filter(fn($case) => !empty($case['vaccine']))
+      ->count();
+
     return $map;
   }
 
@@ -296,6 +427,10 @@ class Immunizations extends Component
       'vita2_date' => $this->vita2_date,
       'ipv2_date' => $this->ipv2_date,
       'hpv_date' => $this->hpv_date,
+      'aefi_period' => $this->aefi_period,
+      'aefi_type' => $this->aefi_type,
+      'aefi_sia_campaign' => $this->aefi_sia_campaign,
+      'aefi_cases' => $this->normalizeAefiCases($this->aefi_cases),
       'comments' => $this->comments,
       'summary_map' => $this->buildSummaryMap(),
       'officer_name' => $this->officer_name,
@@ -312,6 +447,7 @@ class Immunizations extends Component
       $this->applyDerivedFromChild();
       $this->validate();
       $this->validateVaccineDatesAgainstDob();
+      $this->validateAefiDatesAgainstDob();
 
       ImmunizationRecord::create($this->payload());
 
@@ -378,8 +514,13 @@ class Immunizations extends Component
     $this->vita2_date = $record->vita2_date?->format('Y-m-d');
     $this->ipv2_date = $record->ipv2_date?->format('Y-m-d');
     $this->hpv_date = $record->hpv_date?->format('Y-m-d');
+    $this->aefi_period = $record->aefi_period;
+    $this->aefi_type = $record->aefi_type;
+    $this->aefi_sia_campaign = $record->aefi_sia_campaign;
+    $this->aefi_cases = (array) ($record->aefi_cases ?? []);
     $this->comments = $record->comments;
 
+    $this->initializeAefiCases();
     $this->modal_flag = true;
     $this->dispatch('open-main-modal');
   }
@@ -393,6 +534,7 @@ class Immunizations extends Component
       $this->applyDerivedFromChild();
       $this->validate($rules);
       $this->validateVaccineDatesAgainstDob();
+      $this->validateAefiDatesAgainstDob();
 
       $record = ImmunizationRecord::where('facility_id', $this->facility_id)
         ->where('patient_id', $this->patientId)
@@ -496,6 +638,10 @@ class Immunizations extends Component
       'vita2_date',
       'ipv2_date',
       'hpv_date',
+      'aefi_period',
+      'aefi_type',
+      'aefi_sia_campaign',
+      'aefi_cases',
       'comments',
       'modal_flag',
     ]);
@@ -503,6 +649,7 @@ class Immunizations extends Component
     $this->linked_child_id = $keepChild;
     $this->visit_date = now()->format('Y-m-d');
     $this->autoFillMonthYear();
+    $this->initializeAefiCases();
     $this->applyDerivedFromChild();
   }
 
@@ -555,6 +702,8 @@ class Immunizations extends Component
       'currentChild' => $this->currentChild(),
       'hasAccess' => $this->hasAccess,
       'accessError' => $this->accessError,
+      'aefiReactionCodes' => self::AEFI_REACTION_CODES,
+      'aefiOutcomeCodes' => self::AEFI_OUTCOME_CODES,
     ])->layout('layouts.dataOfficerLayout');
   }
 
@@ -563,4 +712,17 @@ class Immunizations extends Component
     return view('placeholder');
   }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
 

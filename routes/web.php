@@ -47,6 +47,7 @@ use App\Livewire\Workspaces\Modules\ANC\FollowUpAssessment;
 use App\Livewire\Workspaces\Modules\Child\Immunizations;
 use App\Livewire\Workspaces\Modules\Child\Nutrition;
 use App\Livewire\Workspaces\Modules\Child\ActivityRegister;
+use App\Livewire\Workspaces\Modules\Clinical\Laboratory;
 use App\Livewire\Analytics\MpdsrReportDashboard;
 use App\Livewire\Core\DisableDataOfficerAccount;
 use App\Livewire\Analytics\HealthTrendsDashboard;
@@ -155,6 +156,11 @@ Route::middleware(['auth', 'role.redirect'])->prefix('workspaces')->group(functi
 
   Route::get('/{patientId}/child-health/activity-register', ActivityRegister::class)
     ->name('workspaces-child-health-activity-register');
+
+  
+  Route::get('/{patientId}/laboratory', Laboratory::class)
+    ->name('workspaces-laboratory');
+
 });
 
 
@@ -187,6 +193,9 @@ Route::post('/logout', function () {
   request()->session()->regenerateToken();
   return redirect()->route('login');
 })->name('logout');
+
+
+
 
 
 
