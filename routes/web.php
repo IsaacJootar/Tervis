@@ -154,8 +154,12 @@ Route::middleware(['auth', 'role.redirect'])->prefix('workspaces')->group(functi
   Route::get('/{patientId}/child-health/immunizations', Immunizations::class)
     ->name('workspaces-child-health-immunizations');
 
-  Route::get('/{patientId}/child-health/activity-register', ActivityRegister::class)
-    ->name('workspaces-child-health-activity-register');
+  Route::get('/{patientId}/child-health/vaccination-schedule', ActivityRegister::class)
+    ->name('workspaces-child-health-vaccination-schedule');
+
+  Route::get('/{patientId}/child-health/activity-register', function ($patientId) {
+    return redirect()->route('workspaces-child-health-vaccination-schedule', ['patientId' => $patientId]);
+  })->name('workspaces-child-health-activity-register');
 
   
   Route::get('/{patientId}/laboratory', Laboratory::class)

@@ -101,7 +101,7 @@
                                 <small class="text-muted">{{ count($records) }} Total</small>
                             </div>
                             <div class="d-flex gap-2">
-                                <a href="{{ route('workspaces-child-health-activity-register', ['patientId' => $patientId]) }}"
+                                <a href="{{ route('workspaces-child-health-vaccination-schedule', ['patientId' => $patientId]) }}"
                                     class="btn btn-outline-primary">
                                     <i class="bx bx-list-check me-1"></i>Vaccination Schedule</a>
                                 <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#immunizationModal" wire:click="exit" wire:loading.attr="disabled" wire:target="exit">

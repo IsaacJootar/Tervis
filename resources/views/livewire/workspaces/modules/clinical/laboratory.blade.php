@@ -67,7 +67,7 @@
         </div>
 
         <div class="card">
-            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+            <div class="card-header bg-clinical-dark text-white d-flex justify-content-between align-items-center">
                 <h5 class="mb-0 text-white">{{ $record_id ? 'Edit Laboratory Record' : 'Laboratory Register' }}</h5>
                 <button type="button" class="btn btn-sm btn-outline-light" wire:click="openCreate" wire:loading.attr="disabled" wire:target="openCreate">
                     <span wire:loading.remove wire:target="openCreate">New Entry</span>
@@ -90,7 +90,7 @@
                     @endif
 
                     <div class="card mb-3">
-                        <div class="card-header bg-label-primary"><h6 class="mb-0"><i class='bx bx-user me-1'></i>Patient Information</h6></div>
+                        <div class="card-header bg-label-primary" style="background-color:#ffedd5 !important;color:#9a3412 !important;border-bottom:1px solid #fdba74 !important;"><h6 class="mb-0"><i class='bx bx-user me-1'></i>Patient Information</h6></div>
                         <div class="card-body">
                             <div class="row g-3">
                                 <div class="col-md-4"><label class="form-label">Surname</label><input type="text" class="form-control" value="{{ $last_name }}" readonly></div>
@@ -106,7 +106,7 @@
                     </div>
 
                     <div class="card mb-3">
-                        <div class="card-header bg-label-primary"><h6 class="mb-0"><i class='bx bx-vial me-1'></i>Reports</h6></div>
+                        <div class="card-header bg-label-primary" style="background-color:#ffedd5 !important;color:#9a3412 !important;border-bottom:1px solid #fdba74 !important;"><h6 class="mb-0"><i class='bx bx-vial me-1'></i>Reports</h6></div>
                         <div class="card-body">
                             <div class="row g-3">
                                 <div class="col-md-3"><label class="form-label">FBS (mg/dL)</label><input class="form-control" wire:model="report_values.fbs" placeholder="e.g. 95 mg/dL (Fasting Normal: 70-110)"></div>
@@ -118,7 +118,7 @@
                                     <div class="btn-group w-100" role="group">
                                         @foreach ($reportToggleFields['mp'] as $value)
                                             @php($meta = $toggleMeta[$value])
-                                            <button type="button" class="btn btn-sm {{ $meta['class'] }} {{ data_get($report_values, 'mp') === $value ? 'active selected-choice' : '' }}"
+                                            <button type="button" class="btn btn-sm {{ $meta['class'] }} {{ data_get($report_values, 'mp') === $value ? 'selected-choice' : '' }}" style="{{ data_get($report_values, 'mp') === $value ? 'font-weight:900;border-width:2px;box-shadow:0 0 0 3px rgba(15,23,42,.18);transform:scale(1.04);' : '' }}"
                                                 wire:click="setSelection('report_values', 'mp', '{{ $value }}')">
                                                 @if (data_get($report_values, 'mp') === $value)<i class='bx bx-check me-1'></i>@endif{{ $meta['text'] }}
                                             </button>
@@ -136,7 +136,7 @@
                                     <div class="btn-group w-100" role="group">
                                         @foreach ($reportToggleFields['preg'] as $value)
                                             @php($meta = $toggleMeta[$value])
-                                            <button type="button" class="btn btn-sm {{ $meta['class'] }} {{ data_get($report_values, 'preg') === $value ? 'active selected-choice' : '' }}"
+                                            <button type="button" class="btn btn-sm {{ $meta['class'] }} {{ data_get($report_values, 'preg') === $value ? 'selected-choice' : '' }}" style="{{ data_get($report_values, 'preg') === $value ? 'font-weight:900;border-width:2px;box-shadow:0 0 0 3px rgba(15,23,42,.18);transform:scale(1.04);' : '' }}"
                                                 wire:click="setSelection('report_values', 'preg', '{{ $value }}')">
                                                 @if (data_get($report_values, 'preg') === $value)<i class='bx bx-check me-1'></i>@endif{{ $meta['text'] }}
                                             </button>
@@ -151,7 +151,7 @@
                     </div>
 
                     <div class="card mb-3">
-                        <div class="card-header bg-label-primary"><h6 class="mb-0"><i class='bx bx-flask me-1'></i>WIDAL Test</h6></div>
+                        <div class="card-header bg-label-primary" style="background-color:#ffedd5 !important;color:#9a3412 !important;border-bottom:1px solid #fdba74 !important;"><h6 class="mb-0"><i class='bx bx-flask me-1'></i>WIDAL Test</h6></div>
                         <div class="card-body">
                             <p class="text-muted small">Enter titre values e.g. 1/80, 1/160, 1/40 or leave blank if not done.</p>
                             <div class="table-responsive">
@@ -168,7 +168,7 @@
                     <div class="row g-3 mb-3">
                         <div class="col-12 col-lg-6">
                             <div class="card h-100 mb-0">
-                                <div class="card-header bg-label-primary"><h6 class="mb-0"><i class='bx bx-atom me-1'></i>Stool Analysis</h6></div>
+                                <div class="card-header bg-label-primary" style="background-color:#ffedd5 !important;color:#9a3412 !important;border-bottom:1px solid #fdba74 !important;"><h6 class="mb-0"><i class='bx bx-atom me-1'></i>Stool Analysis</h6></div>
                                 <div class="card-body">
                                     <div class="mb-2"><label class="form-label">APP</label><input class="form-control" wire:model="stool_values.app" placeholder="e.g. Brown, Formed"></div>
                                     <div class="mb-2"><label class="form-label">Microscopy</label><input class="form-control" wire:model="stool_values.micro" placeholder="e.g. Ova of Ascaris seen"></div>
@@ -176,7 +176,7 @@
                                     <div class="btn-group w-100" role="group">
                                         @foreach ($mcsToggleFields['rvs'] as $value)
                                             @php($meta = $toggleMeta[$value])
-                                            <button type="button" class="btn btn-sm {{ $meta['class'] }} {{ data_get($stool_values, 'us') === $value ? 'active selected-choice' : '' }}"
+                                            <button type="button" class="btn btn-sm {{ $meta['class'] }} {{ data_get($stool_values, 'us') === $value ? 'selected-choice' : '' }}" style="{{ data_get($stool_values, 'us') === $value ? 'font-weight:900;border-width:2px;box-shadow:0 0 0 3px rgba(15,23,42,.18);transform:scale(1.04);' : '' }}"
                                                 wire:click="setSelection('stool_values', 'us', '{{ $value }}')">
                                                 @if (data_get($stool_values, 'us') === $value)<i class='bx bx-check me-1'></i>@endif{{ $meta['text'] }}
                                             </button>
@@ -187,7 +187,7 @@
                         </div>
                         <div class="col-12 col-lg-6">
                             <div class="card h-100 mb-0">
-                                <div class="card-header bg-label-primary"><h6 class="mb-0"><i class='bx bx-dna me-1'></i>M/C/S Tests</h6></div>
+                                <div class="card-header bg-label-primary" style="background-color:#ffedd5 !important;color:#9a3412 !important;border-bottom:1px solid #fdba74 !important;"><h6 class="mb-0"><i class='bx bx-dna me-1'></i>M/C/S Tests</h6></div>
                                 <div class="card-body">
                                     <div class="row g-2">
                                         @foreach ($mcsLabels as $field => $label)
@@ -197,7 +197,7 @@
                                                     <div class="btn-group w-100 mt-1" role="group">
                                                         @foreach ($mcsToggleFields[$field] as $value)
                                                             @php($meta = $toggleMeta[$value])
-                                                            <button type="button" class="btn btn-sm {{ $meta['class'] }} {{ data_get($mcs_results, $field) === $value ? 'active selected-choice' : '' }}"
+                                                            <button type="button" class="btn btn-sm {{ $meta['class'] }} {{ data_get($mcs_results, $field) === $value ? 'selected-choice' : '' }}" style="{{ data_get($mcs_results, $field) === $value ? 'font-weight:900;border-width:2px;box-shadow:0 0 0 3px rgba(15,23,42,.18);transform:scale(1.04);' : '' }}"
                                                                 wire:click="setSelection('mcs_results', '{{ $field }}', '{{ $value }}')">
                                                                 @if (data_get($mcs_results, $field) === $value)<i class='bx bx-check me-1'></i>@endif{{ $meta['text'] }}
                                                             </button>
@@ -213,7 +213,7 @@
                     </div>
 
                     <div class="card mb-3">
-                        <div class="card-header bg-label-primary"><h6 class="mb-0"><i class='bx bx-vial me-1'></i>Urinalysis</h6></div>
+                        <div class="card-header bg-label-primary" style="background-color:#ffedd5 !important;color:#9a3412 !important;border-bottom:1px solid #fdba74 !important;"><h6 class="mb-0"><i class='bx bx-vial me-1'></i>Urinalysis</h6></div>
                         <div class="card-body">
                             <div class="row g-3">
                                 @foreach ($urinalysisLabels as $field => $label)
@@ -237,7 +237,7 @@
                     </div>
 
                     <div class="card mb-3">
-                        <div class="card-header bg-label-primary"><h6 class="mb-0"><i class='bx bx-search-alt-2 me-1'></i>Microscopy</h6></div>
+                        <div class="card-header bg-label-primary" style="background-color:#ffedd5 !important;color:#9a3412 !important;border-bottom:1px solid #fdba74 !important;"><h6 class="mb-0"><i class='bx bx-search-alt-2 me-1'></i>Microscopy</h6></div>
                         <div class="card-body">
                             <div class="row g-3">
                                 @foreach ($microscopyLabels as $field => $label)
@@ -245,7 +245,7 @@
                                         <label class="form-label">{{ $label }}</label>
                                         <div class="btn-group w-100" role="group">
                                             @foreach ($microscopyOptions[$field] as $value)
-                                                <button type="button" class="btn btn-sm btn-outline-warning {{ data_get($microscopy_results, $field) === $value ? 'active selected-choice' : '' }}"
+                                                <button type="button" class="btn btn-sm btn-outline-warning {{ data_get($microscopy_results, $field) === $value ? 'selected-choice' : '' }}" style="{{ data_get($microscopy_results, $field) === $value ? 'font-weight:900;border-width:2px;box-shadow:0 0 0 3px rgba(15,23,42,.18);transform:scale(1.04);' : '' }}"
                                                     wire:click="setSelection('microscopy_results', '{{ $field }}', '{{ $value }}')">
                                                     @if (data_get($microscopy_results, $field) === $value)<i class='bx bx-check me-1'></i>@endif{{ $value }}
                                                 </button>
@@ -253,13 +253,13 @@
                                         </div>
                                     </div>
                                 @endforeach
-                                <div class="col-md-3 col-sm-6"><label class="form-label">Others</label><input class="form-control" wire:model="microscopy_results.others" placeholder="e.g. Mucus threads"></div>
+                                <div class="col-md-3 col-sm-6"><div class="h-100 d-flex flex-column justify-content-end"><label class="form-label">Others</label><input class="form-control" wire:model="microscopy_results.others" placeholder="e.g. Mucus threads"></div></div>
                             </div>
                         </div>
                     </div>
 
                     <div class="card mb-3">
-                        <div class="card-header bg-label-primary"><h6 class="mb-0"><i class='bx bx-capsule me-1'></i>Sensitivity</h6></div>
+                        <div class="card-header bg-label-primary" style="background-color:#ffedd5 !important;color:#9a3412 !important;border-bottom:1px solid #fdba74 !important;"><h6 class="mb-0"><i class='bx bx-capsule me-1'></i>Sensitivity</h6></div>
                         <div class="card-body">
                             <p class="small text-muted mb-2"><span class="badge bg-label-success">S = Sensitive</span> <span class="badge bg-label-danger">R = Resistant</span> <span class="badge bg-label-warning">I = Intermediate</span></p>
                             <div class="row g-3">
@@ -269,7 +269,7 @@
                                         <div class="btn-group w-100" role="group">
                                             @foreach ($sensitivityValues as $value)
                                                 @php($btnClass = $value === 'S' ? 'btn-outline-success' : ($value === 'R' ? 'btn-outline-danger' : 'btn-outline-warning'))
-                                                <button type="button" class="btn btn-sm {{ $btnClass }} {{ data_get($sensitivity_results, $field) === $value ? 'active selected-choice' : '' }}"
+                                                <button type="button" class="btn btn-sm {{ $btnClass }} {{ data_get($sensitivity_results, $field) === $value ? 'selected-choice' : '' }}" style="{{ data_get($sensitivity_results, $field) === $value ? 'font-weight:900;border-width:2px;box-shadow:0 0 0 3px rgba(15,23,42,.18);transform:scale(1.04);' : '' }}"
                                                     wire:click="setSelection('sensitivity_results', '{{ $field }}', '{{ $value }}')">
                                                     @if (data_get($sensitivity_results, $field) === $value)<i class='bx bx-check me-1'></i>@endif{{ $value }}
                                                 </button>
@@ -283,7 +283,7 @@
                     </div>
 
                     <div class="card mb-3">
-                        <div class="card-header bg-label-primary"><h6 class="mb-0"><i class='bx bx-edit-alt me-1'></i>Comment & Sign-off</h6></div>
+                        <div class="card-header bg-label-primary" style="background-color:#ffedd5 !important;color:#9a3412 !important;border-bottom:1px solid #fdba74 !important;"><h6 class="mb-0"><i class='bx bx-edit-alt me-1'></i>Comment & Sign-off</h6></div>
                         <div class="card-body">
                             <div class="mb-2"><label class="form-label">Comment</label><textarea class="form-control" rows="3" wire:model="comment" placeholder="e.g. Significant Widal titre 1:160. Suggestive of Typhoid Fever."></textarea></div>
                             <div class="row g-3">
@@ -347,9 +347,9 @@
 @once
     <style>
         .lab-register-page {
-            --lab-blue: #1d4ed8;
-            --lab-blue-soft: #eff6ff;
-            --lab-border: #dbeafe;
+            --lab-dark: #2c3e50;
+            --lab-soft: #fff7ed;
+            --lab-border: #fed7aa;
             --lab-muted: #64748b;
         }
 
@@ -357,15 +357,15 @@
             border-color: var(--lab-border);
         }
 
-        .lab-register-page .card-header.bg-primary {
-            background: linear-gradient(135deg, #1e3a8a, #1d4ed8) !important;
-            border-bottom: 1px solid #bfdbfe;
+        .lab-register-page .card-header.bg-clinical-dark {
+            background-color: #2c3e50 !important;
+            border-bottom: 1px solid #223242;
         }
 
-        .lab-register-page .bg-label-primary {
-            background: #eff6ff !important;
-            color: #1e40af !important;
-            border-bottom: 1px solid #bfdbfe;
+        .lab-register-page .card .card-header.bg-label-primary {
+            background-color: #ffedd5 !important;
+            color: #9a3412 !important;
+            border-bottom: 1px solid #fdba74 !important;
         }
 
         .lab-register-page .card-header h6 {
@@ -373,6 +373,10 @@
             letter-spacing: 0.01em;
         }
 
+        .lab-register-page .card .card-header.bg-label-primary h6 {
+            color: #7c2d12 !important;
+            font-weight: 700;
+        }
         .lab-register-page .form-label {
             font-size: 11px;
             text-transform: uppercase;
@@ -389,8 +393,8 @@
 
         .lab-register-page .form-control:focus,
         .lab-register-page .form-select:focus {
-            border-color: #93c5fd;
-            box-shadow: 0 0 0 0.2rem rgba(29, 78, 216, 0.12);
+            border-color: #fdba74;
+            box-shadow: 0 0 0 0.2rem rgba(249, 115, 22, 0.14);
         }
 
         .lab-register-page .btn-group .btn {
@@ -412,24 +416,21 @@
         }
 
         .lab-register-page .btn-group .btn.selected-choice {
-            background: #0f172a !important;
-            border-color: #0f172a !important;
-            color: #ffffff !important;
             font-weight: 900 !important;
-            letter-spacing: 0.04em !important;
+            border-width: 2px !important;
+            letter-spacing: 0.02em;
+            box-shadow: 0 0 0 0.18rem rgba(15, 23, 42, 0.14);
             transform: scale(1.03);
-            box-shadow: 0 0 0 0.22rem rgba(15, 23, 42, 0.22) !important;
-            text-shadow: 0 1px 0 rgba(0, 0, 0, 0.35);
         }
 
         .lab-register-page .table thead.table-dark th {
-            background: #1e293b;
-            border-color: #0f172a;
+            background: #2c3e50;
+            border-color: #223242;
         }
 
         .lab-register-page .table thead.table-light th {
-            background: #eff6ff;
-            color: #1e40af;
+            background: #fff7ed;
+            color: #7c2d12;
         }
 
         .lab-register-page .table td,

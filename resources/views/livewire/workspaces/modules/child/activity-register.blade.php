@@ -2,7 +2,7 @@
     use Carbon\Carbon;
 @endphp
 
-@section('title', 'Child Health Activity Register')
+@section('title', 'Vaccination Schedule')
 
 <div>
     @if (!$hasAccess)
@@ -36,7 +36,7 @@
 
         <div class="card mb-4">
             <div class="card-header bg-clinical-dark text-white d-flex justify-content-between align-items-center">
-                <h5 class="mb-0 text-white">{{ $record_id ? 'Edit Activity Register' : 'Activity Register' }}</h5>
+                <h5 class="mb-0 text-white">{{ $record_id ? 'Edit Vaccination Schedule' : 'Vaccination Schedule' }}</h5>
                 @if ($record_id)
                     <button wire:click="exit" type="button" class="btn btn-sm btn-outline-light" wire:loading.attr="disabled" wire:target="exit">
                         <span wire:loading.remove wire:target="exit">New Entry</span>
@@ -377,7 +377,7 @@
                         <small class="text-muted">{{ count($records) }} Total</small>
                     </div>
                     <button type="button" class="btn btn-success" wire:click="openCreateModal" wire:loading.attr="disabled" wire:target="openCreateModal">
-                        <span wire:loading.remove wire:target="openCreateModal"><i class="bx bx-plus me-1"></i>New Activity Register</span>
+                        <span wire:loading.remove wire:target="openCreateModal"><i class="bx bx-plus me-1"></i>New Vaccination Schedule</span>
                         <span wire:loading wire:target="openCreateModal"><span class="spinner-border spinner-border-sm me-1"></span>Preparing...</span>
                     </button>
                 </div>
