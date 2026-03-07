@@ -89,6 +89,47 @@
                         </div>
                     @endif
 
+                    @if (($pendingTestOrders ?? collect())->count())
+                        <div class="card mb-3 border-warning-subtle">
+                            <div class="card-header bg-label-warning"><h6 class="mb-0"><i class='bx bx-list-check me-1'></i>Pending Requested Tests from Doctor Assessment</h6></div>
+                            <div class="card-body p-0">
+                                <div class="table-responsive">
+                                    <table class="table table-sm table-hover mb-0 align-middle">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th style="width: 48px;">Do</th>
+                                                <th>Test</th>
+                                                <th>Specimen</th>
+                                                <th>Priority</th>
+                                                <th>Requested By</th>
+                                                <th>Instructions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach ($pendingTestOrders as $order)
+                                                <tr wire:key="pending-test-order-{{ $order->id }}">
+                                                    <td>
+                                                        <input class="form-check-input" type="checkbox" value="{{ $order->id }}" wire:model="selected_test_order_ids">
+                                                    </td>
+                                                    <td class="fw-semibold">{{ $order->test_name }}</td>
+                                                    <td>{{ $order->specimen ?: '-' }}</td>
+                                                    <td>
+                                                        <span class="badge bg-label-{{ $order->priority === 'STAT' ? 'danger' : ($order->priority === 'Urgent' ? 'warning' : 'primary') }}">{{ $order->priority }}</span>
+                                                    </td>
+                                                    <td>{{ $order->requested_by ?: 'N/A' }}<br><small class="text-muted">{{ $order->requested_at?->format('d M Y, h:i A') ?: '' }}</small></td>
+                                                    <td>{{ $order->instructions ?: '-' }}</td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class="card-footer small text-muted">
+                                Selected tests will be marked <strong>completed</strong> after saving this laboratory record.
+                            </div>
+                        </div>
+                    @endif
+
                     <div class="card mb-3">
                         <div class="card-header bg-label-primary" style="background-color:#ffedd5 !important;color:#9a3412 !important;border-bottom:1px solid #fdba74 !important;"><h6 class="mb-0"><i class='bx bx-user me-1'></i>Patient Information</h6></div>
                         <div class="card-body">

@@ -5,6 +5,7 @@ namespace App\Livewire\Workspaces\Modules\Clinical;
 use App\Models\Activity;
 use App\Models\Facility;
 use App\Models\LabTest;
+use App\Models\LabTestOrder;
 use App\Models\Patient;
 use App\Models\Registrations\DinActivation;
 use Carbon\Carbon;
@@ -141,6 +142,7 @@ class Laboratory extends Component
   public $sensitivity_results = [];
 
   public $comment, $mlt_sign, $sign_date;
+  public $selected_test_order_ids = [];
 
   protected $rules = [
     'patientId' => 'required',
@@ -162,6 +164,8 @@ class Laboratory extends Component
     'comment' => 'nullable|string|max:2000',
     'mlt_sign' => 'nullable|string|max:120',
     'sign_date' => 'nullable|date',
+    'selected_test_order_ids' => 'nullable|array',
+    'selected_test_order_ids.*' => 'integer|exists:lab_test_orders,id',
   ];
 
   public function mount($patientId)
@@ -195,6 +199,7 @@ class Laboratory extends Component
     $this->sign_date = now()->format('Y-m-d');
     $this->autoFillMonthYear();
     $this->initializeFormCollections();
+    $this->selected_test_order_ids = [];
 
     $this->validatePatientAccess();
     if ($this->hasAccess) {
@@ -351,6 +356,37 @@ class Laboratory extends Component
     ];
   }
 
+  private function completeSelectedTestOrders(int $labRecordId): void
+  {
+    $ids = collect((array) $this->selected_test_order_ids)
+      ->filter(fn($id) => is_numeric($id))
+      ->map(fn($id) => (int) $id)
+      ->unique()
+      ->values();
+
+    if ($ids->isEmpty()) {
+      return;
+    }
+
+    $updated = LabTestOrder::query()
+      ->where('patient_id', $this->patientId)
+      ->where('facility_id', $this->facility_id)
+      ->where('status', 'pending')
+      ->whereIn('id', $ids->all())
+      ->update([
+        'status' => 'completed',
+        'completed_lab_test_id' => $labRecordId,
+        'completed_at' => now(),
+        'completed_by' => $this->officer_name,
+        'completion_notes' => 'Completed via laboratory record #' . $labRecordId,
+      ]);
+
+    $this->selected_test_order_ids = [];
+
+    if ($updated > 0) {
+      toastr()->info($updated . ' pending requested test(s) marked completed.');
+    }
+  }
   private function payload(): array
   {
     $this->initializeFormCollections();
@@ -393,6 +429,7 @@ class Laboratory extends Component
       $this->validate();
 
       $record = LabTest::create($this->payload());
+      $this->completeSelectedTestOrders((int) $record->id);
 
       DB::commit();
       $this->logActivity('create', 'Recorded laboratory test/report');
@@ -441,6 +478,7 @@ class Laboratory extends Component
     $this->sign_date = $record->sign_date?->format('Y-m-d');
 
     $this->initializeFormCollections();
+    $this->selected_test_order_ids = [];
   }
 
   public function update(): void
@@ -456,6 +494,7 @@ class Laboratory extends Component
         ->findOrFail($this->record_id);
 
       $record->update($this->payload());
+      $this->completeSelectedTestOrders((int) $record->id);
 
       DB::commit();
       $this->logActivity('update', 'Updated laboratory test/report');
@@ -546,6 +585,7 @@ class Laboratory extends Component
     $this->deriveAgeSexFromPatient();
     $this->mlt_sign = $this->officer_name;
     $this->initializeFormCollections();
+    $this->selected_test_order_ids = [];
   }
 
   public function backToDashboard()
@@ -562,8 +602,17 @@ class Laboratory extends Component
       ->latest('id')
       ->get();
 
+    $pendingTestOrders = LabTestOrder::query()
+      ->where('patient_id', $this->patientId)
+      ->where('facility_id', $this->facility_id)
+      ->where('status', 'pending')
+      ->latest('requested_at')
+      ->latest('id')
+      ->get();
+
     return view('livewire.workspaces.modules.clinical.laboratory', [
       'records' => $records,
+      'pendingTestOrders' => $pendingTestOrders,
       'reportInputFields' => self::REPORT_INPUT_FIELDS,
       'reportToggleFields' => self::REPORT_TOGGLE_FIELDS,
       'bloodGroupOptions' => self::BLOOD_GROUP_OPTIONS,
