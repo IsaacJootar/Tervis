@@ -110,3 +110,15 @@
   - `php -l resources/views/livewire/analytics/monthly-report-dashboard.blade.php`
   - `php artisan test` (`2 passed`)
 
+## Update (2026-03-07)
+- Monthly report `Other Services` mapping now includes Doctor Assessment + Laboratory data sources.
+- `app/Livewire/Analytics/MonthlyReportDashboard.php` now reads:
+  - `DoctorAssessment` for diagnosis/narrative signals (`malaria_cases`, `gbv_cases`)
+  - `LabTest` for laboratory indicators (`malaria_tested`, `malaria_positive`, `tb_screening`, `hepb_tested`, `hepc_tested`)
+- Mapping is currently heuristic for diagnosis text (keyword-based) and structured for lab JSON result fields.
+- Docs synced:
+  - `docs/monthly-report-gap-check.md`
+  - `docs/handoff.md`
+- Validation run after update passed:
+  - `php -l app/Livewire/Analytics/MonthlyReportDashboard.php`
+  - `php artisan test` (`2 passed`)

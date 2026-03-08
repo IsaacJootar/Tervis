@@ -109,7 +109,7 @@
                                             @foreach ($pendingTestOrders as $order)
                                                 <tr wire:key="pending-test-order-{{ $order->id }}">
                                                     <td>
-                                                        <input class="form-check-input" type="checkbox" value="{{ $order->id }}" wire:model="selected_test_order_ids">
+                                                        <input class="form-check-input" type="checkbox" wire:model.live="selected_test_order_map.{{ $order->id }}">
                                                     </td>
                                                     <td class="fw-semibold">{{ $order->test_name }}</td>
                                                     <td>{{ $order->specimen ?: '-' }}</td>
@@ -125,7 +125,7 @@
                                 </div>
                             </div>
                             <div class="card-footer small text-muted">
-                                Selected tests will be marked <strong>completed</strong> after saving this laboratory record.
+                                You must check at least one pending requested test before saving. Checked tests will be marked <strong>completed</strong> after save.
                             </div>
                         </div>
                     @endif
@@ -495,7 +495,5 @@
         }
     </style>
 @endonce
-
-
 
 

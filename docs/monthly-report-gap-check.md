@@ -2,7 +2,7 @@
 
 Purpose: Map monthly report fields to current data sources and call out missing sources or logic needed later.
 
-## Current Status (2026-03-03)
+## Current Status (2026-03-07)
 
 ### Sources In Use
 - `DailyAttendance` for attendance counts (age/sex buckets)
@@ -12,6 +12,8 @@ Purpose: Map monthly report fields to current data sources and call out missing 
 - `ImmunizationRecord` for routine child vaccine dates
 - `NutritionRecord` for core child nutrition indicators
 - `ChildHealthActivityRecord` (Vaccination Schedule) for additional child-health/vaccine activity data
+- `DoctorAssessment` for clinical diagnosis/findings context in monthly other-services aggregation
+- `LabTest` for laboratory-derived monthly testing indicators
 - `Antenatal` (older model) for ANC attendance in the report logic
 
 ### Coverage Summary
@@ -20,7 +22,7 @@ Purpose: Map monthly report fields to current data sources and call out missing 
 - Newborn health: Partial, uses `Delivery`
 - Immunization: Mapped (TT + child vaccines), merged from `TetanusVaccination`, `ImmunizationRecord`, and `ChildHealthActivityRecord` with deduplication by child + dose date
 - Child health: Partially mapped via `NutritionRecord` + `ChildHealthActivityRecord`
-- Other services: Partial, postnatal FP only
+- Other services: Partially mapped from `PostnatalRecord`, `DoctorAssessment`, and `LabTest`
 - Mortality: Partial, inferred from `Delivery` complications
 
 ## Monthly Mapping Implemented
@@ -45,6 +47,15 @@ Purpose: Map monthly report fields to current data sources and call out missing 
   - `child_health.weight_monitoring_entries`
   - `child_health.aefi_reported_cases`
 
+### Other Services (Doctor + Laboratory)
+- `malaria_tested` from `LabTest.report_values.mp` where result is `Positive` or `Negative`
+- `malaria_positive` from `LabTest.report_values.mp = Positive`
+- `malaria_cases` from diagnosis mentions in `DoctorAssessment.final_diagnosis` + `LabTest.clinician_diagnosis`
+- `tb_screening` from `LabTest.mcs_results.tb` where result is `Positive` or `Negative`
+- `hepb_tested` from `LabTest.mcs_results.hbsag` where result is `Positive` or `Negative`
+- `hepc_tested` from `LabTest.mcs_results.hcv` where result is `Positive` or `Negative`
+- `gbv_cases` from keyword match (`gbv`, `gender based violence`) in doctor assessment narrative fields
+
 ## Remaining Gaps
 1. **Maternal Health (ANC)**
    - Still using older `Antenatal` model in report logic.
@@ -57,8 +68,9 @@ Purpose: Map monthly report fields to current data sources and call out missing 
 3. **Mortality Cause Coding**
    - Need structured maternal/neonatal/under-5 cause coding tables.
 
-4. **Other Health Services**
-   - Malaria/TB/GBV/testing still placeholder zeros pending source modules.
+4. **Other Health Services (Quality Refinement)**
+   - Current mapping uses keyword/heuristic extraction from diagnosis and lab JSON payloads.
+   - Next step: map from structured disease/diagnostic domain tables when available.
 
 5. **Child Health NHMIS Row Expansion**
    - `weight_monitoring_entries` and `aefi_reported_cases` are aggregated but not yet mapped to dedicated NHMIS row keys in the current template table.

@@ -17,8 +17,25 @@
         <div class="app-brand demo">
             <a href="{{ url('/patient/patient-dashboard') }}" class="app-brand-link">
                 <span class="app-brand-logo demo">@include('_partials.macros')</span>
-                <span class="app-brand-text demo menu-text fw-bold ms-3">{{ config('variables.templateName') }} <small
-                        class="text-muted">[Patient]</small></span>
+                                <span class="app-brand-text demo menu-text fw-bold ms-3 d-flex flex-column lh-sm">
+                    <span>mpro</span>                    @php
+                        $roleLabel = auth()->user()->role ?? null;
+                        $roleBadgeClass = match ($roleLabel) {
+                            'Central Admin' => 'bg-label-danger',
+                            'Facility Admin' => 'bg-label-warning',
+                            'State Officer' => 'bg-label-success',
+                            'L.G.A Officer' => 'bg-label-info',
+                            'Data Officer' => 'bg-label-primary',
+                            'Verification Officer' => 'bg-label-dark',
+                            'Doctor', 'Medical Officer' => 'bg-label-success',
+                            'Patient' => 'bg-label-secondary',
+                            default => 'bg-label-secondary',
+                        };
+                    @endphp
+                    @if ($roleLabel)
+                        <small class="badge {{ $roleBadgeClass }} mt-1 align-self-start" style="font-size:0.65rem; padding:0.2rem 0.4rem;">{{ $roleLabel }}</small>
+                    @endif
+                </span>
             </a>
 
             <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large ms-auto">
@@ -89,3 +106,12 @@
     </ul>
 
 </aside>
+
+
+
+
+
+
+
+
+

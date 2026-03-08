@@ -157,7 +157,7 @@
                                         $moduleLabel = str_replace('_', ' ', $activity->module);
                                     @endphp
                                     <tr>
-                                        <td>{{ $activity->created_at?->format('d M Y, h:i A') }}</td>
+                                        <td data-order="{{ $activity->created_at?->timestamp ?? 0 }}">{{ $activity->created_at?->format('d M Y, h:i A') }}</td>
                                         <td class="text-capitalize">{{ $moduleLabel }}</td>
                                         <td>
                                             <span class="badge bg-label-{{ $actionColor }}">
@@ -248,3 +248,4 @@
         @endonce
     @endif
 </div>
+

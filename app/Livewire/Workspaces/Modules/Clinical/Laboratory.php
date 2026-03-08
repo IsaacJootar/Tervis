@@ -143,6 +143,7 @@ class Laboratory extends Component
 
   public $comment, $mlt_sign, $sign_date;
   public $selected_test_order_ids = [];
+  public $selected_test_order_map = [];
 
   protected $rules = [
     'patientId' => 'required',
@@ -166,6 +167,8 @@ class Laboratory extends Component
     'sign_date' => 'nullable|date',
     'selected_test_order_ids' => 'nullable|array',
     'selected_test_order_ids.*' => 'integer|exists:lab_test_orders,id',
+    'selected_test_order_map' => 'nullable|array',
+    'selected_test_order_map.*' => 'boolean',
   ];
 
   public function mount($patientId)
@@ -200,6 +203,7 @@ class Laboratory extends Component
     $this->autoFillMonthYear();
     $this->initializeFormCollections();
     $this->selected_test_order_ids = [];
+    $this->selected_test_order_map = [];
 
     $this->validatePatientAccess();
     if ($this->hasAccess) {
@@ -355,14 +359,55 @@ class Laboratory extends Component
       'widal_marked' => collect($this->widal_values)->filter(fn($value) => !empty($value))->count(),
     ];
   }
-
-  private function completeSelectedTestOrders(int $labRecordId): void
+  private function getPendingOrderIds()
   {
-    $ids = collect((array) $this->selected_test_order_ids)
+    return LabTestOrder::query()
+      ->where('patient_id', $this->patientId)
+      ->where('facility_id', $this->facility_id)
+      ->where('status', 'pending')
+      ->pluck('id')
+      ->map(fn($id) => (int) $id)
+      ->values();
+  }
+
+  private function getSelectedPendingOrderIds()
+  {
+    $pendingIds = $this->getPendingOrderIds();
+
+    if ($pendingIds->isEmpty()) {
+      return collect();
+    }
+
+    $fromMap = collect((array) $this->selected_test_order_map)
+      ->filter(fn($checked) => (bool) $checked)
+      ->keys();
+
+    $selected = $fromMap
+      ->merge((array) $this->selected_test_order_ids)
       ->filter(fn($id) => is_numeric($id))
       ->map(fn($id) => (int) $id)
       ->unique()
       ->values();
+
+    return $selected->intersect($pendingIds)->values();
+  }
+
+  private function enforcePendingSelection(): void
+  {
+    if ($this->getPendingOrderIds()->isEmpty()) {
+      return;
+    }
+
+    if ($this->getSelectedPendingOrderIds()->isEmpty()) {
+      throw ValidationException::withMessages([
+        'selected_test_order_map' => 'Select at least one pending requested test before saving this laboratory record.',
+      ]);
+    }
+  }
+
+  private function completeSelectedTestOrders(int $labRecordId): void
+  {
+    $ids = $this->getSelectedPendingOrderIds();
 
     if ($ids->isEmpty()) {
       return;
@@ -382,11 +427,13 @@ class Laboratory extends Component
       ]);
 
     $this->selected_test_order_ids = [];
+    $this->selected_test_order_map = [];
 
     if ($updated > 0) {
       toastr()->info($updated . ' pending requested test(s) marked completed.');
     }
   }
+
   private function payload(): array
   {
     $this->initializeFormCollections();
@@ -427,6 +474,7 @@ class Laboratory extends Component
     try {
       $this->autoFillMonthYear();
       $this->validate();
+      $this->enforcePendingSelection();
 
       $record = LabTest::create($this->payload());
       $this->completeSelectedTestOrders((int) $record->id);
@@ -479,6 +527,7 @@ class Laboratory extends Component
 
     $this->initializeFormCollections();
     $this->selected_test_order_ids = [];
+    $this->selected_test_order_map = [];
   }
 
   public function update(): void
@@ -488,6 +537,7 @@ class Laboratory extends Component
       $rules = array_diff_key($this->rules, ['patientId' => '']);
       $this->autoFillMonthYear();
       $this->validate($rules);
+      $this->enforcePendingSelection();
 
       $record = LabTest::where('facility_id', $this->facility_id)
         ->where('patient_id', $this->patientId)
@@ -586,6 +636,7 @@ class Laboratory extends Component
     $this->mlt_sign = $this->officer_name;
     $this->initializeFormCollections();
     $this->selected_test_order_ids = [];
+    $this->selected_test_order_map = [];
   }
 
   public function backToDashboard()
@@ -610,6 +661,12 @@ class Laboratory extends Component
       ->latest('id')
       ->get();
 
+    $pendingIds = $pendingTestOrders->pluck('id')->map(fn($id) => (string) $id)->all();
+    $this->selected_test_order_map = collect((array) $this->selected_test_order_map)
+      ->filter(fn($checked, $id) => (bool) $checked && in_array((string) $id, $pendingIds, true))
+      ->map(fn() => true)
+      ->toArray();
+
     return view('livewire.workspaces.modules.clinical.laboratory', [
       'records' => $records,
       'pendingTestOrders' => $pendingTestOrders,
@@ -629,3 +686,6 @@ class Laboratory extends Component
     ]);
   }
 }
+
+
+

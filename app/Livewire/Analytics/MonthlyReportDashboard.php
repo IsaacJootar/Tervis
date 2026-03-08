@@ -9,6 +9,8 @@ use App\Models\Facility;
 use App\Models\Delivery;
 use App\Models\Antenatal;
 use App\Models\ClinicalNote;
+use App\Models\DoctorAssessment;
+use App\Models\LabTest;
 use App\Models\ChildHealthActivityRecord;
 use App\Models\ImmunizationRecord;
 use App\Models\NutritionRecord;
@@ -711,18 +713,66 @@ class MonthlyReportDashboard extends Component
     $otherServicesData['modern_contraception'] = 0;
     $otherServicesData['postpartum_fp'] = $postnatal->whereIn('family_planning', ['Counseled', 'Accepted'])->count();
 
-    // Malaria (from clinical notes)
-    $otherServicesData['malaria_cases'] = 0;
-    $otherServicesData['malaria_tested'] = 0;
-    $otherServicesData['malaria_positive'] = 0;
+    // Doctor assessment + laboratory driven mapping for "Other Services".
+    $labTests = LabTest::query()
+      ->whereIn('facility_id', $facilityIds)
+      ->whereBetween('visit_date', [$startDate, $endDate])
+      ->get(['clinician_diagnosis', 'report_values', 'mcs_results']);
 
-    // Other diseases
-    $otherServicesData['tb_screening'] = 0;
+    $doctorAssessments = DoctorAssessment::query()
+      ->whereIn('facility_id', $facilityIds)
+      ->whereBetween('visit_date', [$startDate, $endDate])
+      ->get(['final_diagnosis', 'assessment_note']);
+
+    $containsAny = function ($text, array $needles): bool {
+      $value = strtolower((string) $text);
+      if ($value === '') {
+        return false;
+      }
+      foreach ($needles as $needle) {
+        if (str_contains($value, $needle)) {
+          return true;
+        }
+      }
+      return false;
+    };
+
+    $otherServicesData['malaria_tested'] = $labTests
+      ->filter(fn($record) => in_array(data_get($record->report_values, 'mp'), ['Positive', 'Negative'], true))
+      ->count();
+
+    $otherServicesData['malaria_positive'] = $labTests
+      ->where('report_values.mp', 'Positive')
+      ->count();
+
+    $malariaDiagnosedFromAssessments = $doctorAssessments
+      ->filter(fn($record) => $containsAny($record->final_diagnosis, ['malaria']))
+      ->count();
+
+    $malariaMentionedInLabRequests = $labTests
+      ->filter(fn($record) => $containsAny($record->clinician_diagnosis, ['malaria']))
+      ->count();
+
+    $otherServicesData['malaria_cases'] = $malariaDiagnosedFromAssessments + $malariaMentionedInLabRequests;
+
+    $otherServicesData['tb_screening'] = $labTests
+      ->filter(fn($record) => in_array(data_get($record->mcs_results, 'tb'), ['Positive', 'Negative'], true))
+      ->count();
+
+    $otherServicesData['hepb_tested'] = $labTests
+      ->filter(fn($record) => in_array(data_get($record->mcs_results, 'hbsag'), ['Positive', 'Negative'], true))
+      ->count();
+
+    $otherServicesData['hepc_tested'] = $labTests
+      ->filter(fn($record) => in_array(data_get($record->mcs_results, 'hcv'), ['Positive', 'Negative'], true))
+      ->count();
+
+    $otherServicesData['gbv_cases'] = $doctorAssessments
+      ->filter(fn($record) => $containsAny(($record->final_diagnosis ?? '') . ' ' . ($record->assessment_note ?? ''), ['gbv', 'gender based violence']))
+      ->count();
+
     $otherServicesData['diabetes_cases'] = 0;
     $otherServicesData['hypertension_cases'] = 0;
-    $otherServicesData['hepb_tested'] = 0;
-    $otherServicesData['hepc_tested'] = 0;
-    $otherServicesData['gbv_cases'] = 0;
 
     return $otherServicesData;
   }

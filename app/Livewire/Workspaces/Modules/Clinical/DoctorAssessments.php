@@ -19,8 +19,6 @@ use Livewire\Component;
 #[Layout('layouts.dataOfficerLayout')]
 class DoctorAssessments extends Component
 {
-  public const PRIORITY_OPTIONS = ['Routine', 'Urgent', 'STAT'];
-
   public $patientId;
   public $patient;
 
@@ -32,36 +30,30 @@ class DoctorAssessments extends Component
   public $record_id;
   public $visit_date, $month_year;
 
-  public $chief_complaints, $history_of_present_illness, $vital_signs, $physical_examination, $clinical_findings;
-  public $provisional_diagnosis, $final_diagnosis;
-  public $assessment_note, $management_plan, $follow_up_instructions, $referral_note, $advice_to_patient;
+  public $history_of_present_illness, $vital_signs, $physical_examination;
+  public $final_diagnosis;
+  public $assessment_note, $management_plan, $referral_note, $advice_to_patient;
 
   public $test_orders = [];
 
-  public $test_entry_name, $test_entry_specimen, $test_entry_priority = 'Routine', $test_entry_instructions;
+  public $test_entry_name, $test_entry_specimen;
 
   protected $rules = [
     'patientId' => 'required',
     'facility_id' => 'required|exists:facilities,id',
     'visit_date' => 'required|date',
     'month_year' => 'required|date',
-    'chief_complaints' => 'nullable|string|max:4000',
     'history_of_present_illness' => 'nullable|string|max:12000',
     'vital_signs' => 'nullable|string|max:3000',
     'physical_examination' => 'nullable|string|max:12000',
-    'clinical_findings' => 'nullable|string|max:12000',
-    'provisional_diagnosis' => 'nullable|string|max:255',
     'final_diagnosis' => 'nullable|string|max:255',
     'assessment_note' => 'required|string|max:25000',
     'management_plan' => 'nullable|string|max:12000',
-    'follow_up_instructions' => 'nullable|string|max:12000',
     'referral_note' => 'nullable|string|max:12000',
     'advice_to_patient' => 'nullable|string|max:12000',
     'test_orders' => 'nullable|array',
     'test_orders.*.test_name' => 'required_with:test_orders|string|max:150',
     'test_orders.*.specimen' => 'nullable|string|max:120',
-    'test_orders.*.priority' => 'required_with:test_orders|in:Routine,Urgent,STAT',
-    'test_orders.*.instructions' => 'nullable|string|max:1000',
   ];
 
   public function mount($patientId)
@@ -167,12 +159,9 @@ class DoctorAssessments extends Component
     $this->test_orders[] = [
       'test_name' => $name,
       'specimen' => trim((string) $this->test_entry_specimen) ?: null,
-      'priority' => in_array($this->test_entry_priority, self::PRIORITY_OPTIONS, true) ? $this->test_entry_priority : 'Routine',
-      'instructions' => trim((string) $this->test_entry_instructions) ?: null,
     ];
 
-    $this->reset(['test_entry_name', 'test_entry_specimen', 'test_entry_instructions']);
-    $this->test_entry_priority = 'Routine';
+    $this->reset(['test_entry_name', 'test_entry_specimen']);
   }
 
   public function removeTestOrder(int $index): void
@@ -196,16 +185,12 @@ class DoctorAssessments extends Component
       'doctor_user_id' => Auth::id(),
       'month_year' => $this->month_year,
       'visit_date' => $this->visit_date,
-      'chief_complaints' => $this->chief_complaints,
       'history_of_present_illness' => $this->history_of_present_illness,
       'vital_signs' => $this->vital_signs,
       'physical_examination' => $this->physical_examination,
-      'clinical_findings' => $this->clinical_findings,
-      'provisional_diagnosis' => $this->provisional_diagnosis,
       'final_diagnosis' => $this->final_diagnosis,
       'assessment_note' => $this->assessment_note,
       'management_plan' => $this->management_plan,
-      'follow_up_instructions' => $this->follow_up_instructions,
       'referral_note' => $this->referral_note,
       'advice_to_patient' => $this->advice_to_patient,
       'requires_lab_tests' => count($this->test_orders) > 0,
@@ -238,8 +223,8 @@ class DoctorAssessments extends Component
         'visit_date' => $this->visit_date,
         'test_name' => $entry['test_name'],
         'specimen' => $entry['specimen'] ?? null,
-        'priority' => $entry['priority'] ?? 'Routine',
-        'instructions' => $entry['instructions'] ?? null,
+        'priority' => 'Routine',
+        'instructions' => null,
         'status' => 'pending',
         'requested_by' => $this->officer_name,
         'requested_at' => now(),
@@ -283,23 +268,19 @@ class DoctorAssessments extends Component
     $this->visit_date = $record->visit_date?->format('Y-m-d');
     $this->month_year = $record->month_year?->format('Y-m-d');
 
-    $this->chief_complaints = $record->chief_complaints;
     $this->history_of_present_illness = $record->history_of_present_illness;
     $this->vital_signs = $record->vital_signs;
     $this->physical_examination = $record->physical_examination;
-    $this->clinical_findings = $record->clinical_findings;
-    $this->provisional_diagnosis = $record->provisional_diagnosis;
     $this->final_diagnosis = $record->final_diagnosis;
     $this->assessment_note = $record->assessment_note;
     $this->management_plan = $record->management_plan;
-    $this->follow_up_instructions = $record->follow_up_instructions;
     $this->referral_note = $record->referral_note;
     $this->advice_to_patient = $record->advice_to_patient;
 
     $this->test_orders = LabTestOrder::where('doctor_assessment_id', $record->id)
       ->where('status', 'pending')
       ->orderBy('id')
-      ->get(['test_name', 'specimen', 'priority', 'instructions'])
+      ->get(['test_name', 'specimen'])
       ->map(fn($entry) => $entry->toArray())
       ->values()
       ->toArray();
@@ -378,7 +359,6 @@ class DoctorAssessments extends Component
         'performed_by' => $this->officer_name,
         'meta' => [
           'visit_date' => $this->visit_date,
-          'provisional_diagnosis' => $this->provisional_diagnosis,
           'final_diagnosis' => $this->final_diagnosis,
           'test_orders_count' => count($this->test_orders),
         ],
@@ -394,26 +374,20 @@ class DoctorAssessments extends Component
       'record_id',
       'visit_date',
       'month_year',
-      'chief_complaints',
       'history_of_present_illness',
       'vital_signs',
       'physical_examination',
-      'clinical_findings',
-      'provisional_diagnosis',
       'final_diagnosis',
       'assessment_note',
       'management_plan',
-      'follow_up_instructions',
       'referral_note',
       'advice_to_patient',
       'test_orders',
       'test_entry_name',
       'test_entry_specimen',
-      'test_entry_instructions',
     ]);
 
     $this->visit_date = now()->format('Y-m-d');
-    $this->test_entry_priority = 'Routine';
     $this->autoFillMonthYear();
   }
 
@@ -436,7 +410,6 @@ class DoctorAssessments extends Component
 
     return view('livewire.workspaces.modules.clinical.doctor-assessments', [
       'records' => $records,
-      'priorityOptions' => self::PRIORITY_OPTIONS,
     ]);
   }
 }
