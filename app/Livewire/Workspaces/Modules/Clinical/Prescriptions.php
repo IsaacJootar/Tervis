@@ -34,6 +34,8 @@ class Prescriptions extends Component
   public $selected_prescription_map = [];
 
   public $selected_catalog_id;
+  public $selected_catalog_name;
+  public $drug_search = '';
   public $entry_quantity = 1;
   public $cart = [];
   public $dispense_code = '';
@@ -51,6 +53,7 @@ class Prescriptions extends Component
     'selected_prescription_map' => 'nullable|array',
     'selected_prescription_map.*' => 'boolean',
     'selected_catalog_id' => 'required|integer',
+    'drug_search' => 'nullable|string|max:150',
     'entry_quantity' => 'required|numeric|min:0.1',
     'history_from_date' => 'nullable|date',
     'history_to_date' => 'nullable|date',
@@ -179,6 +182,30 @@ class Prescriptions extends Component
     return redirect()->route('workspaces-drug-catalog', ['patientId' => $this->patientId]);
   }
 
+  public function selectCatalogItem(int $id): void
+  {
+    $item = DrugCatalogItem::query()
+      ->where('facility_id', $this->facility_id)
+      ->where('is_active', true)
+      ->find($id);
+
+    if (!$item) {
+      $this->addError('selected_catalog_id', 'Selected drug was not found or is inactive.');
+      return;
+    }
+
+    $this->selected_catalog_id = (int) $item->id;
+    $this->selected_catalog_name = trim($item->drug_name . ' (' . ($item->formulation ?: 'N/A') . ', ' . ($item->strength ?: 'N/A') . ')');
+    $this->resetErrorBag(['selected_catalog_id']);
+  }
+
+  public function clearCatalogSelection(): void
+  {
+    $this->selected_catalog_id = null;
+    $this->selected_catalog_name = null;
+    $this->drug_search = '';
+  }
+
   public function addToCart(): void
   {
     $this->resetErrorBag(['selected_catalog_id', 'entry_quantity', 'checkout']);
@@ -208,7 +235,7 @@ class Prescriptions extends Component
     ];
 
     $this->persistCartToSession();
-    $this->selected_catalog_id = null;
+    // Keep current filter and selected item after add for faster repeated entry.
     $this->entry_quantity = 1;
     toastr()->success($item->drug_name . ' added to cart.');
   }
@@ -468,10 +495,21 @@ class Prescriptions extends Component
       ->map(fn() => true)
       ->toArray();
 
-    $activeCatalogItems = DrugCatalogItem::query()
+    $catalogSearch = trim((string) $this->drug_search);
+    $catalogSearchResults = DrugCatalogItem::query()
       ->where('facility_id', $this->facility_id)
       ->where('is_active', true)
-      ->latest('drug_name')
+      ->when($catalogSearch !== '', function ($query) use ($catalogSearch) {
+        $query->where(function ($sub) use ($catalogSearch) {
+          $like = '%' . $catalogSearch . '%';
+          $sub->where('drug_name', 'like', $like)
+            ->orWhere('formulation', 'like', $like)
+            ->orWhere('strength', 'like', $like)
+            ->orWhere('route', 'like', $like);
+        });
+      })
+      ->orderBy('drug_name')
+      ->limit($catalogSearch === '' ? 15 : 30)
       ->get();
 
     $historyQuery = DrugDispenseLine::query()
@@ -499,7 +537,7 @@ class Prescriptions extends Component
 
     return view('livewire.workspaces.modules.clinical.prescriptions', [
       'pendingPrescriptions' => $pendingPrescriptions,
-      'activeCatalogItems' => $activeCatalogItems,
+      'catalogSearchResults' => $catalogSearchResults,
       'dispenseBatches' => $dispenseBatches,
     ]);
   }

@@ -117,14 +117,35 @@
                     </div>
                     <div class="card-body">
                         <div class="mb-3">
-                            <label class="form-label text-uppercase fw-semibold" style="font-size:11px;letter-spacing:.05em;color:#64748b;">Active Drug Catalog</label>
-                            <select class="form-select" wire:model="selected_catalog_id">
-                                <option value="">-- Select Drug --</option>
-                                @foreach ($activeCatalogItems as $item)
-                                    <option value="{{ $item->id }}">{{ $item->drug_name }}
-                                        ({{ $item->formulation ?: 'N/A' }}, {{ $item->strength ?: 'N/A' }})</option>
-                                @endforeach
-                            </select>
+                            <label class="form-label text-uppercase fw-semibold" style="font-size:11px;letter-spacing:.05em;color:#64748b;">Search Drug Catalog</label>
+                            <input type="text" class="form-control" wire:model.live.debounce.300ms="drug_search"
+                                placeholder="Type drug name, strength, route...">
+                            @if ($selected_catalog_id)
+                                <div class="small mt-2">
+                                    <span class="text-success fw-semibold">Selected:</span>
+                                    <span class="text-dark">{{ $selected_catalog_name }}</span>
+                                    <button type="button" class="btn btn-link btn-sm p-0 ms-2" wire:click="clearCatalogSelection">Change</button>
+                                </div>
+                            @endif
+                            <div class="list-group mt-2" style="max-height: 190px; overflow-y: auto;">
+                                @forelse ($catalogSearchResults as $item)
+                                    <button type="button"
+                                        class="list-group-item list-group-item-action d-flex justify-content-between align-items-center {{ (int) $selected_catalog_id === (int) $item->id ? 'active' : '' }}"
+                                        wire:click="selectCatalogItem({{ $item->id }})">
+                                        <span>
+                                            {{ $item->drug_name }}
+                                            <small class="{{ (int) $selected_catalog_id === (int) $item->id ? 'text-white' : 'text-muted' }}">
+                                                ({{ $item->formulation ?: 'N/A' }}, {{ $item->strength ?: 'N/A' }}, {{ $item->route ?: 'N/A' }})
+                                            </small>
+                                        </span>
+                                        @if ((int) $selected_catalog_id === (int) $item->id)
+                                            <i class="bx bx-check"></i>
+                                        @endif
+                                    </button>
+                                @empty
+                                    <div class="list-group-item text-muted small">No active drugs found for this search.</div>
+                                @endforelse
+                            </div>
                         </div>
                         <div class="row g-2">
                             <div class="col-md-6">
