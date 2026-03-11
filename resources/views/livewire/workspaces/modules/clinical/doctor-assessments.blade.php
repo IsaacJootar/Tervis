@@ -78,24 +78,15 @@
                     </div>
 
                     <div class="card mb-3">
-                        <div class="card-header bg-label-primary" style="background-color:#ffedd5 !important;color:#9a3412 !important;border-bottom:1px solid #fdba74 !important;"><h6 class="mb-0"><i class='bx bx-note me-1'></i>Clinical Notes (Letter Style)</h6></div>
+                        <div class="card-header bg-label-primary" style="background-color:#ffedd5 !important;color:#9a3412 !important;border-bottom:1px solid #fdba74 !important;"><h6 class="mb-0"><i class='bx bx-note me-1'></i>Clinical Assessment (Essential Fields)</h6></div>
                         <div class="card-body">
                             <div class="row g-3">
-                                <div class="col-md-6"><label class="form-label">History of Present Illness</label><textarea class="form-control" rows="4" wire:model="history_of_present_illness" placeholder="History, onset, duration, associated symptoms"></textarea></div>
-                                <div class="col-md-6"><label class="form-label">Vital Signs</label><textarea class="form-control" rows="3" wire:model="vital_signs" placeholder="BP, Pulse, Temp, RR, SpO2"></textarea></div>
-                                <div class="col-md-12"><label class="form-label">Physical Examination</label><textarea class="form-control" rows="3" wire:model="physical_examination" placeholder="General and systemic examination"></textarea></div>
                                 <div class="col-md-6"><label class="form-label">Final Diagnosis</label><input type="text" class="form-control" wire:model="final_diagnosis" placeholder="Confirmed diagnosis"></div>
                                 <div class="col-md-12">
-                                    <label class="form-label">Assessment / Findings Letter <span class="text-danger">*</span></label>
-                                    <textarea class="form-control letter-box" rows="10" wire:model="assessment_note" placeholder="Write detailed narrative assessment in letter format:
-- Patient presented with...
-- Clinical findings indicate...
-- Impression...
-- Plan..."></textarea>
+                                    <label class="form-label">Assessment / Findings <span class="text-danger">*</span></label>
+                                    <textarea class="form-control letter-box" rows="8" wire:model="assessment_note" placeholder="Summarize key findings and clinical impression."></textarea>
                                 </div>
-                                <div class="col-md-6"><label class="form-label">Management Plan</label><textarea class="form-control" rows="4" wire:model="management_plan" placeholder="Immediate and ongoing plan"></textarea></div>
-                                <div class="col-md-6"><label class="form-label">Advice to Patient / Guardian</label><textarea class="form-control" rows="3" wire:model="advice_to_patient" placeholder="Counselling and home advice"></textarea></div>
-                                <div class="col-md-6"><label class="form-label">Referral Note</label><textarea class="form-control" rows="3" wire:model="referral_note" placeholder="Referral reason and destination (if any)"></textarea></div>
+                                <div class="col-md-12"><label class="form-label">Management Plan</label><textarea class="form-control" rows="4" wire:model="management_plan" placeholder="Immediate and ongoing management plan."></textarea></div>
                             </div>
                         </div>
                     </div>
@@ -128,9 +119,47 @@
                         </div>
                     </div>
 
+                    <div class="card mb-3">
+                        <div class="card-header bg-label-primary" style="background-color:#ffedd5 !important;color:#9a3412 !important;border-bottom:1px solid #fdba74 !important;"><h6 class="mb-0"><i class='bx bx-capsule me-1'></i>Medication Prescriptions (Optional)</h6></div>
+                        <div class="card-body">
+                            <div class="row g-2 align-items-end mb-2">
+                                <div class="col-md-3"><label class="form-label">Drug Name</label><input type="text" class="form-control" wire:model="drug_entry_name" placeholder="e.g. Amoxicillin"></div>
+                                <div class="col-md-2"><label class="form-label">Dosage</label><input type="text" class="form-control" wire:model="drug_entry_dosage" placeholder="500mg"></div>
+                                <div class="col-md-2"><label class="form-label">Frequency</label><input type="text" class="form-control" wire:model="drug_entry_frequency" placeholder="TDS"></div>
+                                <div class="col-md-2"><label class="form-label">Duration</label><input type="text" class="form-control" wire:model="drug_entry_duration" placeholder="5 days"></div>
+                                <div class="col-md-3"><label class="form-label">Route</label><input type="text" class="form-control" wire:model="drug_entry_route" placeholder="Oral"></div>
+                                <div class="col-md-5"><label class="form-label">Instructions</label><input type="text" class="form-control" wire:model="drug_entry_instructions" placeholder="After meals"></div>
+                                <div class="col-md-3"><label class="form-label">Quantity Prescribed</label><input type="number" class="form-control" min="0" step="0.1" wire:model="drug_entry_quantity_prescribed" placeholder="10"></div>
+                                <div class="col-md-4 d-grid"><button type="button" class="btn btn-primary" wire:click="addDrugOrder" wire:loading.attr="disabled" wire:target="addDrugOrder">Add Medication</button></div>
+                            </div>
+
+                            <div class="table-responsive">
+                                <table class="table table-sm table-bordered align-middle mb-0">
+                                    <thead class="table-light"><tr><th>Drug</th><th>Dosage</th><th>Frequency</th><th>Duration</th><th>Route</th><th>Instructions</th><th>Qty</th><th>Action</th></tr></thead>
+                                    <tbody>
+                                        @forelse ($drug_orders as $index => $entry)
+                                            <tr>
+                                                <td>{{ $entry['drug_name'] ?? '-' }}</td>
+                                                <td>{{ $entry['dosage'] ?? '-' }}</td>
+                                                <td>{{ $entry['frequency'] ?? '-' }}</td>
+                                                <td>{{ $entry['duration'] ?? '-' }}</td>
+                                                <td>{{ $entry['route'] ?? '-' }}</td>
+                                                <td>{{ $entry['instructions'] ?? '-' }}</td>
+                                                <td>{{ $entry['quantity_prescribed'] ?? '-' }}</td>
+                                                <td><button type="button" class="btn btn-sm btn-outline-danger" wire:click="removeDrugOrder({{ $index }})">Remove</button></td>
+                                            </tr>
+                                        @empty
+                                            <tr><td colspan="8" class="text-center text-muted py-3">No medications prescribed.</td></tr>
+                                        @endforelse
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="alert alert-info small">
                         <i class="bx bx-info-circle me-1"></i>
-                        Any prescribed tests are routed to <strong>Tests & Laboratory</strong> as pending requests.
+                        Any prescribed tests are routed to <strong>Tests & Laboratory</strong> and medications to <strong>Prescriptions & Drugs</strong> as pending orders.
                     </div>
 
                     <div class="d-flex justify-content-end gap-2">
@@ -151,13 +180,14 @@
             <div class="card-header"><h5 class="mb-0">Assessment Records <small class="text-muted">({{ count($records) }} Total)</small></h5></div>
             <div class="table-responsive">
                 <table class="table table-hover mb-0">
-                    <thead class="table-dark"><tr><th>Date</th><th>Final</th><th>Pending Tests</th><th>Action</th></tr></thead>
+                    <thead class="table-dark"><tr><th>Date</th><th>Final</th><th>Pending Tests</th><th>Pending Prescriptions</th><th>Action</th></tr></thead>
                     <tbody>
                         @forelse ($records as $record)
                             <tr wire:key="assessment-record-{{ $record->id }}">
                                 <td>{{ $record->visit_date?->format('M d, Y') }}</td>
                                 <td>{{ $record->final_diagnosis ?: 'N/A' }}</td>
                                 <td><span class="badge bg-label-primary">{{ $record->pending_tests_count }}</span></td>
+                                <td><span class="badge bg-label-warning">{{ $record->pending_prescriptions_count }}</span></td>
                                 <td>
                                     <div class="d-flex gap-1">
                                         <button type="button" class="btn btn-sm btn-light text-dark border" wire:click="edit({{ $record->id }})" wire:loading.attr="disabled" wire:target="edit({{ $record->id }})">
@@ -172,7 +202,7 @@
                                 </td>
                             </tr>
                         @empty
-                            <tr><td colspan="4" class="text-center py-4 text-muted">No doctor assessments yet.</td></tr>
+                            <tr><td colspan="5" class="text-center py-4 text-muted">No doctor assessments yet.</td></tr>
                         @endforelse
                     </tbody>
                 </table>

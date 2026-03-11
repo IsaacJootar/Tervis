@@ -20,6 +20,7 @@
         'nutrition' => '<svg viewBox="0 0 24 24" class="icon-svg" aria-hidden="true"><path d="M7 4c2 0 3 2 3 4 0 3-2 5-5 5H4V9a5 5 0 0 1 3-5z"></path><path d="M14 4c3 0 6 4 6 7 0 4-3 7-7 7h-1v-5a9 9 0 0 0 2-9z"></path></svg>',
         'laboratory' => '<svg viewBox="0 0 24 24" class="icon-svg" aria-hidden="true"><path d="M9 3h6M10 3v6l-4 7a4 4 0 0 0 3.5 6h5A4 4 0 0 0 18 16l-4-7V3"></path><path d="M8 14h8"></path></svg>',
         'prescriptions' => '<svg viewBox="0 0 24 24" class="icon-svg" aria-hidden="true"><rect x="5" y="4" width="10" height="16" rx="2"></rect><path d="M9 8h4M9 12h6M9 16h4"></path><path d="M16 10l3 3m0-3l-3 3"></path></svg>',
+        'drug_catalog' => '<svg viewBox="0 0 24 24" class="icon-svg" aria-hidden="true"><path d="M5 6h14v12H5z"></path><path d="M8 9h8M8 12h8M8 15h5"></path></svg>',
         'invoices' => '<svg viewBox="0 0 24 24" class="icon-svg" aria-hidden="true"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"></path><path d="M8 8h8M8 12h6"></path></svg>',
         'appointments' => '<svg viewBox="0 0 24 24" class="icon-svg" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="2"></rect><path d="M8 3v4M16 3v4M8 12h5"></path><circle cx="15.5" cy="12.5" r="2.5"></circle></svg>',
         'referrals' => '<svg viewBox="0 0 24 24" class="icon-svg" aria-hidden="true"><path d="M4 8h9"></path><path d="M13 5l3 3-3 3"></path><path d="M20 16H11"></path><path d="M11 13l-3 3 3 3"></path></svg>',

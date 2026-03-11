@@ -1,9 +1,3 @@
-@php
-    use Carbon\Carbon;
-@endphp
-
-@section('title', 'Prescriptions & Drugs')
-
 <div>
     @if (!$hasAccess)
         <div class="row justify-content-center">
@@ -25,129 +19,275 @@
 
         <div class="card mb-4">
             <div class="card-body d-flex flex-wrap align-items-center gap-3">
-                <div class="rounded-circle bg-primary text-white d-inline-flex align-items-center justify-content-center" style="width:64px;height:64px;font-weight:700;">
+                <div class="rounded-circle bg-primary text-white d-inline-flex align-items-center justify-content-center"
+                    style="width:64px;height:64px;font-weight:700;">
                     {{ strtoupper(substr($first_name, 0, 1)) }}{{ strtoupper(substr($last_name, 0, 1)) }}
                 </div>
                 <div class="flex-grow-1">
                     <h4 class="mb-1"><i class='bx bx-capsule me-1'></i>Drug Dispensing Workspace</h4>
-                    <div class="text-muted small">{{ Carbon::now('Africa/Lagos')->format('l, F j, Y, h:i A') }}</div>
+                    <div class="text-muted small">{{ \Carbon\Carbon::now('Africa/Lagos')->format('l, F j, Y, h:i A') }}</div>
                     <div class="d-flex flex-wrap gap-2 mt-2">
                         <span class="badge bg-label-primary">DIN: {{ $patient_din }}</span>
                         <span class="badge bg-label-secondary">Patient: {{ $first_name }} {{ $last_name }}</span>
                     </div>
                 </div>
-                <button wire:click="backToDashboard" type="button" class="btn btn-primary" wire:loading.attr="disabled" wire:target="backToDashboard">
-                    <span wire:loading.remove wire:target="backToDashboard"><i class="bx bx-arrow-back me-1"></i>Back to Workspace</span>
-                    <span wire:loading wire:target="backToDashboard"><span class="spinner-border spinner-border-sm me-1"></span>Opening...</span>
-                </button>
+                <div class="d-flex gap-2">
+                    <button wire:click="goToDrugCatalog" type="button" class="btn btn-outline-primary"
+                        wire:loading.attr="disabled" wire:target="goToDrugCatalog">
+                        <span wire:loading.remove wire:target="goToDrugCatalog"><i class="bx bx-list-ul me-1"></i>Manage
+                            Drug Catalog</span>
+                        <span wire:loading wire:target="goToDrugCatalog"><span
+                                class="spinner-border spinner-border-sm me-1"></span>Opening...</span>
+                    </button>
+                    <button wire:click="backToDashboard" type="button" class="btn btn-primary" wire:loading.attr="disabled"
+                        wire:target="backToDashboard">
+                        <span wire:loading.remove wire:target="backToDashboard"><i
+                                class="bx bx-arrow-back me-1"></i>Back to Workspace</span>
+                        <span wire:loading wire:target="backToDashboard"><span
+                                class="spinner-border spinner-border-sm me-1"></span>Opening...</span>
+                    </button>
+                </div>
             </div>
         </div>
 
         <div class="card mb-4">
-            <div class="card-header bg-clinical-dark text-white"><h5 class="mb-0 text-white">Pending Prescriptions from Doctor Assessment</h5></div>
+            <div class="card-header text-white" style="background-color:#2c3e50;">
+                <h5 class="mb-0 text-white">Pending Prescriptions from Doctor Assessment</h5>
+            </div>
             <div class="card-body p-0">
                 <div class="table-responsive">
                     <table class="table table-hover mb-0">
-                        <thead class="table-light"><tr><th>Date</th><th>Drug</th><th>Dose/Freq/Duration</th><th>Qty Prescribed</th><th>Instructions</th><th>Action</th></tr></thead>
+                        <thead class="table-light">
+                            <tr>
+                                <th style="width: 48px;">Do</th>
+                                <th>Date</th>
+                                <th>Drug</th>
+                                <th>Dose/Freq/Duration/Route</th>
+                                <th>Qty Prescribed</th>
+                                <th>Instructions</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
                         <tbody>
                             @forelse ($pendingPrescriptions as $item)
                                 <tr wire:key="pending-rx-{{ $item->id }}">
+                                    <td><input class="form-check-input" type="checkbox"
+                                            wire:model.live="selected_prescription_map.{{ $item->id }}"></td>
                                     <td>{{ $item->prescribed_date?->format('M d, Y') ?: 'N/A' }}</td>
                                     <td class="fw-semibold">{{ $item->drug_name }}</td>
-                                    <td>{{ $item->dosage ?: '-' }} | {{ $item->frequency ?: '-' }} | {{ $item->duration ?: '-' }}</td>
+                                    <td>{{ $item->dosage ?: '-' }} | {{ $item->frequency ?: '-' }} |
+                                        {{ $item->duration ?: '-' }} | {{ $item->route ?: '-' }}</td>
                                     <td>{{ $item->quantity_prescribed ?? '-' }}</td>
                                     <td>{{ $item->instructions ?: '-' }}</td>
                                     <td>
-                                        <div class="d-flex gap-1">
-                                            <button type="button" class="btn btn-sm btn-primary" wire:click="startDispense({{ $item->id }})" wire:loading.attr="disabled" wire:target="startDispense({{ $item->id }})">
-                                                <span wire:loading.remove wire:target="startDispense({{ $item->id }})">Dispense</span>
-                                                <span wire:loading wire:target="startDispense({{ $item->id }})"><span class="spinner-border spinner-border-sm"></span></span>
-                                            </button>
-                                            <button type="button" class="btn btn-sm btn-outline-danger" wire:click="cancelPending({{ $item->id }})" wire:loading.attr="disabled" wire:target="cancelPending({{ $item->id }})">Cancel</button>
-                                        </div>
+                                        <button type="button" class="btn btn-sm btn-outline-danger"
+                                            wire:click="cancelPending({{ $item->id }})" wire:loading.attr="disabled"
+                                            wire:target="cancelPending({{ $item->id }})">Cancel</button>
                                     </td>
                                 </tr>
                             @empty
-                                <tr><td colspan="6" class="text-center text-muted py-4">No pending prescriptions.</td></tr>
+                                <tr>
+                                    <td colspan="7" class="text-center text-muted py-4">No pending prescriptions.</td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="card-footer small text-muted">
+                Select the pending prescriptions being fulfilled, then checkout cart once.
+            </div>
+        </div>
+
+        @if ($errors->any())
+            <div class="alert alert-danger py-2 mb-4">
+                <ul class="mb-0">
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
+        <div class="row g-4 mb-4">
+            <div class="col-lg-5">
+                <div class="card h-100">
+                    <div class="card-header" style="background-color:#ffedd5;color:#9a3412;border-bottom:1px solid #fdba74;">
+                        <h6 class="mb-0"><i class='bx bx-plus-circle me-1'></i>Add Drug to Cart</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label class="form-label text-uppercase fw-semibold" style="font-size:11px;letter-spacing:.05em;color:#64748b;">Active Drug Catalog</label>
+                            <select class="form-select" wire:model="selected_catalog_id">
+                                <option value="">-- Select Drug --</option>
+                                @foreach ($activeCatalogItems as $item)
+                                    <option value="{{ $item->id }}">{{ $item->drug_name }}
+                                        ({{ $item->formulation ?: 'N/A' }}, {{ $item->strength ?: 'N/A' }})</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="row g-2">
+                            <div class="col-md-6">
+                                <label class="form-label text-uppercase fw-semibold" style="font-size:11px;letter-spacing:.05em;color:#64748b;">Quantity</label>
+                                <input type="number" class="form-control" min="0.1" step="0.1"
+                                    wire:model="entry_quantity">
+                            </div>
+                            <div class="col-md-6 d-grid align-items-end">
+                                <label class="form-label opacity-0 text-uppercase fw-semibold" style="font-size:11px;letter-spacing:.05em;color:#64748b;">Add</label>
+                                <button type="button" class="btn btn-primary" wire:click="addToCart"
+                                    wire:loading.attr="disabled" wire:target="addToCart">
+                                    <span wire:loading.remove wire:target="addToCart">Add to Cart</span>
+                                    <span wire:loading wire:target="addToCart"><span
+                                            class="spinner-border spinner-border-sm me-1"></span>Adding...</span>
+                                </button>
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="small text-muted mb-2">Batch code: <span
+                                class="fw-semibold text-dark">{{ $dispense_code ?: 'Auto-generated' }}</span></div>
+                        <div class="row g-2">
+                            <div class="col-md-5">
+                                <label class="form-label text-uppercase fw-semibold" style="font-size:11px;letter-spacing:.05em;color:#64748b;">Dispense Date</label>
+                                <input type="date" class="form-control" wire:model="dispensed_date">
+                            </div>
+                            <div class="col-md-7">
+                                <label class="form-label text-uppercase fw-semibold" style="font-size:11px;letter-spacing:.05em;color:#64748b;">Dispense Notes</label>
+                                <input type="text" class="form-control" wire:model="dispense_notes"
+                                    placeholder="Optional notes">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer d-flex gap-2 justify-content-end">
+                        <button type="button" class="btn btn-outline-secondary" wire:click="clearCart"
+                            wire:loading.attr="disabled" wire:target="clearCart">Clear Cart</button>
+                        <button type="button" class="btn btn-primary" wire:click="checkoutDispensing"
+                            wire:loading.attr="disabled" wire:target="checkoutDispensing">
+                            <span wire:loading.remove wire:target="checkoutDispensing">Submit Checkout</span>
+                            <span wire:loading wire:target="checkoutDispensing"><span
+                                    class="spinner-border spinner-border-sm me-1"></span>Submitting...</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-7">
+                <div class="card h-100">
+                    <div class="card-header d-flex justify-content-between align-items-center" style="background-color:#ffedd5;color:#9a3412;border-bottom:1px solid #fdba74;">
+                        <h6 class="mb-0"><i class='bx bx-cart me-1'></i>Cart Items</h6>
+                        <small class="text-muted">{{ count($cart) }} line(s)</small>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Drug</th>
+                                        <th style="width: 180px;">Quantity</th>
+                                        <th style="width: 120px;">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @forelse ($cart as $line)
+                                        <tr wire:key="rx-cart-{{ $line['cart_item_id'] }}">
+                                            <td class="fw-semibold">{{ $line['drug_name'] }}</td>
+                                            <td>
+                                                <input type="number" class="form-control form-control-sm" min="0.1"
+                                                    step="0.1" value="{{ $line['quantity'] }}"
+                                                    wire:change="updateCartQuantity('{{ $line['cart_item_id'] }}', $event.target.value)">
+                                            </td>
+                                            <td>
+                                                <button type="button" class="btn btn-sm btn-outline-danger"
+                                                    wire:click="removeFromCart('{{ $line['cart_item_id'] }}')">Remove</button>
+                                            </td>
+                                        </tr>
+                                    @empty
+                                        <tr>
+                                            <td colspan="3" class="text-center text-muted py-4">Cart is empty.</td>
+                                        </tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        @if ($receipt_code)
+            <div class="card mb-4">
+                <div class="card-header text-white d-flex justify-content-between align-items-center" style="background-color:#2c3e50;">
+                    <h6 class="mb-0 text-white">Dispense Receipt: {{ $receipt_code }}</h6>
+                    <div class="d-flex gap-1">
+                        <button type="button" class="btn btn-sm btn-outline-light" wire:click="printReceipt">Print</button>
+                        <button type="button" class="btn btn-sm btn-outline-light" wire:click="closeReceipt">Close</button>
+                    </div>
+                </div>
+                <div class="card-body" id="drug-receipt-printable">
+                    <div class="mb-2 small text-muted">Date: {{ $receipt_date ?: '-' }}</div>
+                    <div class="table-responsive">
+                        <table class="table table-sm table-bordered align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Drug</th>
+                                    <th>Quantity</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach ($receipt_lines as $line)
+                                    <tr>
+                                        <td>{{ $line['drug_name'] ?? '-' }}</td>
+                                        <td>{{ $line['quantity'] ?? '-' }}</td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        @endif
+
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center" style="background-color:#ffedd5;color:#9a3412;border-bottom:1px solid #fdba74;">
+                <h6 class="mb-0"><i class='bx bx-history me-1'></i>Dispensing Batches</h6>
+                <div class="d-flex gap-2">
+                    <input type="date" class="form-control form-control-sm" wire:model.live="history_from_date">
+                    <input type="date" class="form-control form-control-sm" wire:model.live="history_to_date">
+                </div>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Date</th>
+                                <th>Batch Code</th>
+                                <th>Lines</th>
+                                <th>Total Qty</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse ($dispenseBatches as $batch)
+                                <tr>
+                                    <td>{{ \Carbon\Carbon::parse($batch->dispensed_date)->format('M d, Y') }}</td>
+                                    <td class="fw-semibold">{{ $batch->dispense_code }}</td>
+                                    <td>{{ $batch->lines_count }}</td>
+                                    <td>{{ $batch->total_quantity }}</td>
+                                    <td>
+                                        <button type="button" class="btn btn-sm btn-light text-dark border"
+                                            wire:click="openReceipt('{{ $batch->dispense_code }}')">View Receipt</button>
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="5" class="text-center text-muted py-4">No dispensing batches found.</td>
+                                </tr>
                             @endforelse
                         </tbody>
                     </table>
                 </div>
             </div>
         </div>
-
-        @if ($active_dispense_id)
-            <div class="card mb-4">
-                <div class="card-header bg-label-primary" style="background-color:#ffedd5 !important;color:#9a3412 !important;border-bottom:1px solid #fdba74 !important;"><h6 class="mb-0">Dispense Selected Prescription</h6></div>
-                <div class="card-body">
-                    <form wire:submit.prevent="dispense">
-                        @csrf
-                        @if ($errors->any())
-                            <div class="alert alert-danger py-2">
-                                <ul class="mb-0">
-                                    @foreach ($errors->all() as $error)
-                                        <li>{{ $error }}</li>
-                                    @endforeach
-                                </ul>
-                            </div>
-                        @endif
-
-                        <div class="row g-3">
-                            <div class="col-md-4"><label class="form-label">Drug</label><input type="text" class="form-control bg-light" value="{{ $activeRecord?->drug_name }}" readonly></div>
-                            <div class="col-md-2"><label class="form-label">Dispense Date</label><input type="date" class="form-control" wire:model="dispensed_date"></div>
-                            <div class="col-md-2"><label class="form-label">Qty Dispensed</label><input type="number" class="form-control" min="0" step="0.1" wire:model="quantity_dispensed"></div>
-                            <div class="col-md-4"><label class="form-label">Dispense Notes</label><input type="text" class="form-control" wire:model="dispense_notes" placeholder="Batch, counseling notes, etc."></div>
-                        </div>
-
-                        <div class="d-flex justify-content-end gap-2 mt-3">
-                            <button type="button" class="btn btn-outline-secondary" wire:click="clearDispense">Cancel</button>
-                            <button type="submit" class="btn btn-primary" wire:loading.attr="disabled" wire:target="dispense">
-                                <span wire:loading.remove wire:target="dispense">Confirm Dispense</span>
-                                <span wire:loading wire:target="dispense"><span class="spinner-border spinner-border-sm me-1"></span>Saving...</span>
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        @endif
-
-        <div class="card">
-            <div class="card-header"><h5 class="mb-0">Dispensing History</h5></div>
-            <div class="table-responsive">
-                <table class="table table-hover mb-0">
-                    <thead class="table-dark"><tr><th>Prescribed</th><th>Drug</th><th>Status</th><th>Dispensed Date</th><th>Dispensed By</th><th>Notes</th></tr></thead>
-                    <tbody>
-                        @forelse ($history as $item)
-                            <tr wire:key="rx-history-{{ $item->id }}">
-                                <td>{{ $item->prescribed_date?->format('M d, Y') ?: 'N/A' }}</td>
-                                <td>{{ $item->drug_name }}</td>
-                                <td><span class="badge bg-label-{{ $item->status === 'dispensed' ? 'success' : 'danger' }}">{{ ucfirst($item->status) }}</span></td>
-                                <td>{{ $item->dispensed_date?->format('M d, Y') ?: '-' }}</td>
-                                <td>{{ $item->dispensed_by ?: '-' }}</td>
-                                <td>{{ $item->dispense_notes ?: '-' }}</td>
-                            </tr>
-                        @empty
-                            <tr><td colspan="6" class="text-center py-4 text-muted">No dispensing history yet.</td></tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
-        </div>
     @endif
+
 </div>
-
-@once
-    <style>
-        .bg-clinical-dark {
-            background-color: #2c3e50 !important;
-        }
-
-        .form-label {
-            font-size: 11px;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            font-weight: 700;
-            color: #64748b;
-        }
-    </style>
-@endonce

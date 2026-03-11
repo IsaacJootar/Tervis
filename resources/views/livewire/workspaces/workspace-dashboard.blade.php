@@ -231,6 +231,15 @@
                 'description' => 'Medication prescriptions and drug history',
             ])
 
+            {{-- Card 9b: Drug Catalog --}} 
+            @include('livewire.partials.workspace-card', [
+                'key' => 'drug_catalog',
+                'title' => 'Drug Catalog',
+                'icon' => 'bx-list-ul',
+                'color' => 'primary',
+                'description' => 'Manage facility drug list for dispensing cart',
+            ])
+
             {{-- Card 10: Invoices & Payments --}}
             @include('livewire.partials.workspace-card', [
                 'key' => 'invoices',

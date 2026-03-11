@@ -49,6 +49,8 @@ use App\Livewire\Workspaces\Modules\Child\Nutrition;
 use App\Livewire\Workspaces\Modules\Child\ActivityRegister;
 use App\Livewire\Workspaces\Modules\Clinical\DoctorAssessments;
 use App\Livewire\Workspaces\Modules\Clinical\Laboratory;
+use App\Livewire\Workspaces\Modules\Clinical\Prescriptions;
+use App\Livewire\Workspaces\Modules\Clinical\DrugCatalog;
 use App\Livewire\Analytics\MpdsrReportDashboard;
 use App\Livewire\Core\DisableDataOfficerAccount;
 use App\Livewire\Analytics\HealthTrendsDashboard;
@@ -169,6 +171,12 @@ Route::middleware(['auth', 'role.redirect'])->prefix('workspaces')->group(functi
   
   Route::get('/{patientId}/laboratory', Laboratory::class)
     ->name('workspaces-laboratory');
+
+  Route::get('/{patientId}/prescriptions', Prescriptions::class)
+    ->name('workspaces-prescriptions');
+
+  Route::get('/{patientId}/drug-catalog', DrugCatalog::class)
+    ->name('workspaces-drug-catalog');
 
 });
 

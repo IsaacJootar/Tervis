@@ -4,6 +4,7 @@ namespace App\Livewire\Workspaces;
 
 use App\Models\Patient;
 use App\Models\Facility;
+use App\Models\DrugCatalogItem;
 use App\Models\Registrations\DinActivation;
 use Livewire\Component;
 use Illuminate\Support\Facades\Auth;
@@ -270,6 +271,19 @@ class WorkspaceDashboard extends Component
       'label' => 'Prescriptions'
     ];
 
+    // Card 9b: Drug Catalog (facility-level)
+    $drugCatalogCount = 0;
+    try {
+      $drugCatalogCount = DrugCatalogItem::where('facility_id', $this->facility_id)->count();
+    } catch (\Exception $e) {
+      $drugCatalogCount = 0;
+    }
+    $this->cardStatus['drug_catalog'] = [
+      'enabled' => true,
+      'count' => $drugCatalogCount,
+      'label' => 'Catalog Items'
+    ];
+
     // Card 10: Invoices & Payments
     $invoiceCount = $this->getModelCount('App\Models\Invoice');
     $this->cardStatus['invoices'] = [
@@ -340,6 +354,7 @@ class WorkspaceDashboard extends Component
       'nutrition' => 'workspaces-child-health-nutrition',
       'laboratory' => 'workspaces-laboratory',
       'prescriptions' => 'workspaces-prescriptions',
+      'drug_catalog' => 'workspaces-drug-catalog',
       'invoices' => 'workspaces-invoices',
       'appointments' => 'workspaces-appointments',
       'referrals' => 'workspaces-referrals',

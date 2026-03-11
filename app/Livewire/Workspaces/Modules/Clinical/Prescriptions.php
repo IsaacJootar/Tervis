@@ -3,6 +3,8 @@
 namespace App\Livewire\Workspaces\Modules\Clinical;
 
 use App\Models\Activity;
+use App\Models\DrugCatalogItem;
+use App\Models\DrugDispenseLine;
 use App\Models\Facility;
 use App\Models\Patient;
 use App\Models\Prescription;
@@ -11,6 +13,7 @@ use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
@@ -26,16 +29,31 @@ class Prescriptions extends Component
   public $officer_name, $officer_role, $officer_designation;
   public $hasAccess = false, $accessError = '', $activation_time;
 
-  public $active_dispense_id;
   public $dispensed_date;
-  public $quantity_dispensed;
   public $dispense_notes;
+  public $selected_prescription_map = [];
+
+  public $selected_catalog_id;
+  public $entry_quantity = 1;
+  public $cart = [];
+  public $dispense_code = '';
+
+  public $history_from_date;
+  public $history_to_date;
+
+  public $receipt_code;
+  public $receipt_lines = [];
+  public $receipt_date;
 
   protected $rules = [
-    'active_dispense_id' => 'required|exists:prescriptions,id',
     'dispensed_date' => 'required|date',
-    'quantity_dispensed' => 'nullable|numeric|min:0',
     'dispense_notes' => 'nullable|string|max:1000',
+    'selected_prescription_map' => 'nullable|array',
+    'selected_prescription_map.*' => 'boolean',
+    'selected_catalog_id' => 'required|integer',
+    'entry_quantity' => 'required|numeric|min:0.1',
+    'history_from_date' => 'nullable|date',
+    'history_to_date' => 'nullable|date',
   ];
 
   public function mount($patientId)
@@ -71,6 +89,9 @@ class Prescriptions extends Component
     }
 
     $this->dispensed_date = now()->format('Y-m-d');
+    $this->history_from_date = now()->subDays(14)->format('Y-m-d');
+    $this->history_to_date = now()->format('Y-m-d');
+    $this->hydrateCartFromSession();
   }
 
   private function validatePatientAccess(): void
@@ -115,58 +136,282 @@ class Prescriptions extends Component
     $this->patient_age = $this->patient->date_of_birth ? $this->patient->date_of_birth->age : null;
   }
 
-  public function startDispense($id): void
+  private function cartSessionKey(): string
   {
-    $record = Prescription::where('facility_id', $this->facility_id)
+    return 'prescriptions_cart_' . Auth::id() . '_' . $this->patientId;
+  }
+
+  private function codeSessionKey(): string
+  {
+    return 'prescriptions_code_' . Auth::id() . '_' . $this->patientId;
+  }
+
+  private function hydrateCartFromSession(): void
+  {
+    $this->cart = session($this->cartSessionKey(), []);
+    $this->dispense_code = session($this->codeSessionKey(), '');
+  }
+
+  private function persistCartToSession(): void
+  {
+    session([
+      $this->cartSessionKey() => $this->cart,
+      $this->codeSessionKey() => $this->dispense_code,
+    ]);
+  }
+
+  private function resetCartSession(): void
+  {
+    session()->forget([$this->cartSessionKey(), $this->codeSessionKey()]);
+  }
+
+  private function generateDispenseCode(): string
+  {
+    $randomCode = '';
+    for ($i = 0; $i < 14; $i++) {
+      $randomCode .= mt_rand(0, 9);
+    }
+    return $randomCode;
+  }
+
+  public function goToDrugCatalog()
+  {
+    return redirect()->route('workspaces-drug-catalog', ['patientId' => $this->patientId]);
+  }
+
+  public function addToCart(): void
+  {
+    $this->resetErrorBag(['selected_catalog_id', 'entry_quantity', 'checkout']);
+    $this->validateOnly('selected_catalog_id');
+    $this->validateOnly('entry_quantity');
+
+    $item = DrugCatalogItem::query()
+      ->where('facility_id', $this->facility_id)
+      ->where('is_active', true)
+      ->find($this->selected_catalog_id);
+
+    if (!$item) {
+      $this->addError('selected_catalog_id', 'Select an active drug from Drug Catalog.');
+      toastr()->error('Select an active drug from Drug Catalog.');
+      return;
+    }
+
+    if (empty($this->dispense_code)) {
+      $this->dispense_code = $this->generateDispenseCode();
+    }
+
+    $this->cart[] = [
+      'cart_item_id' => Str::uuid()->toString(),
+      'drug_catalog_item_id' => $item->id,
+      'drug_name' => $item->drug_name,
+      'quantity' => (float) $this->entry_quantity,
+    ];
+
+    $this->persistCartToSession();
+    $this->selected_catalog_id = null;
+    $this->entry_quantity = 1;
+    toastr()->success($item->drug_name . ' added to cart.');
+  }
+
+  public function removeFromCart(string $cartItemId): void
+  {
+    $this->cart = array_values(array_filter(
+      $this->cart,
+      fn($item) => ($item['cart_item_id'] ?? null) !== $cartItemId
+    ));
+
+    if (count($this->cart) === 0) {
+      $this->dispense_code = '';
+      $this->resetCartSession();
+    } else {
+      $this->persistCartToSession();
+    }
+  }
+
+  public function updateCartQuantity(string $cartItemId, $quantity): void
+  {
+    $quantity = (float) $quantity;
+    if ($quantity < 0.1) {
+      $quantity = 0.1;
+    }
+
+    foreach ($this->cart as &$item) {
+      if (($item['cart_item_id'] ?? null) === $cartItemId) {
+        $item['quantity'] = $quantity;
+        break;
+      }
+    }
+    unset($item);
+
+    $this->persistCartToSession();
+  }
+
+  public function clearCart(): void
+  {
+    $this->cart = [];
+    $this->dispense_code = '';
+    $this->resetCartSession();
+  }
+
+  private function getPendingPrescriptionIds()
+  {
+    return Prescription::query()
       ->where('patient_id', $this->patientId)
+      ->where('facility_id', $this->facility_id)
       ->where('status', 'pending')
-      ->findOrFail($id);
-
-    $this->active_dispense_id = $record->id;
-    $this->dispensed_date = now()->format('Y-m-d');
-    $this->quantity_dispensed = $record->quantity_prescribed;
-    $this->dispense_notes = null;
+      ->pluck('id')
+      ->map(fn($id) => (int) $id)
+      ->values();
   }
 
-  public function clearDispense(): void
+  private function getSelectedPendingPrescriptionIds()
   {
-    $this->reset(['active_dispense_id', 'quantity_dispensed', 'dispense_notes']);
-    $this->dispensed_date = now()->format('Y-m-d');
+    $pendingIds = $this->getPendingPrescriptionIds();
+    if ($pendingIds->isEmpty()) {
+      return collect();
+    }
+
+    $selected = collect((array) $this->selected_prescription_map)
+      ->filter(fn($checked) => (bool) $checked)
+      ->keys()
+      ->filter(fn($id) => is_numeric($id))
+      ->map(fn($id) => (int) $id)
+      ->unique()
+      ->values();
+
+    return $selected->intersect($pendingIds)->values();
   }
 
-  public function dispense(): void
+  private function enforcePendingSelection(): void
   {
+    if ($this->getPendingPrescriptionIds()->isEmpty()) {
+      return;
+    }
+
+    if ($this->getSelectedPendingPrescriptionIds()->isEmpty()) {
+      throw ValidationException::withMessages([
+        'selected_prescription_map' => 'Select at least one pending prescription before checkout.',
+      ]);
+    }
+  }
+
+  public function checkoutDispensing(): void
+  {
+    $this->resetErrorBag(['selected_prescription_map', 'checkout', 'dispensed_date', 'dispense_notes']);
+
+    $this->validateOnly('dispensed_date');
+    $this->validateOnly('dispense_notes');
+
+    if (count($this->cart) === 0) {
+      $this->addError('checkout', 'Cart is empty. Add at least one drug item.');
+      toastr()->error('Cart is empty.');
+      return;
+    }
+
+    $this->enforcePendingSelection();
+
     DB::beginTransaction();
     try {
-      $this->validate();
+      if (empty($this->dispense_code)) {
+        $this->dispense_code = $this->generateDispenseCode();
+      }
 
-      $record = Prescription::where('facility_id', $this->facility_id)
+      $selectedIds = $this->getSelectedPendingPrescriptionIds()->all();
+
+      $pendingRecords = Prescription::query()
         ->where('patient_id', $this->patientId)
+        ->where('facility_id', $this->facility_id)
         ->where('status', 'pending')
-        ->findOrFail($this->active_dispense_id);
+        ->whereIn('id', $selectedIds)
+        ->get();
 
-      $record->update([
-        'status' => 'dispensed',
-        'quantity_dispensed' => $this->quantity_dispensed === '' ? null : $this->quantity_dispensed,
-        'dispensed_by' => $this->officer_name,
-        'dispensed_date' => $this->dispensed_date,
-        'dispense_notes' => $this->dispense_notes,
-      ]);
+      $pendingPool = [];
+      foreach ($pendingRecords as $record) {
+        $key = strtolower(trim((string) $record->drug_name));
+        $pendingPool[$key] = $pendingPool[$key] ?? [];
+        $pendingPool[$key][] = (int) $record->id;
+      }
+
+      $matchedQtyByPrescription = [];
+      foreach ($this->cart as $line) {
+        $key = strtolower(trim((string) ($line['drug_name'] ?? '')));
+        $matchedPrescriptionId = null;
+        if (isset($pendingPool[$key]) && count($pendingPool[$key]) > 0) {
+          $matchedPrescriptionId = array_shift($pendingPool[$key]);
+          $matchedQtyByPrescription[$matchedPrescriptionId] = ($matchedQtyByPrescription[$matchedPrescriptionId] ?? 0) + (float) ($line['quantity'] ?? 0);
+        }
+
+        DrugDispenseLine::create([
+          'patient_id' => $this->patientId,
+          'facility_id' => $this->facility_id,
+          'state_id' => $this->state_id,
+          'lga_id' => $this->lga_id,
+          'ward_id' => $this->ward_id,
+          'drug_catalog_item_id' => $line['drug_catalog_item_id'] ?? null,
+          'prescription_id' => $matchedPrescriptionId,
+          'month_year' => Carbon::parse($this->dispensed_date)->startOfMonth()->format('Y-m-d'),
+          'dispensed_date' => $this->dispensed_date,
+          'dispense_code' => $this->dispense_code,
+          'drug_name' => $line['drug_name'],
+          'quantity' => (float) ($line['quantity'] ?? 0),
+          'dispense_notes' => $this->dispense_notes,
+          'dispensed_by' => $this->officer_name,
+        ]);
+      }
+
+      foreach ($pendingRecords as $record) {
+        $record->update([
+          'status' => 'dispensed',
+          'quantity_dispensed' => $matchedQtyByPrescription[$record->id] ?? $record->quantity_prescribed,
+          'dispensed_by' => $this->officer_name,
+          'dispensed_date' => $this->dispensed_date,
+          'dispense_notes' => $this->dispense_notes,
+        ]);
+      }
 
       DB::commit();
-      $this->logActivity('dispense', 'Dispensed prescribed drug: ' . $record->drug_name);
-      $this->clearDispense();
-      toastr()->success('Prescription dispensed successfully.');
-    } catch (ValidationException $e) {
-      DB::rollBack();
-      foreach ($e->errors() as $errors) {
-        toastr()->error($errors[0]);
-      }
+
+      $lineCount = count($this->cart);
+      $code = $this->dispense_code;
+      $this->logActivity('dispense', 'Dispensed ' . $lineCount . ' line item(s) with code ' . $code . '.');
+      $this->openReceipt($code);
+      $this->clearCart();
+      $this->selected_prescription_map = [];
+      $this->dispense_notes = null;
+
+      toastr()->success('Dispensing checkout completed successfully.');
     } catch (Exception $e) {
       DB::rollBack();
-      toastr()->error('An error occurred while dispensing prescription.');
-      throw $e;
+      report($e);
+      $this->addError('checkout', 'An error occurred during checkout. Please try again.');
+      toastr()->error('An error occurred during checkout.');
     }
+  }
+
+  public function openReceipt(string $code): void
+  {
+    $lines = DrugDispenseLine::query()
+      ->where('patient_id', $this->patientId)
+      ->where('facility_id', $this->facility_id)
+      ->where('dispense_code', $code)
+      ->orderBy('id')
+      ->get();
+
+    $this->receipt_code = $code;
+    $this->receipt_lines = $lines->toArray();
+    $this->receipt_date = optional($lines->first())->dispensed_date?->format('Y-m-d');
+  }
+
+  public function closeReceipt(): void
+  {
+    $this->receipt_code = null;
+    $this->receipt_lines = [];
+    $this->receipt_date = null;
+  }
+
+  public function printReceipt(): void
+  {
+    $this->dispatch('print-drug-receipt');
   }
 
   public function cancelPending($id): void
@@ -180,6 +425,7 @@ class Prescriptions extends Component
       'status' => 'cancelled',
       'dispense_notes' => 'Cancelled by pharmacy desk.',
     ]);
+    unset($this->selected_prescription_map[$record->id]);
 
     $this->logActivity('cancel', 'Cancelled pending prescription: ' . $record->drug_name);
     toastr()->success('Pending prescription cancelled.');
@@ -216,27 +462,45 @@ class Prescriptions extends Component
       ->latest('id')
       ->get();
 
-    $history = Prescription::query()
-      ->where('patient_id', $this->patientId)
+    $pendingIds = $pendingPrescriptions->pluck('id')->map(fn($id) => (string) $id)->all();
+    $this->selected_prescription_map = collect((array) $this->selected_prescription_map)
+      ->filter(fn($checked, $id) => (bool) $checked && in_array((string) $id, $pendingIds, true))
+      ->map(fn() => true)
+      ->toArray();
+
+    $activeCatalogItems = DrugCatalogItem::query()
       ->where('facility_id', $this->facility_id)
-      ->whereIn('status', ['dispensed', 'cancelled'])
-      ->latest('dispensed_date')
-      ->latest('id')
-      ->limit(100)
+      ->where('is_active', true)
+      ->latest('drug_name')
       ->get();
 
-    $activeRecord = null;
-    if ($this->active_dispense_id) {
-      $activeRecord = $pendingPrescriptions->firstWhere('id', (int) $this->active_dispense_id);
-      if (!$activeRecord) {
-        $activeRecord = Prescription::where('id', $this->active_dispense_id)->first();
-      }
+    $historyQuery = DrugDispenseLine::query()
+      ->where('patient_id', $this->patientId)
+      ->where('facility_id', $this->facility_id);
+
+    if ($this->history_from_date) {
+      $historyQuery->whereDate('dispensed_date', '>=', $this->history_from_date);
     }
+    if ($this->history_to_date) {
+      $historyQuery->whereDate('dispensed_date', '<=', $this->history_to_date);
+    }
+
+    $dispenseBatches = (clone $historyQuery)
+      ->select([
+        'dispense_code',
+        'dispensed_date',
+        DB::raw('COUNT(*) as lines_count'),
+        DB::raw('SUM(quantity) as total_quantity'),
+      ])
+      ->groupBy('dispense_code', 'dispensed_date')
+      ->orderByDesc('dispensed_date')
+      ->orderByDesc(DB::raw('MAX(id)'))
+      ->get();
 
     return view('livewire.workspaces.modules.clinical.prescriptions', [
       'pendingPrescriptions' => $pendingPrescriptions,
-      'history' => $history,
-      'activeRecord' => $activeRecord,
+      'activeCatalogItems' => $activeCatalogItems,
+      'dispenseBatches' => $dispenseBatches,
     ]);
   }
 }
