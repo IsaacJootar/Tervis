@@ -32,11 +32,11 @@
                     </div>
                 </div>
                 <div class="d-flex gap-2">
-                    <button wire:click="goToDrugCatalog" type="button" class="btn btn-outline-primary"
-                        wire:loading.attr="disabled" wire:target="goToDrugCatalog">
-                        <span wire:loading.remove wire:target="goToDrugCatalog"><i class="bx bx-list-ul me-1"></i>Manage
-                            Drug Catalog</span>
-                        <span wire:loading wire:target="goToDrugCatalog"><span
+                    <button wire:click="goToInvoices" type="button" class="btn btn-outline-primary"
+                        wire:loading.attr="disabled" wire:target="goToInvoices">
+                        <span wire:loading.remove wire:target="goToInvoices"><i class="bx bx-receipt me-1"></i>Open
+                            Invoices</span>
+                        <span wire:loading wire:target="goToInvoices"><span
                                 class="spinner-border spinner-border-sm me-1"></span>Opening...</span>
                     </button>
                     <button wire:click="backToDashboard" type="button" class="btn btn-primary" wire:loading.attr="disabled"
@@ -55,8 +55,8 @@
                 <h5 class="mb-0 text-white">Pending Prescriptions from Doctor Assessment</h5>
             </div>
             <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-hover mb-0">
+                <div class="card-datatable table-responsive pt-0">
+                    <table id="pendingPrescriptionsTable" class="table align-middle">
                         <thead class="table-light">
                             <tr>
                                 <th style="width: 48px;">Do</th>
@@ -69,7 +69,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @forelse ($pendingPrescriptions as $item)
+                            @foreach ($pendingPrescriptions as $item)
                                 <tr wire:key="pending-rx-{{ $item->id }}">
                                     <td><input class="form-check-input" type="checkbox"
                                             wire:model.live="selected_prescription_map.{{ $item->id }}"></td>
@@ -85,11 +85,7 @@
                                             wire:target="cancelPending({{ $item->id }})">Cancel</button>
                                     </td>
                                 </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="7" class="text-center text-muted py-4">No pending prescriptions.</td>
-                                </tr>
-                            @endforelse
+                            @endforeach
                         </tbody>
                     </table>
                 </div>
@@ -108,6 +104,28 @@
                 </ul>
             </div>
         @endif
+
+        <div class="card mb-4">
+            <div class="card-header" style="background-color:#ffedd5;color:#9a3412;border-bottom:1px solid #fdba74;">
+                <h6 class="mb-0"><i class='bx bx-wallet me-1'></i>Billing Summary</h6>
+            </div>
+            <div class="card-body py-3">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <div class="small text-uppercase text-muted fw-semibold">Total Billed</div>
+                        <div class="fw-bold fs-5">{{ number_format((float)($billingSummary->total_billed ?? 0), 2) }}</div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="small text-uppercase text-muted fw-semibold">Total Paid</div>
+                        <div class="fw-bold fs-5 text-success">{{ number_format((float)($billingSummary->total_paid ?? 0), 2) }}</div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="small text-uppercase text-muted fw-semibold">Outstanding</div>
+                        <div class="fw-bold fs-5 text-danger">{{ number_format((float)($billingSummary->total_outstanding ?? 0), 2) }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
         <div class="row g-4 mb-4">
             <div class="col-lg-5">
@@ -176,6 +194,31 @@
                                 <input type="text" class="form-control" wire:model="dispense_notes"
                                     placeholder="Optional notes">
                             </div>
+                            <div class="col-md-6">
+                                <label class="form-label text-uppercase fw-semibold" style="font-size:11px;letter-spacing:.05em;color:#64748b;">Charge Amount</label>
+                                <input type="number" min="0" step="0.01" class="form-control" wire:model="charge_amount"
+                                    placeholder="Enter bill amount for this dispensing">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label text-uppercase fw-semibold" style="font-size:11px;letter-spacing:.05em;color:#64748b;">Amount Paid Now</label>
+                                <input type="number" min="0" step="0.01" class="form-control" wire:model="amount_paid_now"
+                                    placeholder="Can be partial or full">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label text-uppercase fw-semibold" style="font-size:11px;letter-spacing:.05em;color:#64748b;">Payment Method</label>
+                                <select class="form-select" wire:model="payment_method">
+                                    <option value="Cash">Cash</option>
+                                    <option value="Transfer">Transfer</option>
+                                    <option value="POS">POS</option>
+                                    <option value="Insurance">Insurance</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label text-uppercase fw-semibold" style="font-size:11px;letter-spacing:.05em;color:#64748b;">Payment Notes</label>
+                                <input type="text" class="form-control" wire:model="payment_notes"
+                                    placeholder="Optional payment note">
+                            </div>
                         </div>
                     </div>
                     <div class="card-footer d-flex gap-2 justify-content-end">
@@ -198,8 +241,8 @@
                         <small class="text-muted">{{ count($cart) }} line(s)</small>
                     </div>
                     <div class="card-body p-0">
-                        <div class="table-responsive">
-                            <table class="table table-hover mb-0">
+                        <div class="card-datatable table-responsive pt-0">
+                            <table id="cartItemsTable" class="table align-middle">
                                 <thead class="table-light">
                                     <tr>
                                         <th>Drug</th>
@@ -208,7 +251,7 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @forelse ($cart as $line)
+                                    @foreach ($cart as $line)
                                         <tr wire:key="rx-cart-{{ $line['cart_item_id'] }}">
                                             <td class="fw-semibold">{{ $line['drug_name'] }}</td>
                                             <td>
@@ -221,11 +264,7 @@
                                                     wire:click="removeFromCart('{{ $line['cart_item_id'] }}')">Remove</button>
                                             </td>
                                         </tr>
-                                    @empty
-                                        <tr>
-                                            <td colspan="3" class="text-center text-muted py-4">Cart is empty.</td>
-                                        </tr>
-                                    @endforelse
+                                    @endforeach
                                 </tbody>
                             </table>
                         </div>
@@ -245,8 +284,8 @@
                 </div>
                 <div class="card-body" id="drug-receipt-printable">
                     <div class="mb-2 small text-muted">Date: {{ $receipt_date ?: '-' }}</div>
-                    <div class="table-responsive">
-                        <table class="table table-sm table-bordered align-middle mb-0">
+                    <div class="card-datatable table-responsive pt-0">
+                        <table id="prescriptionReceiptTable" class="table align-middle">
                             <thead class="table-light">
                                 <tr>
                                     <th>Drug</th>
@@ -276,8 +315,8 @@
                 </div>
             </div>
             <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-hover mb-0">
+                <div class="card-datatable table-responsive pt-0">
+                    <table id="dispenseBatchesTable" class="table align-middle">
                         <thead class="table-light">
                             <tr>
                                 <th>Date</th>
@@ -288,7 +327,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @forelse ($dispenseBatches as $batch)
+                            @foreach ($dispenseBatches as $batch)
                                 <tr>
                                     <td>{{ \Carbon\Carbon::parse($batch->dispensed_date)->format('M d, Y') }}</td>
                                     <td class="fw-semibold">{{ $batch->dispense_code }}</td>
@@ -299,11 +338,38 @@
                                             wire:click="openReceipt('{{ $batch->dispense_code }}')">View Receipt</button>
                                     </td>
                                 </tr>
-                            @empty
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mt-4">
+            <div class="card-header d-flex justify-content-between align-items-center" style="background-color:#ffedd5;color:#9a3412;border-bottom:1px solid #fdba74;">
+                <h6 class="mb-0"><i class='bx bx-credit-card me-1'></i>Recent Payments</h6>
+                <small class="text-muted">{{ $recentPayments->count() }} item(s)</small>
+            </div>
+            <div class="card-body p-0">
+                <div class="card-datatable table-responsive pt-0">
+                    <table class="table align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Date</th>
+                                <th>Payment Code</th>
+                                <th>Amount</th>
+                                <th>Method</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($recentPayments as $payment)
                                 <tr>
-                                    <td colspan="5" class="text-center text-muted py-4">No dispensing batches found.</td>
+                                    <td>{{ $payment->payment_date?->format('M d, Y') }}</td>
+                                    <td class="fw-semibold">{{ $payment->payment_code }}</td>
+                                    <td class="text-success fw-semibold">{{ number_format((float)$payment->amount_received, 2) }}</td>
+                                    <td>{{ $payment->payment_method ?: 'N/A' }}</td>
                                 </tr>
-                            @endforelse
+                            @endforeach
                         </tbody>
                     </table>
                 </div>
@@ -312,3 +378,12 @@
     @endif
 
 </div>
+
+@include('_partials.datatables-init-multi', [
+    'tableIds' => ['pendingPrescriptionsTable', 'cartItemsTable', 'prescriptionReceiptTable', 'dispenseBatchesTable'],
+    'orders' => [
+        'pendingPrescriptionsTable' => [1, 'desc'],
+        'dispenseBatchesTable' => [0, 'desc'],
+    ],
+    'nonOrderable' => ['cartItemsTable', 'prescriptionReceiptTable'],
+])

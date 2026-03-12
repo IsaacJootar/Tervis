@@ -148,8 +148,8 @@
                         <div class="card mb-3">
                             <div class="card-header bg-label-primary"><h6 class="mb-0">Routine Immunization Schedule</h6></div>
                             <div class="card-body p-0">
-                                <div class="table-responsive">
-                                    <table class="table table-hover mb-0 vax-table">
+                                <div class="card-datatable table-responsive pt-0">
+                                    <table class="table">
                                         <thead class="table-light"><tr><th>Antigen</th><th>Age</th><th>Date Given</th><th>Status</th><th>Notes</th></tr></thead>
                                         <tbody>
                                             @foreach ($vaccineSchedule as $vaccine)
@@ -201,8 +201,8 @@
                         <div class="card mb-3">
                             <div class="card-header bg-label-primary"><h6 class="mb-0">Weight History (Saved Records)</h6></div>
                             <div class="card-body p-0">
-                                <div class="table-responsive">
-                                    <table class="table table-hover mb-0">
+                                <div class="card-datatable table-responsive pt-0">
+                                    <table class="table">
                                         <thead class="table-light"><tr><th>Date</th><th>Age (months)</th><th>Weight (kg)</th><th>Status</th><th>Notes</th></tr></thead>
                                         <tbody>
                                             @forelse (($chartWeightEntries ?? []) as $entry)
@@ -290,8 +290,8 @@
                                     </div>
                                 </div>
 
-                                <div class="table-responsive">
-                                    <table class="table table-bordered table-sm aefi-entry-table">
+                                <div class="card-datatable table-responsive pt-0">
+                                    <table class="table">
                                         <thead>
                                             <tr class="table-light text-center">
                                                 <th>Case</th>
@@ -382,8 +382,8 @@
                     </button>
                 </div>
             </div>
-            <div class="table-responsive">
-                <table class="table table-hover mb-0">
+            <div class="card-datatable table-responsive pt-0">
+                <table class="table">
                     <thead class="table-dark">
                         <tr><th>Visit Date</th><th>Child</th><th>Vaccines</th><th>Weight Logs</th><th>BF Months</th><th>Action</th></tr>
                     </thead>

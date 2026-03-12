@@ -100,8 +100,8 @@
                                 <div class="col-md-2 d-grid"><button type="button" class="btn btn-primary" wire:click="addTestOrder" wire:loading.attr="disabled" wire:target="addTestOrder">+</button></div>
                             </div>
 
-                            <div class="table-responsive">
-                                <table class="table table-sm table-bordered align-middle mb-0">
+                            <div class="card-datatable table-responsive pt-0">
+                                <table class="table">
                                     <thead class="table-light"><tr><th>Test</th><th>Specimen</th><th>Action</th></tr></thead>
                                     <tbody>
                                         @forelse ($test_orders as $index => $entry)
@@ -133,8 +133,8 @@
                                 <div class="col-md-4 d-grid"><button type="button" class="btn btn-primary" wire:click="addDrugOrder" wire:loading.attr="disabled" wire:target="addDrugOrder">Add Medication</button></div>
                             </div>
 
-                            <div class="table-responsive">
-                                <table class="table table-sm table-bordered align-middle mb-0">
+                            <div class="card-datatable table-responsive pt-0">
+                                <table class="table">
                                     <thead class="table-light"><tr><th>Drug</th><th>Dosage</th><th>Frequency</th><th>Duration</th><th>Route</th><th>Instructions</th><th>Qty</th><th>Action</th></tr></thead>
                                     <tbody>
                                         @forelse ($drug_orders as $index => $entry)
@@ -178,8 +178,8 @@
 
         <div class="card mt-4">
             <div class="card-header"><h5 class="mb-0">Assessment Records <small class="text-muted">({{ count($records) }} Total)</small></h5></div>
-            <div class="table-responsive">
-                <table class="table table-hover mb-0">
+            <div class="card-datatable table-responsive pt-0">
+                <table class="table">
                     <thead class="table-dark"><tr><th>Date</th><th>Final</th><th>Pending Tests</th><th>Pending Prescriptions</th><th>Action</th></tr></thead>
                     <tbody>
                         @forelse ($records as $record)

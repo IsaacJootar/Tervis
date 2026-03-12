@@ -67,12 +67,8 @@
         </div>
 
         <div class="card">
-            <div class="card-header bg-clinical-dark text-white d-flex justify-content-between align-items-center">
+            <div class="card-header bg-clinical-dark text-white">
                 <h5 class="mb-0 text-white">{{ $record_id ? 'Edit Laboratory Record' : 'Laboratory Register' }}</h5>
-                <button type="button" class="btn btn-sm btn-outline-light" wire:click="openCreate" wire:loading.attr="disabled" wire:target="openCreate">
-                    <span wire:loading.remove wire:target="openCreate">New Entry</span>
-                    <span wire:loading wire:target="openCreate"><span class="spinner-border spinner-border-sm me-1"></span>Preparing...</span>
-                </button>
             </div>
             <div class="card-body">
                 <form wire:submit.prevent="{{ $record_id ? 'update' : 'store' }}">
@@ -93,8 +89,8 @@
                         <div class="card mb-3 border-warning-subtle">
                             <div class="card-header bg-label-warning"><h6 class="mb-0"><i class='bx bx-list-check me-1'></i>Pending Requested Tests from Doctor Assessment</h6></div>
                             <div class="card-body p-0">
-                                <div class="table-responsive">
-                                    <table class="table table-sm table-hover mb-0 align-middle">
+                                <div class="card-datatable table-responsive pt-0">
+                                    <table id="laboratoryPendingRequestsTable" class="table align-middle">
                                         <thead class="table-light">
                                             <tr>
                                                 <th style="width: 48px;">Do</th>
@@ -195,8 +191,8 @@
                         <div class="card-header bg-label-primary" style="background-color:#ffedd5 !important;color:#9a3412 !important;border-bottom:1px solid #fdba74 !important;"><h6 class="mb-0"><i class='bx bx-flask me-1'></i>WIDAL Test</h6></div>
                         <div class="card-body">
                             <p class="text-muted small">Enter titre values e.g. 1/80, 1/160, 1/40 or leave blank if not done.</p>
-                            <div class="table-responsive">
-                                <table class="table table-bordered align-middle">
+                            <div class="card-datatable table-responsive pt-0">
+                                <table class="table">
                                     <thead class="table-light"><tr><th>Antigen</th><th>a</th><th>b</th><th>c</th><th>d</th></tr></thead>
                                     <tbody>
                                         <tr><td>O</td><td><input class="form-control form-control-sm" wire:model="widal_values.Oa" placeholder="e.g. 1/80"></td><td><input class="form-control form-control-sm" wire:model="widal_values.Ob" placeholder="e.g. 1/80"></td><td><input class="form-control form-control-sm" wire:model="widal_values.Oc" placeholder="e.g. 1/80"></td><td><input class="form-control form-control-sm" wire:model="widal_values.Od" placeholder="e.g. 1/80"></td></tr>
@@ -350,13 +346,13 @@
 
         <div class="card mt-4">
             <div class="card-header"><h5 class="mb-0">Laboratory Records <small class="text-muted">({{ count($records) }} Total)</small></h5></div>
-            <div class="table-responsive">
-                <table class="table table-hover mb-0">
+            <div class="card-datatable table-responsive pt-0">
+                <table id="laboratoryRecordsTable" class="table align-middle">
                     <thead class="table-dark">
                         <tr><th>Visit Date</th><th>Lab No.</th><th>Specimen</th><th>Diagnosis</th><th>Sign-off</th><th>Action</th></tr>
                     </thead>
                     <tbody>
-                        @forelse ($records as $record)
+                        @foreach ($records as $record)
                             <tr wire:key="lab-record-{{ $record->id }}">
                                 <td>{{ $record->visit_date?->format('M d, Y') }}</td>
                                 <td>{{ $record->lab_no ?: 'N/A' }}</td>
@@ -376,15 +372,21 @@
                                     </div>
                                 </td>
                             </tr>
-                        @empty
-                            <tr><td colspan="6" class="text-center py-4 text-muted"><i class="bx bx-info-circle me-1"></i>No laboratory records yet.</td></tr>
-                        @endforelse
+                        @endforeach
                     </tbody>
                 </table>
             </div>
         </div>
     @endif
 </div>
+
+@include('_partials.datatables-init-multi', [
+    'tableIds' => ['laboratoryRecordsTable'],
+    'orders' => [
+        'laboratoryRecordsTable' => [0, 'desc'],
+    ],
+])
+
 @once
     <style>
         .lab-register-page {
@@ -495,5 +497,3 @@
         }
     </style>
 @endonce
-
-

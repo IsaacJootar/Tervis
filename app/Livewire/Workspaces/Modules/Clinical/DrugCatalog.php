@@ -15,6 +15,7 @@ use Livewire\Component;
 class DrugCatalog extends Component
 {
   public $patientId;
+  public $isFacilityCatalog = false;
   public $patient;
 
   public $patient_din, $first_name, $last_name, $middle_name, $patient_phone, $patient_dob, $patient_age, $patient_gender;
@@ -39,7 +40,7 @@ class DrugCatalog extends Component
     'catalog_is_active' => 'boolean',
   ];
 
-  public function mount($patientId)
+  public function mount($patientId = null)
   {
     $this->patientId = $patientId;
 
@@ -65,6 +66,13 @@ class DrugCatalog extends Component
     $this->officer_name = $user->first_name . ' ' . $user->last_name;
     $this->officer_role = $user->role;
     $this->officer_designation = $user->designation;
+
+    // Facility-level catalog mode (no patient context).
+    if (empty($this->patientId)) {
+      $this->isFacilityCatalog = true;
+      $this->hasAccess = true;
+      return;
+    }
 
     $this->validatePatientAccess();
     if ($this->hasAccess) {
@@ -193,11 +201,20 @@ class DrugCatalog extends Component
 
   public function goToDispensing()
   {
+    if (empty($this->patientId)) {
+      toastr()->warning('Open a patient workspace to dispense drugs.');
+      return redirect()->route('patient-workspace');
+    }
+
     return redirect()->route('workspaces-prescriptions', ['patientId' => $this->patientId]);
   }
 
   public function backToDashboard()
   {
+    if (empty($this->patientId)) {
+      return redirect()->route('patient-workspace');
+    }
+
     return redirect()->route('workspace-dashboard', ['patientId' => $this->patientId]);
   }
 
@@ -213,4 +230,3 @@ class DrugCatalog extends Component
     ]);
   }
 }
-

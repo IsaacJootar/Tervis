@@ -6,13 +6,17 @@ use App\Models\Activity;
 use App\Models\DrugCatalogItem;
 use App\Models\DrugDispenseLine;
 use App\Models\Facility;
+use App\Models\Invoice;
 use App\Models\Patient;
+use App\Models\PatientPayment;
 use App\Models\Prescription;
 use App\Models\Registrations\DinActivation;
+use App\Services\Billing\BillingService;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Layout;
@@ -47,6 +51,11 @@ class Prescriptions extends Component
   public $receipt_lines = [];
   public $receipt_date;
 
+  public $charge_amount = 0;
+  public $amount_paid_now = 0;
+  public $payment_method = 'Cash';
+  public $payment_notes;
+
   protected $rules = [
     'dispensed_date' => 'required|date',
     'dispense_notes' => 'nullable|string|max:1000',
@@ -57,6 +66,10 @@ class Prescriptions extends Component
     'entry_quantity' => 'required|numeric|min:0.1',
     'history_from_date' => 'nullable|date',
     'history_to_date' => 'nullable|date',
+    'charge_amount' => 'required|numeric|min:0',
+    'amount_paid_now' => 'nullable|numeric|min:0',
+    'payment_method' => 'nullable|string|max:60',
+    'payment_notes' => 'nullable|string|max:1000',
   ];
 
   public function mount($patientId)
@@ -95,6 +108,19 @@ class Prescriptions extends Component
     $this->history_from_date = now()->subDays(14)->format('Y-m-d');
     $this->history_to_date = now()->format('Y-m-d');
     $this->hydrateCartFromSession();
+  }
+
+  public function goToInvoices()
+  {
+    return redirect()->route('workspaces-invoices', ['patientId' => $this->patientId]);
+  }
+
+  private function billingTablesReady(): bool
+  {
+    return Schema::hasTable('invoices')
+      && Schema::hasTable('invoice_lines')
+      && Schema::hasTable('patient_payments')
+      && Schema::hasTable('payment_allocations');
   }
 
   private function validatePatientAccess(): void
@@ -175,11 +201,6 @@ class Prescriptions extends Component
       $randomCode .= mt_rand(0, 9);
     }
     return $randomCode;
-  }
-
-  public function goToDrugCatalog()
-  {
-    return redirect()->route('workspaces-drug-catalog', ['patientId' => $this->patientId]);
   }
 
   public function selectCatalogItem(int $id): void
@@ -324,10 +345,12 @@ class Prescriptions extends Component
 
   public function checkoutDispensing(): void
   {
-    $this->resetErrorBag(['selected_prescription_map', 'checkout', 'dispensed_date', 'dispense_notes']);
+    $this->resetErrorBag(['selected_prescription_map', 'checkout', 'dispensed_date', 'dispense_notes', 'charge_amount', 'amount_paid_now']);
 
     $this->validateOnly('dispensed_date');
     $this->validateOnly('dispense_notes');
+    $this->validateOnly('charge_amount');
+    $this->validateOnly('amount_paid_now');
 
     if (count($this->cart) === 0) {
       $this->addError('checkout', 'Cart is empty. Add at least one drug item.');
@@ -396,17 +419,93 @@ class Prescriptions extends Component
         ]);
       }
 
+      $lineCount = count($this->cart);
+      $chargeAmount = (float) ($this->charge_amount ?? 0);
+      $paidNow = (float) ($this->amount_paid_now ?? 0);
+      $payment = null;
+      $invoice = null;
+      $billingNotice = null;
+
+      if ($this->billingTablesReady()) {
+        $billingService = app(BillingService::class);
+        $invoice = $billingService->findOrCreateOpenInvoice([
+          'patient_id' => $this->patientId,
+          'facility_id' => $this->facility_id,
+          'state_id' => $this->state_id,
+          'lga_id' => $this->lga_id,
+          'ward_id' => $this->ward_id,
+          'created_by' => $this->officer_name,
+        ], $this->dispensed_date, 'Auto-generated from module activities.');
+
+        $billingService->addInvoiceLine($invoice, [
+          'module' => 'prescriptions',
+          'reference_type' => DrugDispenseLine::class,
+          'reference_code' => $this->dispense_code,
+          'description' => 'Drug issuance (' . $lineCount . ' line item(s), code: ' . $this->dispense_code . ')',
+          'quantity' => 1,
+          'unit_price' => $chargeAmount,
+          'line_amount' => $chargeAmount,
+          'service_date' => $this->dispensed_date,
+          'created_by' => $this->officer_name,
+        ]);
+
+        $invoice = $billingService->refreshInvoiceTotals($invoice);
+
+        if ($paidNow > (float) $invoice->outstanding_amount) {
+          throw ValidationException::withMessages([
+            'amount_paid_now' => 'Amount paid cannot exceed invoice outstanding balance (' . number_format((float) $invoice->outstanding_amount, 2) . ').',
+          ]);
+        }
+
+        if ($paidNow > 0) {
+          $payment = $billingService->createPaymentAndAllocate($invoice, [
+            'payment_date' => $this->dispensed_date,
+            'amount_received' => $paidNow,
+            'payment_method' => $this->payment_method ?: 'Cash',
+            'notes' => $this->payment_notes,
+            'received_by' => $this->officer_name,
+            'state_id' => $this->state_id,
+            'lga_id' => $this->lga_id,
+            'ward_id' => $this->ward_id,
+          ]);
+        }
+
+        $invoice = $billingService->refreshInvoiceTotals($invoice);
+      } else {
+        $billingNotice = 'Billing tables are not available yet. Dispensing was saved without invoice entry.';
+      }
+
       DB::commit();
 
-      $lineCount = count($this->cart);
       $code = $this->dispense_code;
       $this->logActivity('dispense', 'Dispensed ' . $lineCount . ' line item(s) with code ' . $code . '.');
       $this->openReceipt($code);
       $this->clearCart();
       $this->selected_prescription_map = [];
       $this->dispense_notes = null;
+      $this->charge_amount = 0;
+      $this->amount_paid_now = 0;
+      $this->payment_method = 'Cash';
+      $this->payment_notes = null;
 
-      toastr()->success('Dispensing checkout completed successfully.');
+      if ($invoice) {
+        $message = 'Dispensing checkout completed. Invoice ' . $invoice->invoice_code . ' outstanding: ' . number_format((float) $invoice->outstanding_amount, 2) . '.';
+        if ($payment) {
+          $message .= ' Payment received: ' . number_format((float) $payment->amount_received, 2) . '.';
+        }
+      } else {
+        $message = 'Dispensing checkout completed.';
+      }
+      toastr()->success($message);
+      if ($billingNotice) {
+        toastr()->warning($billingNotice);
+      }
+    } catch (ValidationException $e) {
+      DB::rollBack();
+      $this->setErrorBag($e->validator->errors());
+      if ($e->validator->errors()->has('amount_paid_now')) {
+        toastr()->error($e->validator->errors()->first('amount_paid_now'));
+      }
     } catch (Exception $e) {
       DB::rollBack();
       report($e);
@@ -535,10 +634,35 @@ class Prescriptions extends Component
       ->orderByDesc(DB::raw('MAX(id)'))
       ->get();
 
+    $billingSummary = (object) [
+      'total_billed' => 0,
+      'total_paid' => 0,
+      'total_outstanding' => 0,
+    ];
+    $recentPayments = collect();
+
+    if ($this->billingTablesReady()) {
+      $billingSummary = Invoice::query()
+        ->where('patient_id', $this->patientId)
+        ->where('facility_id', $this->facility_id)
+        ->selectRaw('COALESCE(SUM(total_amount),0) as total_billed, COALESCE(SUM(amount_paid),0) as total_paid, COALESCE(SUM(outstanding_amount),0) as total_outstanding')
+        ->first();
+
+      $recentPayments = PatientPayment::query()
+        ->where('patient_id', $this->patientId)
+        ->where('facility_id', $this->facility_id)
+        ->latest('payment_date')
+        ->latest('id')
+        ->limit(5)
+        ->get();
+    }
+
     return view('livewire.workspaces.modules.clinical.prescriptions', [
       'pendingPrescriptions' => $pendingPrescriptions,
       'catalogSearchResults' => $catalogSearchResults,
       'dispenseBatches' => $dispenseBatches,
+      'billingSummary' => $billingSummary,
+      'recentPayments' => $recentPayments,
     ]);
   }
 }

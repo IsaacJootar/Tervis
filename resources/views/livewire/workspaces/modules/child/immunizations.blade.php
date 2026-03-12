@@ -253,8 +253,8 @@
                                                 </h6>
                                             </div>
 
-                                    <div class="table-responsive">
-                                        <table class="table table-bordered vax-entry-table">
+                                    <div class="card-datatable table-responsive pt-0">
+                                        <table class="table">
                                             <thead>
                                                 <tr class="table-dark text-center">
                                                     <th colspan="2">At Birth</th>
@@ -377,8 +377,8 @@
                                                 </div>
                                             </div>
 
-                                            <div class="table-responsive">
-                                                <table class="table table-bordered table-sm aefi-entry-table">
+                                            <div class="card-datatable table-responsive pt-0">
+                                                <table class="table">
                                                     <thead>
                                                         <tr class="table-dark text-center">
                                                             <th>Case</th>

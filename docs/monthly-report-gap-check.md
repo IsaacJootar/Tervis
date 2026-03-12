@@ -2,7 +2,7 @@
 
 Purpose: Map monthly report fields to current data sources and call out missing sources or logic needed later.
 
-## Current Status (2026-03-07)
+## Current Status (2026-03-11)
 
 ### Sources In Use
 - `DailyAttendance` for attendance counts (age/sex buckets)
@@ -23,6 +23,7 @@ Purpose: Map monthly report fields to current data sources and call out missing 
 - Immunization: Mapped (TT + child vaccines), merged from `TetanusVaccination`, `ImmunizationRecord`, and `ChildHealthActivityRecord` with deduplication by child + dose date
 - Child health: Partially mapped via `NutritionRecord` + `ChildHealthActivityRecord`
 - Other services: Partially mapped from `PostnatalRecord`, `DoctorAssessment`, and `LabTest`
+- Prescriptions/Dispensing: Not mapped yet in monthly aggregation (`Prescription` + `DrugDispenseLine` currently excluded)
 - Mortality: Partial, inferred from `Delivery` complications
 
 ## Monthly Mapping Implemented
@@ -65,18 +66,28 @@ Purpose: Map monthly report fields to current data sources and call out missing 
    - `Delivery` is still a proxy for admissions/discharges.
    - Need dedicated inpatient admission/discharge records.
 
-3. **Mortality Cause Coding**
+3. **Pharmacy / Dispensing Monthly Mapping**
+   - No monthly-report mapping yet for `Prescription` / `DrugDispenseLine` outputs.
+   - Need structured indicators for prescribed vs dispensed vs pending.
+
+4. **Mortality Cause Coding**
    - Need structured maternal/neonatal/under-5 cause coding tables.
 
-4. **Other Health Services (Quality Refinement)**
+5. **Other Health Services (Quality Refinement)**
    - Current mapping uses keyword/heuristic extraction from diagnosis and lab JSON payloads.
    - Next step: map from structured disease/diagnostic domain tables when available.
 
-5. **Child Health NHMIS Row Expansion**
+6. **Child Health NHMIS Row Expansion**
    - `weight_monitoring_entries` and `aefi_reported_cases` are aggregated but not yet mapped to dedicated NHMIS row keys in the current template table.
 
 ## Action Items (Later)
 - Map ANC report logic to ANC module canonical tables
 - Add dedicated inpatient admission/discharge tracking
+- Map prescriptions/dispensing indicators into monthly summary rows
 - Add structured mortality cause coding
 - Expand NHMIS row/key mapping for additional child-health indicators where applicable
+
+## Documentation Baseline (Vision Alignment)
+- `docs/APP1_MODULE_STATUS.md`
+- `docs/APP1_CODING_RULES.md`
+- `docs/APP1_WORKFLOW_ROADMAP.md`

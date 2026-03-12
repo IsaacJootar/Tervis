@@ -7,6 +7,12 @@
       "slug": "patient-workspace"
     },
     {
+      "url": "/workspaces/drug-catalog",
+      "name": "Drug Catalog",
+      "icon": "menu-icon icon-base ti tabler-pill",
+      "slug": "workspaces-drug-catalog-management"
+    },
+    {
       "url": "/registers/general-patients-register",
       "name": "General Patients Register",
       "icon": "menu-icon icon-base ti tabler-users",

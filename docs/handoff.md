@@ -122,3 +122,18 @@
 - Validation run after update passed:
   - `php -l app/Livewire/Analytics/MonthlyReportDashboard.php`
   - `php artisan test` (`2 passed`)
+
+## Update (2026-03-11)
+- Vision architecture PDF reviewed and converted into app-specific execution documentation baseline.
+- Added new docs in `docs/` for clear governance and delivery tracking:
+  - `APP1_MODULE_STATUS.md` (patient/facility module inventory with Implemented/Partial/Not Started states)
+  - `APP1_CODING_RULES.md` (mandatory coding/UI/workflow/testing rules)
+  - `APP1_UI_STYLE_GUIDE.md` (mobile-first UI rules for labels, tabs, sections, loading states, charts, and responsive behavior)
+  - `APP1_WORKFLOW_ROADMAP.md` (current flow + phased next-module roadmap)
+- UI direction decision captured: use Flowdesk-style clean design language for forms/modals/sections, while retaining App1 default blue as primary accent (gold is not default).
+- Updated `docs/monthly-report-gap-check.md`:
+  - status date refreshed to 2026-03-11
+  - added explicit prescriptions/dispensing aggregation gap (`Prescription` + `DrugDispenseLine`)
+  - linked the new documentation baseline.
+- Route inventory re-validated via `php artisan route:list`.
+- No runtime/business logic code changes were made in this update; this pass focused on documentation alignment and execution clarity.

@@ -5,7 +5,7 @@ CREATE TEMPORARY TABLE tmp_seed_drugs (
   formulation VARCHAR(120) NOT NULL,
   strength VARCHAR(120) NOT NULL,
   route VARCHAR(80) NOT NULL
-);
+) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 INSERT INTO tmp_seed_drugs (drug_name, formulation, strength, route) VALUES
 ('Paracetamol','Tablet','500mg','Oral'),
@@ -99,4 +99,3 @@ WHERE d.id IS NULL;
 DROP TEMPORARY TABLE tmp_seed_drugs;
 
 COMMIT;
-

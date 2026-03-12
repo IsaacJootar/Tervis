@@ -11,11 +11,9 @@ use Illuminate\Support\Facades\Route;
 use App\Livewire\Core\FacilityReports;
 use App\Livewire\Core\FacilityPatients;
 use App\Livewire\Central\CreateFacility;
-use App\Livewire\Patient\PatientProfile;
 
 
 //
-use App\Livewire\Patient\PatientTetanus;
 use App\Livewire\Analytics\RiskDashboard;
 use App\Livewire\Core\CreateDataOfficers;
 
@@ -25,10 +23,6 @@ use App\Livewire\Core\LgaOfficerDashboard;
 use App\Livewire\Core\PatientAppointments;
 
 //
-use App\Livewire\Patient\PatientAntenatal;
-use App\Livewire\Patient\PatientDashboard;
-use App\Livewire\Patient\PatientPostnatal;
-use App\Livewire\Patient\PatientDeliveries;
 use App\Livewire\Core\StateOfficerDashboard;
 use App\Livewire\Analytics\RealTimeDashboard;
 use App\Livewire\Core\FacilityAdminDashboard;
@@ -50,6 +44,7 @@ use App\Livewire\Workspaces\Modules\Child\ActivityRegister;
 use App\Livewire\Workspaces\Modules\Clinical\DoctorAssessments;
 use App\Livewire\Workspaces\Modules\Clinical\Laboratory;
 use App\Livewire\Workspaces\Modules\Clinical\Prescriptions;
+use App\Livewire\Workspaces\Modules\Clinical\Invoices;
 use App\Livewire\Workspaces\Modules\Clinical\DrugCatalog;
 use App\Livewire\Analytics\MpdsrReportDashboard;
 use App\Livewire\Core\DisableDataOfficerAccount;
@@ -102,18 +97,6 @@ Route::middleware(['auth', 'role.redirect'])->prefix('analytics')->group(functio
 });
 
 
-
-// Patient routes with middleware
-Route::middleware(['auth', 'role.redirect'])->prefix('patient')->group(function () {
-  Route::get('/patient-dashboard', PatientDashboard::class)->name('patient-dashboard');
-  Route::get('/patient-profile', PatientProfile::class)->name('patient-profile');
-  Route::get('/patient-antenatal', PatientAntenatal::class)->name('patient-antenatal');
-  Route::get('/patient-deliveries', PatientDeliveries::class)->name('patient-deliveries');
-  Route::get('/patient-postnatal', PatientPostnatal::class)->name('patient-postnatal');
-  Route::get('/patient-tetanus', PatientTetanus::class)->name('patient-tetanus');
-});
-
-
 // Patient Din Activation and Workspace routes with middleware
 Route::middleware(['auth', 'role.redirect'])->prefix('avo')->group(function () {
 
@@ -125,6 +108,9 @@ Route::middleware(['auth', 'role.redirect'])->prefix('avo')->group(function () {
 Route::middleware(['auth', 'role.redirect'])->prefix('workspaces')->group(function () {
 
   Route::get('/patient-workspace', PatientWorkspace::class)->name('patient-workspace');
+
+  Route::get('/drug-catalog', DrugCatalog::class)
+    ->name('workspaces-drug-catalog-management');
 
   Route::get('/{patientId}/dashboard', WorkspaceDashboard::class)
     ->name('workspace-dashboard');
@@ -175,8 +161,12 @@ Route::middleware(['auth', 'role.redirect'])->prefix('workspaces')->group(functi
   Route::get('/{patientId}/prescriptions', Prescriptions::class)
     ->name('workspaces-prescriptions');
 
-  Route::get('/{patientId}/drug-catalog', DrugCatalog::class)
-    ->name('workspaces-drug-catalog');
+  Route::get('/{patientId}/invoices', Invoices::class)
+    ->name('workspaces-invoices');
+
+  Route::get('/{patientId}/drug-catalog', function ($patientId) {
+    return redirect()->route('workspaces-drug-catalog-management');
+  })->name('workspaces-drug-catalog');
 
 });
 
