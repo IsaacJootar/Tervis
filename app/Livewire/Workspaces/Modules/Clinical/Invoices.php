@@ -161,6 +161,11 @@ class Invoices extends Component
       $billingService = app(BillingService::class);
       $invoice = $billingService->refreshInvoiceTotals($invoice);
 
+      if ((float) $invoice->outstanding_amount <= 0 || $invoice->status === 'paid') {
+        $this->addError('selected_invoice_id', 'Selected invoice is already fully paid.');
+        throw new Exception('Selected invoice is already fully paid.');
+      }
+
       $payAmount = (float) $this->payment_amount;
       if ($payAmount > (float) $invoice->outstanding_amount) {
         $this->addError('payment_amount', 'Amount exceeds invoice outstanding balance.');
@@ -183,6 +188,7 @@ class Invoices extends Component
       }
 
       $invoice = $billingService->refreshInvoiceTotals($invoice);
+      $this->selected_invoice_id = null;
 
       Activity::create([
         'patient_id' => $this->patientId,
@@ -233,11 +239,44 @@ class Invoices extends Component
       ->where('patient_id', $this->patientId)
       ->where('facility_id', $this->facility_id)
       ->withCount('lines')
+      ->withSum('lines as lines_total_amount', 'line_amount')
+      ->withSum('allocations as allocations_total_amount', 'amount_allocated')
       ->latest('invoice_date')
       ->latest('id')
-      ->get();
+      ->get()
+      ->map(function ($invoice) {
+        $total = (float) ($invoice->lines_total_amount ?? $invoice->total_amount ?? 0);
+        $paid = (float) ($invoice->allocations_total_amount ?? $invoice->amount_paid ?? 0);
+        $outstanding = max(0, $total - $paid);
 
-    if (!$this->selected_invoice_id && $invoices->isNotEmpty()) {
+        $status = 'draft';
+        if ($total > 0 && $paid <= 0) {
+          $status = 'unpaid';
+        } elseif ($outstanding > 0 && $paid > 0) {
+          $status = 'partially_paid';
+        } elseif ($total > 0 && $outstanding <= 0) {
+          $status = 'paid';
+        }
+
+        $invoice->setAttribute('total_amount', $total);
+        $invoice->setAttribute('amount_paid', $paid);
+        $invoice->setAttribute('outstanding_amount', $outstanding);
+        $invoice->setAttribute('status', $status);
+
+        return $invoice;
+      })
+      ->values();
+
+    $payableInvoices = $invoices
+      ->filter(fn($invoice) => (float) $invoice->outstanding_amount > 0 && in_array($invoice->status, ['draft', 'unpaid', 'partially_paid'], true))
+      ->values();
+
+    if ($payableInvoices->isNotEmpty()) {
+      $selectedPayable = $payableInvoices->contains(fn($invoice) => (int) $invoice->id === (int) $this->selected_invoice_id);
+      if (!$selectedPayable) {
+        $this->selected_invoice_id = (int) $payableInvoices->first()->id;
+      }
+    } elseif (!$this->selected_invoice_id && $invoices->isNotEmpty()) {
       $this->selected_invoice_id = (int) $invoices->first()->id;
     }
 
@@ -251,7 +290,29 @@ class Invoices extends Component
           'lines' => fn($q) => $q->orderBy('id', 'desc'),
           'allocations' => fn($q) => $q->with('payment')->latest('id'),
         ])
+        ->withSum('lines as lines_total_amount', 'line_amount')
+        ->withSum('allocations as allocations_total_amount', 'amount_allocated')
         ->first();
+
+      if ($selectedInvoice) {
+        $total = (float) ($selectedInvoice->lines_total_amount ?? $selectedInvoice->total_amount ?? 0);
+        $paid = (float) ($selectedInvoice->allocations_total_amount ?? $selectedInvoice->amount_paid ?? 0);
+        $outstanding = max(0, $total - $paid);
+
+        $status = 'draft';
+        if ($total > 0 && $paid <= 0) {
+          $status = 'unpaid';
+        } elseif ($outstanding > 0 && $paid > 0) {
+          $status = 'partially_paid';
+        } elseif ($total > 0 && $outstanding <= 0) {
+          $status = 'paid';
+        }
+
+        $selectedInvoice->setAttribute('total_amount', $total);
+        $selectedInvoice->setAttribute('amount_paid', $paid);
+        $selectedInvoice->setAttribute('outstanding_amount', $outstanding);
+        $selectedInvoice->setAttribute('status', $status);
+      }
     }
 
     $payments = PatientPayment::query()
@@ -270,6 +331,7 @@ class Invoices extends Component
 
     return view('livewire.workspaces.modules.clinical.invoices', [
       'invoices' => $invoices,
+      'payableInvoices' => $payableInvoices,
       'selectedInvoice' => $selectedInvoice,
       'payments' => $payments,
       'billingSummary' => $billingSummary ?? $zeroSummary,

@@ -21,6 +21,7 @@ class DoctorAssessment extends Model
     'doctor_user_id',
     'month_year',
     'visit_date',
+    'next_appointment_date',
     'chief_complaints',
     'history_of_present_illness',
     'vital_signs',
@@ -44,6 +45,7 @@ class DoctorAssessment extends Model
   protected $casts = [
     'month_year' => 'date',
     'visit_date' => 'date',
+    'next_appointment_date' => 'date',
     'requires_lab_tests' => 'boolean',
     'requires_drugs' => 'boolean',
     'summary_map' => 'array',

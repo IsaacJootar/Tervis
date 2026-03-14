@@ -10,18 +10,25 @@ use Carbon\Carbon;
 
 class BillingService
 {
-  public function findOrCreateOpenInvoice(array $context, string $invoiceDate, ?string $notes = null): Invoice
+  public function findOrCreateOpenInvoice(
+    array $context,
+    string $invoiceDate,
+    ?string $notes = null,
+    bool $reuseExistingOpenInvoice = false
+  ): Invoice
   {
-    $invoice = Invoice::query()
-      ->where('patient_id', $context['patient_id'])
-      ->where('facility_id', $context['facility_id'])
-      ->whereDate('invoice_date', $invoiceDate)
-      ->whereIn('status', ['draft', 'partially_paid'])
-      ->latest('id')
-      ->first();
+    if ($reuseExistingOpenInvoice) {
+      $invoice = Invoice::query()
+        ->where('patient_id', $context['patient_id'])
+        ->where('facility_id', $context['facility_id'])
+        ->whereDate('invoice_date', $invoiceDate)
+        ->whereIn('status', ['draft', 'partially_paid'])
+        ->latest('id')
+        ->first();
 
-    if ($invoice) {
-      return $invoice;
+      if ($invoice) {
+        return $invoice;
+      }
     }
 
     return Invoice::create([
@@ -138,4 +145,3 @@ class BillingService
     return $prefix . '-' . now()->format('Ymd') . '-' . strtoupper(substr(bin2hex(random_bytes(4)), 0, 8));
   }
 }
-

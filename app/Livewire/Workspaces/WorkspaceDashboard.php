@@ -4,7 +4,11 @@ namespace App\Livewire\Workspaces;
 
 use App\Models\Patient;
 use App\Models\Facility;
+use App\Models\AntenatalFollowUpAssessment;
+use App\Models\DoctorAssessment;
+use App\Models\Registrations\FamilyPlanningRegistration;
 use App\Models\Registrations\DinActivation;
+use App\Models\TetanusVaccination;
 use Livewire\Component;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -279,7 +283,7 @@ class WorkspaceDashboard extends Component
     ];
 
     // Card 11: Appointments
-    $appointmentCount = $this->getModelCount('App\Models\Appointment');
+    $appointmentCount = $this->getAggregatedAppointmentCount();
     $this->cardStatus['appointments'] = [
       'enabled' => true,
       'count' => $appointmentCount,
@@ -379,6 +383,35 @@ class WorkspaceDashboard extends Component
       return $modelClass::where('patient_id', $this->patientId)
         ->where('facility_id', $this->facility_id)
         ->count();
+    } catch (\Exception $e) {
+      return 0;
+    }
+  }
+
+  private function getAggregatedAppointmentCount(): int
+  {
+    try {
+      $doctor = DoctorAssessment::where('patient_id', $this->patientId)
+        ->where('facility_id', $this->facility_id)
+        ->whereNotNull('next_appointment_date')
+        ->count();
+
+      $tetanus = TetanusVaccination::where('patient_id', $this->patientId)
+        ->where('facility_id', $this->facility_id)
+        ->whereNotNull('next_appointment_date')
+        ->count();
+
+      $ancFollowUp = AntenatalFollowUpAssessment::where('patient_id', $this->patientId)
+        ->where('facility_id', $this->facility_id)
+        ->whereNotNull('next_return_date')
+        ->count();
+
+      $familyPlanning = FamilyPlanningRegistration::where('patient_id', $this->patientId)
+        ->where('facility_id', $this->facility_id)
+        ->whereNotNull('next_appointment')
+        ->count();
+
+      return $doctor + $tetanus + $ancFollowUp + $familyPlanning;
     } catch (\Exception $e) {
       return 0;
     }

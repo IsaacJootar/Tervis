@@ -8,7 +8,6 @@ use App\Models\DrugDispenseLine;
 use App\Models\Facility;
 use App\Models\Invoice;
 use App\Models\Patient;
-use App\Models\PatientPayment;
 use App\Models\Prescription;
 use App\Models\Registrations\DinActivation;
 use App\Services\Billing\BillingService;
@@ -51,10 +50,7 @@ class Prescriptions extends Component
   public $receipt_lines = [];
   public $receipt_date;
 
-  public $charge_amount = 0;
-  public $amount_paid_now = 0;
-  public $payment_method = 'Cash';
-  public $payment_notes;
+  public $charge_amount;
 
   protected $rules = [
     'dispensed_date' => 'required|date',
@@ -66,10 +62,7 @@ class Prescriptions extends Component
     'entry_quantity' => 'required|numeric|min:0.1',
     'history_from_date' => 'nullable|date',
     'history_to_date' => 'nullable|date',
-    'charge_amount' => 'required|numeric|min:0',
-    'amount_paid_now' => 'nullable|numeric|min:0',
-    'payment_method' => 'nullable|string|max:60',
-    'payment_notes' => 'nullable|string|max:1000',
+    'charge_amount' => 'required|numeric|min:0.01',
   ];
 
   public function mount($patientId)
@@ -107,6 +100,7 @@ class Prescriptions extends Component
     $this->dispensed_date = now()->format('Y-m-d');
     $this->history_from_date = now()->subDays(14)->format('Y-m-d');
     $this->history_to_date = now()->format('Y-m-d');
+    $this->charge_amount = null;
     $this->hydrateCartFromSession();
   }
 
@@ -345,12 +339,11 @@ class Prescriptions extends Component
 
   public function checkoutDispensing(): void
   {
-    $this->resetErrorBag(['selected_prescription_map', 'checkout', 'dispensed_date', 'dispense_notes', 'charge_amount', 'amount_paid_now']);
+    $this->resetErrorBag(['selected_prescription_map', 'checkout', 'dispensed_date', 'dispense_notes', 'charge_amount']);
 
     $this->validateOnly('dispensed_date');
     $this->validateOnly('dispense_notes');
     $this->validateOnly('charge_amount');
-    $this->validateOnly('amount_paid_now');
 
     if (count($this->cart) === 0) {
       $this->addError('checkout', 'Cart is empty. Add at least one drug item.');
@@ -421,8 +414,6 @@ class Prescriptions extends Component
 
       $lineCount = count($this->cart);
       $chargeAmount = (float) ($this->charge_amount ?? 0);
-      $paidNow = (float) ($this->amount_paid_now ?? 0);
-      $payment = null;
       $invoice = null;
       $billingNotice = null;
 
@@ -436,6 +427,7 @@ class Prescriptions extends Component
           'ward_id' => $this->ward_id,
           'created_by' => $this->officer_name,
         ], $this->dispensed_date, 'Auto-generated from module activities.');
+        $invoiceWasNew = (bool) $invoice->wasRecentlyCreated;
 
         $billingService->addInvoiceLine($invoice, [
           'module' => 'prescriptions',
@@ -451,26 +443,20 @@ class Prescriptions extends Component
 
         $invoice = $billingService->refreshInvoiceTotals($invoice);
 
-        if ($paidNow > (float) $invoice->outstanding_amount) {
-          throw ValidationException::withMessages([
-            'amount_paid_now' => 'Amount paid cannot exceed invoice outstanding balance (' . number_format((float) $invoice->outstanding_amount, 2) . ').',
-          ]);
-        }
-
-        if ($paidNow > 0) {
-          $payment = $billingService->createPaymentAndAllocate($invoice, [
-            'payment_date' => $this->dispensed_date,
-            'amount_received' => $paidNow,
-            'payment_method' => $this->payment_method ?: 'Cash',
-            'notes' => $this->payment_notes,
-            'received_by' => $this->officer_name,
-            'state_id' => $this->state_id,
-            'lga_id' => $this->lga_id,
-            'ward_id' => $this->ward_id,
-          ]);
-        }
-
-        $invoice = $billingService->refreshInvoiceTotals($invoice);
+        Activity::create([
+          'patient_id' => $this->patientId,
+          'facility_id' => $this->facility_id,
+          'module' => 'invoices',
+          'action' => $invoiceWasNew ? 'create' : 'update',
+          'description' => ($invoiceWasNew ? 'Created' : 'Updated') . ' invoice ' . $invoice->invoice_code . ' from prescriptions checkout.',
+          'performed_by' => $this->officer_name,
+          'meta' => [
+            'invoice_id' => $invoice->id,
+            'invoice_code' => $invoice->invoice_code,
+            'dispense_code' => $this->dispense_code,
+            'charge_amount' => $chargeAmount,
+          ],
+        ]);
       } else {
         $billingNotice = 'Billing tables are not available yet. Dispensing was saved without invoice entry.';
       }
@@ -483,16 +469,10 @@ class Prescriptions extends Component
       $this->clearCart();
       $this->selected_prescription_map = [];
       $this->dispense_notes = null;
-      $this->charge_amount = 0;
-      $this->amount_paid_now = 0;
-      $this->payment_method = 'Cash';
-      $this->payment_notes = null;
+      $this->charge_amount = null;
 
       if ($invoice) {
-        $message = 'Dispensing checkout completed. Invoice ' . $invoice->invoice_code . ' outstanding: ' . number_format((float) $invoice->outstanding_amount, 2) . '.';
-        if ($payment) {
-          $message .= ' Payment received: ' . number_format((float) $payment->amount_received, 2) . '.';
-        }
+        $message = 'Dispensing checkout completed. Invoice ' . $invoice->invoice_code . ' created. Outstanding: ' . number_format((float) $invoice->outstanding_amount, 2) . '.';
       } else {
         $message = 'Dispensing checkout completed.';
       }
@@ -503,9 +483,7 @@ class Prescriptions extends Component
     } catch (ValidationException $e) {
       DB::rollBack();
       $this->setErrorBag($e->validator->errors());
-      if ($e->validator->errors()->has('amount_paid_now')) {
-        toastr()->error($e->validator->errors()->first('amount_paid_now'));
-      }
+      toastr()->error('Please correct the validation errors.');
     } catch (Exception $e) {
       DB::rollBack();
       report($e);
@@ -639,7 +617,6 @@ class Prescriptions extends Component
       'total_paid' => 0,
       'total_outstanding' => 0,
     ];
-    $recentPayments = collect();
 
     if ($this->billingTablesReady()) {
       $billingSummary = Invoice::query()
@@ -647,14 +624,6 @@ class Prescriptions extends Component
         ->where('facility_id', $this->facility_id)
         ->selectRaw('COALESCE(SUM(total_amount),0) as total_billed, COALESCE(SUM(amount_paid),0) as total_paid, COALESCE(SUM(outstanding_amount),0) as total_outstanding')
         ->first();
-
-      $recentPayments = PatientPayment::query()
-        ->where('patient_id', $this->patientId)
-        ->where('facility_id', $this->facility_id)
-        ->latest('payment_date')
-        ->latest('id')
-        ->limit(5)
-        ->get();
     }
 
     return view('livewire.workspaces.modules.clinical.prescriptions', [
@@ -662,7 +631,6 @@ class Prescriptions extends Component
       'catalogSearchResults' => $catalogSearchResults,
       'dispenseBatches' => $dispenseBatches,
       'billingSummary' => $billingSummary,
-      'recentPayments' => $recentPayments,
     ]);
   }
 }

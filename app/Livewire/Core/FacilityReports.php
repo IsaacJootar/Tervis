@@ -344,37 +344,106 @@ class FacilityReports extends Component
     $facilityIds = $this->getFacilityIds();
     $appointments = collect();
 
-    // Antenatal appointments
-    $antenatalAppts = DB::table('antenatals')
-      ->join('users', 'antenatals.user_id', '=', 'users.id')
-      ->join('facilities', 'antenatals.registration_facility_id', '=', 'facilities.id')
-      ->whereIn('antenatals.registration_facility_id', $facilityIds)
-      ->whereNotNull('antenatals.follow_up_next_visit')
-      ->whereBetween('antenatals.follow_up_next_visit', [$this->date_from, $this->date_to])
+    // Doctor Assessment next appointments
+    $doctorAppts = DB::table('doctor_assessments')
+      ->join('patients', 'doctor_assessments.patient_id', '=', 'patients.id')
+      ->join('facilities', 'doctor_assessments.facility_id', '=', 'facilities.id')
+      ->whereIn('doctor_assessments.facility_id', $facilityIds)
+      ->whereNotNull('doctor_assessments.next_appointment_date')
+      ->whereBetween('doctor_assessments.next_appointment_date', [$this->date_from, $this->date_to])
       ->select([
-        'users.first_name',
-        'users.last_name',
-        'users.DIN',
+        'patients.first_name',
+        'patients.last_name',
+        'patients.din as DIN',
         'facilities.name as facility_name',
-        'antenatals.follow_up_next_visit as appointment_date',
-        DB::raw("'Antenatal Follow-up' as appointment_type"),
-        'users.id as user_id',
-        'antenatals.registration_facility_id as facility_id'
+        'doctor_assessments.next_appointment_date as appointment_date',
+        DB::raw("'Doctor Follow-up' as appointment_type"),
+        'doctor_assessments.patient_id as patient_id',
+        'doctor_assessments.facility_id as facility_id'
       ])
       ->get();
 
-    foreach ($antenatalAppts as $appt) {
-      $fulfilled = DB::table('daily_attendances')
-        ->where('user_id', $appt->user_id)
+    // ANC Tetanus next appointments
+    $ttAppts = DB::table('tetanus_vaccinations')
+      ->join('patients', 'tetanus_vaccinations.patient_id', '=', 'patients.id')
+      ->join('facilities', 'tetanus_vaccinations.facility_id', '=', 'facilities.id')
+      ->whereIn('tetanus_vaccinations.facility_id', $facilityIds)
+      ->whereNotNull('tetanus_vaccinations.next_appointment_date')
+      ->whereBetween('tetanus_vaccinations.next_appointment_date', [$this->date_from, $this->date_to])
+      ->select([
+        'patients.first_name',
+        'patients.last_name',
+        'patients.din as DIN',
+        'facilities.name as facility_name',
+        'tetanus_vaccinations.next_appointment_date as appointment_date',
+        DB::raw("'TT Vaccination' as appointment_type"),
+        'tetanus_vaccinations.patient_id as patient_id',
+        'tetanus_vaccinations.facility_id as facility_id'
+      ])
+      ->get();
+
+    // ANC Follow-up next return appointments
+    $ancFollowUpAppts = DB::table('antenatal_follow_up_assessments')
+      ->join('patients', 'antenatal_follow_up_assessments.patient_id', '=', 'patients.id')
+      ->join('facilities', 'antenatal_follow_up_assessments.facility_id', '=', 'facilities.id')
+      ->whereIn('antenatal_follow_up_assessments.facility_id', $facilityIds)
+      ->whereNotNull('antenatal_follow_up_assessments.next_return_date')
+      ->whereBetween('antenatal_follow_up_assessments.next_return_date', [$this->date_from, $this->date_to])
+      ->select([
+        'patients.first_name',
+        'patients.last_name',
+        'patients.din as DIN',
+        'facilities.name as facility_name',
+        'antenatal_follow_up_assessments.next_return_date as appointment_date',
+        DB::raw("'ANC Follow-up' as appointment_type"),
+        'antenatal_follow_up_assessments.patient_id as patient_id',
+        'antenatal_follow_up_assessments.facility_id as facility_id'
+      ])
+      ->get();
+
+    // Family Planning next appointments
+    $familyPlanningAppts = DB::table('family_planning_registrations')
+      ->join('patients', 'family_planning_registrations.patient_id', '=', 'patients.id')
+      ->join('facilities', 'family_planning_registrations.facility_id', '=', 'facilities.id')
+      ->whereIn('family_planning_registrations.facility_id', $facilityIds)
+      ->whereNotNull('family_planning_registrations.next_appointment')
+      ->whereBetween('family_planning_registrations.next_appointment', [$this->date_from, $this->date_to])
+      ->select([
+        'patients.first_name',
+        'patients.last_name',
+        'patients.din as DIN',
+        'facilities.name as facility_name',
+        'family_planning_registrations.next_appointment as appointment_date',
+        DB::raw("'Family Planning Follow-up' as appointment_type"),
+        'family_planning_registrations.patient_id as patient_id',
+        'family_planning_registrations.facility_id as facility_id'
+      ])
+      ->get();
+
+    $allAppts = $doctorAppts
+      ->concat($ttAppts)
+      ->concat($ancFollowUpAppts)
+      ->concat($familyPlanningAppts);
+
+    foreach ($allAppts as $appt) {
+      $fulfilled = DB::table('din_activations')
+        ->where('patient_id', $appt->patient_id)
         ->where('facility_id', $appt->facility_id)
         ->where('visit_date', '>=', $appt->appointment_date)
+        ->whereNull('deleted_at')
         ->exists();
 
-      $appt->status = $fulfilled ? 'Fulfilled' : 'Missed';
+      $appointmentDate = Carbon::parse($appt->appointment_date)->startOfDay();
+      if ($fulfilled) {
+        $appt->status = 'Fulfilled';
+      } else {
+        $appt->status = $appointmentDate->isFuture() || $appointmentDate->isToday() ? 'Upcoming' : 'Missed';
+      }
+
       $appointments->push($appt);
     }
 
-    $this->report_data = $appointments->sortBy('appointment_date');
+    $this->report_data = $appointments->sortBy('appointment_date')->values();
   }
 
   private function generateMaternalOutcomesReport()

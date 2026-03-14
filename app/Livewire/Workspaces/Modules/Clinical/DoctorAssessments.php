@@ -29,7 +29,7 @@ class DoctorAssessments extends Component
   public $hasAccess = false, $accessError = '', $activation_time;
 
   public $record_id;
-  public $visit_date, $month_year;
+  public $visit_date, $month_year, $next_appointment_date;
 
   public $final_diagnosis;
   public $assessment_note, $management_plan;
@@ -44,6 +44,7 @@ class DoctorAssessments extends Component
     'patientId' => 'required',
     'facility_id' => 'required|exists:facilities,id',
     'visit_date' => 'required|date',
+    'next_appointment_date' => 'nullable|date',
     'month_year' => 'required|date',
     'final_diagnosis' => 'nullable|string|max:255',
     'assessment_note' => 'required|string|max:25000',
@@ -235,6 +236,7 @@ class DoctorAssessments extends Component
       'doctor_user_id' => Auth::id(),
       'month_year' => $this->month_year,
       'visit_date' => $this->visit_date,
+      'next_appointment_date' => $this->next_appointment_date ?: null,
       'final_diagnosis' => $this->final_diagnosis,
       'assessment_note' => $this->assessment_note,
       'management_plan' => $this->management_plan,
@@ -342,6 +344,7 @@ class DoctorAssessments extends Component
     $this->record_id = $record->id;
     $this->visit_date = $record->visit_date?->format('Y-m-d');
     $this->month_year = $record->month_year?->format('Y-m-d');
+    $this->next_appointment_date = $record->next_appointment_date?->format('Y-m-d');
 
     $this->final_diagnosis = $record->final_diagnosis;
     $this->assessment_note = $record->assessment_note;
@@ -449,6 +452,7 @@ class DoctorAssessments extends Component
         'performed_by' => $this->officer_name,
         'meta' => [
           'visit_date' => $this->visit_date,
+          'next_appointment_date' => $this->next_appointment_date,
           'final_diagnosis' => $this->final_diagnosis,
           'test_orders_count' => count($this->test_orders),
           'drug_orders_count' => count($this->drug_orders),
@@ -465,6 +469,7 @@ class DoctorAssessments extends Component
       'record_id',
       'visit_date',
       'month_year',
+      'next_appointment_date',
       'final_diagnosis',
       'assessment_note',
       'management_plan',

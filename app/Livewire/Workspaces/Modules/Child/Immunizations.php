@@ -681,6 +681,12 @@ class Immunizations extends Component
     $this->closeModalAndRefresh();
   }
 
+  public function openCreateModal(): void
+  {
+    $this->resetForm();
+    $this->dispatch('open-main-modal');
+  }
+
   public function closeModalAndRefresh(): void
   {
     $this->dispatch('close-modals');
