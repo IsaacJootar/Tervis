@@ -111,8 +111,8 @@
                     </div>
                     <div class="register-section {{ $active_tab === 'child' ? 'active' : '' }}">
                         <div class="card mb-3">
-                            <div class="card-header bg-label-primary">
-                                <h6 class="mb-0">Child Information</h6>
+                            <div class="card-header">
+                                <h6 class="mb-0"><span class="badge bg-label-primary text-uppercase">Child Information</span></h6>
                             </div>
                             <div class="card-body">
                                 <div class="child-info-grid">
@@ -146,11 +146,11 @@
                             </div>
                         </div>
                         <div class="card mb-3">
-                            <div class="card-header bg-label-primary"><h6 class="mb-0">Routine Immunization Schedule</h6></div>
+                            <div class="card-header"><h6 class="mb-0"><span class="badge bg-label-info text-uppercase">Routine Immunization Schedule</span></h6></div>
                             <div class="card-body p-0">
                                 <div class="card-datatable table-responsive pt-0">
                                     <table class="table">
-                                        <thead class="table-light"><tr><th>Antigen</th><th>Age</th><th>Date Given</th><th>Status</th><th>Notes</th></tr></thead>
+                                        <thead class="table-dark"><tr><th>Antigen</th><th>Age</th><th>Date Given</th><th>Status</th><th>Notes</th></tr></thead>
                                         <tbody>
                                             @foreach ($vaccineSchedule as $vaccine)
                                                 @php $vaccineDate = $vaccination_dates[$vaccine['id']] ?? null; @endphp
@@ -171,7 +171,7 @@
 
                     <div class="register-section {{ $active_tab === 'weight' ? 'active' : '' }}">
                         <div class="card mb-3">
-                            <div class="card-header bg-label-primary"><h6 class="mb-0">Add Weight Measurement</h6></div>
+                            <div class="card-header"><h6 class="mb-0"><span class="badge bg-label-primary text-uppercase">Add Weight Measurement</span></h6></div>
                             <div class="card-body">
                                 <div class="row g-3 align-items-end">
                                     <div class="col-md-3"><label class="form-label">Date of Visit</label><input type="date" class="form-control" wire:model="weight_entry_date"></div>
@@ -188,7 +188,7 @@
                         </div>
 
                         <div class="card mb-3">
-                            <div class="card-header bg-label-primary"><h6 class="mb-0">Weight-for-Age Growth Chart</h6></div>
+                            <div class="card-header"><h6 class="mb-0"><span class="badge bg-label-info text-uppercase">Weight-for-Age Growth Chart</span></h6></div>
                             <div class="card-body">
                                 <div class="weight-chart-wrap"><canvas id="activityWeightChart" data-entries="@json($chartWeightEntries ?? [])"></canvas></div>
                                 <div class="chart-legend mt-3">
@@ -199,11 +199,11 @@
                             </div>
                         </div>
                         <div class="card mb-3">
-                            <div class="card-header bg-label-primary"><h6 class="mb-0">Weight History (Saved Records)</h6></div>
+                            <div class="card-header"><h6 class="mb-0"><span class="badge bg-label-warning text-uppercase">Weight History (Saved Records)</span></h6></div>
                             <div class="card-body p-0">
                                 <div class="card-datatable table-responsive pt-0">
                                     <table class="table">
-                                        <thead class="table-light"><tr><th>Date</th><th>Age (months)</th><th>Weight (kg)</th><th>Status</th><th>Notes</th></tr></thead>
+                                        <thead class="table-dark"><tr><th>Date</th><th>Age (months)</th><th>Weight (kg)</th><th>Status</th><th>Notes</th></tr></thead>
                                         <tbody>
                                             @forelse (($chartWeightEntries ?? []) as $entry)
                                                 @php
@@ -241,7 +241,7 @@
 
                     <div class="register-section {{ $active_tab === 'breastfeeding' ? 'active' : '' }}">
                         <div class="card mb-3">
-                            <div class="card-header bg-label-primary"><h6 class="mb-0">Breastfeeding Log</h6></div>
+                            <div class="card-header"><h6 class="mb-0"><span class="badge bg-label-success text-uppercase">Breastfeeding Log</span></h6></div>
                             <div class="card-body">
                                 <p class="small text-muted mb-3">E = Exclusive Breast Feeding | P = Partial Breast Feeding | BW = Breast Feeding with Water | NO = No Breast Feeding</p>
                                 <div class="bf-grid">
@@ -264,7 +264,7 @@
 
                                         <div class="register-section {{ $active_tab === 'aefi' ? 'active' : '' }}">
                         <div class="card mb-3">
-                            <div class="card-header bg-label-primary"><h6 class="mb-0">AEFI - Adverse Events Following Immunization</h6></div>
+                            <div class="card-header"><h6 class="mb-0"><span class="badge bg-label-dark text-uppercase">AEFI - Adverse Events Following Immunization</span></h6></div>
                             <div class="card-body">
                                 <div class="aefi-codes-box mt-2 mb-3">
                                     <div class="fw-semibold mb-1">Reaction Type Codes (1-28)</div>
@@ -292,8 +292,8 @@
 
                                 <div class="card-datatable table-responsive pt-0">
                                     <table class="table">
-                                        <thead>
-                                            <tr class="table-light text-center">
+                                        <thead class="table-dark">
+                                            <tr class="text-center">
                                                 <th>Case</th>
                                                 <th>Age Y</th>
                                                 <th>Age M</th>
@@ -419,19 +419,17 @@
         @once
             <style>
                 .bg-clinical-dark { background-color: #2c3e50; }
-                .register-tabs { position: sticky; top: 0; background: #fff; z-index: 10; border-bottom: 1px solid #fed7aa; }
-                .register-tabs .nav-link { font-weight: 600; color: #9a3412; border: none; border-bottom: 2px solid transparent; border-radius: 0; }
-                .register-tabs .nav-link:hover { color: #7c2d12; border-bottom-color: #fdba74; }
-                .register-tabs .nav-link.active { color: #7c2d12; background: #fff7ed; border-bottom-color: #ea580c; }
-                .bg-label-primary { background-color: #ffedd5 !important; color: #9a3412 !important; border-bottom: 1px solid #fdba74; }
-                .card-header.bg-label-primary h6 { color: #7c2d12 !important; font-weight: 700; }
+                .register-tabs { position: sticky; top: 0; background: #fff; z-index: 10; border-bottom: 1px solid #dbeafe; }
+                .register-tabs .nav-link { font-weight: 600; color: #334155; border: none; border-bottom: 2px solid transparent; border-radius: 0; }
+                .register-tabs .nav-link:hover { color: #1d4ed8; border-bottom-color: #93c5fd; }
+                .register-tabs .nav-link.active { color: #1d4ed8; background: #eff6ff; border-bottom-color: #2563eb; }
                 .register-section { display: none; }
                 .register-section.active { display: block; }
                 .vax-table th, .vax-table td { white-space: nowrap; vertical-align: middle; }
                 .weight-chart-wrap { height: 320px; }
                 .bf-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 12px; }
                 .bf-entry { background: #f8fafc; border: 1px solid #e5e7eb; border-radius: 8px; padding: 10px; }
-                .aefi-codes-box { border: 1px solid #fed7aa; background: #fff7ed; border-radius: 10px; padding: 10px 12px; }
+                .aefi-codes-box { border: 1px solid #dbeafe; background: #f8fbff; border-radius: 10px; padding: 10px 12px; }
                 .aefi-entry-table th, .aefi-entry-table td { white-space: nowrap; min-width: 120px; vertical-align: middle; }
                 .chart-legend { display: flex; flex-wrap: wrap; gap: 18px; font-size: 12px; color: #6b7280; }
                 .legend-line { display: inline-block; width: 20px; height: 2px; margin-right: 6px; vertical-align: middle; }

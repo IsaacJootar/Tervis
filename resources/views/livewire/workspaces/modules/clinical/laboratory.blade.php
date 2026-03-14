@@ -87,11 +87,11 @@
 
                     @if (($pendingTestOrders ?? collect())->count())
                         <div class="card mb-3 border-warning-subtle">
-                            <div class="card-header bg-label-warning"><h6 class="mb-0"><i class='bx bx-list-check me-1'></i>Pending Requested Tests from Doctor Assessment</h6></div>
+                            <div class="card-header"><h6 class="mb-0"><span class="badge bg-label-warning text-uppercase"><i class='bx bx-list-check me-1'></i>Pending Requested Tests from Doctor Assessment</span></h6></div>
                             <div class="card-body p-0">
                                 <div class="card-datatable table-responsive pt-0">
                                     <table id="laboratoryPendingRequestsTable" class="table align-middle">
-                                        <thead class="table-light">
+                                        <thead class="table-dark">
                                             <tr>
                                                 <th style="width: 48px;">Do</th>
                                                 <th>Test</th>
@@ -127,7 +127,7 @@
                     @endif
 
                     <div class="card mb-3">
-                        <div class="card-header bg-label-primary" style="background-color:#ffedd5 !important;color:#9a3412 !important;border-bottom:1px solid #fdba74 !important;"><h6 class="mb-0"><i class='bx bx-user me-1'></i>Patient Information</h6></div>
+                        <div class="card-header"><h6 class="mb-0"><span class="badge bg-label-primary text-uppercase"><i class='bx bx-user me-1'></i>Patient Information</span></h6></div>
                         <div class="card-body">
                             <div class="row g-3">
                                 <div class="col-md-4"><label class="form-label">Surname</label><input type="text" class="form-control" value="{{ $last_name }}" readonly></div>
@@ -143,7 +143,7 @@
                     </div>
 
                     <div class="card mb-3">
-                        <div class="card-header bg-label-primary" style="background-color:#ffedd5 !important;color:#9a3412 !important;border-bottom:1px solid #fdba74 !important;"><h6 class="mb-0"><i class='bx bx-vial me-1'></i>Reports</h6></div>
+                        <div class="card-header"><h6 class="mb-0"><span class="badge bg-label-info text-uppercase"><i class='bx bx-vial me-1'></i>Reports</span></h6></div>
                         <div class="card-body">
                             <div class="row g-3">
                                 <div class="col-md-3"><label class="form-label">FBS (mg/dL)</label><input class="form-control" wire:model="report_values.fbs" placeholder="e.g. 95 mg/dL (Fasting Normal: 70-110)"></div>
@@ -188,12 +188,12 @@
                     </div>
 
                     <div class="card mb-3">
-                        <div class="card-header bg-label-primary" style="background-color:#ffedd5 !important;color:#9a3412 !important;border-bottom:1px solid #fdba74 !important;"><h6 class="mb-0"><i class='bx bx-flask me-1'></i>WIDAL Test</h6></div>
+                        <div class="card-header"><h6 class="mb-0"><span class="badge bg-label-primary text-uppercase"><i class='bx bx-flask me-1'></i>WIDAL Test</span></h6></div>
                         <div class="card-body">
                             <p class="text-muted small">Enter titre values e.g. 1/80, 1/160, 1/40 or leave blank if not done.</p>
                             <div class="card-datatable table-responsive pt-0">
                                 <table class="table">
-                                    <thead class="table-light"><tr><th>Antigen</th><th>a</th><th>b</th><th>c</th><th>d</th></tr></thead>
+                                    <thead class="table-dark"><tr><th>Antigen</th><th>a</th><th>b</th><th>c</th><th>d</th></tr></thead>
                                     <tbody>
                                         <tr><td>O</td><td><input class="form-control form-control-sm" wire:model="widal_values.Oa" placeholder="e.g. 1/80"></td><td><input class="form-control form-control-sm" wire:model="widal_values.Ob" placeholder="e.g. 1/80"></td><td><input class="form-control form-control-sm" wire:model="widal_values.Oc" placeholder="e.g. 1/80"></td><td><input class="form-control form-control-sm" wire:model="widal_values.Od" placeholder="e.g. 1/80"></td></tr>
                                         <tr><td>H</td><td><input class="form-control form-control-sm" wire:model="widal_values.Ha" placeholder="e.g. 1/80"></td><td><input class="form-control form-control-sm" wire:model="widal_values.Hb" placeholder="e.g. 1/80"></td><td><input class="form-control form-control-sm" wire:model="widal_values.Hc" placeholder="e.g. 1/80"></td><td><input class="form-control form-control-sm" wire:model="widal_values.Hd" placeholder="e.g. 1/80"></td></tr>
@@ -205,7 +205,7 @@
                     <div class="row g-3 mb-3">
                         <div class="col-12 col-lg-6">
                             <div class="card h-100 mb-0">
-                                <div class="card-header bg-label-primary" style="background-color:#ffedd5 !important;color:#9a3412 !important;border-bottom:1px solid #fdba74 !important;"><h6 class="mb-0"><i class='bx bx-atom me-1'></i>Stool Analysis</h6></div>
+                                <div class="card-header"><h6 class="mb-0"><span class="badge bg-label-info text-uppercase"><i class='bx bx-atom me-1'></i>Stool Analysis</span></h6></div>
                                 <div class="card-body">
                                     <div class="mb-2"><label class="form-label">APP</label><input class="form-control" wire:model="stool_values.app" placeholder="e.g. Brown, Formed"></div>
                                     <div class="mb-2"><label class="form-label">Microscopy</label><input class="form-control" wire:model="stool_values.micro" placeholder="e.g. Ova of Ascaris seen"></div>
@@ -224,7 +224,7 @@
                         </div>
                         <div class="col-12 col-lg-6">
                             <div class="card h-100 mb-0">
-                                <div class="card-header bg-label-primary" style="background-color:#ffedd5 !important;color:#9a3412 !important;border-bottom:1px solid #fdba74 !important;"><h6 class="mb-0"><i class='bx bx-dna me-1'></i>M/C/S Tests</h6></div>
+                                <div class="card-header"><h6 class="mb-0"><span class="badge bg-label-warning text-uppercase"><i class='bx bx-dna me-1'></i>M/C/S Tests</span></h6></div>
                                 <div class="card-body">
                                     <div class="row g-2">
                                         @foreach ($mcsLabels as $field => $label)
@@ -250,7 +250,7 @@
                     </div>
 
                     <div class="card mb-3">
-                        <div class="card-header bg-label-primary" style="background-color:#ffedd5 !important;color:#9a3412 !important;border-bottom:1px solid #fdba74 !important;"><h6 class="mb-0"><i class='bx bx-vial me-1'></i>Urinalysis</h6></div>
+                        <div class="card-header"><h6 class="mb-0"><span class="badge bg-label-primary text-uppercase"><i class='bx bx-vial me-1'></i>Urinalysis</span></h6></div>
                         <div class="card-body">
                             <div class="row g-3">
                                 @foreach ($urinalysisLabels as $field => $label)
@@ -274,7 +274,7 @@
                     </div>
 
                     <div class="card mb-3">
-                        <div class="card-header bg-label-primary" style="background-color:#ffedd5 !important;color:#9a3412 !important;border-bottom:1px solid #fdba74 !important;"><h6 class="mb-0"><i class='bx bx-search-alt-2 me-1'></i>Microscopy</h6></div>
+                        <div class="card-header"><h6 class="mb-0"><span class="badge bg-label-info text-uppercase"><i class='bx bx-search-alt-2 me-1'></i>Microscopy</span></h6></div>
                         <div class="card-body">
                             <div class="row g-3">
                                 @foreach ($microscopyLabels as $field => $label)
@@ -296,7 +296,7 @@
                     </div>
 
                     <div class="card mb-3">
-                        <div class="card-header bg-label-primary" style="background-color:#ffedd5 !important;color:#9a3412 !important;border-bottom:1px solid #fdba74 !important;"><h6 class="mb-0"><i class='bx bx-capsule me-1'></i>Sensitivity</h6></div>
+                        <div class="card-header"><h6 class="mb-0"><span class="badge bg-label-success text-uppercase"><i class='bx bx-capsule me-1'></i>Sensitivity</span></h6></div>
                         <div class="card-body">
                             <p class="small text-muted mb-2"><span class="badge bg-label-success">S = Sensitive</span> <span class="badge bg-label-danger">R = Resistant</span> <span class="badge bg-label-warning">I = Intermediate</span></p>
                             <div class="row g-3">
@@ -320,7 +320,7 @@
                     </div>
 
                     <div class="card mb-3">
-                        <div class="card-header bg-label-primary" style="background-color:#ffedd5 !important;color:#9a3412 !important;border-bottom:1px solid #fdba74 !important;"><h6 class="mb-0"><i class='bx bx-edit-alt me-1'></i>Comment & Sign-off</h6></div>
+                        <div class="card-header"><h6 class="mb-0"><span class="badge bg-label-dark text-uppercase"><i class='bx bx-edit-alt me-1'></i>Comment & Sign-off</span></h6></div>
                         <div class="card-body">
                             <div class="mb-2"><label class="form-label">Comment</label><textarea class="form-control" rows="3" wire:model="comment" placeholder="e.g. Significant Widal titre 1:160. Suggestive of Typhoid Fever."></textarea></div>
                             <div class="row g-3">
@@ -346,8 +346,8 @@
 
         <div class="card mt-4">
             <div class="card-header"><h5 class="mb-0">Laboratory Records <small class="text-muted">({{ count($records) }} Total)</small></h5></div>
-            <div class="card-datatable table-responsive pt-0">
-                <table id="laboratoryRecordsTable" class="table align-middle">
+            <div class="card-datatable table-responsive pt-0" wire:ignore>
+                <table id="dataTable" class="table align-middle">
                     <thead class="table-dark">
                         <tr><th>Visit Date</th><th>Lab No.</th><th>Specimen</th><th>Diagnosis</th><th>Sign-off</th><th>Action</th></tr>
                     </thead>
@@ -380,19 +380,14 @@
     @endif
 </div>
 
-@include('_partials.datatables-init-multi', [
-    'tableIds' => ['laboratoryRecordsTable'],
-    'orders' => [
-        'laboratoryRecordsTable' => [0, 'desc'],
-    ],
-])
+@include('_partials.datatables-init')
 
 @once
     <style>
         .lab-register-page {
             --lab-dark: #2c3e50;
-            --lab-soft: #fff7ed;
-            --lab-border: #fed7aa;
+            --lab-soft: #f8fafc;
+            --lab-border: #dbe3ef;
             --lab-muted: #64748b;
         }
 
@@ -405,20 +400,9 @@
             border-bottom: 1px solid #223242;
         }
 
-        .lab-register-page .card .card-header.bg-label-primary {
-            background-color: #ffedd5 !important;
-            color: #9a3412 !important;
-            border-bottom: 1px solid #fdba74 !important;
-        }
-
         .lab-register-page .card-header h6 {
             font-weight: 700;
             letter-spacing: 0.01em;
-        }
-
-        .lab-register-page .card .card-header.bg-label-primary h6 {
-            color: #7c2d12 !important;
-            font-weight: 700;
         }
         .lab-register-page .form-label {
             font-size: 11px;
@@ -436,8 +420,8 @@
 
         .lab-register-page .form-control:focus,
         .lab-register-page .form-select:focus {
-            border-color: #fdba74;
-            box-shadow: 0 0 0 0.2rem rgba(249, 115, 22, 0.14);
+            border-color: #60a5fa;
+            box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.14);
         }
 
         .lab-register-page .btn-group .btn {
@@ -469,11 +453,6 @@
         .lab-register-page .table thead.table-dark th {
             background: #2c3e50;
             border-color: #223242;
-        }
-
-        .lab-register-page .table thead.table-light th {
-            background: #fff7ed;
-            color: #7c2d12;
         }
 
         .lab-register-page .table td,

@@ -1,6 +1,6 @@
 # APP1 Coding, UI, and Workflow Rules
 
-Last updated: 2026-03-11  
+Last updated: 2026-03-12  
 Scope: `app1` (patient workspace + analytics + facility-facing modules)
 
 These rules are mandatory for all new module work and refactors.
@@ -32,13 +32,16 @@ Primary UI reference for design decisions:
 3. Child/patient context blocks inside forms should be read-only display (not editable inputs) when data is already known.
 4. Use Flowdesk-style clean section cards and keep App1 default blue as the primary accent.
 5. Selected option states must be visually obvious (high-contrast selected style).
+6. Workspace history tables should reuse register-style DataTable pattern (`wire:ignore` + standard init partials).
 
 ## 4) Interaction Rules
 
-1. Every submit/action button must have loading states (`wire:loading`, disabled state, and loading label).
-2. No silent failures: success/error feedback must always appear (toast or inline error).
-3. Pending task flows (Lab Orders, Prescriptions) must require explicit user selection before completion/checkout.
-4. Persist cart-like workflows in session per user+patient where checkout is a single final commit.
+1. Submit/commit actions must have loading states (`wire:loading`, disabled state, loading label).
+2. Pure UI launcher actions (for example open modal) should avoid loading labels unless they perform long server work.
+3. Modal open buttons must call dedicated open methods (for example `openCreateModal`) and must not call close/reset handlers.
+4. No silent failures: success/error feedback must always appear (toast or inline error).
+5. Pending task flows (Lab Orders, Prescriptions) must require explicit user selection before completion/checkout.
+6. Persist cart-like workflows in session per user+patient where checkout is a single final commit.
 
 ## 5) Validation Rules
 

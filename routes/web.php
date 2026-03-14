@@ -34,6 +34,7 @@ use App\Livewire\Core\UpdateOfficerDesignation;
 use App\Livewire\Workspaces\WorkspaceDashboard;
 use App\Livewire\Workspaces\Modules\Attendance;
 use App\Livewire\Workspaces\Modules\Activities;
+use App\Livewire\Workspaces\Modules\Appointments;
 use App\Livewire\Workspaces\Modules\ANC\Deliveries;
 use App\Livewire\Workspaces\Modules\ANC\Postnatal;
 use App\Livewire\Workspaces\Modules\ANC\AncOverview;
@@ -163,6 +164,9 @@ Route::middleware(['auth', 'role.redirect'])->prefix('workspaces')->group(functi
 
   Route::get('/{patientId}/invoices', Invoices::class)
     ->name('workspaces-invoices');
+
+  Route::get('/{patientId}/appointments', Appointments::class)
+    ->name('workspaces-appointments');
 
   Route::get('/{patientId}/drug-catalog', function ($patientId) {
     return redirect()->route('workspaces-drug-catalog-management');

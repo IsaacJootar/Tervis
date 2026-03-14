@@ -57,7 +57,7 @@
             <div class="card-body p-0">
                 <div class="card-datatable table-responsive pt-0">
                     <table id="pendingPrescriptionsTable" class="table align-middle">
-                        <thead class="table-light">
+                        <thead class="table-dark">
                             <tr>
                                 <th style="width: 48px;">Do</th>
                                 <th>Date</th>
@@ -106,8 +106,8 @@
         @endif
 
         <div class="card mb-4">
-            <div class="card-header" style="background-color:#ffedd5;color:#9a3412;border-bottom:1px solid #fdba74;">
-                <h6 class="mb-0"><i class='bx bx-wallet me-1'></i>Billing Summary</h6>
+            <div class="card-header">
+                <h6 class="mb-0"><span class="badge bg-label-primary text-uppercase"><i class='bx bx-wallet me-1'></i>Billing Summary</span></h6>
             </div>
             <div class="card-body py-3">
                 <div class="row g-3">
@@ -130,8 +130,8 @@
         <div class="row g-4 mb-4">
             <div class="col-lg-5">
                 <div class="card h-100">
-                    <div class="card-header" style="background-color:#ffedd5;color:#9a3412;border-bottom:1px solid #fdba74;">
-                        <h6 class="mb-0"><i class='bx bx-plus-circle me-1'></i>Add Drug to Cart</h6>
+                    <div class="card-header">
+                        <h6 class="mb-0"><span class="badge bg-label-info text-uppercase"><i class='bx bx-plus-circle me-1'></i>Add Drug to Cart</span></h6>
                     </div>
                     <div class="card-body">
                         <div class="mb-3">
@@ -195,29 +195,10 @@
                                     placeholder="Optional notes">
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label text-uppercase fw-semibold" style="font-size:11px;letter-spacing:.05em;color:#64748b;">Charge Amount</label>
+                                <label class="form-label text-uppercase fw-semibold" style="font-size:11px;letter-spacing:.05em;color:#64748b;">Charge Amount <span class="text-danger">*</span></label>
                                 <input type="number" min="0" step="0.01" class="form-control" wire:model="charge_amount"
                                     placeholder="Enter bill amount for this dispensing">
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label text-uppercase fw-semibold" style="font-size:11px;letter-spacing:.05em;color:#64748b;">Amount Paid Now</label>
-                                <input type="number" min="0" step="0.01" class="form-control" wire:model="amount_paid_now"
-                                    placeholder="Can be partial or full">
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label text-uppercase fw-semibold" style="font-size:11px;letter-spacing:.05em;color:#64748b;">Payment Method</label>
-                                <select class="form-select" wire:model="payment_method">
-                                    <option value="Cash">Cash</option>
-                                    <option value="Transfer">Transfer</option>
-                                    <option value="POS">POS</option>
-                                    <option value="Insurance">Insurance</option>
-                                    <option value="Other">Other</option>
-                                </select>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label text-uppercase fw-semibold" style="font-size:11px;letter-spacing:.05em;color:#64748b;">Payment Notes</label>
-                                <input type="text" class="form-control" wire:model="payment_notes"
-                                    placeholder="Optional payment note">
+                                <div class="form-text">Required. This is the bill to post to invoice.</div>
                             </div>
                         </div>
                     </div>
@@ -236,14 +217,14 @@
 
             <div class="col-lg-7">
                 <div class="card h-100">
-                    <div class="card-header d-flex justify-content-between align-items-center" style="background-color:#ffedd5;color:#9a3412;border-bottom:1px solid #fdba74;">
-                        <h6 class="mb-0"><i class='bx bx-cart me-1'></i>Cart Items</h6>
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h6 class="mb-0"><span class="badge bg-label-warning text-uppercase"><i class='bx bx-cart me-1'></i>Cart Items</span></h6>
                         <small class="text-muted">{{ count($cart) }} line(s)</small>
                     </div>
                     <div class="card-body p-0">
                         <div class="card-datatable table-responsive pt-0">
                             <table id="cartItemsTable" class="table align-middle">
-                                <thead class="table-light">
+                                <thead class="table-dark">
                                     <tr>
                                         <th>Drug</th>
                                         <th style="width: 180px;">Quantity</th>
@@ -286,7 +267,7 @@
                     <div class="mb-2 small text-muted">Date: {{ $receipt_date ?: '-' }}</div>
                     <div class="card-datatable table-responsive pt-0">
                         <table id="prescriptionReceiptTable" class="table align-middle">
-                            <thead class="table-light">
+                            <thead class="table-dark">
                                 <tr>
                                     <th>Drug</th>
                                     <th>Quantity</th>
@@ -307,8 +288,8 @@
         @endif
 
         <div class="card">
-            <div class="card-header d-flex justify-content-between align-items-center" style="background-color:#ffedd5;color:#9a3412;border-bottom:1px solid #fdba74;">
-                <h6 class="mb-0"><i class='bx bx-history me-1'></i>Dispensing Batches</h6>
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h6 class="mb-0"><span class="badge bg-label-success text-uppercase"><i class='bx bx-history me-1'></i>Dispensing Batches</span></h6>
                 <div class="d-flex gap-2">
                     <input type="date" class="form-control form-control-sm" wire:model.live="history_from_date">
                     <input type="date" class="form-control form-control-sm" wire:model.live="history_to_date">
@@ -317,7 +298,7 @@
             <div class="card-body p-0">
                 <div class="card-datatable table-responsive pt-0">
                     <table id="dispenseBatchesTable" class="table align-middle">
-                        <thead class="table-light">
+                        <thead class="table-dark">
                             <tr>
                                 <th>Date</th>
                                 <th>Batch Code</th>
@@ -345,45 +326,13 @@
             </div>
         </div>
 
-        <div class="card mt-4">
-            <div class="card-header d-flex justify-content-between align-items-center" style="background-color:#ffedd5;color:#9a3412;border-bottom:1px solid #fdba74;">
-                <h6 class="mb-0"><i class='bx bx-credit-card me-1'></i>Recent Payments</h6>
-                <small class="text-muted">{{ $recentPayments->count() }} item(s)</small>
-            </div>
-            <div class="card-body p-0">
-                <div class="card-datatable table-responsive pt-0">
-                    <table class="table align-middle">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Date</th>
-                                <th>Payment Code</th>
-                                <th>Amount</th>
-                                <th>Method</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach ($recentPayments as $payment)
-                                <tr>
-                                    <td>{{ $payment->payment_date?->format('M d, Y') }}</td>
-                                    <td class="fw-semibold">{{ $payment->payment_code }}</td>
-                                    <td class="text-success fw-semibold">{{ number_format((float)$payment->amount_received, 2) }}</td>
-                                    <td>{{ $payment->payment_method ?: 'N/A' }}</td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
     @endif
 
 </div>
 
 @include('_partials.datatables-init-multi', [
-    'tableIds' => ['pendingPrescriptionsTable', 'cartItemsTable', 'prescriptionReceiptTable', 'dispenseBatchesTable'],
+    'tableIds' => ['dispenseBatchesTable'],
     'orders' => [
-        'pendingPrescriptionsTable' => [1, 'desc'],
         'dispenseBatchesTable' => [0, 'desc'],
     ],
-    'nonOrderable' => ['cartItemsTable', 'prescriptionReceiptTable'],
 ])

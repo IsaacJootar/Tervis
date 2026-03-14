@@ -58,8 +58,12 @@
         @endif
 
         <div class="card mb-4">
-            <div class="card-header" style="background-color:#ffedd5;color:#9a3412;border-bottom:1px solid #fdba74;">
-                <h6 class="mb-0"><i class='bx bx-wallet me-1'></i>Billing Summary</h6>
+            <div class="card-header">
+                <h6 class="mb-0">
+                    <span class="badge bg-label-primary text-uppercase">
+                        <i class='bx bx-wallet me-1'></i>Billing Summary
+                    </span>
+                </h6>
             </div>
             <div class="card-body py-3">
                 <div class="row g-3">
@@ -82,13 +86,17 @@
         <div class="row g-4 mb-4">
             <div class="col-lg-8">
                 <div class="card h-100">
-                    <div class="card-header" style="background-color:#ffedd5;color:#9a3412;border-bottom:1px solid #fdba74;">
-                        <h6 class="mb-0"><i class='bx bx-file me-1'></i>Invoices</h6>
+                    <div class="card-header">
+                        <h6 class="mb-0">
+                            <span class="badge bg-label-info text-uppercase">
+                                <i class='bx bx-file me-1'></i>Invoices
+                            </span>
+                        </h6>
                     </div>
                     <div class="card-body p-0">
                         <div class="card-datatable table-responsive pt-0">
                             <table id="invoiceRecordsTable" class="table align-middle">
-                                <thead class="table-light">
+                                <thead class="table-dark">
                                     <tr>
                                         <th>Date</th>
                                         <th>Invoice Code</th>
@@ -129,20 +137,31 @@
 
             <div class="col-lg-4">
                 <div class="card h-100">
-                    <div class="card-header" style="background-color:#ffedd5;color:#9a3412;border-bottom:1px solid #fdba74;">
-                        <h6 class="mb-0"><i class='bx bx-money me-1'></i>Record Payment</h6>
+                    <div class="card-header">
+                        <h6 class="mb-0">
+                            <span class="badge bg-label-success text-uppercase">
+                                <i class='bx bx-money me-1'></i>Record Payment
+                            </span>
+                        </h6>
                     </div>
                     <div class="card-body">
                         <div class="mb-3">
                             <label class="form-label text-uppercase fw-semibold" style="font-size:11px;letter-spacing:.05em;color:#64748b;">Invoice</label>
                             <select class="form-select" wire:model="selected_invoice_id">
-                                <option value="">Select invoice...</option>
-                                @foreach ($invoices as $invoice)
-                                    <option value="{{ $invoice->id }}">
-                                        {{ $invoice->invoice_code }} | Out: {{ number_format((float)$invoice->outstanding_amount, 2) }}
-                                    </option>
-                                @endforeach
+                                @if (($payableInvoices ?? collect())->isEmpty())
+                                    <option value="">No outstanding invoices</option>
+                                @else
+                                    <option value="">Select outstanding invoice...</option>
+                                    @foreach ($payableInvoices as $invoice)
+                                        <option value="{{ $invoice->id }}">
+                                            {{ $invoice->invoice_code }} | Out: {{ number_format((float)$invoice->outstanding_amount, 2) }}
+                                        </option>
+                                    @endforeach
+                                @endif
                             </select>
+                            @if (($payableInvoices ?? collect())->isEmpty())
+                                <div class="form-text text-muted">All invoices are fully paid.</div>
+                            @endif
                         </div>
                         <div class="mb-3">
                             <label class="form-label text-uppercase fw-semibold" style="font-size:11px;letter-spacing:.05em;color:#64748b;">Payment Date</label>
@@ -168,7 +187,8 @@
                             <input type="text" class="form-control" wire:model="payment_notes" placeholder="Optional notes">
                         </div>
                         <button type="button" class="btn btn-primary w-100" wire:click="recordPayment"
-                            wire:loading.attr="disabled" wire:target="recordPayment">
+                            wire:loading.attr="disabled" wire:target="recordPayment"
+                            @disabled(($payableInvoices ?? collect())->isEmpty())>
                             <span wire:loading.remove wire:target="recordPayment">Submit Payment</span>
                             <span wire:loading wire:target="recordPayment"><span
                                     class="spinner-border spinner-border-sm me-1"></span>Processing...</span>
@@ -180,13 +200,18 @@
 
         @if ($selectedInvoice)
             <div class="card mb-4">
-                <div class="card-header" style="background-color:#ffedd5;color:#9a3412;border-bottom:1px solid #fdba74;">
-                    <h6 class="mb-0"><i class='bx bx-detail me-1'></i>Invoice Details: {{ $selectedInvoice->invoice_code }}</h6>
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <span class="badge bg-label-warning text-uppercase">
+                            <i class='bx bx-detail me-1'></i>Invoice Details
+                        </span>
+                        <span class="ms-2 small text-muted">{{ $selectedInvoice->invoice_code }}</span>
+                    </h6>
                 </div>
                 <div class="card-body p-0">
                     <div class="card-datatable table-responsive pt-0">
                         <table id="invoiceLinesTable" class="table align-middle">
-                            <thead class="table-light">
+                            <thead class="table-dark">
                                 <tr>
                                     <th>Module</th>
                                     <th>Description</th>
@@ -215,13 +240,17 @@
         @endif
 
         <div class="card">
-            <div class="card-header" style="background-color:#ffedd5;color:#9a3412;border-bottom:1px solid #fdba74;">
-                <h6 class="mb-0"><i class='bx bx-history me-1'></i>Payment History</h6>
+            <div class="card-header">
+                <h6 class="mb-0">
+                    <span class="badge bg-label-dark text-uppercase">
+                        <i class='bx bx-history me-1'></i>Payment History
+                    </span>
+                </h6>
             </div>
             <div class="card-body p-0">
                 <div class="card-datatable table-responsive pt-0">
                     <table id="invoicePaymentHistoryTable" class="table align-middle">
-                        <thead class="table-light">
+                        <thead class="table-dark">
                             <tr>
                                 <th>Date</th>
                                 <th>Payment Code</th>
@@ -249,10 +278,9 @@
 </div>
 
 @include('_partials.datatables-init-multi', [
-    'tableIds' => ['invoiceRecordsTable', 'invoiceLinesTable', 'invoicePaymentHistoryTable'],
+    'tableIds' => ['invoiceRecordsTable', 'invoicePaymentHistoryTable'],
     'orders' => [
         'invoiceRecordsTable' => [0, 'desc'],
         'invoicePaymentHistoryTable' => [0, 'desc'],
     ],
-    'nonOrderable' => ['invoiceLinesTable'],
 ])

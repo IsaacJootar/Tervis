@@ -67,18 +67,19 @@
                     @endif
 
                     <div class="card mb-3">
-                        <div class="card-header bg-label-primary" style="background-color:#ffedd5 !important;color:#9a3412 !important;border-bottom:1px solid #fdba74 !important;"><h6 class="mb-0"><i class='bx bx-calendar me-1'></i>Visit Context</h6></div>
+                        <div class="card-header"><h6 class="mb-0"><span class="badge bg-label-primary text-uppercase"><i class='bx bx-calendar me-1'></i>Visit Context</span></h6></div>
                         <div class="card-body">
                             <div class="row g-3">
-                                <div class="col-md-4"><label class="form-label">Visit Date</label><input type="date" class="form-control" wire:model="visit_date"></div>
-                                <div class="col-md-4"><label class="form-label">Month Bucket</label><input type="text" class="form-control bg-light" value="{{ $month_year ? Carbon::parse($month_year)->format('F Y') : 'N/A' }}" readonly></div>
-                                <div class="col-md-4"><label class="form-label">Patient Age / Sex</label><input type="text" class="form-control bg-light" value="{{ $patient_age ?? 'N/A' }} yrs / {{ strtoupper(substr((string) $patient_gender, 0, 1)) ?: 'N/A' }}" readonly></div>
+                                <div class="col-md-3"><label class="form-label">Visit Date</label><input type="date" class="form-control" wire:model="visit_date"></div>
+                                <div class="col-md-3"><label class="form-label">Next Appointment (Optional)</label><input type="date" class="form-control" wire:model="next_appointment_date"></div>
+                                <div class="col-md-3"><label class="form-label">Month Bucket</label><input type="text" class="form-control bg-light" value="{{ $month_year ? Carbon::parse($month_year)->format('F Y') : 'N/A' }}" readonly></div>
+                                <div class="col-md-3"><label class="form-label">Patient Age / Sex</label><input type="text" class="form-control bg-light" value="{{ $patient_age ?? 'N/A' }} yrs / {{ strtoupper(substr((string) $patient_gender, 0, 1)) ?: 'N/A' }}" readonly></div>
                             </div>
                         </div>
                     </div>
 
                     <div class="card mb-3">
-                        <div class="card-header bg-label-primary" style="background-color:#ffedd5 !important;color:#9a3412 !important;border-bottom:1px solid #fdba74 !important;"><h6 class="mb-0"><i class='bx bx-note me-1'></i>Clinical Assessment (Essential Fields)</h6></div>
+                        <div class="card-header"><h6 class="mb-0"><span class="badge bg-label-info text-uppercase"><i class='bx bx-note me-1'></i>Clinical Assessment (Essential Fields)</span></h6></div>
                         <div class="card-body">
                             <div class="row g-3">
                                 <div class="col-md-6"><label class="form-label">Final Diagnosis</label><input type="text" class="form-control" wire:model="final_diagnosis" placeholder="Confirmed diagnosis"></div>
@@ -92,7 +93,7 @@
                     </div>
 
                     <div class="card mb-3">
-                        <div class="card-header bg-label-primary" style="background-color:#ffedd5 !important;color:#9a3412 !important;border-bottom:1px solid #fdba74 !important;"><h6 class="mb-0"><i class='bx bx-test-tube me-1'></i>Prescribed Tests (Optional)</h6></div>
+                        <div class="card-header"><h6 class="mb-0"><span class="badge bg-label-warning text-uppercase"><i class='bx bx-test-tube me-1'></i>Prescribed Tests (Optional)</span></h6></div>
                         <div class="card-body">
                             <div class="row g-2 align-items-end mb-3">
                                 <div class="col-md-5"><label class="form-label">Test Name</label><input type="text" class="form-control" wire:model="test_entry_name" placeholder="e.g. FBC"></div>
@@ -102,7 +103,7 @@
 
                             <div class="card-datatable table-responsive pt-0">
                                 <table class="table">
-                                    <thead class="table-light"><tr><th>Test</th><th>Specimen</th><th>Action</th></tr></thead>
+                                    <thead class="table-dark"><tr><th>Test</th><th>Specimen</th><th>Action</th></tr></thead>
                                     <tbody>
                                         @forelse ($test_orders as $index => $entry)
                                             <tr>
@@ -120,7 +121,7 @@
                     </div>
 
                     <div class="card mb-3">
-                        <div class="card-header bg-label-primary" style="background-color:#ffedd5 !important;color:#9a3412 !important;border-bottom:1px solid #fdba74 !important;"><h6 class="mb-0"><i class='bx bx-capsule me-1'></i>Medication Prescriptions (Optional)</h6></div>
+                        <div class="card-header"><h6 class="mb-0"><span class="badge bg-label-success text-uppercase"><i class='bx bx-capsule me-1'></i>Medication Prescriptions (Optional)</span></h6></div>
                         <div class="card-body">
                             <div class="row g-2 align-items-end mb-2">
                                 <div class="col-md-3"><label class="form-label">Drug Name</label><input type="text" class="form-control" wire:model="drug_entry_name" placeholder="e.g. Amoxicillin"></div>
@@ -135,7 +136,7 @@
 
                             <div class="card-datatable table-responsive pt-0">
                                 <table class="table">
-                                    <thead class="table-light"><tr><th>Drug</th><th>Dosage</th><th>Frequency</th><th>Duration</th><th>Route</th><th>Instructions</th><th>Qty</th><th>Action</th></tr></thead>
+                                    <thead class="table-dark"><tr><th>Drug</th><th>Dosage</th><th>Frequency</th><th>Duration</th><th>Route</th><th>Instructions</th><th>Qty</th><th>Action</th></tr></thead>
                                     <tbody>
                                         @forelse ($drug_orders as $index => $entry)
                                             <tr>
@@ -180,11 +181,12 @@
             <div class="card-header"><h5 class="mb-0">Assessment Records <small class="text-muted">({{ count($records) }} Total)</small></h5></div>
             <div class="card-datatable table-responsive pt-0">
                 <table class="table">
-                    <thead class="table-dark"><tr><th>Date</th><th>Final</th><th>Pending Tests</th><th>Pending Prescriptions</th><th>Action</th></tr></thead>
+                    <thead class="table-dark"><tr><th>Date</th><th>Next Appointment</th><th>Final</th><th>Pending Tests</th><th>Pending Prescriptions</th><th>Action</th></tr></thead>
                     <tbody>
                         @forelse ($records as $record)
                             <tr wire:key="assessment-record-{{ $record->id }}">
                                 <td>{{ $record->visit_date?->format('M d, Y') }}</td>
+                                <td>{{ $record->next_appointment_date?->format('M d, Y') ?? 'N/A' }}</td>
                                 <td>{{ $record->final_diagnosis ?: 'N/A' }}</td>
                                 <td><span class="badge bg-label-primary">{{ $record->pending_tests_count }}</span></td>
                                 <td><span class="badge bg-label-warning">{{ $record->pending_prescriptions_count }}</span></td>
@@ -202,7 +204,7 @@
                                 </td>
                             </tr>
                         @empty
-                            <tr><td colspan="5" class="text-center py-4 text-muted">No doctor assessments yet.</td></tr>
+                            <tr><td colspan="6" class="text-center py-4 text-muted">No doctor assessments yet.</td></tr>
                         @endforelse
                     </tbody>
                 </table>

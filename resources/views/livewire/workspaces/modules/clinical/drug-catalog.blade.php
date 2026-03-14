@@ -62,9 +62,8 @@
         </div>
 
         <div class="card mb-4">
-            <div class="card-header" style="background-color:#ffedd5;color:#9a3412;border-bottom:1px solid #fdba74;">
-                <h6 class="mb-0"><i class='bx bx-plus-circle me-1'></i>{{ $catalog_id ? 'Update Drug Item' : 'Add Drug Item' }}
-                </h6>
+            <div class="card-header">
+                <h6 class="mb-0"><span class="badge bg-label-primary text-uppercase"><i class='bx bx-plus-circle me-1'></i>{{ $catalog_id ? 'Update Drug Item' : 'Add Drug Item' }}</span></h6>
             </div>
             <div class="card-body">
                 @if ($errors->any())
@@ -124,14 +123,14 @@
         </div>
 
         <div class="card">
-            <div class="card-header d-flex justify-content-between align-items-center" style="background-color:#ffedd5;color:#9a3412;border-bottom:1px solid #fdba74;">
-                <h6 class="mb-0"><i class='bx bx-list-ul me-1'></i>Catalog Records</h6>
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h6 class="mb-0"><span class="badge bg-label-info text-uppercase"><i class='bx bx-list-ul me-1'></i>Catalog Records</span></h6>
                 <small class="text-muted">{{ count($catalogItems) }} total item(s)</small>
             </div>
             <div class="card-body p-0">
                 <div class="card-datatable table-responsive pt-0">
                     <table id="drugCatalogRecordsTable" class="table">
-                        <thead class="table-light">
+                        <thead class="table-dark">
                             <tr>
                                 <th>Drug</th>
                                 <th>Form / Strength</th>

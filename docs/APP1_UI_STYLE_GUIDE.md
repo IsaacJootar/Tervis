@@ -1,6 +1,6 @@
 # APP1 UI Style Guide (Mobile-First, Flowdesk-Inspired)
 
-Last updated: 2026-03-11  
+Last updated: 2026-03-12  
 Reference baseline: `FLOWDESK_UI_GUIDE.md` adapted for healthcare workflow in `app1`.
 
 ## 1) UI Principles (Non-Negotiable)
@@ -66,22 +66,28 @@ Notes:
 
 ## 7) Buttons and Loading States (Mandatory)
 
-1. Every submit/action button must have `wire:loading` state with clear loading text.
-2. Disable controls while request is active to prevent double-submit.
-3. Use consistent verbs:
+1. Every submit/commit action button must have `wire:loading` state with clear loading text.
+2. UI launcher buttons (open modal, switch tab, expand/collapse) should not show spinner labels unless they trigger long-running server work.
+3. Modal open flow must use a dedicated opener method (for example `openCreateModal`) that resets state and opens the modal only.
+4. Never bind modal open buttons to close/reset handlers (for example `exit`) because this causes open-then-close flicker.
+5. Disable controls while request is active to prevent double-submit.
+6. Use consistent verbs:
    - `Save Record...`
    - `Update Record...`
    - `Submitting...`
    - `Processing...`
-4. Pending-selection workflows (lab/prescription) must enforce user acknowledgment before completion.
+7. Pending-selection workflows (lab/prescription) must enforce user acknowledgment before completion.
 
 ## 8) Table and History Standards
 
 1. Keep search/filter controls aligned and consistent across modules.
-2. Use server-side pagination in operational lists.
-3. Record status must be visible with badge/chip styles.
-4. Row actions must be explicit and safe (Edit, Delete, View, Print where relevant).
-5. Show empty states with next-step message.
+2. Reuse register-style DataTable behavior in workspace history tables: pagination, export controls, and responsive layout.
+3. For a single primary table in a module view, prefer `id="dataTable"` + `wire:ignore` + `@include('_partials.datatables-init')`.
+4. For multiple tables in one view, use `@include('_partials.datatables-init-multi', ...)` with explicit table IDs and order rules.
+5. Use server-side pagination only when dataset size or performance requires it.
+6. Record status must be visible with badge/chip styles.
+7. Row actions must be explicit and safe (Edit, Delete, View, Print where relevant).
+8. Show empty states with next-step message.
 
 ## 9) Chart and Data Visualization Standards
 
@@ -112,9 +118,10 @@ Notes:
 3. Section headers use APP1 demarcation style.
 4. Forms have explicit labels and inline validation.
 5. Every action button has loading/disabled states.
-6. Table/history placed below primary data-entry workflow.
-7. Charts (if any) read from persisted data and render after save.
-8. Toasts show success/error for all major actions.
+6. Modal launcher buttons do not use loading text and do not call close/reset handlers.
+7. Table/history placed below primary data-entry workflow.
+8. Charts (if any) read from persisted data and render after save.
+9. Toasts show success/error for all major actions.
 
 ## 13) Definition of Done (UI)
 

@@ -104,9 +104,8 @@
                                 <a href="{{ route('workspaces-child-health-vaccination-schedule', ['patientId' => $patientId]) }}"
                                     class="btn btn-outline-primary">
                                     <i class="bx bx-list-check me-1"></i>Vaccination Schedule</a>
-                                <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#immunizationModal" wire:click="exit" wire:loading.attr="disabled" wire:target="exit">
-                                    <span wire:loading.remove wire:target="exit"><i class="bx bx-plus me-1"></i>Immunization Register</span>
-                                    <span wire:loading wire:target="exit"><span class="spinner-border spinner-border-sm me-1"></span>Preparing...</span>
+                                <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#immunizationModal" wire:click="openCreateModal">
+                                    <i class="bx bx-plus me-1"></i>Immunization Register
                                 </button>
                             </div>
                         </div>

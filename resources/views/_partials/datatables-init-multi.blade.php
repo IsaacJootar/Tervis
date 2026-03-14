@@ -14,6 +14,7 @@
 
         window.__app1MultiDataTables = window.__app1MultiDataTables || {
             registry: {},
+            instances: {},
             timer: null,
             listenersBound: false,
             livewireHookBound: false,
@@ -21,12 +22,28 @@
 
         const manager = window.__app1MultiDataTables;
 
+        const nextRegistry = {};
         tableIds.forEach((tableId) => {
-            manager.registry[tableId] = {
+            nextRegistry[tableId] = {
                 order: orders[tableId] || defaultOrder,
                 nonOrderable: nonOrderable.includes(tableId),
             };
         });
+
+        // Tear down stale instances from previous page/component includes.
+        Object.keys(manager.instances).forEach((tableId) => {
+            if (!nextRegistry[tableId] && manager.instances[tableId] &&
+                typeof manager.instances[tableId].destroy === 'function') {
+                try {
+                    manager.instances[tableId].destroy();
+                } catch (e) {
+                    // Ignore teardown failures.
+                }
+                manager.instances[tableId] = null;
+            }
+        });
+
+        manager.registry = nextRegistry;
 
         function buildConfig(meta) {
             const config = {
@@ -80,11 +97,36 @@
                     return;
                 }
 
+                if (manager.instances[tableId] && typeof manager.instances[tableId].destroy === 'function') {
+                    try {
+                        manager.instances[tableId].destroy();
+                    } catch (e) {
+                        // Ignore and continue with fallback destroy.
+                    }
+                    manager.instances[tableId] = null;
+                }
+
                 if ($.fn.DataTable.isDataTable(table)) {
-                    $(table).DataTable().destroy();
+                    try {
+                        $(table).DataTable().destroy();
+                    } catch (e) {
+                        // Ignore and continue.
+                    }
+                }
+
+                const headerCount = table.querySelectorAll('thead th').length;
+                const tbody = table.tBodies && table.tBodies[0] ? table.tBodies[0] : null;
+                if (tbody && headerCount > 0) {
+                    Array.from(tbody.rows).forEach((row) => {
+                        const hasColspan = !!row.querySelector('td[colspan], th[colspan]');
+                        if (hasColspan || row.cells.length !== headerCount) {
+                            row.remove();
+                        }
+                    });
                 }
 
                 const dataTable = new DataTable(table, buildConfig(meta));
+                manager.instances[tableId] = dataTable;
 
                 if (dataTable?.columns && typeof dataTable.columns.adjust === 'function') {
                     dataTable.columns.adjust();

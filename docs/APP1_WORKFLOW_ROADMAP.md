@@ -1,6 +1,6 @@
 # APP1 Workflow and Roadmap
 
-Last updated: 2026-03-11  
+Last updated: 2026-03-14  
 Aligned to: HMS Vision Architecture v2.0 (Nov 2025)
 
 ## 1) Current End-to-End Workflow (Implemented)
@@ -17,15 +17,20 @@ Aligned to: HMS Vision Architecture v2.0 (Nov 2025)
 4. Pharmacy/dispensing bridge:
    - Pending prescriptions appear in Prescriptions page.
    - Dispensing uses cart checkout and marks selected pending prescriptions as dispensed.
-5. Child health chain:
+5. Billing bridge:
+   - Prescription checkout generates/updates invoice records.
+   - Payments are recorded in Invoices & Payments module with history.
+6. Child health chain:
    - Immunizations + Vaccination Schedule + Nutrition capture child activity data.
-6. Monthly report:
+7. Appointment aggregation:
+   - Appointments module auto-collates next-visit dates from Doctor Assessment, TT, ANC follow-up, and Family Planning.
+8. Monthly report:
    - Monthly dashboard aggregates mapped data from attendance, maternal/child, doctor, and lab sources.
 
 ## 2) Workflow Gaps (Not Yet Closed)
 
-1. Patient Section 10-16 gaps:
-   - Invoices, Appointments module flow, Referrals, Reminders, Health Insurance, Visits grouping.
+1. Patient Section 12-16 gaps:
+   - Referrals, Reminders, Health Insurance, Visits grouping.
 2. Family Planning workspace module:
    - Register exists but dedicated workspace activity module not yet active.
 3. Facility operations:
@@ -39,10 +44,8 @@ Aligned to: HMS Vision Architecture v2.0 (Nov 2025)
 ## 3) Execution Plan (Next Modules, In Order)
 
 ## Phase A: Close Remaining Patient Dashboard Core
-1. Invoices & Payments module (Section 10)
-2. Appointments module (Section 11)
-3. Referrals module (Section 12)
-4. Reminders module (Section 13)
+1. Referrals module (Section 12)
+2. Reminders module (Section 13)
 
 Done criteria:
 - Routed module pages exist from dashboard.

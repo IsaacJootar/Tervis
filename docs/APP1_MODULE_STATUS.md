@@ -1,6 +1,6 @@
 # APP1 Module Status (Vision-Aligned Ground Truth)
 
-Last updated: 2026-03-11  
+Last updated: 2026-03-14  
 Reference vision: `Health Management System - Complete Architecture (Patient + Facility Modules).pdf` (v2.0, Nov 2025)
 
 Status legend:
@@ -23,8 +23,8 @@ Status legend:
 | 8. Tests & Lab | `workspaces/{patientId}/laboratory` | Implemented | Laboratory record capture + pending test completion flow. |
 | 9. Prescriptions | `workspaces/{patientId}/prescriptions` | Implemented | Cart-based dispensing workflow. |
 | 9b. Drug Catalog (supporting page) | `workspaces/{patientId}/drug-catalog` | Implemented | Facility-level catalog CRUD for dispensing. |
-| 10. Invoices & Payments | No active workspace route | Not Started | Dashboard card route intentionally absent/hidden. |
-| 11. Appointments | No active workspace route | Not Started | Core page exists (`core/patient-appointments`) but not patient-workspace module flow. |
+| 10. Invoices & Payments | `workspaces/{patientId}/invoices` (`workspaces-invoices`) | Implemented | Invoice creation from prescriptions + payment recording workflow active. |
+| 11. Appointments | `workspaces/{patientId}/appointments` (`workspaces-appointments`) | Implemented | Aggregated from Doctor Assessment, TT, ANC follow-up, and Family Planning next-visit fields. |
 | 12. Referrals | No active workspace route | Not Started | No active patient-workspace module route. |
 | 13. Reminders & Alerts | No active workspace route | Not Started | No active patient-workspace module route. |
 | 14. Family Planning | No active workspace route | Partial | Register exists (`registers/family-planning-register`) but workspace activity module not active. |
@@ -65,7 +65,6 @@ Note: Vision text mentions both "7 modules" and "8 management modules" in differ
 
 ## 5) Immediate Priority Recommendation
 
-1. Complete Section 10 (Invoices & Payments) before more new modules.
-2. Complete Section 11-13 (Appointments, Referrals, Reminders) as support workflow chain.
-3. Complete Section 14-16 (Family Planning workspace module, Insurance, Visits grouping).
-4. Then execute facility modules in order: Bed -> Inpatient -> full Pharmacy Ops -> full Lab Ops.
+1. Complete Section 12-13 (Referrals, Reminders) as support workflow chain.
+2. Complete Section 14-16 (Family Planning workspace module, Insurance, Visits grouping).
+3. Then execute facility modules in order: Bed -> Inpatient -> full Pharmacy Ops -> full Lab Ops.

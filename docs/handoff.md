@@ -137,3 +137,41 @@
   - linked the new documentation baseline.
 - Route inventory re-validated via `php artisan route:list`.
 - No runtime/business logic code changes were made in this update; this pass focused on documentation alignment and execution clarity.
+
+## Update (2026-03-12)
+- Immunization Register modal open flow standardized:
+  - Added dedicated `openCreateModal()` opener in `Immunizations` component.
+  - CTA now opens modal without calling `exit` (prevents immediate close/reload behavior).
+  - Removed loading state text from the Immunization Register launcher button.
+- Laboratory records table pagination aligned to register pattern:
+  - Use `wire:ignore` + `id="dataTable"` + `@include('_partials.datatables-init')` for the primary history table.
+- Governance updates for reuse in future modules:
+  - `docs/APP1_UI_STYLE_GUIDE.md` updated with launcher-button and modal-open flow rules.
+  - `docs/APP1_CODING_RULES.md` updated with interaction and table standardization rules.
+
+## Update (2026-03-14)
+- Appointments workspace module implemented and routed:
+  - Route: `workspaces/{patientId}/appointments` (`workspaces-appointments`)
+  - New files:
+    - `app/Livewire/Workspaces/Modules/Appointments.php`
+    - `resources/views/livewire/workspaces/modules/appointments/index.blade.php`
+- Appointment sources now aggregated (no manual duplicate entry in appointments page):
+  - `doctor_assessments.next_appointment_date`
+  - `tetanus_vaccinations.next_appointment_date`
+  - `antenatal_follow_up_assessments.next_return_date`
+  - `family_planning_registrations.next_appointment`
+- Appointment status logic:
+  - `Fulfilled` if `din_activations.visit_date >= appointment_date` for same patient/facility
+  - Else `Upcoming` (today/future) or `Missed` (past)
+- Workspace dashboard card updates:
+  - `appointments` card count now derived from aggregated module source counts (not `Appointment` model).
+  - File: `app/Livewire/Workspaces/WorkspaceDashboard.php`
+- Facility Reports appointment tracking upgraded to same multi-source aggregation:
+  - File: `app/Livewire/Core/FacilityReports.php`
+  - Now reports Doctor Follow-up, TT Vaccination, ANC Follow-up, and Family Planning Follow-up with status.
+- Validation run:
+  - `php -l app/Livewire/Workspaces/Modules/Appointments.php`
+  - `php -l app/Livewire/Workspaces/WorkspaceDashboard.php`
+  - `php -l app/Livewire/Core/FacilityReports.php`
+  - `php artisan route:list --name=workspaces-appointments`
+  - `php artisan test` (`2 passed`)
