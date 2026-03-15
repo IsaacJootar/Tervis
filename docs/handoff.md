@@ -175,3 +175,35 @@
   - `php -l app/Livewire/Core/FacilityReports.php`
   - `php artisan route:list --name=workspaces-appointments`
   - `php artisan test` (`2 passed`)
+- Referrals workspace module implemented and routed:
+  - Route: `workspaces/{patientId}/referrals` (`workspaces-referrals`)
+  - New files:
+    - `app/Models/Referral.php`
+    - `database/migrations/2026_03_14_150000_create_referrals_table.php`
+    - `app/Livewire/Workspaces/Modules/Clinical/Referrals.php`
+    - `resources/views/livewire/workspaces/modules/clinical/referrals.blade.php`
+  - Features:
+    - Auto patient/facility context
+    - Referral details capture
+    - 26-item services checklist + "Others"
+    - Service outcome/transport/time tracking
+    - Authorization fields + record history CRUD
+    - Activity timeline logging (`module = referrals`)
+- Referral validation run:
+  - `php artisan migrate --force`
+  - `php artisan route:list --name=workspaces-referrals`
+  - `php artisan test` (`2 passed`)
+- Heavy-load readiness updates (server-side pagination + tenancy scoping) applied to clinical workspace tables:
+  - Components updated to DB pagination (`paginate`) and bootstrap links:
+    - `app/Livewire/Workspaces/Modules/Clinical/DoctorAssessments.php`
+    - `app/Livewire/Workspaces/Modules/Clinical/Referrals.php`
+    - `app/Livewire/Workspaces/Modules/Clinical/Laboratory.php`
+    - `app/Livewire/Workspaces/Modules/Clinical/Prescriptions.php`
+    - `app/Livewire/Workspaces/Modules/Clinical/Invoices.php`
+  - Views updated to render server-side pagination links:
+    - `resources/views/livewire/workspaces/modules/clinical/doctor-assessments.blade.php`
+    - `resources/views/livewire/workspaces/modules/clinical/referrals.blade.php`
+    - `resources/views/livewire/workspaces/modules/clinical/laboratory.blade.php`
+    - `resources/views/livewire/workspaces/modules/clinical/prescriptions.blade.php`
+    - `resources/views/livewire/workspaces/modules/clinical/invoices.blade.php`
+  - Tenancy/facility scope preserved in all updated queries (`facility_id` and `patient_id` filters).

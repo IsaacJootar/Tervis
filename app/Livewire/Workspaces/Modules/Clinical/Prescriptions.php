@@ -20,10 +20,15 @@ use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
+use Livewire\WithPagination;
 
 #[Layout('layouts.dataOfficerLayout')]
 class Prescriptions extends Component
 {
+  use WithPagination;
+
+  protected $paginationTheme = 'bootstrap';
+
   public $patientId;
   public $patient;
 
@@ -558,15 +563,17 @@ class Prescriptions extends Component
 
   public function render()
   {
-    $pendingPrescriptions = Prescription::query()
+    $pendingPrescriptionsBase = Prescription::query()
       ->where('patient_id', $this->patientId)
       ->where('facility_id', $this->facility_id)
-      ->where('status', 'pending')
+      ->where('status', 'pending');
+
+    $pendingPrescriptions = (clone $pendingPrescriptionsBase)
       ->latest('prescribed_date')
       ->latest('id')
-      ->get();
+      ->paginate(10, ['*'], 'pending_prescriptions_page');
 
-    $pendingIds = $pendingPrescriptions->pluck('id')->map(fn($id) => (string) $id)->all();
+    $pendingIds = (clone $pendingPrescriptionsBase)->pluck('id')->map(fn($id) => (string) $id)->all();
     $this->selected_prescription_map = collect((array) $this->selected_prescription_map)
       ->filter(fn($checked, $id) => (bool) $checked && in_array((string) $id, $pendingIds, true))
       ->map(fn() => true)
@@ -610,7 +617,7 @@ class Prescriptions extends Component
       ->groupBy('dispense_code', 'dispensed_date')
       ->orderByDesc('dispensed_date')
       ->orderByDesc(DB::raw('MAX(id)'))
-      ->get();
+      ->paginate(10, ['*'], 'dispense_batches_page');
 
     $billingSummary = (object) [
       'total_billed' => 0,

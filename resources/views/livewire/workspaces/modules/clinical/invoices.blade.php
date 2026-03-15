@@ -131,6 +131,14 @@
                                 </tbody>
                             </table>
                         </div>
+                        <div class="px-3 py-2 d-flex justify-content-between align-items-center flex-wrap gap-2">
+                            <small class="text-muted">Page {{ $invoices->currentPage() }} of {{ $invoices->lastPage() }} | Total {{ $invoices->total() }}</small>
+                            <div>
+                                @if (method_exists($invoices, 'links'))
+                                    {{ $invoices->links() }}
+                                @endif
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -272,15 +280,15 @@
                         </tbody>
                     </table>
                 </div>
+                <div class="px-3 py-2 d-flex justify-content-between align-items-center flex-wrap gap-2">
+                    <small class="text-muted">Page {{ $payments->currentPage() }} of {{ $payments->lastPage() }} | Total {{ $payments->total() }}</small>
+                    <div>
+                        @if (method_exists($payments, 'links'))
+                            {{ $payments->links() }}
+                        @endif
+                    </div>
+                </div>
             </div>
         </div>
     @endif
 </div>
-
-@include('_partials.datatables-init-multi', [
-    'tableIds' => ['invoiceRecordsTable', 'invoicePaymentHistoryTable'],
-    'orders' => [
-        'invoiceRecordsTable' => [0, 'desc'],
-        'invoicePaymentHistoryTable' => [0, 'desc'],
-    ],
-])

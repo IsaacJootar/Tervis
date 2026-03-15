@@ -29,8 +29,8 @@ Aligned to: HMS Vision Architecture v2.0 (Nov 2025)
 
 ## 2) Workflow Gaps (Not Yet Closed)
 
-1. Patient Section 12-16 gaps:
-   - Referrals, Reminders, Health Insurance, Visits grouping.
+1. Patient Section 13-16 gaps:
+   - Reminders, Health Insurance, Visits grouping.
 2. Family Planning workspace module:
    - Register exists but dedicated workspace activity module not yet active.
 3. Facility operations:
@@ -44,8 +44,7 @@ Aligned to: HMS Vision Architecture v2.0 (Nov 2025)
 ## 3) Execution Plan (Next Modules, In Order)
 
 ## Phase A: Close Remaining Patient Dashboard Core
-1. Referrals module (Section 12)
-2. Reminders module (Section 13)
+1. Reminders module (Section 13)
 
 Done criteria:
 - Routed module pages exist from dashboard.

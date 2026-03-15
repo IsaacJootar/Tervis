@@ -119,6 +119,10 @@
                                         </tbody>
                                     </table>
                                 </div>
+                                <div class="px-3 py-2 d-flex justify-content-between align-items-center flex-wrap gap-2">
+                                    <small class="text-muted">Page {{ $pendingTestOrders->currentPage() }} of {{ $pendingTestOrders->lastPage() }} | Total {{ $pendingTestOrders->total() }}</small>
+                                    <div>{{ $pendingTestOrders->links() }}</div>
+                                </div>
                             </div>
                             <div class="card-footer small text-muted">
                                 You must check at least one pending requested test before saving. Checked tests will be marked <strong>completed</strong> after save.
@@ -345,8 +349,8 @@
         </div>
 
         <div class="card mt-4">
-            <div class="card-header"><h5 class="mb-0">Laboratory Records <small class="text-muted">({{ count($records) }} Total)</small></h5></div>
-            <div class="card-datatable table-responsive pt-0" wire:ignore>
+            <div class="card-header"><h5 class="mb-0">Laboratory Records <small class="text-muted">({{ $records->total() }} Total)</small></h5></div>
+            <div class="card-datatable table-responsive pt-0">
                 <table id="dataTable" class="table align-middle">
                     <thead class="table-dark">
                         <tr><th>Visit Date</th><th>Lab No.</th><th>Specimen</th><th>Diagnosis</th><th>Sign-off</th><th>Action</th></tr>
@@ -376,11 +380,13 @@
                     </tbody>
                 </table>
             </div>
+            <div class="px-3 py-2 d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <small class="text-muted">Page {{ $records->currentPage() }} of {{ $records->lastPage() }} | Total {{ $records->total() }}</small>
+                <div>{{ $records->links() }}</div>
+            </div>
         </div>
     @endif
 </div>
-
-@include('_partials.datatables-init')
 
 @once
     <style>

@@ -32,7 +32,14 @@ Primary UI reference for design decisions:
 3. Child/patient context blocks inside forms should be read-only display (not editable inputs) when data is already known.
 4. Use Flowdesk-style clean section cards and keep App1 default blue as the primary accent.
 5. Selected option states must be visually obvious (high-contrast selected style).
-6. Workspace history tables should reuse register-style DataTable pattern (`wire:ignore` + standard init partials).
+6. Workspace history tables must always be paginated.
+   - Default/normal-load pages may use register-style DataTable (`_partials/datatables-init-multi`) with export/search.
+   - Heavy-load pages must use server-side pagination/filtering in Livewire/Eloquent (`paginate`) instead of client-side in-memory DataTable processing.
+   - Do not ship plain non-paginated history tables.
+7. Every workspace query must respect tenancy scope by default:
+   - always filter by `facility_id`
+   - for patient workspace modules, also filter by `patient_id`
+   - never query cross-facility data unless the module explicitly requires aggregated scope and user role allows it.
 
 ## 4) Interaction Rules
 

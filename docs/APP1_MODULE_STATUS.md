@@ -25,7 +25,7 @@ Status legend:
 | 9b. Drug Catalog (supporting page) | `workspaces/{patientId}/drug-catalog` | Implemented | Facility-level catalog CRUD for dispensing. |
 | 10. Invoices & Payments | `workspaces/{patientId}/invoices` (`workspaces-invoices`) | Implemented | Invoice creation from prescriptions + payment recording workflow active. |
 | 11. Appointments | `workspaces/{patientId}/appointments` (`workspaces-appointments`) | Implemented | Aggregated from Doctor Assessment, TT, ANC follow-up, and Family Planning next-visit fields. |
-| 12. Referrals | No active workspace route | Not Started | No active patient-workspace module route. |
+| 12. Referrals | `workspaces/{patientId}/referrals` (`workspaces-referrals`) | Implemented | Referral form module with services checklist, outcome tracking, and history table. |
 | 13. Reminders & Alerts | No active workspace route | Not Started | No active patient-workspace module route. |
 | 14. Family Planning | No active workspace route | Partial | Register exists (`registers/family-planning-register`) but workspace activity module not active. |
 | 15. Health Insurance | No active workspace route | Not Started | No active module route/workflow. |
@@ -65,6 +65,6 @@ Note: Vision text mentions both "7 modules" and "8 management modules" in differ
 
 ## 5) Immediate Priority Recommendation
 
-1. Complete Section 12-13 (Referrals, Reminders) as support workflow chain.
+1. Complete Section 13 (Reminders) as support workflow chain.
 2. Complete Section 14-16 (Family Planning workspace module, Insurance, Visits grouping).
 3. Then execute facility modules in order: Bed -> Inpatient -> full Pharmacy Ops -> full Lab Ops.

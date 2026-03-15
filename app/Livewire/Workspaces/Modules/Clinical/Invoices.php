@@ -16,10 +16,15 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
+use Livewire\WithPagination;
 
 #[Layout('layouts.dataOfficerLayout')]
 class Invoices extends Component
 {
+  use WithPagination;
+
+  protected $paginationTheme = 'bootstrap';
+
   public $patientId;
   public $patient;
 
@@ -229,6 +234,7 @@ class Invoices extends Component
     if (!$this->billingAvailable) {
       return view('livewire.workspaces.modules.clinical.invoices', [
         'invoices' => collect(),
+        'payableInvoices' => collect(),
         'selectedInvoice' => null,
         'payments' => collect(),
         'billingSummary' => $zeroSummary,
@@ -243,8 +249,9 @@ class Invoices extends Component
       ->withSum('allocations as allocations_total_amount', 'amount_allocated')
       ->latest('invoice_date')
       ->latest('id')
-      ->get()
-      ->map(function ($invoice) {
+      ->paginate(10, ['*'], 'invoice_records_page');
+
+    $invoices->getCollection()->transform(function ($invoice) {
         $total = (float) ($invoice->lines_total_amount ?? $invoice->total_amount ?? 0);
         $paid = (float) ($invoice->allocations_total_amount ?? $invoice->amount_paid ?? 0);
         $outstanding = max(0, $total - $paid);
@@ -264,19 +271,23 @@ class Invoices extends Component
         $invoice->setAttribute('status', $status);
 
         return $invoice;
-      })
-      ->values();
+      });
 
-    $payableInvoices = $invoices
-      ->filter(fn($invoice) => (float) $invoice->outstanding_amount > 0 && in_array($invoice->status, ['draft', 'unpaid', 'partially_paid'], true))
-      ->values();
+    $payableInvoices = Invoice::query()
+      ->where('patient_id', $this->patientId)
+      ->where('facility_id', $this->facility_id)
+      ->where('outstanding_amount', '>', 0)
+      ->orderByDesc('invoice_date')
+      ->orderByDesc('id')
+      ->limit(200)
+      ->get();
 
     if ($payableInvoices->isNotEmpty()) {
       $selectedPayable = $payableInvoices->contains(fn($invoice) => (int) $invoice->id === (int) $this->selected_invoice_id);
       if (!$selectedPayable) {
         $this->selected_invoice_id = (int) $payableInvoices->first()->id;
       }
-    } elseif (!$this->selected_invoice_id && $invoices->isNotEmpty()) {
+    } elseif (!$this->selected_invoice_id && $invoices->count() > 0) {
       $this->selected_invoice_id = (int) $invoices->first()->id;
     }
 
@@ -320,8 +331,7 @@ class Invoices extends Component
       ->where('facility_id', $this->facility_id)
       ->latest('payment_date')
       ->latest('id')
-      ->limit(20)
-      ->get();
+      ->paginate(10, ['*'], 'payments_history_page');
 
     $billingSummary = Invoice::query()
       ->where('patient_id', $this->patientId)

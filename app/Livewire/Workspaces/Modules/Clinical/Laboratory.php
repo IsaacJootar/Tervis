@@ -17,11 +17,16 @@ use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Lazy;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
+use Livewire\WithPagination;
 
 #[Layout('layouts.dataOfficerLayout')]
 #[Lazy]
 class Laboratory extends Component
 {
+  use WithPagination;
+
+  protected $paginationTheme = 'bootstrap';
+
   public const REPORT_INPUT_FIELDS = [
     'fbs',
     'rbs',
@@ -651,17 +656,19 @@ class Laboratory extends Component
       ->where('facility_id', $this->facility_id)
       ->latest('visit_date')
       ->latest('id')
-      ->get();
+      ->paginate(10, ['*'], 'lab_records_page');
 
-    $pendingTestOrders = LabTestOrder::query()
+    $pendingOrdersBaseQuery = LabTestOrder::query()
       ->where('patient_id', $this->patientId)
       ->where('facility_id', $this->facility_id)
-      ->where('status', 'pending')
+      ->where('status', 'pending');
+
+    $pendingTestOrders = (clone $pendingOrdersBaseQuery)
       ->latest('requested_at')
       ->latest('id')
-      ->get();
+      ->paginate(10, ['*'], 'lab_pending_page');
 
-    $pendingIds = $pendingTestOrders->pluck('id')->map(fn($id) => (string) $id)->all();
+    $pendingIds = (clone $pendingOrdersBaseQuery)->pluck('id')->map(fn($id) => (string) $id)->all();
     $this->selected_test_order_map = collect((array) $this->selected_test_order_map)
       ->filter(fn($checked, $id) => (bool) $checked && in_array((string) $id, $pendingIds, true))
       ->map(fn() => true)

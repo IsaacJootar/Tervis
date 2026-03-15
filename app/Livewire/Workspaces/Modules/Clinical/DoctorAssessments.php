@@ -16,10 +16,15 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
+use Livewire\WithPagination;
 
 #[Layout('layouts.dataOfficerLayout')]
 class DoctorAssessments extends Component
 {
+  use WithPagination;
+
+  protected $paginationTheme = 'bootstrap';
+
   public $patientId;
   public $patient;
 
@@ -506,7 +511,7 @@ class DoctorAssessments extends Component
       ])
       ->latest('visit_date')
       ->latest('id')
-      ->get();
+      ->paginate(10, ['*'], 'assessment_records_page');
 
     return view('livewire.workspaces.modules.clinical.doctor-assessments', [
       'records' => $records,

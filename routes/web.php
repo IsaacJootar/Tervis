@@ -46,6 +46,7 @@ use App\Livewire\Workspaces\Modules\Clinical\DoctorAssessments;
 use App\Livewire\Workspaces\Modules\Clinical\Laboratory;
 use App\Livewire\Workspaces\Modules\Clinical\Prescriptions;
 use App\Livewire\Workspaces\Modules\Clinical\Invoices;
+use App\Livewire\Workspaces\Modules\Clinical\Referrals;
 use App\Livewire\Workspaces\Modules\Clinical\DrugCatalog;
 use App\Livewire\Analytics\MpdsrReportDashboard;
 use App\Livewire\Core\DisableDataOfficerAccount;
@@ -167,6 +168,9 @@ Route::middleware(['auth', 'role.redirect'])->prefix('workspaces')->group(functi
 
   Route::get('/{patientId}/appointments', Appointments::class)
     ->name('workspaces-appointments');
+
+  Route::get('/{patientId}/referrals', Referrals::class)
+    ->name('workspaces-referrals');
 
   Route::get('/{patientId}/drug-catalog', function ($patientId) {
     return redirect()->route('workspaces-drug-catalog-management');

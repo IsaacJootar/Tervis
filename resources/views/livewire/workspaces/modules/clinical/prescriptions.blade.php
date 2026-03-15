@@ -89,6 +89,10 @@
                         </tbody>
                     </table>
                 </div>
+                <div class="px-3 py-2 d-flex justify-content-between align-items-center flex-wrap gap-2">
+                    <small class="text-muted">Page {{ $pendingPrescriptions->currentPage() }} of {{ $pendingPrescriptions->lastPage() }} | Total {{ $pendingPrescriptions->total() }}</small>
+                    <div>{{ $pendingPrescriptions->links() }}</div>
+                </div>
             </div>
             <div class="card-footer small text-muted">
                 Select the pending prescriptions being fulfilled, then checkout cart once.
@@ -323,16 +327,13 @@
                         </tbody>
                     </table>
                 </div>
+                <div class="px-3 py-2 d-flex justify-content-between align-items-center flex-wrap gap-2">
+                    <small class="text-muted">Page {{ $dispenseBatches->currentPage() }} of {{ $dispenseBatches->lastPage() }} | Total {{ $dispenseBatches->total() }}</small>
+                    <div>{{ $dispenseBatches->links() }}</div>
+                </div>
             </div>
         </div>
 
     @endif
 
 </div>
-
-@include('_partials.datatables-init-multi', [
-    'tableIds' => ['dispenseBatchesTable'],
-    'orders' => [
-        'dispenseBatchesTable' => [0, 'desc'],
-    ],
-])

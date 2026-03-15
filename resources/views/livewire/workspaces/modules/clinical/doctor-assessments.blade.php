@@ -178,36 +178,42 @@
         </div>
 
         <div class="card mt-4">
-            <div class="card-header"><h5 class="mb-0">Assessment Records <small class="text-muted">({{ count($records) }} Total)</small></h5></div>
-            <div class="card-datatable table-responsive pt-0">
-                <table class="table">
-                    <thead class="table-dark"><tr><th>Date</th><th>Next Appointment</th><th>Final</th><th>Pending Tests</th><th>Pending Prescriptions</th><th>Action</th></tr></thead>
-                    <tbody>
-                        @forelse ($records as $record)
-                            <tr wire:key="assessment-record-{{ $record->id }}">
-                                <td>{{ $record->visit_date?->format('M d, Y') }}</td>
-                                <td>{{ $record->next_appointment_date?->format('M d, Y') ?? 'N/A' }}</td>
-                                <td>{{ $record->final_diagnosis ?: 'N/A' }}</td>
-                                <td><span class="badge bg-label-primary">{{ $record->pending_tests_count }}</span></td>
-                                <td><span class="badge bg-label-warning">{{ $record->pending_prescriptions_count }}</span></td>
-                                <td>
-                                    <div class="d-flex gap-1">
-                                        <button type="button" class="btn btn-sm btn-light text-dark border" wire:click="edit({{ $record->id }})" wire:loading.attr="disabled" wire:target="edit({{ $record->id }})">
-                                            <span wire:loading.remove wire:target="edit({{ $record->id }})">Edit</span>
-                                            <span wire:loading wire:target="edit({{ $record->id }})"><span class="spinner-border spinner-border-sm"></span></span>
-                                        </button>
-                                        <button type="button" class="btn btn-sm btn-light text-dark border" wire:click="delete({{ $record->id }})" wire:loading.attr="disabled" wire:target="delete({{ $record->id }})">
-                                            <span wire:loading.remove wire:target="delete({{ $record->id }})">Delete</span>
-                                            <span wire:loading wire:target="delete({{ $record->id }})"><span class="spinner-border spinner-border-sm"></span></span>
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                        @empty
-                            <tr><td colspan="6" class="text-center py-4 text-muted">No doctor assessments yet.</td></tr>
-                        @endforelse
-                    </tbody>
-                </table>
+            <div class="card-header"><h5 class="mb-0">Assessment Records <small class="text-muted">({{ $records->total() }} Total)</small></h5></div>
+            <div class="card-body p-0">
+                <div class="card-datatable table-responsive pt-0">
+                    <table id="assessmentRecordsTable" class="table align-middle">
+                        <thead class="table-dark"><tr><th>Date</th><th>Next Appointment</th><th>Final</th><th>Pending Tests</th><th>Pending Prescriptions</th><th>Action</th></tr></thead>
+                        <tbody>
+                            @forelse ($records as $record)
+                                <tr wire:key="assessment-record-{{ $record->id }}">
+                                    <td>{{ $record->visit_date?->format('M d, Y') }}</td>
+                                    <td>{{ $record->next_appointment_date?->format('M d, Y') ?? 'N/A' }}</td>
+                                    <td>{{ $record->final_diagnosis ?: 'N/A' }}</td>
+                                    <td><span class="badge bg-label-primary">{{ $record->pending_tests_count }}</span></td>
+                                    <td><span class="badge bg-label-warning">{{ $record->pending_prescriptions_count }}</span></td>
+                                    <td>
+                                        <div class="d-flex gap-1">
+                                            <button type="button" class="btn btn-sm btn-light text-dark border" wire:click="edit({{ $record->id }})" wire:loading.attr="disabled" wire:target="edit({{ $record->id }})">
+                                                <span wire:loading.remove wire:target="edit({{ $record->id }})">Edit</span>
+                                                <span wire:loading wire:target="edit({{ $record->id }})"><span class="spinner-border spinner-border-sm"></span></span>
+                                            </button>
+                                            <button type="button" class="btn btn-sm btn-light text-dark border" wire:click="delete({{ $record->id }})" wire:loading.attr="disabled" wire:target="delete({{ $record->id }})">
+                                                <span wire:loading.remove wire:target="delete({{ $record->id }})">Delete</span>
+                                                <span wire:loading wire:target="delete({{ $record->id }})"><span class="spinner-border spinner-border-sm"></span></span>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr><td colspan="6" class="text-center py-4 text-muted">No doctor assessments yet.</td></tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+                <div class="px-3 py-2 d-flex justify-content-between align-items-center flex-wrap gap-2">
+                    <small class="text-muted">Page {{ $records->currentPage() }} of {{ $records->lastPage() }} | Total {{ $records->total() }}</small>
+                    <div>{{ $records->links() }}</div>
+                </div>
             </div>
         </div>
     @endif
