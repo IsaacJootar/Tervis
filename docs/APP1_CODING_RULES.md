@@ -36,7 +36,14 @@ Primary UI reference for design decisions:
    - Default/normal-load pages may use register-style DataTable (`_partials/datatables-init-multi`) with export/search.
    - Heavy-load pages must use server-side pagination/filtering in Livewire/Eloquent (`paginate`) instead of client-side in-memory DataTable processing.
    - Do not ship plain non-paginated history tables.
-7. Every workspace query must respect tenancy scope by default:
+7. Core/facility operational tables follow the same table standard as workspace tables:
+   - Pagination + search + export controls are mandatory.
+   - Use `@include('_partials.datatables-init-multi', ...)` for multiple tables in one page.
+   - If server-side pagination is required for scale, add explicit export actions so users can still export filtered datasets.
+8. Card styling scope:
+   - Use multi-color tinted styling for stat/metric summary cards only.
+   - Do not apply tinted stat-card styling across all form/content cards.
+9. Every workspace query must respect tenancy scope by default:
    - always filter by `facility_id`
    - for patient workspace modules, also filter by `patient_id`
    - never query cross-facility data unless the module explicitly requires aggregated scope and user role allows it.

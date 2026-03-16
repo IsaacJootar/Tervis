@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Route;
 //
 use App\Livewire\Core\FacilityReports;
 use App\Livewire\Core\FacilityPatients;
+use App\Livewire\Core\FacilityRemindersHub;
 use App\Livewire\Central\CreateFacility;
 
 
@@ -35,6 +36,7 @@ use App\Livewire\Workspaces\WorkspaceDashboard;
 use App\Livewire\Workspaces\Modules\Attendance;
 use App\Livewire\Workspaces\Modules\Activities;
 use App\Livewire\Workspaces\Modules\Appointments;
+use App\Livewire\Workspaces\Modules\Reminders;
 use App\Livewire\Workspaces\Modules\ANC\Deliveries;
 use App\Livewire\Workspaces\Modules\ANC\Postnatal;
 use App\Livewire\Workspaces\Modules\ANC\AncOverview;
@@ -82,6 +84,7 @@ Route::middleware(['auth', 'role.redirect'])->prefix('core')->group(function () 
   Route::get('/facility-departments', FacilityDepartments::class)->name('facility-departments');
   Route::get('/facility-patients', FacilityPatients::class)->name('facility-patients');
   Route::get('/patient-appointments', PatientAppointments::class)->name('patient-appointments');
+  Route::get('/reminders-notifications-hub', FacilityRemindersHub::class)->name('facility-reminders-hub');
   Route::get('/facility-reports', FacilityReports::class)->name('patient-reports');
 });
 
@@ -168,6 +171,9 @@ Route::middleware(['auth', 'role.redirect'])->prefix('workspaces')->group(functi
 
   Route::get('/{patientId}/appointments', Appointments::class)
     ->name('workspaces-appointments');
+
+  Route::get('/{patientId}/reminders', Reminders::class)
+    ->name('workspaces-reminders');
 
   Route::get('/{patientId}/referrals', Referrals::class)
     ->name('workspaces-referrals');

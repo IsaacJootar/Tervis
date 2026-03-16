@@ -103,7 +103,7 @@
     {{-- Information Cards --}}
     <div class="row">
         <div class="col-md-4">
-            <div class="card mb-4">
+            <div class="card mb-4 h-100 workspace-step-card workspace-step-slate">
                 <div class="card-body text-center">
                     <div class="mb-3">
                         <i class="bx bx-check-shield text-success" style="font-size: 3rem;"></i>
@@ -116,7 +116,7 @@
             </div>
         </div>
         <div class="col-md-4">
-            <div class="card mb-4">
+            <div class="card mb-4 h-100 workspace-step-card workspace-step-sky">
                 <div class="card-body text-center">
                     <div class="mb-3">
                         <i class="bx bx-search-alt text-primary" style="font-size: 3rem;"></i>
@@ -129,7 +129,7 @@
             </div>
         </div>
         <div class="col-md-4">
-            <div class="card mb-4">
+            <div class="card mb-4 h-100 workspace-step-card workspace-step-emerald">
                 <div class="card-body text-center">
                     <div class="mb-3">
                         <i class="bx bx-grid-alt text-info" style="font-size: 3rem;"></i>
@@ -142,6 +142,39 @@
             </div>
         </div>
     </div>
+
+    @once
+        <style>
+            .workspace-step-card {
+                border-radius: 18px;
+                border: 1px solid rgba(148, 163, 184, 0.25);
+                min-height: 238px;
+                box-shadow: 0 10px 26px -22px rgba(15, 23, 42, 0.45);
+            }
+
+            .workspace-step-card .card-body {
+                height: 100%;
+                display: flex;
+                flex-direction: column;
+                justify-content: flex-start;
+            }
+
+            .workspace-step-slate {
+                border-color: #cbd5e1;
+                background: #f8fafc;
+            }
+
+            .workspace-step-sky {
+                border-color: #bae6fd;
+                background: #f0f9ff;
+            }
+
+            .workspace-step-emerald {
+                border-color: #a7f3d0;
+                background: #ecfdf5;
+            }
+        </style>
+    @endonce
 
     {{-- ============================================ --}}
     {{-- DIN VERIFICATION MODAL --}}

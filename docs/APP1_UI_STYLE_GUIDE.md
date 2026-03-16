@@ -46,6 +46,9 @@ Notes:
 2. Primary accent should remain App1 default blue (gold is not the default).
 3. Keep backgrounds neutral and text high-contrast.
 4. Never rely on color alone to communicate selected/required/error state.
+5. Summary metric cards should use distinct soft tints (for example slate/sky/emerald/rose/violet) with matching border/text contrast.
+6. Scope rule: apply this tinted style to stat/metric/dashboard summary cards only (counts/KPI cards), not all content/form cards.
+7. Stat cards in the same row should use a consistent minimum height for visual alignment.
 
 ## 5b) Form and Modal Composition (Flowdesk Pattern)
 
@@ -88,6 +91,7 @@ Notes:
 6. Record status must be visible with badge/chip styles.
 7. Row actions must be explicit and safe (Edit, Delete, View, Print where relevant).
 8. Show empty states with next-step message.
+9. Export controls are mandatory on operational tables (Copy/Excel/CSV/PDF via DataTable buttons or an equivalent server-side export endpoint).
 
 ## 9) Chart and Data Visualization Standards
 

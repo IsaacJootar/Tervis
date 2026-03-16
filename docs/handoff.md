@@ -207,3 +207,46 @@
     - `resources/views/livewire/workspaces/modules/clinical/prescriptions.blade.php`
     - `resources/views/livewire/workspaces/modules/clinical/invoices.blade.php`
   - Tenancy/facility scope preserved in all updated queries (`facility_id` and `patient_id` filters).
+
+## Update (2026-03-15)
+- Reminders workspace module implemented and routed:
+  - Route: `workspaces/{patientId}/reminders` (`workspaces-reminders`)
+  - New files:
+    - `app/Livewire/Workspaces/Modules/Reminders.php`
+    - `resources/views/livewire/workspaces/modules/reminders/index.blade.php`
+    - `app/Models/Reminder.php`
+    - `app/Models/ReminderDispatchLog.php`
+    - `database/migrations/2026_03_15_090000_create_reminders_table.php`
+    - `database/migrations/2026_03_15_090100_create_reminder_dispatch_logs_table.php`
+- Placeholder communication stack added (Flowdesk-style queue/log separation):
+  - `app/Services/Communication/SmsPlaceholderService.php`
+  - `app/Services/Communication/EmailPlaceholderService.php`
+  - `app/Services/Communication/ReminderDispatchService.php`
+- Reminder orchestration behavior:
+  - Sync source dates from:
+    - `doctor_assessments.next_appointment_date`
+    - `tetanus_vaccinations.next_appointment_date`
+    - `antenatal_follow_up_assessments.next_return_date`
+    - `family_planning_registrations.next_appointment`
+  - Upsert central reminder records per source module/source record.
+  - Dispatch due reminders via placeholder SMS/Email and write per-channel delivery logs.
+  - Reminder actions are activity-logged under `module = reminders`.
+- Console command added:
+  - `php artisan reminders:dispatch-due --sync`
+  - Optional scope filters: `--facilityId=` and `--patientId=`.
+- Facility admin reminders hub UI hardening:
+  - `resources/views/livewire/core/facility-reminders-hub.blade.php`
+    - Both tables now use DataTable controls with pagination/search/export buttons.
+    - Removed duplicate Laravel paginator blocks from those tables.
+    - Summary cards switched to distinct Flowdesk-style tinted metric cards.
+  - `app/Livewire/Core/FacilityRemindersHub.php`
+    - Reminders and dispatch logs now return filtered collections for DataTable rendering.
+    - Dispatch log query now respects date/channel/search filters from hub controls.
+- Stat-card scope alignment update:
+  - Tinted metric-card style applied to stat/summary cards only in:
+    - `resources/views/livewire/workspaces/modules/appointments/index.blade.php`
+    - `resources/views/livewire/workspaces/modules/reminders/index.blade.php`
+    - `resources/views/livewire/workspaces/patient-workspace.blade.php` (dashboard step cards)
+  - Explicitly documented as scoped behavior (not global/all cards) in:
+    - `docs/APP1_UI_STYLE_GUIDE.md`
+    - `docs/APP1_CODING_RULES.md`

@@ -1,6 +1,6 @@
 # APP1 Workflow and Roadmap
 
-Last updated: 2026-03-14  
+Last updated: 2026-03-15  
 Aligned to: HMS Vision Architecture v2.0 (Nov 2025)
 
 ## 1) Current End-to-End Workflow (Implemented)
@@ -24,13 +24,16 @@ Aligned to: HMS Vision Architecture v2.0 (Nov 2025)
    - Immunizations + Vaccination Schedule + Nutrition capture child activity data.
 7. Appointment aggregation:
    - Appointments module auto-collates next-visit dates from Doctor Assessment, TT, ANC follow-up, and Family Planning.
-8. Monthly report:
+8. Reminder orchestration:
+   - Reminders module syncs due dates from Doctor Assessment, TT, ANC follow-up, and Family Planning.
+   - Due reminders dispatch through placeholder SMS/Email services with per-channel dispatch logs.
+9. Monthly report:
    - Monthly dashboard aggregates mapped data from attendance, maternal/child, doctor, and lab sources.
 
 ## 2) Workflow Gaps (Not Yet Closed)
 
-1. Patient Section 13-16 gaps:
-   - Reminders, Health Insurance, Visits grouping.
+1. Patient Section 14-16 gaps:
+   - Family Planning workspace activity module, Health Insurance, Visits grouping.
 2. Family Planning workspace module:
    - Register exists but dedicated workspace activity module not yet active.
 3. Facility operations:
@@ -44,13 +47,13 @@ Aligned to: HMS Vision Architecture v2.0 (Nov 2025)
 ## 3) Execution Plan (Next Modules, In Order)
 
 ## Phase A: Close Remaining Patient Dashboard Core
-1. Reminders module (Section 13)
+1. Reminders module (Section 13) - completed with placeholder delivery stack.
 
 Done criteria:
 - Routed module pages exist from dashboard.
 - CRUD and workflow transitions completed.
 - Loading states and feedback implemented.
-- Monthly mapping impact documented.
+- Placeholder dispatch command available: `php artisan reminders:dispatch-due --sync`.
 
 ## Phase B: Complete Patient Support and Longitudinal Tracking
 1. Family Planning workspace activity module (Section 14 alignment)
@@ -92,3 +95,6 @@ Done criteria:
    - `docs/APP1_MODULE_STATUS.md`
    - `docs/monthly-report-gap-check.md` (if aggregation affected)
    - `docs/handoff.md`
+5. Table/UI enforcement:
+   - Every operational table must ship with pagination + export controls.
+   - Multi-metric summaries should use distinct, readable tinted cards (Flowdesk-inspired palette, no gold default).

@@ -2,11 +2,16 @@
 
 namespace App\Livewire\Core;
 
-use App\Models\User;
+use App\Models\AntenatalFollowUpAssessment;
+use App\Models\DoctorAssessment;
+use App\Models\Patient;
+use App\Models\Registrations\DinActivation;
+use App\Models\Registrations\FamilyPlanningRegistration;
+use App\Models\TetanusVaccination;
+use Carbon\Carbon;
+use Illuminate\Support\Collection;
 use Livewire\Component;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
-use Carbon\Carbon;
 
 class PatientAppointments extends Component
 {
@@ -17,6 +22,9 @@ class PatientAppointments extends Component
   public function mount()
   {
     $admin = Auth::user();
+    if (!$admin) {
+      abort(403, 'Unauthorized');
+    }
 
     $this->facility_id = $admin->facility_id;
   }
@@ -56,7 +64,6 @@ class PatientAppointments extends Component
   {
     $patients = $this->getAllPatientsWithAppointments();
     $dueSoonPatients = [];
-    $now = Carbon::now();
 
     foreach ($patients as $patient) {
       foreach ($patient->appointments as $appointment) {
@@ -68,7 +75,7 @@ class PatientAppointments extends Component
               'id' => $patient->id,
               'name' => $patient->first_name . ' ' . $patient->last_name,
               'phone' => $patient->phone,
-              'din' => $patient->DIN,
+              'din' => $patient->din,
               'appointment_type' => $appointment['type'],
               'appointment_date' => $appointment['date']->format('M d, Y'),
               'days_until' => $daysUntil,
@@ -99,245 +106,205 @@ class PatientAppointments extends Component
 
   private function getAllPatientsWithAppointments()
   {
-    // Reuse the same logic from render() method
-    return User::select([
-      'users.id',
-      'users.DIN',
-      'users.first_name',
-      'users.last_name',
-      'users.phone',
-      'users.email',
-      'users.created_at'
-    ])
-      ->where('users.role', 'Patient')
-      ->whereExists(function ($query) {
-        $query->select(DB::raw(1))
-          ->from('daily_attendances')
-          ->whereColumn('daily_attendances.user_id', 'users.id')
-          ->where('daily_attendances.facility_id', $this->facility_id);
-      })
-      ->with([
-        'antenatal',
-        'tetanusVaccinations',
-        'dailyAttendances'
-      ])
-      ->get()
-      ->map(function ($patient) {
-        $appointments = [];
-        $now = Carbon::now();
-
-        // Same appointment logic as render() method
-        if ($patient->antenatal && $patient->antenatal->follow_up_next_visit) {
-          $appointmentDate = Carbon::parse($patient->antenatal->follow_up_next_visit);
-          $fulfilled = $this->checkAppointmentFulfilled($patient->id, $appointmentDate, ['antenatal', 'daily_attendance']);
-
-          $appointments[] = [
-            'type' => 'Antenatal Follow-up',
-            'date' => $appointmentDate,
-            'status' => $this->getAppointmentStatus($appointmentDate, $fulfilled),
-            'days_until' => round($appointmentDate->diffInDays($now, false)),
-            'fulfilled' => $fulfilled,
-            'color_class' => $this->getStatusColorClass($appointmentDate, $fulfilled)
-          ];
-        }
-
-        $latestTetanus = $patient->tetanusVaccinations->where('next_appointment_date', '!=', null)->sortByDesc('next_appointment_date')->first();
-        if ($latestTetanus && $latestTetanus->next_appointment_date) {
-          $appointmentDate = Carbon::parse($latestTetanus->next_appointment_date);
-          $fulfilled = $this->checkAppointmentFulfilled($patient->id, $appointmentDate, ['tetanus', 'daily_attendance']);
-
-          $appointments[] = [
-            'type' => 'TT Vaccination',
-            'date' => $appointmentDate,
-            'status' => $this->getAppointmentStatus($appointmentDate, $fulfilled),
-            'days_until' => round($appointmentDate->diffInDays($now, false)),
-            'fulfilled' => $fulfilled,
-            'color_class' => $this->getStatusColorClass($appointmentDate, $fulfilled)
-          ];
-        }
-
-        $patient->appointments = collect($appointments);
-        return $patient;
-      })
-      ->filter(function ($patient) {
-        return $patient->appointments->count() > 0;
-      });
+    return $this->buildPatientsWithAppointments();
   }
 
   public function render()
   {
-    // Get all patients who have visited this facility
-    $patients = User::select([
-      'users.id',
-      'users.DIN',
-      'users.first_name',
-      'users.last_name',
-      'users.phone',
-      'users.email',
-      'users.created_at'
-    ])
-      ->where('users.role', 'Patient')
-      ->whereExists(function ($query) {
-        $query->select(DB::raw(1))
-          ->from('daily_attendances')
-          ->whereColumn('daily_attendances.user_id', 'users.id')
-          ->where('daily_attendances.facility_id', $this->facility_id);
-      })
-      ->with([
-        'antenatal',
-        'tetanusVaccinations',
-        'dailyAttendances'
-      ])
-      ->get()
-      ->map(function ($patient) {
-        $appointments = [];
-        $now = Carbon::now();
-
-        // Check antenatal follow-up appointments
-        if ($patient->antenatal && $patient->antenatal->follow_up_next_visit) {
-          $appointmentDate = Carbon::parse($patient->antenatal->follow_up_next_visit);
-          $fulfilled = $this->checkAppointmentFulfilled($patient->id, $appointmentDate, ['antenatal', 'daily_attendance']);
-
-          $appointments[] = [
-            'type' => 'Antenatal Follow-up',
-            'date' => $appointmentDate,
-            'status' => $this->getAppointmentStatus($appointmentDate, $fulfilled),
-            'days_until' => round($appointmentDate->diffInDays($now, false)), // rounded to whole days
-            'fulfilled' => $fulfilled,
-            'color_class' => $this->getStatusColorClass($appointmentDate, $fulfilled)
-          ];
-        }
-
-        // Check tetanus vaccination next appointments
-        $latestTetanus = $patient->tetanusVaccinations->where('next_appointment_date', '!=', null)->sortByDesc('next_appointment_date')->first();
-        if ($latestTetanus && $latestTetanus->next_appointment_date) {
-          $appointmentDate = Carbon::parse($latestTetanus->next_appointment_date);
-          $fulfilled = $this->checkAppointmentFulfilled($patient->id, $appointmentDate, ['tetanus', 'daily_attendance']);
-
-          $appointments[] = [
-            'type' => 'TT Vaccination',
-            'date' => $appointmentDate,
-            'status' => $this->getAppointmentStatus($appointmentDate, $fulfilled),
-            'days_until' => round($appointmentDate->diffInDays($now, false)), // rounded to whole days
-            'fulfilled' => $fulfilled,
-            'color_class' => $this->getStatusColorClass($appointmentDate, $fulfilled)
-          ];
-        }
-
-        // Check postnatal follow-up (removed for now), maybe will add later if need be - Postnatal appointments will be added later
-
-        // Sort appointments by date (soonest first)
-        usort($appointments, function ($a, $b) {
-          return $a['date']->timestamp <=> $b['date']->timestamp;
-        });
-
-        $patient->appointments = collect($appointments);
-        $patient->next_appointment = $appointments ? $appointments[0] : null;
-        $patient->total_appointments = count($appointments);
-        $patient->missed_appointments = collect($appointments)->where('status', 'Missed')->count();
-        $patient->upcoming_appointments = collect($appointments)->where('status', 'Upcoming')->count();
-
-        return $patient;
-      })
-      ->filter(function ($patient) {
-        // Only show patients who have appointments
-        return $patient->total_appointments > 0;
-      })
-      ->sortBy(function ($patient) {
-        // Sort by next appointment date (soonest first)
-        return $patient->next_appointment ? $patient->next_appointment['date']->timestamp : PHP_INT_MAX;
-      });
+    $patients = $this->buildPatientsWithAppointments();
 
     return view('livewire.core.patient-appointments', [
       'patients' => $patients,
     ])->layout('layouts.facilityAdminLayout');
   }
 
-  private function checkAppointmentFulfilled($patientId, $appointmentDate, $recordTypes)
+  private function buildPatientsWithAppointments(): Collection
   {
-    // Check if patient attended after the appointment date
-    $attendanceAfter = DB::table('daily_attendances')
-      ->where('user_id', $patientId)
-      ->where('visit_date', '>=', $appointmentDate->toDateString())
-      ->exists();
-
-    if ($attendanceAfter) {
-      return true;
+    if (empty($this->facility_id)) {
+      return collect();
     }
 
-    // Check specific record types for fulfillment
-    foreach ($recordTypes as $type) {
-      switch ($type) {
-        case 'antenatal':
-          $fulfilled = DB::table('antenatals')
-            ->where('user_id', $patientId)
-            ->where('created_at', '>=', $appointmentDate)
-            ->exists();
-          break;
-
-        case 'tetanus':
-          $fulfilled = DB::table('tetanus_vaccinations')
-            ->where('user_id', $patientId)
-            ->where('dose_date', '>=', $appointmentDate->toDateString())
-            ->exists();
-          break;
-
-        case 'postnatal': //visit date would do for now
-          $fulfilled = DB::table('postnatal_records')
-            ->where('user_id', $patientId)
-            ->where('visit_date', '>=', $appointmentDate->toDateString())
-            ->exists();
-          break;
-
-        case 'delivery': // dodel is not very aligned to how i want the apointments dates.Will be back maybe
-          $fulfilled = DB::table('deliveries')
-            ->where('user_id', $patientId)
-            ->where('dodel', '>=', $appointmentDate->toDateString())
-            ->exists();
-          break;
-      }
-
-      if (isset($fulfilled) && $fulfilled) {
-        return true;
-      }
+    $appointmentRows = $this->collectAppointmentRows();
+    if ($appointmentRows->isEmpty()) {
+      return collect();
     }
 
-    return false;
+    $patientIds = $appointmentRows->pluck('patient_id')->unique()->values();
+    $patients = Patient::query()
+      ->whereIn('id', $patientIds)
+      ->select([
+        'id',
+        'din',
+        'first_name',
+        'last_name',
+        'phone',
+        'email',
+        'created_at',
+      ])
+      ->get()
+      ->keyBy('id');
+
+    $activationDatesByPatient = $this->getActivationDatesByPatient($patientIds);
+    $today = Carbon::today();
+
+    return $appointmentRows
+      ->groupBy('patient_id')
+      ->map(function (Collection $rows, $patientId) use ($patients, $activationDatesByPatient, $today) {
+        $patient = $patients->get((int) $patientId);
+        if (!$patient) {
+          return null;
+        }
+
+        $activationDates = $activationDatesByPatient->get((int) $patientId, collect());
+
+        $appointments = $rows
+          ->map(function (array $row) use ($activationDates, $today) {
+            $appointmentDate = $row['date']->copy()->startOfDay();
+            $fulfilled = $this->isAppointmentFulfilled($activationDates, $appointmentDate);
+            $status = $this->getAppointmentStatus($appointmentDate, $fulfilled);
+            $daysUntil = (int) round($appointmentDate->diffInDays($today, false));
+
+            return [
+              'type' => $row['type'],
+              'date' => $appointmentDate,
+              'status' => $status,
+              'days_until' => $daysUntil,
+              'fulfilled' => $fulfilled,
+              'color_class' => $this->getStatusColorClass($appointmentDate, $fulfilled),
+            ];
+          })
+          ->sortBy(fn(array $appointment) => $appointment['date']->timestamp)
+          ->values();
+
+        $patient->appointments = $appointments;
+        $patient->next_appointment = $appointments->first();
+        $patient->total_appointments = $appointments->count();
+        $patient->missed_appointments = $appointments->where('status', 'Missed')->count();
+        $patient->upcoming_appointments = $appointments->where('status', 'Upcoming')->count();
+
+        return $patient;
+      })
+      ->filter(fn($patient) => $patient && $patient->total_appointments > 0)
+      ->sortBy(function ($patient) {
+        return $patient->next_appointment ? $patient->next_appointment['date']->timestamp : PHP_INT_MAX;
+      })
+      ->values();
+  }
+
+  private function collectAppointmentRows(): Collection
+  {
+    $rows = collect();
+
+    $doctorAppointments = DoctorAssessment::query()
+      ->where('facility_id', $this->facility_id)
+      ->whereNotNull('next_appointment_date')
+      ->get(['patient_id', 'next_appointment_date']);
+
+    foreach ($doctorAppointments as $record) {
+      $rows->push([
+        'patient_id' => (int) $record->patient_id,
+        'type' => 'Doctor Follow-up',
+        'date' => Carbon::parse($record->next_appointment_date)->startOfDay(),
+      ]);
+    }
+
+    $ttAppointments = TetanusVaccination::query()
+      ->where('facility_id', $this->facility_id)
+      ->whereNotNull('next_appointment_date')
+      ->get(['patient_id', 'next_appointment_date']);
+
+    foreach ($ttAppointments as $record) {
+      $rows->push([
+        'patient_id' => (int) $record->patient_id,
+        'type' => 'TT Vaccination',
+        'date' => Carbon::parse($record->next_appointment_date)->startOfDay(),
+      ]);
+    }
+
+    $ancFollowUpAppointments = AntenatalFollowUpAssessment::query()
+      ->where('facility_id', $this->facility_id)
+      ->whereNotNull('next_return_date')
+      ->get(['patient_id', 'next_return_date']);
+
+    foreach ($ancFollowUpAppointments as $record) {
+      $rows->push([
+        'patient_id' => (int) $record->patient_id,
+        'type' => 'ANC Follow-up',
+        'date' => Carbon::parse($record->next_return_date)->startOfDay(),
+      ]);
+    }
+
+    $familyPlanningAppointments = FamilyPlanningRegistration::query()
+      ->where('facility_id', $this->facility_id)
+      ->whereNotNull('next_appointment')
+      ->get(['patient_id', 'next_appointment']);
+
+    foreach ($familyPlanningAppointments as $record) {
+      $rows->push([
+        'patient_id' => (int) $record->patient_id,
+        'type' => 'Family Planning Follow-up',
+        'date' => Carbon::parse($record->next_appointment)->startOfDay(),
+      ]);
+    }
+
+    return $rows->filter(function (array $row) {
+      return !empty($row['patient_id']);
+    });
+  }
+
+  private function getActivationDatesByPatient(Collection $patientIds): Collection
+  {
+    if ($patientIds->isEmpty()) {
+      return collect();
+    }
+
+    return DinActivation::query()
+      ->where('facility_id', $this->facility_id)
+      ->whereIn('patient_id', $patientIds)
+      ->whereNotNull('visit_date')
+      ->get(['patient_id', 'visit_date'])
+      ->groupBy('patient_id')
+      ->map(function (Collection $records) {
+        return $records
+          ->pluck('visit_date')
+          ->filter()
+          ->map(fn($date) => Carbon::parse($date)->startOfDay())
+          ->sortBy(fn(Carbon $date) => $date->timestamp)
+          ->values();
+      });
+  }
+
+  private function isAppointmentFulfilled(Collection $activationDates, Carbon $appointmentDate): bool
+  {
+    return $activationDates->contains(
+      fn(Carbon $visitDate) => $visitDate->greaterThanOrEqualTo($appointmentDate)
+    );
   }
 
   private function getAppointmentStatus($appointmentDate, $fulfilled)
   {
-    $now = Carbon::now();
-
     if ($fulfilled) {
       return 'Fulfilled';
     }
 
-    if ($appointmentDate->isFuture()) {
-      return 'Upcoming';
-    } else {
-      return 'Missed';
-    }
+    return $appointmentDate->isFuture() || $appointmentDate->isToday() ? 'Upcoming' : 'Missed';
   }
 
   private function getStatusColorClass($appointmentDate, $fulfilled)
   {
-    $now = Carbon::now();
-
     if ($fulfilled) {
       return 'bg-label-success';
     }
 
-    if ($appointmentDate->isFuture()) {
-      // Upcoming - different colors based on urgency
-      $daysUntil = $now->diffInDays($appointmentDate);
-      if ($daysUntil <= 3) {
-        return 'bg-label-warning'; // Due soon
-      } else {
-        return 'bg-label-info'; // Upcoming
-      }
-    } else {
-      return 'bg-label-danger'; // Missed
+    if ($appointmentDate->isPast() && !$appointmentDate->isToday()) {
+      return 'bg-label-danger';
     }
+
+    $daysUntil = Carbon::today()->diffInDays($appointmentDate, false);
+    if ($daysUntil <= 3) {
+      return 'bg-label-warning';
+    }
+
+    return 'bg-label-info';
   }
 }

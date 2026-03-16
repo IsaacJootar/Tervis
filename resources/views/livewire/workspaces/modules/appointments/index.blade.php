@@ -53,35 +53,27 @@
 
         <div class="row g-3 mb-4">
             <div class="col-6 col-lg-3">
-                <div class="card h-100">
-                    <div class="card-body">
-                        <div class="text-muted text-uppercase small">Total</div>
-                        <div class="h4 mb-0">{{ $summary['total'] }}</div>
-                    </div>
+                <div class="metric-card metric-card-slate h-100">
+                    <div class="metric-label">Total</div>
+                    <div class="metric-value">{{ $summary['total'] }}</div>
                 </div>
             </div>
             <div class="col-6 col-lg-3">
-                <div class="card h-100">
-                    <div class="card-body">
-                        <div class="text-muted text-uppercase small">Upcoming</div>
-                        <div class="h4 mb-0 text-primary">{{ $summary['upcoming'] }}</div>
-                    </div>
+                <div class="metric-card metric-card-sky h-100">
+                    <div class="metric-label">Upcoming</div>
+                    <div class="metric-value">{{ $summary['upcoming'] }}</div>
                 </div>
             </div>
             <div class="col-6 col-lg-3">
-                <div class="card h-100">
-                    <div class="card-body">
-                        <div class="text-muted text-uppercase small">Missed</div>
-                        <div class="h4 mb-0 text-danger">{{ $summary['missed'] }}</div>
-                    </div>
+                <div class="metric-card metric-card-rose h-100">
+                    <div class="metric-label">Missed</div>
+                    <div class="metric-value">{{ $summary['missed'] }}</div>
                 </div>
             </div>
             <div class="col-6 col-lg-3">
-                <div class="card h-100">
-                    <div class="card-body">
-                        <div class="text-muted text-uppercase small">Fulfilled</div>
-                        <div class="h4 mb-0 text-success">{{ $summary['fulfilled'] }}</div>
-                    </div>
+                <div class="metric-card metric-card-emerald h-100">
+                    <div class="metric-label">Fulfilled</div>
+                    <div class="metric-value">{{ $summary['fulfilled'] }}</div>
                 </div>
             </div>
         </div>
@@ -144,4 +136,56 @@
             </div>
         </div>
     @endif
+
+    <style>
+        .metric-card {
+            border-radius: 18px;
+            border: 1px solid rgba(148, 163, 184, 0.25);
+            padding: 14px 16px;
+            min-height: 108px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            box-shadow: 0 10px 26px -22px rgba(15, 23, 42, 0.45);
+        }
+
+        .metric-label {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.14em;
+            font-weight: 700;
+        }
+
+        .metric-value {
+            margin-top: 6px;
+            font-size: 1.6rem;
+            font-weight: 700;
+            line-height: 1.1;
+        }
+
+        .metric-card-slate {
+            border-color: #cbd5e1;
+            background: #f8fafc;
+            color: #0f172a;
+        }
+
+        .metric-card-sky {
+            border-color: #bae6fd;
+            background: #f0f9ff;
+            color: #0c4a6e;
+        }
+
+        .metric-card-emerald {
+            border-color: #a7f3d0;
+            background: #ecfdf5;
+            color: #065f46;
+        }
+
+        .metric-card-rose {
+            border-color: #fecdd3;
+            background: #fff1f2;
+            color: #9f1239;
+        }
+    </style>
 </div>
+

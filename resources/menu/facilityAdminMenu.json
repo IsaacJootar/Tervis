@@ -63,6 +63,12 @@
       ]
     },
     {
+      "url": "/core/reminders-notifications-hub",
+      "name": "Reminders Hub",
+      "icon": "menu-icon icon-base ti tabler-bell",
+      "slug": "facility-reminders-hub"
+    },
+    {
       "name": "Facility Resources",
       "icon": "menu-icon icon-base ti tabler-building",
       "slug": "facility-admin-resources",
