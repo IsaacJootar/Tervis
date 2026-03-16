@@ -276,7 +276,16 @@
                 'description' => 'Family planning methods and counseling',
             ])
 
-            {{-- Card 15: Visits --}}
+            {{-- Card 15: Health Insurance --}}
+            @include('livewire.partials.workspace-card', [
+                'key' => 'health_insurance',
+                'title' => 'Health Insurance',
+                'icon' => 'bx-shield-plus',
+                'color' => 'success',
+                'description' => 'Insurance status, provider, plan, and audit history',
+            ])
+
+            {{-- Card 16: Visits --}}
             @include('livewire.partials.workspace-card', [
                 'key' => 'visits',
                 'title' => 'Visits',
@@ -285,7 +294,7 @@
                 'description' => 'Complete visit history and records',
             ])
 
-            {{-- Card 16: Activities --}}
+            {{-- Card 17: Activities --}}
             @include('livewire.partials.workspace-card', [
                 'key' => 'activities',
                 'title' => 'Activities',

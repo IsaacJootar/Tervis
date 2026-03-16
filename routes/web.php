@@ -36,7 +36,9 @@ use App\Livewire\Workspaces\WorkspaceDashboard;
 use App\Livewire\Workspaces\Modules\Attendance;
 use App\Livewire\Workspaces\Modules\Activities;
 use App\Livewire\Workspaces\Modules\Appointments;
+use App\Livewire\Workspaces\Modules\HealthInsurance;
 use App\Livewire\Workspaces\Modules\Reminders;
+use App\Livewire\Workspaces\Modules\Visits;
 use App\Livewire\Workspaces\Modules\ANC\Deliveries;
 use App\Livewire\Workspaces\Modules\ANC\Postnatal;
 use App\Livewire\Workspaces\Modules\ANC\AncOverview;
@@ -50,6 +52,7 @@ use App\Livewire\Workspaces\Modules\Clinical\Prescriptions;
 use App\Livewire\Workspaces\Modules\Clinical\Invoices;
 use App\Livewire\Workspaces\Modules\Clinical\Referrals;
 use App\Livewire\Workspaces\Modules\Clinical\DrugCatalog;
+use App\Livewire\Workspaces\Modules\FamilyPlanning\ClientFollowUp;
 use App\Livewire\Analytics\MpdsrReportDashboard;
 use App\Livewire\Core\DisableDataOfficerAccount;
 use App\Livewire\Analytics\HealthTrendsDashboard;
@@ -172,8 +175,17 @@ Route::middleware(['auth', 'role.redirect'])->prefix('workspaces')->group(functi
   Route::get('/{patientId}/appointments', Appointments::class)
     ->name('workspaces-appointments');
 
+  Route::get('/{patientId}/visits', Visits::class)
+    ->name('workspaces-visits');
+
   Route::get('/{patientId}/reminders', Reminders::class)
     ->name('workspaces-reminders');
+
+  Route::get('/{patientId}/family-planning', ClientFollowUp::class)
+    ->name('workspaces-family-planning');
+
+  Route::get('/{patientId}/health-insurance', HealthInsurance::class)
+    ->name('workspaces-health-insurance');
 
   Route::get('/{patientId}/referrals', Referrals::class)
     ->name('workspaces-referrals');

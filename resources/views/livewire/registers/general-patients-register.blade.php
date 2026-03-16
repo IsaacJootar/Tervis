@@ -257,7 +257,7 @@
                                     <strong>This patient already has an OPD registration.</strong><br>
                                     You cannot register them again. Click below to view their dashboard.
                                 </div>
-                                <a href="{{ route('patient-dashboard', $patient_id) }}"
+                                <a href="{{ route('workspace-dashboard', ['patientId' => $patient_id]) }}"
                                     class="btn btn-primary w-100 mt-3">
                                     <i class="bx bx-tachometer me-1"></i>Go to Patient Dashboard
                                 </a>

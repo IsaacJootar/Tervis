@@ -4,8 +4,10 @@ namespace App\Models\Registrations;
 
 use App\Models\Patient;
 use App\Models\Facility;
+use App\Models\FamilyPlanningFollowUp;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class FamilyPlanningRegistration extends Model
@@ -113,5 +115,12 @@ class FamilyPlanningRegistration extends Model
   public function facility(): BelongsTo
   {
     return $this->belongsTo(Facility::class);
+  }
+
+  public function followUps(): HasMany
+  {
+    return $this->hasMany(FamilyPlanningFollowUp::class, 'family_planning_registration_id')
+      ->orderBy('visit_date', 'desc')
+      ->orderBy('id', 'desc');
   }
 }

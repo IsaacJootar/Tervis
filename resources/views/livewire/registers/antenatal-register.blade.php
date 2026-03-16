@@ -260,7 +260,7 @@
                                     <strong>This patient has an active pregnancy.</strong><br>
                                     Cannot register a new pregnancy until the current one is completed.
                                 </div>
-                                <a href="{{ route('patient-dashboard', $patient_id) }}"
+                                <a href="{{ route('workspace-dashboard', ['patientId' => $patient_id]) }}"
                                     class="btn btn-primary w-100 mt-3">
                                     <i class="bx bx-tachometer me-1"></i>Go to Patient Dashboard
                                 </a>
@@ -484,21 +484,92 @@
                                 </div>
                             </div>
 
+                            <h6 class="text-secondary mb-3">
+                                <i class="bx bx-shield-alt-2 me-1"></i>NHIS (National Health Insurance) Information
+                            </h6>
                             <div class="row g-3 mb-4">
-                                <div class="col-md-4">
-                                    <label class="form-label">NHIS Status</label>
-                                    <select class="form-select" wire:model="is_nhis_subscriber">
-                                        <option value="">--Select--</option>
-                                        <option value="0">Non-NHIS</option>
-                                        <option value="1">NHIS Subscriber</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-4">
-                                    <label class="form-label">NHIS Number</label>
-                                    <input type="text" class="form-control" wire:model="nhis_number"
-                                        placeholder="Enter NHIS number">
+                                <div class="col-md-12">
+                                    <div class="form-check form-switch">
+                                        <input type="checkbox" class="form-check-input" id="anc_is_nhis_subscriber"
+                                            wire:model.live="is_nhis_subscriber">
+                                        <label class="form-check-label" for="anc_is_nhis_subscriber">
+                                            <i class="bx bx-shield-alt-2 me-1"></i>Is NHIS Subscriber?
+                                        </label>
+                                    </div>
                                 </div>
                             </div>
+
+                            @if ($is_nhis_subscriber)
+                                <div class="card bg-label-success mb-4">
+                                    <div class="card-body">
+                                        <div class="row g-3">
+                                            <div class="col-md-6">
+                                                <label class="form-label">NHIS Number <span
+                                                        class="text-danger">*</span></label>
+                                                <input type="text" class="form-control" wire:model="nhis_number"
+                                                    placeholder="Enter NHIS number">
+                                                @error('nhis_number')
+                                                    <small class="text-danger">{{ $message }}</small>
+                                                @enderror
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label">NHIS Provider <span
+                                                        class="text-danger">*</span></label>
+                                                <input type="text" class="form-control" wire:model="nhis_provider"
+                                                    placeholder="Enter NHIS provider">
+                                                @error('nhis_provider')
+                                                    <small class="text-danger">{{ $message }}</small>
+                                                @enderror
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label">NHIS Expiry Date <span
+                                                        class="text-danger">*</span></label>
+                                                <input type="date" class="form-control"
+                                                    wire:model="nhis_expiry_date">
+                                                @error('nhis_expiry_date')
+                                                    <small class="text-danger">{{ $message }}</small>
+                                                @enderror
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label">NHIS Plan Type <span
+                                                        class="text-danger">*</span></label>
+                                                <select class="form-select" wire:model.live="nhis_plan_type">
+                                                    <option value="">--Select Plan Type--</option>
+                                                    <option value="Individual">Individual</option>
+                                                    <option value="Family">Family</option>
+                                                    <option value="Corporate">Corporate</option>
+                                                </select>
+                                                @error('nhis_plan_type')
+                                                    <small class="text-danger">{{ $message }}</small>
+                                                @enderror
+                                            </div>
+
+                                            @if (in_array($nhis_plan_type, ['Family', 'Corporate']))
+                                                <div class="col-md-6">
+                                                    <label class="form-label">Principal Name <span
+                                                            class="text-danger">*</span></label>
+                                                    <input type="text" class="form-control"
+                                                        wire:model="nhis_principal_name"
+                                                        placeholder="Enter principal name">
+                                                    @error('nhis_principal_name')
+                                                        <small class="text-danger">{{ $message }}</small>
+                                                    @enderror
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label class="form-label">Principal Number <span
+                                                            class="text-danger">*</span></label>
+                                                    <input type="text" class="form-control"
+                                                        wire:model="nhis_principal_number"
+                                                        placeholder="Enter principal number">
+                                                    @error('nhis_principal_number')
+                                                        <small class="text-danger">{{ $message }}</small>
+                                                    @enderror
+                                                </div>
+                                            @endif
+                                        </div>
+                                    </div>
+                                </div>
+                            @endif
                         @else
                             {{-- EXISTING PATIENT: Show summary only --}}
                             <div class="alert alert-info mb-4">

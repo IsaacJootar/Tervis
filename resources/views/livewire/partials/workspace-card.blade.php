@@ -26,6 +26,7 @@
         'referrals' => '<svg viewBox="0 0 24 24" class="icon-svg" aria-hidden="true"><path d="M4 8h9"></path><path d="M13 5l3 3-3 3"></path><path d="M20 16H11"></path><path d="M11 13l-3 3 3 3"></path></svg>',
         'reminders' => '<svg viewBox="0 0 24 24" class="icon-svg" aria-hidden="true"><path d="M12 4a6 6 0 0 1 6 6v4l2 2H4l2-2v-4a6 6 0 0 1 6-6z"></path><path d="M9 20a3 3 0 0 0 6 0"></path></svg>',
         'family_planning' => '<svg viewBox="0 0 24 24" class="icon-svg" aria-hidden="true"><path d="M12 20s-6-4.2-6-8.5A3.5 3.5 0 0 1 12 9a3.5 3.5 0 0 1 6 2.5C18 15.8 12 20 12 20z"></path><path d="M12 7V4M10.5 5.5h3"></path></svg>',
+        'health_insurance' => '<svg viewBox="0 0 24 24" class="icon-svg" aria-hidden="true"><path d="M12 3l7 4v5c0 4-3 7-7 9-4-2-7-5-7-9V7l7-4z"></path><path d="M9 12h6"></path><path d="M12 9v6"></path></svg>',
         'visits' => '<svg viewBox="0 0 24 24" class="icon-svg" aria-hidden="true"><path d="M6 4h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6z"></path><path d="M8 8h8M8 12h8M8 16h5"></path></svg>',
         'activities' => '<svg viewBox="0 0 24 24" class="icon-svg" aria-hidden="true"><circle cx="12" cy="12" r="8"></circle><path d="M12 8v4l3 2"></path></svg>',
     ];

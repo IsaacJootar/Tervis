@@ -45,8 +45,13 @@ class AntenatalRegister extends Component
   public $state_id;
   public $lga_id;
   public $ward_id;
-  public $is_nhis_subscriber;
+  public $is_nhis_subscriber = false;
   public $nhis_number;
+  public $nhis_provider;
+  public $nhis_expiry_date;
+  public $nhis_plan_type;
+  public $nhis_principal_name;
+  public $nhis_principal_number;
 
   // Multiple Pregnancy Tracking
   public $pregnancy_number = 1;
@@ -164,6 +169,18 @@ class AntenatalRegister extends Component
       $rules['patient_id'] = 'required|exists:patients,id';
     }
 
+    if ($this->is_nhis_subscriber) {
+      $rules['nhis_number'] = 'required|string|max:50';
+      $rules['nhis_provider'] = 'required|string|max:255';
+      $rules['nhis_expiry_date'] = 'required|date';
+      $rules['nhis_plan_type'] = 'required|in:Individual,Family,Corporate';
+
+      if (in_array($this->nhis_plan_type, ['Family', 'Corporate'], true)) {
+        $rules['nhis_principal_name'] = 'required|string|max:255';
+        $rules['nhis_principal_number'] = 'required|string|max:50';
+      }
+    }
+
     return $rules;
   }
 
@@ -180,6 +197,12 @@ class AntenatalRegister extends Component
       'state_id.required' => 'State is required',
       'lga_id.required' => 'LGA is required',
       'address.required' => 'Residential address is required',
+      'nhis_number.required' => 'NHIS number is required for NHIS subscribers',
+      'nhis_provider.required' => 'NHIS provider is required for NHIS subscribers',
+      'nhis_expiry_date.required' => 'NHIS expiry date is required for NHIS subscribers',
+      'nhis_plan_type.required' => 'NHIS plan type is required for NHIS subscribers',
+      'nhis_principal_name.required' => 'Principal name is required for Family/Corporate NHIS plan',
+      'nhis_principal_number.required' => 'Principal number is required for Family/Corporate NHIS plan',
 
       // ANC fields
       'lmp.required' => 'Last Menstrual Period (LMP) is required',
@@ -231,6 +254,13 @@ class AntenatalRegister extends Component
       'patient_id',
       'first_name',
       'last_name',
+      'is_nhis_subscriber',
+      'nhis_number',
+      'nhis_provider',
+      'nhis_expiry_date',
+      'nhis_plan_type',
+      'nhis_principal_name',
+      'nhis_principal_number',
       'isPatientVerified',
       'isNewPatient',
       'hasActiveAncRegistration',
@@ -275,12 +305,11 @@ class AntenatalRegister extends Component
       return;
     }
 
-    // SCENARIO 2: Patient found - check if has ACTIVE ANC registration
-    $activeAncRegistration = $patient->antenatalRegistrations()->where('is_active', true)->first();
+    // SCENARIO 2: Patient found - block repeat ANC registration globally
+    $existingAncRegistration = $patient->antenatalRegistrations()->first();
 
-    if ($activeAncRegistration) {
-      // Has ACTIVE ANC registration - show dashboard button
-      toastr()->info('Patient Found & has an active ANC registration (Pregnancy in progress).');
+    if ($existingAncRegistration) {
+      toastr()->warning('Patient already has an ANC registration. Use ANC follow-up workflow for subsequent visits.');
       $this->isPatientVerified = false;
       $this->isNewPatient = false;
       $this->hasActiveAncRegistration = true;
@@ -288,7 +317,7 @@ class AntenatalRegister extends Component
       $this->first_name = $patient->first_name;
       $this->last_name = $patient->last_name;
       $this->patient_registration_facility = $patient->facility->name ?? 'N/A';
-      $this->pregnancy_number = $patient->antenatalRegistrations()->count() + 1;
+      $this->pregnancy_number = $patient->antenatalRegistrations()->count();
       $this->din_modal_flag = true;
       return;
     }
@@ -309,6 +338,13 @@ class AntenatalRegister extends Component
     $this->patient_age = $patient->age;
     $this->patient_phone = $patient->phone;
     $this->patient_email = $patient->email;
+    $this->is_nhis_subscriber = (bool) $patient->is_nhis_subscriber;
+    $this->nhis_number = $patient->nhis_number;
+    $this->nhis_provider = $patient->nhis_provider;
+    $this->nhis_expiry_date = $patient->nhis_expiry_date?->format('Y-m-d');
+    $this->nhis_plan_type = $patient->nhis_plan_type;
+    $this->nhis_principal_name = $patient->nhis_principal_name;
+    $this->nhis_principal_number = $patient->nhis_principal_number;
 
     // Get previous ANC registrations (use local variable)
     $previousRegistrations = $patient->antenatalRegistrations;
@@ -507,11 +543,22 @@ class AntenatalRegister extends Component
 
         if ($this->is_nhis_subscriber) {
           if ($this->nhis_number) $patientData['nhis_number'] = $this->nhis_number;
+          if ($this->nhis_provider) $patientData['nhis_provider'] = $this->nhis_provider;
+          if ($this->nhis_expiry_date) $patientData['nhis_expiry_date'] = $this->nhis_expiry_date;
+          if ($this->nhis_plan_type) $patientData['nhis_plan_type'] = $this->nhis_plan_type;
+          if ($this->nhis_principal_name) $patientData['nhis_principal_name'] = $this->nhis_principal_name;
+          if ($this->nhis_principal_number) $patientData['nhis_principal_number'] = $this->nhis_principal_number;
         }
 
         $patient = Patient::create($patientData);
         $this->patient_id = $patient->id;
         $this->pregnancy_number = 1; // First pregnancy for new patient
+      }
+
+      if (AntenatalRegistration::where('patient_id', $this->patient_id)->exists()) {
+        throw ValidationException::withMessages([
+          'patient_id' => 'Patient already has an ANC registration. Use ANC follow-up workflow for subsequent visits.',
+        ]);
       }
 
       $this->validate();
@@ -586,7 +633,9 @@ class AntenatalRegister extends Component
    */
   public function edit($id)
   {
-    $registration = AntenatalRegistration::with('patient')->findOrFail($id);
+    $registration = AntenatalRegistration::with('patient')
+      ->where('facility_id', $this->facility_id)
+      ->findOrFail($id);
 
     $this->registration_id = $id;
     $patient = $registration->patient;
@@ -635,7 +684,8 @@ class AntenatalRegister extends Component
     try {
       $this->validate();
 
-      $registration = AntenatalRegistration::findOrFail($this->registration_id);
+      $registration = AntenatalRegistration::where('facility_id', $this->facility_id)
+        ->findOrFail($this->registration_id);
 
       $registrationData = [
         'date_of_booking' => $this->date_of_booking,
@@ -700,7 +750,8 @@ class AntenatalRegister extends Component
   {
     DB::beginTransaction();
     try {
-      $registration = AntenatalRegistration::findOrFail($id);
+      $registration = AntenatalRegistration::where('facility_id', $this->facility_id)
+        ->findOrFail($id);
       $registration->delete();
 
       $this->clearCaches();
@@ -773,6 +824,13 @@ class AntenatalRegister extends Component
       'ethnic_group',
       'unit_no',
       'husband_name',
+      'is_nhis_subscriber',
+      'nhis_number',
+      'nhis_provider',
+      'nhis_expiry_date',
+      'nhis_plan_type',
+      'nhis_principal_name',
+      'nhis_principal_number',
       'genotype',
       'blood_group_rhesus',
       'isPatientVerified',

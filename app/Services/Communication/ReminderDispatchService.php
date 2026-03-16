@@ -4,6 +4,7 @@ namespace App\Services\Communication;
 
 use App\Models\AntenatalFollowUpAssessment;
 use App\Models\DoctorAssessment;
+use App\Models\FamilyPlanningFollowUp;
 use App\Models\Patient;
 use App\Models\Reminder;
 use App\Models\ReminderDispatchLog;
@@ -259,21 +260,40 @@ class ReminderDispatchService
       ]);
     }
 
-    $familyPlanningAppointments = FamilyPlanningRegistration::query()
+    $familyPlanningAppointments = FamilyPlanningFollowUp::query()
+      ->where('patient_id', $patientId)
+      ->where('facility_id', $facilityId)
+      ->whereNotNull('next_appointment_date')
+      ->get(['id', 'next_appointment_date', 'method_supplied']);
+
+    foreach ($familyPlanningAppointments as $record) {
+      $rows->push([
+        'source_module' => 'family_planning_follow_up',
+        'source_record_id' => (int) $record->id,
+        'reminder_date' => Carbon::parse($record->next_appointment_date)->format('Y-m-d'),
+        'title' => 'Family Planning Follow-up',
+        'message' => $record->method_supplied
+          ? 'Family planning review due for method: ' . $record->method_supplied
+          : 'Family planning follow-up appointment is due.',
+        'meta' => ['source' => 'Family Planning Follow-up'],
+      ]);
+    }
+
+    $familyPlanningRegistrationAppointments = FamilyPlanningRegistration::query()
       ->where('patient_id', $patientId)
       ->where('facility_id', $facilityId)
       ->whereNotNull('next_appointment')
       ->get(['id', 'next_appointment', 'contraceptive_selected']);
 
-    foreach ($familyPlanningAppointments as $record) {
+    foreach ($familyPlanningRegistrationAppointments as $record) {
       $rows->push([
-        'source_module' => 'family_planning',
+        'source_module' => 'family_planning_registration',
         'source_record_id' => (int) $record->id,
         'reminder_date' => Carbon::parse($record->next_appointment)->format('Y-m-d'),
-        'title' => 'Family Planning Follow-up',
+        'title' => 'Family Planning Registration Follow-up',
         'message' => $record->contraceptive_selected
-          ? 'Family planning review due for method: ' . $record->contraceptive_selected
-          : 'Family planning follow-up appointment is due.',
+          ? 'Family planning follow-up due for method: ' . $record->contraceptive_selected
+          : 'Family planning registration follow-up appointment is due.',
         'meta' => ['source' => 'Family Planning Registration'],
       ]);
     }
@@ -368,4 +388,3 @@ class ReminderDispatchService
     ]);
   }
 }
-

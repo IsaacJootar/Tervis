@@ -321,6 +321,12 @@ class GeneralPatientsRegister extends Component
         $patient = Patient::create($patientData);
       }
 
+      if (GeneralPatientsRegistration::where('patient_id', $patient->id)->exists()) {
+        throw ValidationException::withMessages([
+          'patient_id' => 'Patient already has an OPD registration. Open patient dashboard instead of creating another register entry.',
+        ]);
+      }
+
       $registrationData = [
         'patient_id' => $patient->id,
         'facility_id' => $this->facility_id,
@@ -371,7 +377,9 @@ class GeneralPatientsRegister extends Component
 
   public function edit($id)
   {
-    $registration = GeneralPatientsRegistration::with('patient')->findOrFail($id);
+    $registration = GeneralPatientsRegistration::with('patient')
+      ->where('facility_id', $this->facility_id)
+      ->findOrFail($id);
 
     $this->registration_id = $id;
     $patient = $registration->patient;
@@ -444,7 +452,8 @@ class GeneralPatientsRegister extends Component
     try {
       $this->validate();
 
-      $registration = GeneralPatientsRegistration::findOrFail($this->registration_id);
+      $registration = GeneralPatientsRegistration::where('facility_id', $this->facility_id)
+        ->findOrFail($this->registration_id);
       $patient = $registration->patient;
 
       $patientData = [
@@ -528,7 +537,8 @@ class GeneralPatientsRegister extends Component
   {
     DB::beginTransaction();
     try {
-      $registration = GeneralPatientsRegistration::findOrFail($id);
+      $registration = GeneralPatientsRegistration::where('facility_id', $this->facility_id)
+        ->findOrFail($id);
       $registration->delete();
 
       $this->clearCaches();

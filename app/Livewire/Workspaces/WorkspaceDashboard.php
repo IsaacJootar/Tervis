@@ -6,6 +6,7 @@ use App\Models\Patient;
 use App\Models\Facility;
 use App\Models\AntenatalFollowUpAssessment;
 use App\Models\DoctorAssessment;
+use App\Models\FamilyPlanningFollowUp;
 use App\Models\Registrations\FamilyPlanningRegistration;
 use App\Models\Registrations\DinActivation;
 use App\Models\TetanusVaccination;
@@ -181,7 +182,11 @@ class WorkspaceDashboard extends Component
 
     // Family Planning Registration - safely check
     try {
-      $fpReg = $this->patient->familyPlanningRegistration;
+      $fpReg = FamilyPlanningRegistration::query()
+        ->where('patient_id', $this->patientId)
+        ->latest('registration_date')
+        ->latest('id')
+        ->first();
       $this->hasFamilyPlanningRegistration = !is_null($fpReg);
       $this->familyPlanningRegistrationId = $fpReg?->id;
     } catch (\Exception $e) {
@@ -307,7 +312,7 @@ class WorkspaceDashboard extends Component
     ];
 
     // Card 14: Family Planning
-    $fpCount = $this->getModelCount('App\Models\FamilyPlanningVisit');
+    $fpCount = $this->getModelCount('App\Models\FamilyPlanningFollowUp');
     $this->cardStatus['family_planning'] = [
       'enabled' => $this->hasFamilyPlanningRegistration,
       'count' => $fpCount,
@@ -315,7 +320,14 @@ class WorkspaceDashboard extends Component
       'requires' => 'FP Registration'
     ];
 
-    // Card 15: Visits
+    // Card 15: Health Insurance
+    $this->cardStatus['health_insurance'] = [
+      'enabled' => true,
+      'count' => $this->patient && $this->patient->is_nhis_subscriber ? 1 : 0,
+      'label' => $this->patient && $this->patient->is_nhis_subscriber ? 'Active' : 'Inactive'
+    ];
+
+    // Card 16: Visits
     $visitCount = $this->getModelCount('App\Models\Visit');
     $this->cardStatus['visits'] = [
       'enabled' => true,
@@ -323,7 +335,7 @@ class WorkspaceDashboard extends Component
       'label' => 'Visits'
     ];
 
-    // Card 16: Activities
+    // Card 17: Activities
     $activityCount = $this->getModelCount('App\Models\Activity');
     $this->cardStatus['activities'] = [
       'enabled' => true,
@@ -349,6 +361,7 @@ class WorkspaceDashboard extends Component
       'referrals' => 'workspaces-referrals',
       'reminders' => 'workspaces-reminders',
       'family_planning' => 'workspaces-family-planning',
+      'health_insurance' => 'workspaces-health-insurance',
       'visits' => 'workspaces-visits',
       'activities' => 'workspaces-activities',
     ];
@@ -406,12 +419,17 @@ class WorkspaceDashboard extends Component
         ->whereNotNull('next_return_date')
         ->count();
 
-      $familyPlanning = FamilyPlanningRegistration::where('patient_id', $this->patientId)
+      $familyPlanning = FamilyPlanningFollowUp::where('patient_id', $this->patientId)
+        ->where('facility_id', $this->facility_id)
+        ->whereNotNull('next_appointment_date')
+        ->count();
+
+      $familyPlanningRegistration = FamilyPlanningRegistration::where('patient_id', $this->patientId)
         ->where('facility_id', $this->facility_id)
         ->whereNotNull('next_appointment')
         ->count();
 
-      return $doctor + $tetanus + $ancFollowUp + $familyPlanning;
+      return $doctor + $tetanus + $ancFollowUp + $familyPlanning + $familyPlanningRegistration;
     } catch (\Exception $e) {
       return 0;
     }

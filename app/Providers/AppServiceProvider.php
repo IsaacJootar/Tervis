@@ -2,6 +2,10 @@
 
 namespace App\Providers;
 
+use App\Models\Activity;
+use App\Models\Registrations\DinActivation;
+use App\Observers\ActivityObserver;
+use App\Observers\DinActivationObserver;
 use App\Services\DashboardMetricsService;
 use App\Services\PredictiveAnalyticsService;
 use Illuminate\Support\Facades\Vite;
@@ -25,6 +29,9 @@ class AppServiceProvider extends ServiceProvider
    */
   public function boot(): void
   {
+    Activity::observe(ActivityObserver::class);
+    DinActivation::observe(DinActivationObserver::class);
+
     Vite::useStyleTagAttributes(function (?string $src, string $url, ?array $chunk, ?array $manifest) {
       if ($src !== null) {
         return [

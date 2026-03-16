@@ -4,6 +4,7 @@ namespace App\Livewire\Core;
 
 use App\Models\AntenatalFollowUpAssessment;
 use App\Models\DoctorAssessment;
+use App\Models\FamilyPlanningFollowUp;
 use App\Models\Patient;
 use App\Models\Registrations\DinActivation;
 use App\Models\Registrations\FamilyPlanningRegistration;
@@ -234,15 +235,28 @@ class PatientAppointments extends Component
       ]);
     }
 
-    $familyPlanningAppointments = FamilyPlanningRegistration::query()
+    $familyPlanningAppointments = FamilyPlanningFollowUp::query()
       ->where('facility_id', $this->facility_id)
-      ->whereNotNull('next_appointment')
-      ->get(['patient_id', 'next_appointment']);
+      ->whereNotNull('next_appointment_date')
+      ->get(['patient_id', 'next_appointment_date']);
 
     foreach ($familyPlanningAppointments as $record) {
       $rows->push([
         'patient_id' => (int) $record->patient_id,
         'type' => 'Family Planning Follow-up',
+        'date' => Carbon::parse($record->next_appointment_date)->startOfDay(),
+      ]);
+    }
+
+    $familyPlanningRegistrationAppointments = FamilyPlanningRegistration::query()
+      ->where('facility_id', $this->facility_id)
+      ->whereNotNull('next_appointment')
+      ->get(['patient_id', 'next_appointment']);
+
+    foreach ($familyPlanningRegistrationAppointments as $record) {
+      $rows->push([
+        'patient_id' => (int) $record->patient_id,
+        'type' => 'Family Planning Registration Follow-up',
         'date' => Carbon::parse($record->next_appointment)->startOfDay(),
       ]);
     }

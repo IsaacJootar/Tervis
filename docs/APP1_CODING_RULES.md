@@ -16,6 +16,9 @@ Primary UI reference for design decisions:
    - Registers create/enroll program files.
    - Workspace modules capture clinical activities.
 4. Do not duplicate base patient/facility identity fields in activity forms when already auto-resolved from context.
+5. Strict scope mode:
+   - Patient identity and one-time program registration checks may be global (cross-facility) to prevent duplicate registrations.
+   - Activity records, activity-based summaries, reminders, and appointments must remain facility-scoped (`facility_id` + `patient_id`).
 
 ## 2) Route and Module Rules
 
@@ -47,6 +50,9 @@ Primary UI reference for design decisions:
    - always filter by `facility_id`
    - for patient workspace modules, also filter by `patient_id`
    - never query cross-facility data unless the module explicitly requires aggregated scope and user role allows it.
+10. Exception for one-time registration gates:
+   - duplicate-prevention checks for one-time registrations (example: Family Planning baseline registration) should check by `patient_id` globally.
+   - once the gate passes, all follow-up/activity writes and reads remain facility-scoped.
 
 ## 4) Interaction Rules
 

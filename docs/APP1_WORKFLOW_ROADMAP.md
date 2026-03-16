@@ -1,6 +1,6 @@
 # APP1 Workflow and Roadmap
 
-Last updated: 2026-03-15  
+Last updated: 2026-03-16  
 Aligned to: HMS Vision Architecture v2.0 (Nov 2025)
 
 ## 1) Current End-to-End Workflow (Implemented)
@@ -27,21 +27,24 @@ Aligned to: HMS Vision Architecture v2.0 (Nov 2025)
 8. Reminder orchestration:
    - Reminders module syncs due dates from Doctor Assessment, TT, ANC follow-up, and Family Planning.
    - Due reminders dispatch through placeholder SMS/Email services with per-channel dispatch logs.
-9. Monthly report:
+9. Insurance management:
+   - Initial NHIS capture is aligned across all register entry points (General, ANC, Family Planning).
+   - Health Insurance workspace manages activation/deactivation and NHIS detail updates with audit history.
+10. Visit collation:
+   - Visits module auto-groups visit sessions by date from DIN activation + activity records.
+   - Sync is automatic on activity/activation create-update-delete events (staff do not click manual sync).
+   - Visit events remain facility-scoped and are sync/backfill-safe.
+11. Monthly report:
    - Monthly dashboard aggregates mapped data from attendance, maternal/child, doctor, and lab sources.
 
 ## 2) Workflow Gaps (Not Yet Closed)
 
-1. Patient Section 14-16 gaps:
-   - Family Planning workspace activity module, Health Insurance, Visits grouping.
-2. Family Planning workspace module:
-   - Register exists but dedicated workspace activity module not yet active.
-3. Facility operations:
+1. Facility operations:
    - Bed management and admitted-patient workflows are missing.
    - Pharmacy/Lab operations are still patient-form-centric, not full facility-operations grade.
-4. NHMIS completeness:
+2. NHMIS completeness:
    - Monthly mapping is partial; additional row-key mappings and stronger structured sources are needed.
-5. Test coverage:
+3. Test coverage:
    - No dedicated workflow feature tests yet for Doctor/Lab/Prescriptions/Child Health chains.
 
 ## 3) Execution Plan (Next Modules, In Order)
@@ -56,10 +59,10 @@ Done criteria:
 - Placeholder dispatch command available: `php artisan reminders:dispatch-due --sync`.
 
 ## Phase B: Complete Patient Support and Longitudinal Tracking
-1. Family Planning workspace activity module (Section 14 alignment)
-2. Health Insurance module (Section 15)
-3. Visits session grouping module (Section 16)
-4. Timeline enrichment improvements (Section 17 quality upgrade)
+1. Family Planning workspace activity module (Section 14 alignment) - completed
+2. Health Insurance module (Section 15) - completed
+3. Visits session grouping module (Section 16) - completed
+4. Timeline enrichment improvements (Section 17 quality upgrade) - pending
 
 Done criteria:
 - Full patient workflow chain can run without side systems.

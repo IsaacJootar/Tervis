@@ -1,7 +1,9 @@
 <?php
 
+use App\Models\Activity;
 use App\Models\Registrations\DinActivation;
 use App\Services\Communication\ReminderDispatchService;
+use App\Services\Visits\VisitCollationService;
 use Illuminate\Foundation\Console\ClosureCommand;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
@@ -47,3 +49,55 @@ Artisan::command('reminders:dispatch-due {--facilityId=} {--patientId=} {--sync}
     $result = $service->dispatchDueGlobal($facilityId, $patientId);
     $this->info("Reminders dispatch complete. Total {$result['total']}, sent {$result['sent']}, failed {$result['failed']}, skipped {$result['skipped']}.");
 })->purpose('Dispatch due reminders using placeholder SMS/Email channels.');
+
+Artisan::command('visits:backfill {--facilityId=} {--patientId=} {--from=} {--to=}', function () {
+    /** @var ClosureCommand $this */
+    $facilityId = $this->option('facilityId') ? (int) $this->option('facilityId') : null;
+    $patientId = $this->option('patientId') ? (int) $this->option('patientId') : null;
+    $fromDate = $this->option('from') ?: null;
+    $toDate = $this->option('to') ?: null;
+
+    $activationPairs = DinActivation::query()
+        ->select('patient_id', 'facility_id')
+        ->when($facilityId, fn($q) => $q->where('facility_id', $facilityId))
+        ->when($patientId, fn($q) => $q->where('patient_id', $patientId));
+
+    $activityPairs = Activity::query()
+        ->select('patient_id', 'facility_id')
+        ->when($facilityId, fn($q) => $q->where('facility_id', $facilityId))
+        ->when($patientId, fn($q) => $q->where('patient_id', $patientId));
+
+    $pairs = $activationPairs->union($activityPairs)->get();
+
+    if ($pairs->isEmpty()) {
+        $this->warn('No patient/facility pairs found for backfill.');
+        return;
+    }
+
+    /** @var VisitCollationService $service */
+    $service = app(VisitCollationService::class);
+
+    $totalDates = 0;
+    $totalVisitsTouched = 0;
+    $totalEventsUpserted = 0;
+    $totalEventsDeleted = 0;
+
+    foreach ($pairs as $pair) {
+        $result = $service->syncPatientFacility(
+            (int) $pair->patient_id,
+            (int) $pair->facility_id,
+            $fromDate,
+            $toDate,
+            'console-backfill'
+        );
+
+        $totalDates += $result['visit_dates'];
+        $totalVisitsTouched += $result['visits_touched'];
+        $totalEventsUpserted += $result['events_upserted'];
+        $totalEventsDeleted += $result['events_deleted'];
+    }
+
+    $this->info(
+        "Visits backfill complete. pairs={$pairs->count()}, dates={$totalDates}, visits_touched={$totalVisitsTouched}, events_upserted={$totalEventsUpserted}, events_deleted={$totalEventsDeleted}."
+    );
+})->purpose('Build or refresh visits and visit events from DIN activations + activity timeline.');

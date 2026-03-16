@@ -54,25 +54,62 @@
         <div class="row g-3 mb-4">
             <div class="col-6 col-lg-3">
                 <div class="metric-card metric-card-slate h-100">
-                    <div class="metric-label">Total</div>
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div class="metric-label">Total</div>
+                        <span class="metric-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="none">
+                                <path d="M7 3v3M17 3v3M4 9h16" stroke="currentColor" stroke-width="1.8"
+                                    stroke-linecap="round" />
+                                <rect x="4" y="5" width="16" height="15" rx="2.5" stroke="currentColor"
+                                    stroke-width="1.8" />
+                            </svg>
+                        </span>
+                    </div>
                     <div class="metric-value">{{ $summary['total'] }}</div>
                 </div>
             </div>
             <div class="col-6 col-lg-3">
                 <div class="metric-card metric-card-sky h-100">
-                    <div class="metric-label">Upcoming</div>
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div class="metric-label">Upcoming</div>
+                        <span class="metric-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="none">
+                                <circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="1.8" />
+                                <path d="M12 8v4l3 2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+                                    stroke-linejoin="round" />
+                            </svg>
+                        </span>
+                    </div>
                     <div class="metric-value">{{ $summary['upcoming'] }}</div>
                 </div>
             </div>
             <div class="col-6 col-lg-3">
                 <div class="metric-card metric-card-rose h-100">
-                    <div class="metric-label">Missed</div>
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div class="metric-label">Missed</div>
+                        <span class="metric-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="none">
+                                <circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="1.8" />
+                                <path d="M9.5 9.5l5 5M14.5 9.5l-5 5" stroke="currentColor" stroke-width="1.8"
+                                    stroke-linecap="round" />
+                            </svg>
+                        </span>
+                    </div>
                     <div class="metric-value">{{ $summary['missed'] }}</div>
                 </div>
             </div>
             <div class="col-6 col-lg-3">
                 <div class="metric-card metric-card-emerald h-100">
-                    <div class="metric-label">Fulfilled</div>
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div class="metric-label">Fulfilled</div>
+                        <span class="metric-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="none">
+                                <circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="1.8" />
+                                <path d="M8.5 12.5l2.5 2.5 4.5-5" stroke="currentColor" stroke-width="1.8"
+                                    stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                        </span>
+                    </div>
                     <div class="metric-value">{{ $summary['fulfilled'] }}</div>
                 </div>
             </div>
@@ -161,6 +198,21 @@
             font-size: 1.6rem;
             font-weight: 700;
             line-height: 1.1;
+        }
+
+        .metric-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 999px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(15, 23, 42, 0.08);
+        }
+
+        .metric-icon svg {
+            width: 18px;
+            height: 18px;
         }
 
         .metric-card-slate {

@@ -192,6 +192,13 @@ class Patient extends Model
     return $this->hasOne(FamilyPlanningRegistration::class);
   }
 
+  public function familyPlanningFollowUps(): HasMany
+  {
+    return $this->hasMany(FamilyPlanningFollowUp::class)
+      ->orderBy('visit_date', 'desc')
+      ->orderBy('id', 'desc');
+  }
+
   /**
    * Linked Children - Active only
    * Children linked to this patient for immunization/nutrition tracking

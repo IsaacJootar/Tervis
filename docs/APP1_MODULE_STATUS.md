@@ -1,6 +1,6 @@
 # APP1 Module Status (Vision-Aligned Ground Truth)
 
-Last updated: 2026-03-15  
+Last updated: 2026-03-16  
 Reference vision: `Health Management System - Complete Architecture (Patient + Facility Modules).pdf` (v2.0, Nov 2025)
 
 Status legend:
@@ -27,9 +27,9 @@ Status legend:
 | 11. Appointments | `workspaces/{patientId}/appointments` (`workspaces-appointments`) | Implemented | Aggregated from Doctor Assessment, TT, ANC follow-up, and Family Planning next-visit fields. |
 | 12. Referrals | `workspaces/{patientId}/referrals` (`workspaces-referrals`) | Implemented | Referral form module with services checklist, outcome tracking, and history table. |
 | 13. Reminders & Alerts | `workspaces/{patientId}/reminders` (`workspaces-reminders`) | Implemented | Reminder workspace with module-date sync and placeholder SMS/Email dispatch logs. |
-| 14. Family Planning | No active workspace route | Partial | Register exists (`registers/family-planning-register`) but workspace activity module not active. |
-| 15. Health Insurance | No active workspace route | Not Started | No active module route/workflow. |
-| 16. Visits | No active workspace route | Not Started | Visit grouping module not yet delivered. |
+| 14. Family Planning | `workspaces/{patientId}/family-planning` (`workspaces-family-planning`) | Implemented | Follow-up assessment workspace for subsequent visits; one-time baseline remains in `registers/family-planning-register`. |
+| 15. Health Insurance | `workspaces/{patientId}/health-insurance` (`workspaces-health-insurance`) | Implemented | Patient insurance management hub for activate/deactivate, provider/plan/expiry updates, and audit history. Initial NHIS capture is now aligned across all 3 register entry points. |
+| 16. Visits | `workspaces/{patientId}/visits` (`workspaces-visits`) | Implemented | Auto-collates facility-scoped visit sessions from DIN activations + activity timeline events. |
 | 17. Timeline / Activities | `workspaces/{patientId}/activities` (`workspaces-activities`) | Implemented | Activity timeline page active (latest-first behavior requested earlier). |
 
 ## 2) Facility-Centric Modules (Vision Scope)
@@ -61,10 +61,10 @@ Note: Vision text mentions both "7 modules" and "8 management modules" in differ
 
 - `php artisan route:list` passes (routes compile and load).
 - Automated test suite currently only has example tests (`tests/Feature/ExampleTest.php`, `tests/Unit/ExampleTest.php`).
-- Gap: No dedicated feature tests yet for Doctor/Lab/Prescriptions/Child Health module workflows.
+- Gap: No dedicated feature tests yet for Doctor/Lab/Prescriptions/Child Health/Health Insurance module workflows.
 
 ## 5) Immediate Priority Recommendation
 
-1. Complete Section 14-16 (Family Planning workspace module, Insurance, Visits grouping).
-2. Then execute facility modules in order: Bed -> Inpatient -> full Pharmacy Ops -> full Lab Ops.
-3. Add dedicated workflow tests for reminder sync/dispatch and cross-module transitions.
+1. Start facility modules in order: Bed -> Inpatient -> full Pharmacy Ops -> full Lab Ops.
+2. Add dedicated workflow tests for reminder sync/dispatch, visits collation, insurance updates, and cross-module transitions.
+3. Continue NHMIS mapping hardening with structured source coverage.

@@ -402,7 +402,25 @@ class FacilityReports extends Component
       ->get();
 
     // Family Planning next appointments
-    $familyPlanningAppts = DB::table('family_planning_registrations')
+    $familyPlanningAppts = DB::table('family_planning_follow_ups')
+      ->join('patients', 'family_planning_follow_ups.patient_id', '=', 'patients.id')
+      ->join('facilities', 'family_planning_follow_ups.facility_id', '=', 'facilities.id')
+      ->whereIn('family_planning_follow_ups.facility_id', $facilityIds)
+      ->whereNotNull('family_planning_follow_ups.next_appointment_date')
+      ->whereBetween('family_planning_follow_ups.next_appointment_date', [$this->date_from, $this->date_to])
+      ->select([
+        'patients.first_name',
+        'patients.last_name',
+        'patients.din as DIN',
+        'facilities.name as facility_name',
+        'family_planning_follow_ups.next_appointment_date as appointment_date',
+        DB::raw("'Family Planning Follow-up' as appointment_type"),
+        'family_planning_follow_ups.patient_id as patient_id',
+        'family_planning_follow_ups.facility_id as facility_id'
+      ])
+      ->get();
+
+    $familyPlanningRegistrationAppts = DB::table('family_planning_registrations')
       ->join('patients', 'family_planning_registrations.patient_id', '=', 'patients.id')
       ->join('facilities', 'family_planning_registrations.facility_id', '=', 'facilities.id')
       ->whereIn('family_planning_registrations.facility_id', $facilityIds)
@@ -414,7 +432,7 @@ class FacilityReports extends Component
         'patients.din as DIN',
         'facilities.name as facility_name',
         'family_planning_registrations.next_appointment as appointment_date',
-        DB::raw("'Family Planning Follow-up' as appointment_type"),
+        DB::raw("'Family Planning Registration Follow-up' as appointment_type"),
         'family_planning_registrations.patient_id as patient_id',
         'family_planning_registrations.facility_id as facility_id'
       ])
@@ -423,7 +441,8 @@ class FacilityReports extends Component
     $allAppts = $doctorAppts
       ->concat($ttAppts)
       ->concat($ancFollowUpAppts)
-      ->concat($familyPlanningAppts);
+      ->concat($familyPlanningAppts)
+      ->concat($familyPlanningRegistrationAppts);
 
     foreach ($allAppts as $appt) {
       $fulfilled = DB::table('din_activations')

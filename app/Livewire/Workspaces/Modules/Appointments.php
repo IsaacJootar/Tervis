@@ -5,6 +5,7 @@ namespace App\Livewire\Workspaces\Modules;
 use App\Models\AntenatalFollowUpAssessment;
 use App\Models\DoctorAssessment;
 use App\Models\Facility;
+use App\Models\FamilyPlanningFollowUp;
 use App\Models\Patient;
 use App\Models\Registrations\DinActivation;
 use App\Models\Registrations\FamilyPlanningRegistration;
@@ -193,18 +194,37 @@ class Appointments extends Component
       ]);
     }
 
-    $familyPlanningAppointments = FamilyPlanningRegistration::query()
+    $familyPlanningAppointments = FamilyPlanningFollowUp::query()
+      ->where('patient_id', $this->patientId)
+      ->where('facility_id', $this->facility_id)
+      ->whereNotNull('next_appointment_date')
+      ->get(['id', 'visit_date', 'next_appointment_date', 'method_supplied']);
+
+    foreach ($familyPlanningAppointments as $record) {
+      $appointmentDate = Carbon::parse($record->next_appointment_date)->startOfDay();
+      $rows->push([
+        'appointment_date' => $appointmentDate,
+        'appointment_type' => 'Family Planning Follow-up',
+        'source' => 'Family Planning Follow-up',
+        'source_date' => $record->visit_date,
+        'status' => $this->resolveStatus($activationDates, $appointmentDate),
+        'days_from_today' => $today->diffInDays($appointmentDate, false),
+        'details' => $record->method_supplied ?: 'N/A',
+      ]);
+    }
+
+    $familyPlanningRegistrationAppointments = FamilyPlanningRegistration::query()
       ->where('patient_id', $this->patientId)
       ->where('facility_id', $this->facility_id)
       ->whereNotNull('next_appointment')
       ->get(['id', 'registration_date', 'next_appointment', 'contraceptive_selected']);
 
-    foreach ($familyPlanningAppointments as $record) {
+    foreach ($familyPlanningRegistrationAppointments as $record) {
       $appointmentDate = Carbon::parse($record->next_appointment)->startOfDay();
       $rows->push([
         'appointment_date' => $appointmentDate,
-        'appointment_type' => 'Family Planning Follow-up',
-        'source' => 'Family Planning',
+        'appointment_type' => 'Family Planning Registration Follow-up',
+        'source' => 'Family Planning Registration',
         'source_date' => $record->registration_date,
         'status' => $this->resolveStatus($activationDates, $appointmentDate),
         'days_from_today' => $today->diffInDays($appointmentDate, false),

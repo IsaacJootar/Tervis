@@ -4,6 +4,7 @@ namespace App\Livewire\Core;
 
 use App\Models\AntenatalFollowUpAssessment;
 use App\Models\DoctorAssessment;
+use App\Models\FamilyPlanningFollowUp;
 use App\Models\Reminder;
 use App\Models\ReminderDispatchLog;
 use App\Models\Registrations\FamilyPlanningRegistration;
@@ -121,12 +122,17 @@ class FacilityRemindersHub extends Component
       ->whereNotNull('next_return_date')
       ->pluck('patient_id');
 
-    $fp = FamilyPlanningRegistration::query()
+    $fp = FamilyPlanningFollowUp::query()
+      ->where('facility_id', $this->facility_id)
+      ->whereNotNull('next_appointment_date')
+      ->pluck('patient_id');
+
+    $fpRegistration = FamilyPlanningRegistration::query()
       ->where('facility_id', $this->facility_id)
       ->whereNotNull('next_appointment')
       ->pluck('patient_id');
 
-    return $doctor->merge($tt)->merge($anc)->merge($fp)->filter()->unique()->values();
+    return $doctor->merge($tt)->merge($anc)->merge($fp)->merge($fpRegistration)->filter()->unique()->values();
   }
 
   public function render()

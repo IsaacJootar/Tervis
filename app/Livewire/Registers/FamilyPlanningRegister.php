@@ -34,6 +34,9 @@ class FamilyPlanningRegister extends Component
   public $patient_phone, $patient_email;
   public $address, $marital_status;
   public $education, $religion;
+  public $is_nhis_subscriber = false;
+  public $nhis_number, $nhis_provider, $nhis_expiry_date, $nhis_plan_type;
+  public $nhis_principal_name, $nhis_principal_number;
 
   // FP Registration fields
   public $registration_id;
@@ -110,6 +113,18 @@ class FamilyPlanningRegister extends Component
       $rules['patient_id'] = 'required|exists:patients,id';
     }
 
+    if ($this->is_nhis_subscriber) {
+      $rules['nhis_number'] = 'required|string|max:50';
+      $rules['nhis_provider'] = 'required|string|max:255';
+      $rules['nhis_expiry_date'] = 'required|date';
+      $rules['nhis_plan_type'] = 'required|in:Individual,Family,Corporate';
+
+      if (in_array($this->nhis_plan_type, ['Family', 'Corporate'], true)) {
+        $rules['nhis_principal_name'] = 'required|string|max:255';
+        $rules['nhis_principal_number'] = 'required|string|max:50';
+      }
+    }
+
     return $rules;
   }
 
@@ -125,6 +140,12 @@ class FamilyPlanningRegister extends Component
       'state_id.required' => 'State is required',
       'lga_id.required' => 'LGA is required',
       'address.required' => 'Residential address is required',
+      'nhis_number.required' => 'NHIS number is required for NHIS subscribers',
+      'nhis_provider.required' => 'NHIS provider is required for NHIS subscribers',
+      'nhis_expiry_date.required' => 'NHIS expiry date is required for NHIS subscribers',
+      'nhis_plan_type.required' => 'NHIS plan type is required for NHIS subscribers',
+      'nhis_principal_name.required' => 'Principal name is required for Family/Corporate NHIS plan',
+      'nhis_principal_number.required' => 'Principal number is required for Family/Corporate NHIS plan',
       'registration_date.required' => 'Registration date is required',
       'last_menstrual_period.required' => 'Last Menstrual Period (LMP) is required',
       'last_menstrual_period.before_or_equal' => 'LMP cannot be a future date',
@@ -199,7 +220,24 @@ class FamilyPlanningRegister extends Component
 
   public function openDinModal()
   {
-    $this->reset(['din', 'patient_id', 'first_name', 'last_name', 'isPatientVerified', 'isNewPatient', 'registration_id', 'modal_flag', 'patient_registration_facility']);
+    $this->reset([
+      'din',
+      'patient_id',
+      'first_name',
+      'last_name',
+      'is_nhis_subscriber',
+      'nhis_number',
+      'nhis_provider',
+      'nhis_expiry_date',
+      'nhis_plan_type',
+      'nhis_principal_name',
+      'nhis_principal_number',
+      'isPatientVerified',
+      'isNewPatient',
+      'registration_id',
+      'modal_flag',
+      'patient_registration_facility'
+    ]);
   }
 
   public function verifyPatient()
@@ -225,13 +263,12 @@ class FamilyPlanningRegister extends Component
       return;
     }
 
-    // SCENARIO 2: Already registered TODAY
-    $registeredToday = FamilyPlanningRegistration::where('patient_id', $patient->id)
-      ->whereDate('registration_date', Carbon::today())
+    // SCENARIO 2: Already has FP registration (global one-time registration rule)
+    $alreadyRegistered = FamilyPlanningRegistration::where('patient_id', $patient->id)
       ->exists();
 
-    if ($registeredToday) {
-      toastr()->warning('Patient already has an FP registration today.');
+    if ($alreadyRegistered) {
+      toastr()->warning('Patient already has an FP registration. Use Family Planning follow-up for subsequent visits.');
       $this->isPatientVerified = false;
       $this->isNewPatient = false;
       return;
@@ -254,6 +291,13 @@ class FamilyPlanningRegister extends Component
     $this->patient_age = $patient->age;
     $this->patient_phone = $patient->phone;
     $this->patient_email = $patient->email;
+    $this->is_nhis_subscriber = (bool) $patient->is_nhis_subscriber;
+    $this->nhis_number = $patient->nhis_number;
+    $this->nhis_provider = $patient->nhis_provider;
+    $this->nhis_expiry_date = $patient->nhis_expiry_date?->format('Y-m-d');
+    $this->nhis_plan_type = $patient->nhis_plan_type;
+    $this->nhis_principal_name = $patient->nhis_principal_name;
+    $this->nhis_principal_number = $patient->nhis_principal_number;
 
     // PRE-FILL: Additional demographic data from General Registration if available
     if ($patient->generalRegistration) {
@@ -297,6 +341,7 @@ class FamilyPlanningRegister extends Component
           'state_id' => $this->state_id,
           'lga_id' => $this->lga_id,
           'facility_id' => $this->facility_id,
+          'is_nhis_subscriber' => (bool) $this->is_nhis_subscriber,
         ];
 
         if ($this->middle_name) $patientData['middle_name'] = $this->middle_name;
@@ -308,8 +353,23 @@ class FamilyPlanningRegister extends Component
         if ($this->education) $patientData['education'] = $this->education;
         if ($this->religion) $patientData['religion'] = $this->religion;
 
+        if ($this->is_nhis_subscriber) {
+          if ($this->nhis_number) $patientData['nhis_number'] = $this->nhis_number;
+          if ($this->nhis_provider) $patientData['nhis_provider'] = $this->nhis_provider;
+          if ($this->nhis_expiry_date) $patientData['nhis_expiry_date'] = $this->nhis_expiry_date;
+          if ($this->nhis_plan_type) $patientData['nhis_plan_type'] = $this->nhis_plan_type;
+          if ($this->nhis_principal_name) $patientData['nhis_principal_name'] = $this->nhis_principal_name;
+          if ($this->nhis_principal_number) $patientData['nhis_principal_number'] = $this->nhis_principal_number;
+        }
+
         $patient = Patient::create($patientData);
         $this->patient_id = $patient->id;
+      }
+
+      if (FamilyPlanningRegistration::where('patient_id', $this->patient_id)->exists()) {
+        throw ValidationException::withMessages([
+          'patient_id' => 'Patient already has a Family Planning registration. Use the follow-up workflow for subsequent visits.',
+        ]);
       }
 
       $registrationData = [
@@ -391,7 +451,9 @@ class FamilyPlanningRegister extends Component
 
   public function edit($id)
   {
-    $registration = FamilyPlanningRegistration::with('patient')->findOrFail($id);
+    $registration = FamilyPlanningRegistration::with('patient')
+      ->where('facility_id', $this->facility_id)
+      ->findOrFail($id);
 
     $this->registration_id = $id;
     $patient = $registration->patient;
@@ -478,7 +540,8 @@ class FamilyPlanningRegister extends Component
       ]);
       $this->validate($rules);
 
-      $registration = FamilyPlanningRegistration::findOrFail($this->registration_id);
+      $registration = FamilyPlanningRegistration::where('facility_id', $this->facility_id)
+        ->findOrFail($this->registration_id);
 
       $registrationData = [
         'registration_date' => $this->registration_date,
@@ -559,7 +622,8 @@ class FamilyPlanningRegister extends Component
   {
     DB::beginTransaction();
     try {
-      $registration = FamilyPlanningRegistration::findOrFail($id);
+      $registration = FamilyPlanningRegistration::where('facility_id', $this->facility_id)
+        ->findOrFail($id);
       $registration->delete();
 
       $this->clearCaches();
@@ -589,6 +653,7 @@ class FamilyPlanningRegister extends Component
   private function clearCaches()
   {
     Cache::forget('fp_registrations_list');
+    Cache::forget('fp_registrations_list_facility_' . $this->facility_id);
     Cache::forget('fp_registrations_count');
   }
 
@@ -614,6 +679,13 @@ class FamilyPlanningRegister extends Component
       'marital_status',
       'education',
       'religion',
+      'is_nhis_subscriber',
+      'nhis_number',
+      'nhis_provider',
+      'nhis_expiry_date',
+      'nhis_plan_type',
+      'nhis_principal_name',
+      'nhis_principal_number',
       'registration_id',
       'client_reg_number',
       'referral_source',
@@ -674,8 +746,11 @@ class FamilyPlanningRegister extends Component
 
   public function render()
   {
-    $registrations = Cache::remember('fp_registrations_list', 300, function () {
+    $cacheKey = 'fp_registrations_list_facility_' . $this->facility_id;
+
+    $registrations = Cache::remember($cacheKey, 300, function () {
       return FamilyPlanningRegistration::with(['patient', 'facility'])
+        ->where('facility_id', $this->facility_id)
         ->latest()
         ->take(50)
         ->get();

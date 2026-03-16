@@ -250,3 +250,125 @@
   - Explicitly documented as scoped behavior (not global/all cards) in:
     - `docs/APP1_UI_STYLE_GUIDE.md`
     - `docs/APP1_CODING_RULES.md`
+
+## Update (2026-03-16)
+- Family Planning follow-up workspace module implemented and routed:
+  - Route: `workspaces/{patientId}/family-planning` (`workspaces-family-planning`)
+  - New files:
+    - `database/migrations/2026_03_16_120000_create_family_planning_follow_ups_table.php`
+    - `app/Models/FamilyPlanningFollowUp.php`
+    - `app/Livewire/Workspaces/Modules/FamilyPlanning/ClientFollowUp.php`
+    - `resources/views/livewire/workspaces/modules/family-planning/client-follow-up.blade.php`
+- Workflow aligned to one-time registration rule:
+  - Baseline Family Planning registration stays one-time in `registers/family-planning-register`.
+  - Subsequent visits are captured as many `family_planning_follow_ups` records.
+  - Follow-up save/update syncs `family_planning_registrations.next_appointment` for Appointments/Reminders aggregation continuity.
+- Dashboard wiring updates:
+  - Family Planning workspace card now counts `App\Models\FamilyPlanningFollowUp` records.
+  - Family Planning registration check in dashboard is now facility-scoped.
+  - File: `app/Livewire/Workspaces/WorkspaceDashboard.php`
+- Model relationship updates:
+  - `Patient` now has `familyPlanningFollowUps()` relation.
+  - `FamilyPlanningRegistration` now has `followUps()` relation.
+- Validation run:
+  - `php -l` passed for all changed PHP files.
+  - `php artisan route:list` passed and shows `workspaces-family-planning`.
+  - `php artisan test` passed (`2 passed`).
+
+## Update (2026-03-16, Health Insurance + Register Alignment)
+- Register route fix:
+  - Fixed broken register links that referenced undefined `patient-dashboard` route.
+  - Updated to `workspace-dashboard` with `patientId` param in:
+    - `resources/views/livewire/registers/general-patients-register.blade.php`
+    - `resources/views/livewire/registers/antenatal-register.blade.php`
+- NHIS capture alignment across all 3 register entry points:
+  - General register already had full NHIS fields.
+  - ANC register now includes full NHIS fields and validations:
+    - `is_nhis_subscriber`, `nhis_number`, `nhis_provider`, `nhis_expiry_date`, `nhis_plan_type`, `nhis_principal_name`, `nhis_principal_number`.
+  - Family Planning register now includes the same full NHIS fields and validations.
+  - Updated files:
+    - `app/Livewire/Registers/AntenatalRegister.php`
+    - `resources/views/livewire/registers/antenatal-register.blade.php`
+    - `app/Livewire/Registers/FamilyPlanningRegister.php`
+    - `resources/views/livewire/registers/family-planning-register.blade.php`
+- Health Insurance workspace module implemented (Section 15):
+  - Route: `workspaces/{patientId}/health-insurance` (`workspaces-health-insurance`)
+  - New files:
+    - `app/Livewire/Workspaces/Modules/HealthInsurance.php`
+    - `resources/views/livewire/workspaces/modules/health-insurance/index.blade.php`
+  - Features:
+    - Activate/deactivate NHIS coverage
+    - Update provider, plan type, expiry, and principal fields
+    - Patient-scoped insurance audit/history via `Activity` log (`module = health_insurance`)
+- Workspace dashboard wiring:
+  - Added Health Insurance card and route mapping in:
+    - `app/Livewire/Workspaces/WorkspaceDashboard.php`
+    - `resources/views/livewire/workspaces/workspace-dashboard.blade.php`
+    - `resources/views/livewire/partials/workspace-card.blade.php`
+- Validation run:
+  - `php -l app/Livewire/Registers/AntenatalRegister.php`
+  - `php -l app/Livewire/Registers/FamilyPlanningRegister.php`
+  - `php -l app/Livewire/Workspaces/Modules/HealthInsurance.php`
+  - `php -l app/Livewire/Workspaces/WorkspaceDashboard.php`
+  - `php -l routes/web.php`
+  - `php artisan route:list --name=workspaces-health-insurance`
+  - `php artisan route:list --name=workspace-dashboard`
+  - `php artisan test` (`2 passed`)
+
+## Update (2026-03-16, Visits Module Section 16)
+- Visits workspace module implemented and routed:
+  - Route: `workspaces/{patientId}/visits` (`workspaces-visits`)
+  - New files:
+    - `database/migrations/2026_03_16_230000_create_visits_table.php`
+    - `database/migrations/2026_03_16_230100_create_visit_events_table.php`
+    - `app/Models/Visit.php`
+    - `app/Models/VisitEvent.php`
+    - `app/Services/Visits/VisitCollationService.php`
+    - `app/Livewire/Workspaces/Modules/Visits.php`
+    - `resources/views/livewire/workspaces/modules/visits/index.blade.php`
+- Collation workflow:
+  - One visit session per `patient_id + facility_id + visit_date`.
+  - Visit source dates come from union of DIN activations and activity timeline records.
+  - Visit events are synced from `activities` (`module/action/description/performed_by/meta`) and deduplicated by `activity_id`.
+  - Session summary fields update on each sync (`total_events`, `modules_summary`, open/closed status).
+- Console backfill command added:
+  - `php artisan visits:backfill`
+  - Optional filters: `--facilityId=`, `--patientId=`, `--from=YYYY-MM-DD`, `--to=YYYY-MM-DD`
+- Route and documentation wiring:
+  - `routes/web.php` imports and serves `Visits` Livewire page.
+  - `routes/console.php` registers `visits:backfill`.
+  - `docs/APP1_MODULE_STATUS.md` now marks Section 16 as Implemented.
+  - `docs/APP1_WORKFLOW_ROADMAP.md` now reflects visit collation as implemented flow.
+- Validation run:
+  - `php -l app/Models/Visit.php`
+  - `php -l app/Models/VisitEvent.php`
+  - `php -l app/Services/Visits/VisitCollationService.php`
+  - `php -l app/Livewire/Workspaces/Modules/Visits.php`
+  - `php -l routes/web.php`
+  - `php -l routes/console.php`
+  - `php artisan migrate --force`
+  - `php artisan route:list --name=workspaces-visits`
+  - `php artisan visits:backfill`
+  - `php artisan test` (`2 passed`)
+
+## Update (2026-03-16, Visits Auto-Sync)
+- Removed manual day-to-day sync dependency from Visits workspace UI:
+  - Sync button removed from `resources/views/livewire/workspaces/modules/visits/index.blade.php`.
+  - Page now states visits are auto-updated from attendance/activity entries.
+- Auto-sync wiring added with model observers:
+  - `app/Observers/ActivityObserver.php`
+  - `app/Observers/DinActivationObserver.php`
+  - Observers registered in `app/Providers/AppServiceProvider.php`.
+- Trigger behavior:
+  - On `Activity` create/update/delete -> sync only affected patient/facility date(s).
+  - On `DinActivation` create/update/delete/restore -> sync only affected patient/facility date(s).
+- Collation service hardening:
+  - `app/Services/Visits/VisitCollationService.php` now also reads existing visits in scope and deletes stale visit sessions when no activation/activity remains for a date.
+- Validation run:
+  - `php -l app/Observers/ActivityObserver.php`
+  - `php -l app/Observers/DinActivationObserver.php`
+  - `php -l app/Providers/AppServiceProvider.php`
+  - `php -l app/Services/Visits/VisitCollationService.php`
+  - `php artisan route:list --name=workspaces-visits`
+  - `php artisan visits:backfill`
+  - `php artisan test` (`2 passed`)
