@@ -372,3 +372,87 @@
   - `php artisan route:list --name=workspaces-visits`
   - `php artisan visits:backfill`
   - `php artisan test` (`2 passed`)
+
+## Update (2026-03-16, Bed Management Module - Phase C Start)
+- Facility bed management module added (facility-scoped):
+  - Route: `/core/bed-management` (`bed-management`)
+  - New files:
+    - `database/migrations/2026_03_16_231000_create_beds_table.php`
+    - `app/Models/Bed.php`
+    - `app/Livewire/Core/BedManagement.php`
+    - `resources/views/livewire/core/bed-management.blade.php`
+- Core features delivered:
+  - Bed CRUD per facility (`bed_code`, ward/section, room, type, status, notes, active/inactive).
+  - Status operations: available, occupied, maintenance, inactive.
+  - Occupancy placeholder fields prepared for next module linkage:
+    - `occupied_by_patient_id`, `occupied_since`.
+  - Ward/Section is now facility-managed via dedicated section CRUD and selected in bed form (no free-text ward entry in bed form).
+  - Bed code entry is now optional in bed form; if blank, system auto-generates unique code (`BED-0001` style) within facility.
+
+## Update (2026-03-16, Facility Sections separated from Bed Management)
+- Ward/Section CRUD moved out of Bed Management into a dedicated core module:
+  - Route: `/core/facility-sections` (`facility-sections`)
+  - New files:
+    - `app/Livewire/Core/FacilitySections.php`
+    - `resources/views/livewire/core/facility-sections.blade.php`
+    - `app/Models/BedSection.php`
+    - `database/migrations/2026_03_17_000000_create_bed_sections_table.php`
+    - `database/migrations/2026_03_17_000100_add_bed_section_id_to_beds_table.php`
+- Bed Management remains standalone and now only handles bed records:
+  - Route: `/core/bed-management` (`bed-management`)
+  - Bed form uses section selection from Facility Sections.
+  - Bed code is optional; auto-generated if blank.
+- Sidebar change:
+  - Removed nested `Facility Resources` group entry for these items.
+  - Added standalone links: `Facility Sections`, `Bed Management`.
+- Validation run:
+  - `php -l app/Livewire/Core/FacilitySections.php`
+  - `php -l app/Livewire/Core/BedManagement.php`
+  - `php -l app/Models/BedSection.php`
+  - `php -l routes/web.php`
+  - `php artisan route:list --name=facility-sections`
+  - `php artisan route:list --name=bed-management`
+  - `php artisan test` (`2 passed`)
+  - Dashboard-style stat cards + DataTable export/search/pagination for bed records.
+- Routing/menu wiring:
+  - Added route in `routes/web.php`.
+  - Added Facility Admin sidebar link in `resources/menu/facilityAdminMenu.json` under Facility Resources.
+- Validation run:
+  - `php -l app/Livewire/Core/BedManagement.php`
+  - `php -l app/Models/Bed.php`
+  - `php -l routes/web.php`
+  - `php -l database/migrations/2026_03_16_231000_create_beds_table.php`
+  - `php artisan route:list --name=bed-management`
+  - `php artisan migrate --force`
+  - `php artisan test` (`2 passed`)
+
+## Update (2026-03-17, Admitted Patients / Inpatient Module)
+- Admitted Patients core module implemented and routed:
+  - Route: `/core/admitted-patients` (`admitted-patients`)
+  - New files:
+    - `app/Models/InpatientAdmission.php`
+    - `database/migrations/2026_03_17_001000_create_inpatient_admissions_table.php`
+    - `app/Livewire/Core/AdmittedPatients.php`
+    - `resources/views/livewire/core/admitted-patients.blade.php`
+- Workflow delivered:
+  - Admit patient to a selected available bed (facility-scoped).
+  - Enforce one active admission per patient per facility.
+  - Enforce one active occupant per bed.
+  - Discharge or refer-out closes active admission and frees bed occupancy.
+  - Activity timeline logging added for admit/discharge/refer events (`module = inpatient`).
+- Bed/section integration:
+  - Bed occupancy fields are updated on admit and cleared on close.
+  - Works with facility sections and bed management foundation delivered earlier.
+- Monthly summary alignment:
+  - `app/Livewire/Analytics/MonthlyReportDashboard.php` inpatient section now reads from `inpatient_admissions` for admission/discharge totals (instead of delivery proxy).
+- Sidebar routing:
+  - Added standalone Facility Admin menu link for Admitted Patients in:
+    - `resources/menu/facilityAdminMenu.json`
+- Validation run:
+  - `php -l app/Livewire/Core/AdmittedPatients.php`
+  - `php -l app/Livewire/Analytics/MonthlyReportDashboard.php`
+  - `php -l routes/web.php`
+  - `php artisan migrate --force`
+  - `php artisan route:list --name=admitted-patients`
+  - `php artisan route:list --name=bed-management`
+  - `php artisan test` (`2 passed`)

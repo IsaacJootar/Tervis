@@ -38,9 +38,9 @@ Note: Vision text mentions both "7 modules" and "8 management modules" in differ
 
 | Vision Facility Module | Current App1 Status | Notes |
 | --- | --- | --- |
-| Bed Management | Not Started | No beds/wards/room allocation module delivered. |
+| Bed Management | Implemented | Facility-scoped bed catalog and status management delivered (`/core/bed-management`) with section linkage + occupancy state updates. |
 | Pharmacy & Drug Management | Partial | Drug catalog + dispensing implemented, but no stock-in/expiry/reorder/supplier/LMIS workflow yet. |
-| Admitted Patients (Inpatient) | Not Started | No admission, bed assignment, discharge workflow module yet. |
+| Admitted Patients (Inpatient) | Implemented | Admission/discharge/referral workflow delivered (`/core/admitted-patients`) with bed occupancy sync + activity timeline logging. |
 | Laboratory Management | Partial | Patient lab form and results exist; facility-level sample batching, QC, reagents, equipment calibration not yet delivered. |
 | Staff Management | Partial | User/officer management exists in core admin pages; full staff lifecycle module not yet implemented. |
 | Facility Administration | Partial | Facility creation/config pages exist; full service catalog/fee schedule/permissions/audit administration remains incomplete. |
@@ -56,6 +56,7 @@ Note: Vision text mentions both "7 modules" and "8 management modules" in differ
 | Prescriptions Checkout -> Resolve Pending Prescriptions | Implemented | Selected pending prescriptions required for checkout; dispensed lines saved and linked records marked `dispensed`. |
 | Child Health -> Monthly NHMIS Aggregation | Partial | Immunization/nutrition/vaccination schedule wired; some NHMIS row mappings still pending. |
 | Doctor/Lab -> Monthly NHMIS Aggregation | Partial | Keyword/structured extraction present; requires stronger structured mapping later. |
+| Inpatient -> Monthly NHMIS Aggregation | Implemented | Monthly inpatient totals now sourced from `inpatient_admissions` (admissions/discharges) instead of delivery proxy. |
 
 ## 4) Testing & Quality Snapshot
 
@@ -65,6 +66,6 @@ Note: Vision text mentions both "7 modules" and "8 management modules" in differ
 
 ## 5) Immediate Priority Recommendation
 
-1. Start facility modules in order: Bed -> Inpatient -> full Pharmacy Ops -> full Lab Ops.
-2. Add dedicated workflow tests for reminder sync/dispatch, visits collation, insurance updates, and cross-module transitions.
+1. Start facility ops hardening next: Pharmacy full ops -> Laboratory full ops -> Staff module.
+2. Add dedicated feature tests for Bed/Sections/Inpatient admission-discharge-referral transitions.
 3. Continue NHMIS mapping hardening with structured source coverage.

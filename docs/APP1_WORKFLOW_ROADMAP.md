@@ -40,12 +40,12 @@ Aligned to: HMS Vision Architecture v2.0 (Nov 2025)
 ## 2) Workflow Gaps (Not Yet Closed)
 
 1. Facility operations:
-   - Bed management and admitted-patient workflows are missing.
+   - Bed management + admitted-patient foundations are now delivered; advanced operations (transfers, occupancy dashboards, staffing ratios) remain.
    - Pharmacy/Lab operations are still patient-form-centric, not full facility-operations grade.
 2. NHMIS completeness:
    - Monthly mapping is partial; additional row-key mappings and stronger structured sources are needed.
 3. Test coverage:
-   - No dedicated workflow feature tests yet for Doctor/Lab/Prescriptions/Child Health chains.
+   - No dedicated workflow feature tests yet for Doctor/Lab/Prescriptions/Child Health/Bed-Inpatient chains.
 
 ## 3) Execution Plan (Next Modules, In Order)
 
@@ -69,8 +69,8 @@ Done criteria:
 - Each module has activity/audit logging and dashboard counts.
 
 ## Phase C: Facility Operations Buildout
-1. Bed Management
-2. Admitted Patients (inpatient)
+1. Bed Management (completed foundation)
+2. Admitted Patients (completed foundation)
 3. Pharmacy & Drug full ops (inventory/stock/expiry/supplier)
 4. Laboratory full ops (catalog/sample/batch/QC/reagent/equipment)
 5. Staff Management

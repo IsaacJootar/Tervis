@@ -87,6 +87,10 @@ Notes:
 2. Reuse register-style DataTable behavior in workspace history tables: pagination, export controls, and responsive layout.
 3. For a single primary table in a module view, prefer `id="dataTable"` + `wire:ignore` + `@include('_partials.datatables-init')`.
 4. For multiple tables in one view, use `@include('_partials.datatables-init-multi', ...)` with explicit table IDs and order rules.
+4a. Required table markup baseline:
+   - wrapper: `card-datatable table-responsive pt-0` + `wire:ignore`
+   - table: unique `id` + `table align-middle`
+   - this applies to all workspace and core operational tables.
 5. Use server-side pagination only when dataset size or performance requires it.
 6. Record status must be visible with badge/chip styles.
 7. Row actions must be explicit and safe (Edit, Delete, View, Print where relevant).

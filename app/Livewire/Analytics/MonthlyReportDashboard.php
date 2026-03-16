@@ -7,6 +7,7 @@ use App\Models\User;
 use Livewire\Component;
 use App\Models\Facility;
 use App\Models\Delivery;
+use App\Models\InpatientAdmission;
 use App\Models\Antenatal;
 use App\Models\ClinicalNote;
 use App\Models\DoctorAssessment;
@@ -219,15 +220,17 @@ class MonthlyReportDashboard extends Component
   {
     $inpatientData = [];
 
-    // Using deliveries as proxy for admissions (admitted field)
-    $admissions = Delivery::whereIn('facility_id', $facilityIds)
-      ->whereBetween('dodel', [$startDate, $endDate])
-      ->where('admitted', 'yes')
+    $admissions = InpatientAdmission::query()
+      ->with(['patient:id,gender,date_of_birth'])
+      ->whereIn('facility_id', $facilityIds)
+      ->whereBetween('admitted_at', [$startDate, $endDate])
       ->get();
 
-    $discharges = Delivery::whereIn('facility_id', $facilityIds)
-      ->whereBetween('dodel', [$startDate, $endDate])
-      ->where('discharged', 'yes')
+    $discharges = InpatientAdmission::query()
+      ->with(['patient:id,gender,date_of_birth'])
+      ->whereIn('facility_id', $facilityIds)
+      ->whereBetween('discharged_at', [$startDate, $endDate])
+      ->whereIn('status', ['discharged', 'referred'])
       ->get();
 
     foreach (['admissions', 'discharges'] as $type) {
@@ -238,7 +241,38 @@ class MonthlyReportDashboard extends Component
       }
     }
 
-    // Count admissions and discharges (simplified - you may need patient age data)
+    foreach ($admissions as $record) {
+      $patient = $record->patient;
+      if (!$patient || !$patient->date_of_birth) {
+        continue;
+      }
+
+      $age = Carbon::parse($patient->date_of_birth)->age;
+      $ageDays = Carbon::parse($patient->date_of_birth)->diffInDays(Carbon::now());
+      $ageGroup = $this->getAgeGroup($age, $ageDays);
+      $gender = strtolower((string) $patient->gender);
+
+      if ($ageGroup && in_array($gender, ['male', 'female'], true)) {
+        $inpatientData["admissions_{$gender}_{$ageGroup}"]++;
+      }
+    }
+
+    foreach ($discharges as $record) {
+      $patient = $record->patient;
+      if (!$patient || !$patient->date_of_birth) {
+        continue;
+      }
+
+      $age = Carbon::parse($patient->date_of_birth)->age;
+      $ageDays = Carbon::parse($patient->date_of_birth)->diffInDays(Carbon::now());
+      $ageGroup = $this->getAgeGroup($age, $ageDays);
+      $gender = strtolower((string) $patient->gender);
+
+      if ($ageGroup && in_array($gender, ['male', 'female'], true)) {
+        $inpatientData["discharges_{$gender}_{$ageGroup}"]++;
+      }
+    }
+
     $inpatientData['total_admissions'] = $admissions->count();
     $inpatientData['total_discharges'] = $discharges->count();
 

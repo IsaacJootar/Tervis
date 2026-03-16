@@ -42,11 +42,6 @@
           "url": "/core/facility-patients",
           "name": "All Patients",
           "slug": "facility-patients"
-        },
-        {
-          "url": "#",
-          "name": "Discharge Management",
-          "slug": "#"
         }
       ]
     },
@@ -69,21 +64,22 @@
       "slug": "facility-reminders-hub"
     },
     {
-      "name": "Facility Resources",
-      "icon": "menu-icon icon-base ti tabler-building",
-      "slug": "facility-admin-resources",
-      "submenu": [
-        {
-          "url": "#",
-          "name": "Room Management",
-          "slug": "#"
-        },
-        {
-          "url": "#",
-          "name": "Facility Inventory",
-          "slug": "#"
-        }
-      ]
+      "url": "/core/facility-sections",
+      "name": "Facility Sections",
+      "icon": "menu-icon icon-base ti tabler-layers-intersect",
+      "slug": "facility-sections"
+    },
+    {
+      "url": "/core/bed-management",
+      "name": "Bed Management",
+      "icon": "menu-icon icon-base ti tabler-bed",
+      "slug": "bed-management"
+    },
+    {
+      "url": "/core/admitted-patients",
+      "name": "Admitted Patients",
+      "icon": "menu-icon icon-base ti tabler-user-plus",
+      "slug": "admitted-patients"
     },
     {
       "name": "Facility Finances",

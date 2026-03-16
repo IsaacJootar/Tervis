@@ -20,6 +20,9 @@ use App\Livewire\Core\CreateDataOfficers;
 
 //
 use App\Livewire\Core\FacilityDepartments;
+use App\Livewire\Core\BedManagement;
+use App\Livewire\Core\AdmittedPatients;
+use App\Livewire\Core\FacilitySections;
 use App\Livewire\Core\LgaOfficerDashboard;
 use App\Livewire\Core\PatientAppointments;
 
@@ -85,6 +88,9 @@ Route::middleware(['auth', 'role.redirect'])->prefix('core')->group(function () 
   Route::get('/update-officer-designation', UpdateOfficerDesignation::class)->name('update-officer-designation');
   Route::get('/disable-data-officer-account', DisableDataOfficerAccount::class)->name('disable-data-officer-account');
   Route::get('/facility-departments', FacilityDepartments::class)->name('facility-departments');
+  Route::get('/facility-sections', FacilitySections::class)->name('facility-sections');
+  Route::get('/bed-management', BedManagement::class)->name('bed-management');
+  Route::get('/admitted-patients', AdmittedPatients::class)->name('admitted-patients');
   Route::get('/facility-patients', FacilityPatients::class)->name('facility-patients');
   Route::get('/patient-appointments', PatientAppointments::class)->name('patient-appointments');
   Route::get('/reminders-notifications-hub', FacilityRemindersHub::class)->name('facility-reminders-hub');

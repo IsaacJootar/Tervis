@@ -43,6 +43,12 @@ Primary UI reference for design decisions:
    - Pagination + search + export controls are mandatory.
    - Use `@include('_partials.datatables-init-multi', ...)` for multiple tables in one page.
    - If server-side pagination is required for scale, add explicit export actions so users can still export filtered datasets.
+   - Markup requirement (non-negotiable):
+     - wrapper: `<div class="card-datatable table-responsive pt-0" wire:ignore>`
+     - table: unique `id` per table and `class="table align-middle"`
+     - init include:
+       - single table: `@include('_partials.datatables-init')`
+       - multiple tables: `@include('_partials.datatables-init-multi', ...)`
 8. Card styling scope:
    - Use multi-color tinted styling for stat/metric summary cards only.
    - Do not apply tinted stat-card styling across all form/content cards.

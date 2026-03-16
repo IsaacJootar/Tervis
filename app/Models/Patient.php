@@ -210,6 +210,13 @@ class Patient extends Model
       ->orderBy('date_of_birth', 'desc');
   }
 
+  public function inpatientAdmissions(): HasMany
+  {
+    return $this->hasMany(InpatientAdmission::class)
+      ->orderBy('admitted_at', 'desc')
+      ->orderBy('id', 'desc');
+  }
+
   /**
    * All Linked Children - Including inactive (graduated/deceased)
    */
