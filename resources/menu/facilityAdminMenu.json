@@ -82,6 +82,18 @@
       "slug": "admitted-patients"
     },
     {
+      "url": "/core/pharmacy-operations",
+      "name": "Pharmacy Ops",
+      "icon": "menu-icon icon-base ti tabler-pill",
+      "slug": "pharmacy-operations"
+    },
+    {
+      "url": "/core/laboratory-operations",
+      "name": "Laboratory Ops",
+      "icon": "menu-icon icon-base ti tabler-flask",
+      "slug": "laboratory-operations"
+    },
+    {
       "name": "Facility Finances",
       "icon": "menu-icon icon-base ti tabler-currency-dollar",
       "slug": "facility-admin-finance",

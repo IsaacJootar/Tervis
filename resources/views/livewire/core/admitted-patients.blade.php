@@ -164,64 +164,6 @@
         </div>
     </div>
 
-    @if ($close_admission_id && $selectedCloseAdmission)
-        <div class="card mb-4 border border-warning-subtle">
-            <div class="card-header d-flex align-items-center justify-content-between">
-                <h5 class="mb-0">Close Admission: {{ $selectedCloseAdmission->admission_code }}</h5>
-                <button type="button" class="btn btn-sm btn-label-secondary" wire:click="cancelClose">Cancel</button>
-            </div>
-            <div class="card-body">
-                <div class="alert alert-warning py-2 mb-3">
-                    <strong>Patient:</strong>
-                    {{ trim(($selectedCloseAdmission->patient->first_name ?? '') . ' ' . ($selectedCloseAdmission->patient->last_name ?? '')) }}
-                    | <strong>DIN:</strong> {{ $selectedCloseAdmission->patient->din ?? 'N/A' }}
-                    | <strong>Bed:</strong> {{ $selectedCloseAdmission->bed->bed_code ?? 'N/A' }}
-                </div>
-                <div class="row g-3">
-                    <div class="col-md-3">
-                        <label class="form-label">Action</label>
-                        <input type="text" class="form-control bg-light"
-                            value="{{ $close_action === 'referred' ? 'Referred Out' : 'Discharged' }}" readonly>
-                    </div>
-                    <div class="col-md-3">
-                        <label class="form-label">Close Date & Time <span class="text-danger">*</span></label>
-                        <input type="datetime-local" class="form-control" wire:model.live="close_at">
-                        @error('close_at')
-                            <small class="text-danger">{{ $message }}</small>
-                        @enderror
-                    </div>
-                    @if ($close_action === 'referred')
-                        <div class="col-md-6">
-                            <label class="form-label">Referral Destination <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" wire:model.live="close_referral_destination"
-                                placeholder="Receiving facility / destination">
-                            @error('close_referral_destination')
-                                <small class="text-danger">{{ $message }}</small>
-                            @enderror
-                        </div>
-                    @endif
-                    <div class="col-12">
-                        <label class="form-label">{{ $close_action === 'referred' ? 'Referral Note' : 'Discharge Note' }}</label>
-                        <textarea class="form-control" rows="2" wire:model.live="close_note" placeholder="Optional closing note"></textarea>
-                        @error('close_note')
-                            <small class="text-danger">{{ $message }}</small>
-                        @enderror
-                    </div>
-                </div>
-                <div class="mt-3">
-                    <button type="button" class="btn btn-primary" wire:click="completeCloseAdmission"
-                        wire:loading.attr="disabled" wire:target="completeCloseAdmission">
-                        <span wire:loading.remove wire:target="completeCloseAdmission">
-                            {{ $close_action === 'referred' ? 'Confirm Referral' : 'Confirm Discharge' }}
-                        </span>
-                        <span wire:loading wire:target="completeCloseAdmission"><span
-                                class="spinner-border spinner-border-sm me-1"></span>Saving...</span>
-                    </button>
-                </div>
-            </div>
-        </div>
-    @endif
-
     <div class="card mb-4">
         <div class="card-header">
             <h5 class="mb-0">Active Admissions <small class="text-muted">({{ $activeAdmissions->count() }})</small></h5>
@@ -332,6 +274,77 @@
                     @endforelse
                 </tbody>
             </table>
+        </div>
+    </div>
+
+    <div wire:ignore.self class="modal fade" id="closeAdmissionModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        {{ $close_action === 'referred' ? 'Refer Patient Out' : 'Discharge Patient' }}
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    @if ($close_admission_id && $selectedCloseAdmission)
+                        <div class="alert alert-warning py-2 mb-3">
+                            <strong>Patient:</strong>
+                            {{ trim(($selectedCloseAdmission->patient->first_name ?? '') . ' ' . ($selectedCloseAdmission->patient->last_name ?? '')) }}
+                            | <strong>DIN:</strong> {{ $selectedCloseAdmission->patient->din ?? 'N/A' }}
+                            | <strong>Bed:</strong> {{ $selectedCloseAdmission->bed->bed_code ?? 'N/A' }}
+                            | <strong>Admission:</strong> {{ $selectedCloseAdmission->admission_code ?? 'N/A' }}
+                        </div>
+
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label class="form-label">Action</label>
+                                <input type="text" class="form-control bg-light"
+                                    value="{{ $close_action === 'referred' ? 'Referred Out' : 'Discharged' }}" readonly>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Close Date & Time <span class="text-danger">*</span></label>
+                                <input type="datetime-local" class="form-control" wire:model.live="close_at">
+                                @error('close_at')
+                                    <small class="text-danger">{{ $message }}</small>
+                                @enderror
+                            </div>
+                            @if ($close_action === 'referred')
+                                <div class="col-md-4">
+                                    <label class="form-label">Referral Destination <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" wire:model.live="close_referral_destination"
+                                        placeholder="Receiving facility / destination">
+                                    @error('close_referral_destination')
+                                        <small class="text-danger">{{ $message }}</small>
+                                    @enderror
+                                </div>
+                            @endif
+                            <div class="col-12">
+                                <label class="form-label">{{ $close_action === 'referred' ? 'Referral Note' : 'Discharge Note' }}</label>
+                                <textarea class="form-control" rows="2" wire:model.live="close_note" placeholder="Optional closing note"></textarea>
+                                @error('close_note')
+                                    <small class="text-danger">{{ $message }}</small>
+                                @enderror
+                            </div>
+                        </div>
+                    @else
+                        <div class="alert alert-danger mb-0">Admission not found or no longer active.</div>
+                    @endif
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">Cancel</button>
+                    @if ($close_admission_id && $selectedCloseAdmission)
+                        <button type="button" class="btn btn-primary" wire:click="completeCloseAdmission"
+                            wire:loading.attr="disabled" wire:target="completeCloseAdmission">
+                            <span wire:loading.remove wire:target="completeCloseAdmission">
+                                {{ $close_action === 'referred' ? 'Confirm Referral' : 'Confirm Discharge' }}
+                            </span>
+                            <span wire:loading wire:target="completeCloseAdmission"><span
+                                    class="spinner-border spinner-border-sm me-1"></span>Saving...</span>
+                        </button>
+                    @endif
+                </div>
+            </div>
         </div>
     </div>
 
@@ -447,6 +460,43 @@
             gap: 12px;
         }
     </style>
+
+    <script>
+        document.addEventListener('livewire:initialized', function() {
+            const modalEl = document.getElementById('closeAdmissionModal');
+            if (!modalEl) return;
+            let modalInstance = null;
+
+            const getModal = () => {
+                if (!modalInstance) {
+                    modalInstance = new bootstrap.Modal(modalEl);
+                }
+                return modalInstance;
+            };
+
+            const cleanupModalArtifacts = () => {
+                document.body.classList.remove('modal-open');
+                document.body.style.removeProperty('padding-right');
+                document.querySelectorAll('.modal-backdrop').forEach((node) => node.remove());
+            };
+
+            Livewire.on('open-close-admission-modal', () => {
+                getModal().show();
+            });
+
+            Livewire.on('close-close-admission-modal', () => {
+                if (modalInstance) {
+                    modalInstance.hide();
+                }
+            });
+
+            modalEl.addEventListener('hidden.bs.modal', function() {
+                @this.call('cancelClose');
+                cleanupModalArtifacts();
+            });
+        });
+    </script>
+
     @include('_partials.datatables-init-multi', [
         'tableIds' => ['activeAdmissionsTable', 'admissionHistoryTable'],
         'orders' => [

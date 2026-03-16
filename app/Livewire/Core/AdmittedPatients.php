@@ -292,11 +292,18 @@ class AdmittedPatients extends Component
     $this->close_at = now()->format('Y-m-d\TH:i');
     $this->close_note = null;
     $this->close_referral_destination = null;
+    $this->dispatch('open-close-admission-modal');
   }
 
   public function cancelClose(): void
   {
     $this->resetCloseForm();
+  }
+
+  public function closeCloseModal(): void
+  {
+    $this->resetCloseForm();
+    $this->dispatch('close-close-admission-modal');
   }
 
   public function completeCloseAdmission(): void
@@ -375,6 +382,7 @@ class AdmittedPatients extends Component
       DB::commit();
       toastr()->success($this->close_action === InpatientAdmission::STATUS_REFERRED ? 'Patient referred out successfully.' : 'Patient discharged successfully.');
       $this->resetCloseForm();
+      $this->dispatch('close-close-admission-modal');
       $this->refreshPageSoon(1500);
     } catch (ValidationException $e) {
       DB::rollBack();

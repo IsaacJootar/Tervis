@@ -456,3 +456,127 @@
   - `php artisan route:list --name=admitted-patients`
   - `php artisan route:list --name=bed-management`
   - `php artisan test` (`2 passed`)
+
+## Update (2026-03-17, Pharmacy Operations Module)
+- New facility core module delivered:
+  - Route: `/core/pharmacy-operations` (`pharmacy-operations`)
+  - New files:
+    - `app/Livewire/Core/PharmacyOperations.php`
+    - `resources/views/livewire/core/pharmacy-operations.blade.php`
+    - `app/Services/Pharmacy/DrugInventoryService.php`
+    - `app/Models/DrugStockBatch.php`
+    - `app/Models/DrugStockMovement.php`
+    - `database/migrations/2026_03_17_010000_add_reorder_level_to_drug_catalog_items_table.php`
+    - `database/migrations/2026_03_17_010100_create_drug_stock_batches_table.php`
+    - `database/migrations/2026_03_17_010200_create_drug_stock_movements_table.php`
+- Workflow implemented (clear labels, facility-scoped):
+  - Stock In (new batch)
+  - Stock Adjustment (add/deduct with reason)
+  - Inventory Overview (available/expired/reorder level/status)
+  - Stock Batches table
+  - Stock Movement Log table
+- Integration added to patient dispensing:
+  - `app/Livewire/Workspaces/Modules/Clinical/Prescriptions.php` now deducts inventory on checkout via FIFO batches.
+  - Checkout now blocks with clear error when stock is insufficient.
+  - Movement logs are created for each issued line with checkout reference code.
+- Route/menu wiring:
+  - Added route in `routes/web.php`
+  - Added Facility Admin sidebar link in `resources/menu/facilityAdminMenu.json`
+- Validation run:
+  - `php -l` for all new/changed pharmacy files passed
+  - `php artisan migrate --force` (new stock tables + reorder level)
+  - `php artisan route:list --name=pharmacy-operations`
+  - `php artisan test` (`2 passed`)
+- UI hardening note:
+  - Pharmacy stat cards switched to inline SVG icons to ensure icons always render.
+  - Added project rule: stat cards must carry visible icons; inline SVG is the standard.
+
+## Update (2026-03-17, Workflow Documentation Hardening)
+- Added explicit cross-module order bridge workflow mapping in:
+  - `docs/APP1_WORKFLOW_ROADMAP.md`
+    - new section: `Clinical Order Bridges (Implemented)`
+    - includes Doctor->Lab->Lab Result completion chain and Doctor->Prescriptions->Dispensing->Inventory->Invoice chain.
+- Added operational usage guide for staff in:
+  - `docs/APP1_USER_GUIDE_CLINICAL_ORDER_BRIDGES.md`
+    - practical step-by-step usage order and troubleshooting.
+- Added workflow documentation enforcement rule in roadmap checklist:
+  - every bridge update must document source action, pending table, completion action, and downstream effects.
+
+## Update (2026-03-17, Admitted Patients Mobile Flow)
+- Replaced inline discharge/refer close-admission section with modal workflow in:
+  - `resources/views/livewire/core/admitted-patients.blade.php`
+- Action behavior:
+  - Clicking `Discharge` or `Refer Out` now opens a clear modal with selected patient/admission context.
+  - Close/hidden modal resets close-form state to avoid stale values.
+- Livewire event wiring added:
+  - `open-close-admission-modal`
+  - `close-close-admission-modal`
+
+## Update (2026-03-17, Pharmacy Ops UX Clarification)
+- Clarified `Reorder Level` behavior in UI and docs:
+  - Reorder level is a low-stock threshold only; it does not add quantity.
+  - Added explicit in-page guidance and status helper text in:
+    - `resources/views/livewire/core/pharmacy-operations.blade.php`
+- Simplified pharmacy page workflow:
+  - `Step 1: Stock In` is now primary and obvious.
+  - `Step 2 (Optional): Manual Stock Adjustment` is now opened by page button and handled in a modal (collapse toggle removed).
+  - Inventory action button now focuses and scrolls to Stock In form.
+- User guide updated:
+  - `docs/APP1_USER_GUIDE_CLINICAL_ORDER_BRIDGES.md`
+
+## Update (2026-03-17, Workspace Prescriptions Modal Flow)
+- Workspace Prescriptions receipt interaction was converted from inline card rendering to modal behavior in:
+  - `resources/views/livewire/workspaces/modules/clinical/prescriptions.blade.php`
+  - `app/Livewire/Workspaces/Modules/Clinical/Prescriptions.php`
+- Behavior change:
+  - `Submit Checkout` and `View Receipt` now open a receipt modal (no page jump/shift).
+  - Closing the receipt modal resets receipt state cleanly.
+- Livewire event wiring added:
+  - `open-drug-receipt-modal`
+  - `close-drug-receipt-modal`
+- Validation run:
+  - `php -l app/Livewire/Workspaces/Modules/Clinical/Prescriptions.php`
+  - `php artisan test` (`2 passed`)
+
+## Update (2026-03-17, Laboratory Full Operations Module)
+- New facility core module delivered:
+  - Route: `/core/laboratory-operations` (`laboratory-operations`)
+  - Sidebar link added in `resources/menu/facilityAdminMenu.json`
+- New core component/view:
+  - `app/Livewire/Core/LaboratoryOperations.php`
+  - `resources/views/livewire/core/laboratory-operations.blade.php`
+- New laboratory operations tables/migration:
+  - `database/migrations/2026_03_17_020000_create_laboratory_operations_tables.php`
+  - Creates: `lab_processing_batches`, `lab_samples`, `lab_qc_logs`, `lab_reagent_stocks`, `lab_reagent_movements`, `lab_equipment_logs`
+- New models:
+  - `app/Models/LabProcessingBatch.php`
+  - `app/Models/LabSample.php`
+  - `app/Models/LabQcLog.php`
+  - `app/Models/LabReagentStock.php`
+  - `app/Models/LabReagentMovement.php`
+  - `app/Models/LabEquipmentLog.php`
+- Workflow implemented (facility scoped):
+  - Pending lab order queue -> sample intake prefill
+  - Sample tracking lifecycle (received/processing/ready/reported/rejected)
+  - Processing batch creation + assignment + completion
+  - QC log capture and history
+  - Reagent stock-in, adjustment, reorder threshold, movement logs
+  - Equipment calibration/maintenance logging with due-date tracking
+- UI and table standards applied:
+  - Clear section labels and loading states on actions
+  - Stat cards with icons
+  - DataTables pagination + export controls on all operational tables
+- Validation run:
+  - `php -l app/Livewire/Core/LaboratoryOperations.php`
+  - `php -l app/Models/LabProcessingBatch.php`
+  - `php -l app/Models/LabSample.php`
+  - `php -l app/Models/LabQcLog.php`
+  - `php -l app/Models/LabReagentStock.php`
+  - `php -l app/Models/LabReagentMovement.php`
+  - `php -l app/Models/LabEquipmentLog.php`
+  - `php -l database/migrations/2026_03_17_020000_create_laboratory_operations_tables.php`
+  - `php -l routes/web.php`
+  - `php artisan migrate --force`
+  - `php artisan route:list --name=laboratory-operations`
+  - `php artisan view:cache`
+  - `php artisan test` (`2 passed`)

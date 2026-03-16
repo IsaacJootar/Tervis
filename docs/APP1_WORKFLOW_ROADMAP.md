@@ -37,6 +37,30 @@ Aligned to: HMS Vision Architecture v2.0 (Nov 2025)
 11. Monthly report:
    - Monthly dashboard aggregates mapped data from attendance, maternal/child, doctor, and lab sources.
 
+## 1b) Clinical Order Bridges (Implemented)
+
+### Doctor -> Laboratory -> Patient Lab Record
+1. Doctor saves assessment with requested tests.
+2. System creates `lab_test_orders` rows with `status = pending` (patient + facility scoped).
+3. Laboratory workspace for that patient loads pending test orders.
+4. On laboratory save/update:
+   - selected pending orders are required when pending exists,
+   - system creates/updates `lab_tests` record,
+   - selected orders are marked `completed` and linked using `completed_lab_test_id`.
+5. Result: patient lab entry and pending queue stay synchronized.
+
+### Doctor -> Prescriptions -> Dispensing -> Inventory -> Invoice
+1. Doctor saves assessment with drug orders.
+2. System creates `prescriptions` rows with `status = pending` (patient + facility scoped).
+3. Prescriptions workspace loads pending prescriptions for that patient.
+4. On checkout:
+   - selected pending rows are required when pending exists,
+   - `drug_dispense_lines` are written,
+   - matched pending prescriptions are marked `dispensed`,
+   - inventory is deducted FIFO from `drug_stock_batches` and `drug_stock_movements` are logged,
+   - billing line is posted to invoice.
+5. Result: issuance, stock ledger, and billing are tied to one checkout event.
+
 ## 2) Workflow Gaps (Not Yet Closed)
 
 1. Facility operations:
@@ -71,8 +95,8 @@ Done criteria:
 ## Phase C: Facility Operations Buildout
 1. Bed Management (completed foundation)
 2. Admitted Patients (completed foundation)
-3. Pharmacy & Drug full ops (inventory/stock/expiry/supplier)
-4. Laboratory full ops (catalog/sample/batch/QC/reagent/equipment)
+3. Pharmacy & Drug full ops (inventory foundation delivered: stock-in, adjustments, reorder levels, movement logs, dispense deduction; advanced supplier/LMIS remains)
+4. Laboratory full ops (completed: facility queue intake, sample tracking, processing batches, QC, reagents/movements, equipment logs)
 5. Staff Management
 6. Facility Administration hardening
 
@@ -101,3 +125,9 @@ Done criteria:
 5. Table/UI enforcement:
    - Every operational table must ship with pagination + export controls.
    - Multi-metric summaries should use distinct, readable tinted cards (Flowdesk-inspired palette, no gold default).
+6. Workflow documentation enforcement:
+   - For every cross-module bridge, update workflow docs with:
+     - source module action,
+     - queue/pending state table,
+     - completion/issue action,
+     - downstream side effects (inventory, billing, timeline).

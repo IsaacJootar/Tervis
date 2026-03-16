@@ -11,6 +11,7 @@ use App\Models\Patient;
 use App\Models\Prescription;
 use App\Models\Registrations\DinActivation;
 use App\Services\Billing\BillingService;
+use App\Services\Pharmacy\DrugInventoryService;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Facades\Auth;
@@ -389,13 +390,20 @@ class Prescriptions extends Component
           $matchedQtyByPrescription[$matchedPrescriptionId] = ($matchedQtyByPrescription[$matchedPrescriptionId] ?? 0) + (float) ($line['quantity'] ?? 0);
         }
 
-        DrugDispenseLine::create([
+        $catalogItemId = (int) ($line['drug_catalog_item_id'] ?? 0);
+        if ($catalogItemId <= 0) {
+          throw ValidationException::withMessages([
+            'checkout' => 'Each cart line must come from Drug Catalog for stock tracking.',
+          ]);
+        }
+
+        $dispenseLine = DrugDispenseLine::create([
           'patient_id' => $this->patientId,
           'facility_id' => $this->facility_id,
           'state_id' => $this->state_id,
           'lga_id' => $this->lga_id,
           'ward_id' => $this->ward_id,
-          'drug_catalog_item_id' => $line['drug_catalog_item_id'] ?? null,
+          'drug_catalog_item_id' => $catalogItemId,
           'prescription_id' => $matchedPrescriptionId,
           'month_year' => Carbon::parse($this->dispensed_date)->startOfMonth()->format('Y-m-d'),
           'dispensed_date' => $this->dispensed_date,
@@ -405,6 +413,24 @@ class Prescriptions extends Component
           'dispense_notes' => $this->dispense_notes,
           'dispensed_by' => $this->officer_name,
         ]);
+
+        try {
+          app(DrugInventoryService::class)->issueStock([
+            'facility_id' => $this->facility_id,
+            'drug_catalog_item_id' => $catalogItemId,
+            'quantity' => (float) ($line['quantity'] ?? 0),
+            'patient_id' => $this->patientId,
+            'moved_by' => $this->officer_name,
+            'reference_type' => DrugDispenseLine::class,
+            'reference_id' => $dispenseLine->id,
+            'reference_code' => $this->dispense_code,
+            'notes' => 'Prescription checkout issue.',
+          ]);
+        } catch (\RuntimeException $e) {
+          throw ValidationException::withMessages([
+            'checkout' => $e->getMessage(),
+          ]);
+        }
       }
 
       foreach ($pendingRecords as $record) {
@@ -509,13 +535,17 @@ class Prescriptions extends Component
     $this->receipt_code = $code;
     $this->receipt_lines = $lines->toArray();
     $this->receipt_date = optional($lines->first())->dispensed_date?->format('Y-m-d');
+    $this->dispatch('open-drug-receipt-modal');
   }
 
-  public function closeReceipt(): void
+  public function closeReceipt(bool $fromModalEvent = false): void
   {
     $this->receipt_code = null;
     $this->receipt_lines = [];
     $this->receipt_date = null;
+    if (!$fromModalEvent) {
+      $this->dispatch('close-drug-receipt-modal');
+    }
   }
 
   public function printReceipt(): void

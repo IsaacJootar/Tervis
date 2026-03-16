@@ -143,7 +143,7 @@
 
     <div class="card mb-4">
         <div class="card-header"><h5 class="mb-0">Facility Reminder Queue <small class="text-muted">({{ $reminders->count() }} Total)</small></h5></div>
-        <div class="card-datatable table-responsive pt-0">
+        <div class="card-datatable table-responsive pt-0" wire:ignore>
             <table id="facilityReminderQueueTable" class="table align-middle">
                 <thead class="table-dark">
                     <tr>
@@ -210,7 +210,7 @@
 
     <div class="card">
         <div class="card-header"><h5 class="mb-0">Dispatch Log <small class="text-muted">({{ $dispatchLogs->count() }} Total)</small></h5></div>
-        <div class="card-datatable table-responsive pt-0">
+        <div class="card-datatable table-responsive pt-0" wire:ignore>
             <table id="facilityDispatchLogTable" class="table align-middle">
                 <thead class="table-dark">
                     <tr>
@@ -332,15 +332,15 @@
             color: #64748b;
         }
     </style>
-</div>
 
-@include('_partials.datatables-init-multi', [
-    'tableIds' => ['facilityReminderQueueTable', 'facilityDispatchLogTable'],
-    'orders' => [
-        'facilityReminderQueueTable' => [0, 'desc'],
-        'facilityDispatchLogTable' => [0, 'desc'],
-    ],
-])
+    @include('_partials.datatables-init-multi', [
+        'tableIds' => ['facilityReminderQueueTable', 'facilityDispatchLogTable'],
+        'orders' => [
+            'facilityReminderQueueTable' => [0, 'desc'],
+            'facilityDispatchLogTable' => [0, 'desc'],
+        ],
+    ])
+</div>
 
 
 

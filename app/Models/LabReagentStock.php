@@ -8,26 +8,27 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class DrugCatalogItem extends Model
+class LabReagentStock extends Model
 {
   use HasFactory, SoftDeletes;
 
   protected $fillable = [
     'facility_id',
-    'state_id',
-    'lga_id',
-    'ward_id',
-    'drug_name',
-    'formulation',
-    'strength',
-    'route',
-    'notes',
+    'reagent_name',
+    'lot_number',
+    'unit',
+    'quantity_available',
     'reorder_level',
+    'expiry_date',
+    'manufacturer',
     'is_active',
+    'notes',
   ];
 
   protected $casts = [
-    'reorder_level' => 'integer',
+    'quantity_available' => 'decimal:2',
+    'reorder_level' => 'decimal:2',
+    'expiry_date' => 'date',
     'is_active' => 'boolean',
   ];
 
@@ -36,18 +37,9 @@ class DrugCatalogItem extends Model
     return $this->belongsTo(Facility::class);
   }
 
-  public function dispenseLines(): HasMany
+  public function movements(): HasMany
   {
-    return $this->hasMany(DrugDispenseLine::class);
-  }
-
-  public function stockBatches(): HasMany
-  {
-    return $this->hasMany(DrugStockBatch::class, 'drug_catalog_item_id');
-  }
-
-  public function stockMovements(): HasMany
-  {
-    return $this->hasMany(DrugStockMovement::class, 'drug_catalog_item_id');
+    return $this->hasMany(LabReagentMovement::class, 'lab_reagent_stock_id');
   }
 }
+

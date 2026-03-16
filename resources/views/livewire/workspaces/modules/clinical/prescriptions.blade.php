@@ -258,39 +258,6 @@
             </div>
         </div>
 
-        @if ($receipt_code)
-            <div class="card mb-4">
-                <div class="card-header text-white d-flex justify-content-between align-items-center" style="background-color:#2c3e50;">
-                    <h6 class="mb-0 text-white">Dispense Receipt: {{ $receipt_code }}</h6>
-                    <div class="d-flex gap-1">
-                        <button type="button" class="btn btn-sm btn-outline-light" wire:click="printReceipt">Print</button>
-                        <button type="button" class="btn btn-sm btn-outline-light" wire:click="closeReceipt">Close</button>
-                    </div>
-                </div>
-                <div class="card-body" id="drug-receipt-printable">
-                    <div class="mb-2 small text-muted">Date: {{ $receipt_date ?: '-' }}</div>
-                    <div class="card-datatable table-responsive pt-0">
-                        <table id="prescriptionReceiptTable" class="table align-middle">
-                            <thead class="table-dark">
-                                <tr>
-                                    <th>Drug</th>
-                                    <th>Quantity</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach ($receipt_lines as $line)
-                                    <tr>
-                                        <td>{{ $line['drug_name'] ?? '-' }}</td>
-                                        <td>{{ $line['quantity'] ?? '-' }}</td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        @endif
-
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h6 class="mb-0"><span class="badge bg-label-success text-uppercase"><i class='bx bx-history me-1'></i>Dispensing Batches</span></h6>
@@ -334,6 +301,84 @@
             </div>
         </div>
 
+        <div wire:ignore.self class="modal fade" id="drugReceiptModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-lg modal-dialog-scrollable">
+                <div class="modal-content">
+                    <div class="modal-header text-white" style="background-color:#2c3e50;">
+                        <h5 class="modal-title text-white">Dispense Receipt: {{ $receipt_code ?: '-' }}</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body" id="drug-receipt-printable">
+                        <div class="mb-2 small text-muted">Date: {{ $receipt_date ?: '-' }}</div>
+                        <div class="card-datatable table-responsive pt-0">
+                            <table class="table align-middle">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>Drug</th>
+                                        <th>Quantity</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @forelse ($receipt_lines as $line)
+                                        <tr>
+                                            <td>{{ $line['drug_name'] ?? '-' }}</td>
+                                            <td>{{ $line['quantity'] ?? '-' }}</td>
+                                        </tr>
+                                    @empty
+                                        <tr>
+                                            <td colspan="2" class="text-center text-muted py-4">No receipt lines found.</td>
+                                        </tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-primary" wire:click="printReceipt">
+                            <i class="bx bx-printer me-1"></i>Print
+                        </button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     @endif
+
+    <script>
+        document.addEventListener('livewire:initialized', function() {
+            const modalEl = document.getElementById('drugReceiptModal');
+            if (!modalEl) return;
+
+            let modalInstance = null;
+            const getModal = () => {
+                if (!modalInstance) {
+                    modalInstance = new bootstrap.Modal(modalEl);
+                }
+                return modalInstance;
+            };
+
+            const cleanupModalArtifacts = () => {
+                document.body.classList.remove('modal-open');
+                document.body.style.removeProperty('padding-right');
+                document.querySelectorAll('.modal-backdrop').forEach((node) => node.remove());
+            };
+
+            Livewire.on('open-drug-receipt-modal', () => {
+                getModal().show();
+            });
+
+            Livewire.on('close-drug-receipt-modal', () => {
+                if (modalInstance) {
+                    modalInstance.hide();
+                }
+            });
+
+            modalEl.addEventListener('hidden.bs.modal', function() {
+                @this.call('closeReceipt', true);
+                cleanupModalArtifacts();
+            });
+        });
+    </script>
 
 </div>

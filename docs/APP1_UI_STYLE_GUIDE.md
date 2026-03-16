@@ -49,6 +49,8 @@ Notes:
 5. Summary metric cards should use distinct soft tints (for example slate/sky/emerald/rose/violet) with matching border/text contrast.
 6. Scope rule: apply this tinted style to stat/metric/dashboard summary cards only (counts/KPI cards), not all content/form cards.
 7. Stat cards in the same row should use a consistent minimum height for visual alignment.
+8. Every stat card must include a visible icon beside the label/value.
+9. Icon implementation standard for stat cards: use inline SVG in `.metric-icon` to avoid missing icon-font rendering issues.
 
 ## 5b) Form and Modal Composition (Flowdesk Pattern)
 

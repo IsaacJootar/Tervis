@@ -52,6 +52,8 @@ Primary UI reference for design decisions:
 8. Card styling scope:
    - Use multi-color tinted styling for stat/metric summary cards only.
    - Do not apply tinted stat-card styling across all form/content cards.
+   - Stat cards must include a visible icon for each metric.
+   - Preferred implementation is inline SVG inside `.metric-icon` (avoid icon-font-only dependency for critical card icons).
 9. Every workspace query must respect tenancy scope by default:
    - always filter by `facility_id`
    - for patient workspace modules, also filter by `patient_id`
