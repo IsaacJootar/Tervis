@@ -4,7 +4,6 @@
 
 @section('title', 'Patient Workspace')
 
-{{-- Wrap EVERYTHING in Alpine DataTable component with integrated DIN logic --}}
 <div x-data="{
     din: '',
     handleInput(e, index) {
@@ -35,109 +34,279 @@
         }
     }
 }" x-on:keydown.enter.window="submitOnEnter($event)">
-    {{-- Hero Card Header --}}
-    <div class="row mb-5">
-        <div class="col-12">
-            <div class="hero-card">
+    <div class="mb-3">
+        <span class="badge bg-label-primary text-uppercase">Patient Workspace Access</span>
+    </div>
 
-                {{-- Floating Decorations --}}
-                <div class="hero-decoration">
-                    <span class="floating-shape shape-1"></span>
-                    <span class="floating-shape shape-2"></span>
-                    <span class="floating-shape shape-3"></span>
+    <div class="card mb-4">
+        <div class="card-body d-flex flex-wrap align-items-center gap-3">
+            <div class="rounded-circle bg-primary text-white d-inline-flex align-items-center justify-content-center"
+                style="width:64px;height:64px;font-weight:700;">
+                {{ strtoupper(substr($facility_name ?? 'F', 0, 1)) }}{{ strtoupper(substr($officer_name ?? 'C', 0, 1)) }}
+            </div>
+            <div class="flex-grow-1">
+                <h4 class="mb-1">Access Patient Workspace</h4>
+                <div class="text-muted small">{{ Carbon::now('Africa/Lagos')->format('l, F j, Y, h:i A') }}</div>
+                <div class="d-flex flex-wrap gap-2 mt-2">
+                    <span class="badge bg-label-primary">Facility: {{ $facility_name ?? 'N/A' }}</span>
+                    <span class="badge bg-label-info">State: {{ $facility_state ?? 'N/A' }}</span>
+                    <span class="badge bg-label-secondary">LGA: {{ $facility_lga ?? 'N/A' }}</span>
+                    <span class="badge bg-label-dark">Ward: {{ $facility_ward ?? 'N/A' }}</span>
                 </div>
+            </div>
+            <div class="ms-lg-auto">
+                <button type="button" class="btn btn-primary px-4" data-bs-toggle="modal"
+                    data-bs-target="#dinVerificationModal" wire:click="openDinModal" wire:target="openDinModal"
+                    wire:loading.attr="disabled">
+                    <i class="bx bx-search me-1"></i>Verify DIN
+                </button>
+            </div>
+        </div>
+    </div>
 
-                {{-- Hero Content --}}
-                <div class="hero-content">
-
-                    <div class="hero-text">
-                        <h4 class="hero-title mb-1" style="color: white; font-size: 22px;">
-                            <i class='bx bx-grid-alt me-2'></i>
-                            Access Patient Workspace
-                        </h4>
-
-                        <p class="mb-2" style="color: rgba(255, 255, 255, 0.85); font-size: 0.875rem;">
-                            <i class="bx bx-time me-1"></i>
-                            {{ Carbon::now('Africa/Lagos')->format('l, F j, Y, h:i A') }}
-                        </p>
-
-                        <div class="hero-stats">
-                            <span class="hero-stat">
-                                <i class="bx bx-building"></i>
-                                {{ $facility_name ?? 'N/A' }}
-                            </span>
-
-                            <span class="hero-stat">
-                                <i class="bx bx-map-pin"></i>
-                                {{ $facility_state ?? 'N/A' }}
-                            </span>
-
-                            <span class="hero-stat">
-                                <i class="bx bx-map"></i>
-                                {{ $facility_lga ?? 'N/A' }}
-                            </span>
-
-                            <span class="hero-stat">
-                                <i class="bx bx-current-location"></i>
-                                Ward: {{ $facility_ward ?? 'N/A' }}
-                            </span>
-                        </div>
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-lg-3">
+            <div class="metric-card metric-card-primary h-100">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <div class="metric-label">Facility</div>
+                        <div class="metric-value metric-value-sm">{{ $facility_name ?? 'N/A' }}</div>
                     </div>
-
-                    {{-- CTA Button --}}
-                    <div class="demo-inline-spacing mt-3">
-                        <button type="button"
-                            class="btn btn-lg btn-dark px-5 py-3 d-inline-flex align-items-center shadow"
-                            style="border-radius: 8px;" data-bs-toggle="modal" data-bs-target="#dinVerificationModal"
-                            wire:click="openDinModal">
-                            <span class="icon-base ti tabler-user-search icon-24px me-2 text-white"></span>
-                            <span class="fw-bold">Access Patient Workspace</span>
-                        </button>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-lg-3">
+            <div class="metric-card metric-card-info h-100">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <div class="metric-label">State</div>
+                        <div class="metric-value metric-value-sm">{{ $facility_state ?? 'N/A' }}</div>
                     </div>
-
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-lg-3">
+            <div class="metric-card metric-card-success h-100">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <div class="metric-label">LGA</div>
+                        <div class="metric-value metric-value-sm">{{ $facility_lga ?? 'N/A' }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-lg-3">
+            <div class="metric-card metric-card-warning h-100">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <div class="metric-label">Ward</div>
+                        <div class="metric-value metric-value-sm">{{ $facility_ward ?? 'N/A' }}</div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    {{-- Information Cards --}}
-    <div class="row">
-        <div class="col-md-4">
-            <div class="card mb-4 h-100 workspace-step-card workspace-step-slate">
-                <div class="card-body text-center">
-                    <div class="mb-3">
-                        <i class="bx bx-check-shield text-success" style="font-size: 3rem;"></i>
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">Workflow Steps</h5>
+            <small class="text-muted">Follow this sequence to open a patient workspace</small>
+        </div>
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <div class="workflow-card workflow-card-slate h-100">
+                        <h6 class="mb-2">Step 1: DIN Activation</h6>
+                        <p class="text-muted mb-0">Confirm patient checked in today from DIN activation.</p>
                     </div>
-                    <h5 class="card-title">Step 1: DIN Activation</h5>
-                    <p class="card-text text-muted">
-                        Patient must first check-in at the DIN Activation desk to record attendance for the day.
-                    </p>
+                </div>
+                <div class="col-md-4">
+                    <div class="workflow-card workflow-card-sky h-100">
+                        <h6 class="mb-2">Step 2: Verify DIN</h6>
+                        <p class="text-muted mb-0">Enter the 8-digit DIN to validate today activation status.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="workflow-card workflow-card-emerald h-100">
+                        <h6 class="mb-2">Step 3: Open Workspace</h6>
+                        <p class="text-muted mb-0">Open patient dashboard cards and continue section workflows.</p>
+                    </div>
                 </div>
             </div>
         </div>
-        <div class="col-md-4">
-            <div class="card mb-4 h-100 workspace-step-card workspace-step-sky">
-                <div class="card-body text-center">
-                    <div class="mb-3">
-                        <i class="bx bx-search-alt text-primary" style="font-size: 3rem;"></i>
-                    </div>
-                    <h5 class="card-title">Step 2: Verify Activation</h5>
-                    <p class="card-text text-muted">
-                        Enter patient's DIN to verify they have been activated for today before accessing workspace.
-                    </p>
+    </div>
+
+    <div wire:ignore.self class="modal fade" id="dinVerificationModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable" style="max-width: 560px;">
+            <div class="modal-content">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title">DIN Verification</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
+                        wire:click="exit"></button>
                 </div>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card mb-4 h-100 workspace-step-card workspace-step-emerald">
-                <div class="card-body text-center">
+
+                <div class="modal-body px-4 pb-4">
                     <div class="mb-3">
-                        <i class="bx bx-grid-alt text-info" style="font-size: 3rem;"></i>
+                        <label class="form-label fw-semibold">Enter 8-Digit DIN <span class="text-danger">*</span></label>
+                        <div
+                            class="auth-input-wrapper d-flex align-items-center justify-content-between numeral-mask-wrapper mb-2">
+                            @for ($i = 0; $i < 8; $i++)
+                                <input type="tel" inputmode="numeric"
+                                    class="form-control auth-input h-px-50 text-center numeral-mask mx-sm-1 my-2"
+                                    maxlength="1" {{ $i === 0 ? 'autofocus' : '' }}
+                                    x-on:input="handleInput($event, {{ $i }})"
+                                    x-on:keydown="handleBackspace($event, {{ $i }})" />
+                            @endfor
+                        </div>
+                        <input type="hidden" x-model="din" />
+                        @error('din')
+                            <span class="text-danger">{{ $message }}</span>
+                        @enderror
                     </div>
-                    <h5 class="card-title">Step 3: Open Workspace</h5>
-                    <p class="card-text text-muted">
-                        Access the patient's workspace with 19 activity cards for clinical services.
-                    </p>
+
+                    <div class="d-grid gap-2 mb-3">
+                        <button wire:click="verifyPatient" type="button" class="btn btn-primary"
+                            :disabled="din.length !== 8" id="verify-btn" wire:target="verifyPatient"
+                            wire:loading.attr="disabled">
+                            <span wire:loading.remove wire:target="verifyPatient">
+                                <i class="bx bx-search me-1"></i>Verify Activation
+                            </span>
+                            <span wire:loading wire:target="verifyPatient">
+                                <span class="spinner-border spinner-border-sm me-1" role="status"
+                                    aria-hidden="true"></span>Verifying...
+                            </span>
+                        </button>
+
+                        <button wire:click="exit" type="button" class="btn btn-label-secondary"
+                            data-bs-dismiss="modal" aria-label="Close">
+                            <i class="bx bx-x me-1"></i>Cancel
+                        </button>
+                    </div>
+
+                    @if ($isPatientNotFound)
+                        <div class="verification-card verification-danger">
+                            <span class="badge bg-label-danger mb-2"><i class="bx bx-error-circle me-1"></i>Patient Not Registered</span>
+                            <p class="mb-1"><strong>This DIN does not exist in the system.</strong></p>
+                            <p class="mb-0">Patient needs registration before accessing services.</p>
+                            <div class="d-grid gap-2 mt-3">
+                                <button wire:click="resetForNextPatient" type="button" class="btn btn-primary">
+                                    <i class="bx bx-refresh me-1"></i>Try Another DIN
+                                </button>
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
+                                    wire:click="exit">
+                                    <i class="bx bx-x me-1"></i>Close
+                                </button>
+                            </div>
+                        </div>
+                    @endif
+
+                    @if ($isNotActivatedToday)
+                        <div class="verification-card verification-warning">
+                            <span class="badge bg-label-warning mb-2"><i class="bx bx-time-five me-1"></i>Not Checked In Today</span>
+                            <div class="small">
+                                <p class="mb-1"><strong>DIN:</strong> {{ $patient_din }}</p>
+                                <p class="mb-1"><strong>Name:</strong> {{ $first_name }} {{ $middle_name }} {{ $last_name }}</p>
+                                <p class="mb-0"><strong>Registered At:</strong> {{ $patient_registration_facility }}</p>
+                            </div>
+                            <div class="alert alert-warning mt-3 mb-0">
+                                Patient must complete DIN activation before workspace access.
+                            </div>
+                            <div class="d-grid gap-2 mt-3">
+                                <button wire:click="resetForNextPatient" type="button" class="btn btn-outline-primary">
+                                    <i class="bx bx-refresh me-1"></i>Try Another Patient
+                                </button>
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
+                                    wire:click="exit">
+                                    <i class="bx bx-x me-1"></i>Close
+                                </button>
+                            </div>
+                        </div>
+                    @endif
+
+                    @if ($isPatientVerified)
+                        <div class="verification-card verification-success">
+                            <span class="badge bg-label-success mb-2"><i class="bx bx-check-circle me-1"></i>Patient Verified</span>
+                            <div class="row g-2 mt-1">
+                                <div class="col-md-6">
+                                    <div class="verified-item">
+                                        <span class="verified-label">DIN</span>
+                                        <span class="verified-value">{{ $patient_din }}</span>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="verified-item">
+                                        <span class="verified-label">Name</span>
+                                        <span class="verified-value">{{ $first_name }} {{ $middle_name }} {{ $last_name }}</span>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="verified-item">
+                                        <span class="verified-label">Gender</span>
+                                        <span class="verified-value">{{ $patient_gender }}</span>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="verified-item">
+                                        <span class="verified-label">Age</span>
+                                        <span class="verified-value">{{ $patient_age }} years</span>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="verified-item">
+                                        <span class="verified-label">Check-In</span>
+                                        <span class="verified-value">{{ $activation_time }}</span>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="verified-item">
+                                        <span class="verified-label">Phone</span>
+                                        <span class="verified-value">{{ $patient_phone ?? 'N/A' }}</span>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="verified-item">
+                                        <span class="verified-label">Registered At</span>
+                                        <span class="verified-value">{{ $patient_registration_facility }}</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            @if (count($entry_points) > 0)
+                                <div class="mt-3">
+                                    <h6 class="mb-2">Registered Programs</h6>
+                                    <div class="d-flex flex-wrap gap-2">
+                                        @foreach ($entry_points as $entry)
+                                            <span class="badge bg-label-info">{{ $entry }}</span>
+                                        @endforeach
+                                    </div>
+                                </div>
+                            @else
+                                <div class="alert alert-info mt-3 mb-0 py-2">
+                                    Patient has no program registrations yet.
+                                </div>
+                            @endif
+
+                            <div class="d-grid gap-2 mt-3">
+                                <button wire:click="openWorkspace" type="button" class="btn btn-success btn-lg"
+                                    wire:target="openWorkspace" wire:loading.attr="disabled">
+                                    <span wire:loading.remove wire:target="openWorkspace">
+                                        <i class="bx bx-grid-alt me-1"></i>Open Patient Workspace
+                                    </span>
+                                    <span wire:loading wire:target="openWorkspace">
+                                        <span class="spinner-border spinner-border-sm me-1" role="status"
+                                            aria-hidden="true"></span>Opening...
+                                    </span>
+                                </button>
+                                <button wire:click="resetForNextPatient" type="button" class="btn btn-outline-primary">
+                                    <i class="bx bx-user-plus me-1"></i>Access Another Patient
+                                </button>
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
+                                    wire:click="exit">
+                                    <i class="bx bx-x me-1"></i>Close
+                                </button>
+                            </div>
+                        </div>
+                    @endif
                 </div>
             </div>
         </div>
@@ -145,226 +314,129 @@
 
     @once
         <style>
-            .workspace-step-card {
-                border-radius: 18px;
-                border: 1px solid rgba(148, 163, 184, 0.25);
-                min-height: 238px;
-                box-shadow: 0 10px 26px -22px rgba(15, 23, 42, 0.45);
+            .metric-card {
+                border: 1px solid #e5e7eb;
+                border-radius: 12px;
+                padding: 12px;
+                min-height: 112px;
             }
 
-            .workspace-step-card .card-body {
-                height: 100%;
-                display: flex;
-                flex-direction: column;
-                justify-content: flex-start;
+            .metric-card-primary {
+                background: #eff6ff;
+                border-color: #bfdbfe;
+                color: #1e40af;
             }
 
-            .workspace-step-slate {
-                border-color: #cbd5e1;
-                background: #f8fafc;
-            }
-
-            .workspace-step-sky {
-                border-color: #bae6fd;
+            .metric-card-info {
                 background: #f0f9ff;
+                border-color: #bae6fd;
+                color: #075985;
             }
 
-            .workspace-step-emerald {
-                border-color: #a7f3d0;
+            .metric-card-success {
+                background: #ecfdf3;
+                border-color: #bbf7d0;
+                color: #166534;
+            }
+
+            .metric-card-warning {
+                background: #fff7ed;
+                border-color: #fed7aa;
+                color: #9a3412;
+            }
+
+            .metric-label {
+                font-size: 11px;
+                text-transform: uppercase;
+                letter-spacing: 0.05em;
+                font-weight: 700;
+                color: rgba(15, 23, 42, 0.7);
+            }
+
+            .metric-value {
+                font-size: 1.3rem;
+                font-weight: 700;
+                margin-top: 4px;
+                line-height: 1.3rem;
+            }
+
+            .metric-value-sm {
+                font-size: 1rem;
+                line-height: 1.2rem;
+            }
+
+            .workflow-card {
+                border: 1px solid #e5e7eb;
+                border-radius: 12px;
+                padding: 14px;
+                min-height: 168px;
+            }
+
+            .workflow-card-slate {
+                background: #f8fafc;
+                border-color: #cbd5e1;
+            }
+
+            .workflow-card-sky {
+                background: #f0f9ff;
+                border-color: #bae6fd;
+            }
+
+            .workflow-card-emerald {
                 background: #ecfdf5;
+                border-color: #a7f3d0;
+            }
+
+            .verification-card {
+                border-radius: 12px;
+                border: 1px solid #e5e7eb;
+                padding: 14px;
+                background: #fff;
+            }
+
+            .verification-danger {
+                border-color: #fecaca;
+                background: #fef2f2;
+            }
+
+            .verification-warning {
+                border-color: #fcd34d;
+                background: #fffbeb;
+            }
+
+            .verification-success {
+                border-color: #86efac;
+                background: #f0fdf4;
+            }
+
+            .verified-item {
+                border: 1px solid #d1fae5;
+                background: #ffffff;
+                border-radius: 10px;
+                padding: 8px 10px;
+                height: 100%;
+            }
+
+            .verified-label {
+                display: block;
+                font-size: 11px;
+                font-weight: 700;
+                text-transform: uppercase;
+                letter-spacing: 0.04em;
+                color: #065f46;
+                margin-bottom: 2px;
+            }
+
+            .verified-value {
+                display: block;
+                font-size: 0.92rem;
+                font-weight: 600;
+                color: #0f172a;
+                line-height: 1.3;
+                word-break: break-word;
             }
         </style>
     @endonce
-
-    {{-- ============================================ --}}
-    {{-- DIN VERIFICATION MODAL --}}
-    {{-- ============================================ --}}
-    <div wire:ignore.self class="modal fade" id="dinVerificationModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-lg modal-dialog-centered" style="max-width: 520px;">
-            <div class="modal-content">
-                <div class="modal-header border-0 pb-0">
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
-                        wire:click="exit"></button>
-                </div>
-                <div class="modal-body" style="padding: 1.5rem 2.5rem 2.5rem;">
-                    <div class="text-center mb-4">
-                        <h3 class="mb-3">
-                            <i class="menu-icon icon-base ti tabler-user-search me-1 text-primary"
-                                style="font-size: 1.2rem;"></i>
-                            Access Patient Workspace
-                        </h3>
-                        <p class="text-muted mb-2">Enter the Patient's 8-digit DIN to access their workspace.</p>
-                    </div>
-
-                    <form onSubmit="return false">
-                        @csrf
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Enter 8-Digit DIN <span
-                                    class="text-danger">*</span></label>
-                            <div
-                                class="auth-input-wrapper d-flex align-items-center justify-content-between numeral-mask-wrapper mb-3">
-                                @for ($i = 0; $i < 8; $i++)
-                                    <input type="tel"
-                                        class="form-control auth-input h-px-50 text-center numeral-mask mx-sm-1 my-2"
-                                        maxlength="1" {{ $i === 0 ? 'autofocus' : '' }}
-                                        x-on:input="handleInput($event, {{ $i }})"
-                                        x-on:keydown="handleBackspace($event, {{ $i }})" />
-                                @endfor
-                            </div>
-                            <input type="hidden" x-model="din" />
-                            @error('din')
-                                <span class="text-danger">{{ $message }}</span>
-                            @enderror
-                        </div>
-
-                        <div class="text-center mb-3">
-                            <button wire:click="verifyPatient" type="button" class="btn btn-primary w-100"
-                                :disabled="din.length !== 8" id="verify-btn">
-                                <span wire:loading.remove wire:target="verifyPatient">
-                                    <i class="bx bx-search me-1"></i>Verify Activation
-                                </span>
-                                <span wire:loading wire:target="verifyPatient">
-                                    <span class="spinner-border spinner-border-sm" role="status"
-                                        aria-hidden="true"></span>
-                                    Verifying...
-                                </span>
-                            </button>
-                            <button wire:click="exit" type="button" class="btn btn-label-secondary w-100 mt-2"
-                                data-bs-dismiss="modal" aria-label="Close">
-                                <i class="bx bx-x me-1"></i>Cancel
-                            </button>
-                        </div>
-
-                        {{-- ============================================ --}}
-                        {{-- SCENARIO 1: Patient NOT FOUND IN SYSTEM --}}
-                        {{-- ============================================ --}}
-                        @if ($isPatientNotFound)
-                            <div class="text-center mt-3">
-                                <span class="badge bg-label-danger mb-2">
-                                    <i class="bx bx-error-circle me-1"></i>Patient Not Registered
-                                </span>
-                                <div class="alert alert-danger">
-                                    <p class="mb-0"><strong>This DIN does not exist in the system.</strong></p>
-                                    <p class="mb-0">Patient needs to be registered first before accessing services.
-                                    </p>
-                                </div>
-                                <div class="d-flex gap-2 mt-3">
-                                    <button wire:click="resetForNextPatient" type="button"
-                                        class="btn btn-primary flex-fill">
-                                        <i class="bx bx-refresh me-1"></i>Try Another DIN
-                                    </button>
-                                </div>
-                                <button type="button" class="btn btn-secondary w-100 mt-2" data-bs-dismiss="modal"
-                                    wire:click="exit">
-                                    <i class="bx bx-x me-1"></i>Close
-                                </button>
-                            </div>
-                        @endif
-
-                        {{-- ============================================ --}}
-                        {{-- SCENARIO 2: NOT ACTIVATED TODAY --}}
-                        {{-- ============================================ --}}
-                        @if ($isNotActivatedToday)
-                            <div class="text-center mt-3">
-                                <span class="badge bg-label-warning mb-2">
-                                    <i class="bx bx-time-five me-1"></i>Not Checked In Today
-                                </span>
-                                <div class="card p-3 bg-light">
-                                    <p class="mb-1"><strong>DIN:</strong> <span
-                                            class="badge bg-primary">{{ $patient_din }}</span></p>
-                                    <p class="mb-1"><strong>Name:</strong> {{ $first_name }} {{ $middle_name }}
-                                        {{ $last_name }}</p>
-                                    <p class="mb-0"><strong>Registered At:</strong>
-                                        {{ $patient_registration_facility }}</p>
-                                </div>
-                                <div class="alert alert-warning mt-3 mb-0">
-                                    <i class="bx bx-info-circle me-1"></i>
-                                    <strong>Patient has not been checked in today.</strong><br>
-                                    Please direct the patient to the DIN Activation desk first.
-                                </div>
-
-                                <button wire:click="resetForNextPatient" type="button"
-                                    class="btn btn-outline-primary w-100 mt-2">
-                                    <i class="bx bx-refresh me-1"></i>Try Another Patient
-                                </button>
-                                <button type="button" class="btn btn-secondary w-100 mt-2" data-bs-dismiss="modal"
-                                    wire:click="exit">
-                                    <i class="bx bx-x me-1"></i>Close
-                                </button>
-                            </div>
-                        @endif
-
-                        {{-- ============================================ --}}
-                        {{-- SCENARIO 3: VERIFIED & ACTIVATED - READY --}}
-                        {{-- ============================================ --}}
-                        @if ($isPatientVerified)
-                            <div class="text-center mt-3">
-                                <span class="badge bg-label-success mb-2">
-                                    <i class="bx bx-check-circle me-1"></i>Patient Verified & Checked In
-                                </span>
-                                <div class="card p-3 bg-light">
-                                    <p class="mb-1"><strong>DIN:</strong> <span
-                                            class="badge bg-primary">{{ $patient_din }}</span></p>
-                                    <p class="mb-1"><strong>Name:</strong> {{ $first_name }} {{ $middle_name }}
-                                        {{ $last_name }}</p>
-                                    <p class="mb-1"><strong>Gender:</strong> {{ $patient_gender }}</p>
-                                    <p class="mb-1"><strong>Age:</strong> {{ $patient_age }} years</p>
-                                    <p class="mb-1"><strong>Phone:</strong> {{ $patient_phone ?? 'N/A' }}</p>
-                                    <p class="mb-1"><strong>Check-In Time:</strong>
-                                        <span class="badge bg-success">{{ $activation_time }}</span>
-                                    </p>
-                                    <p class="mb-0"><strong>Registered At:</strong>
-                                        {{ $patient_registration_facility }}</p>
-                                </div>
-
-                                {{-- Entry Points (Registered Programs) --}}
-                                @if (count($entry_points) > 0)
-                                    <div class="mt-3">
-                                        <h6 class="text-start mb-2"><i class="bx bx-list-check me-1"></i>Registered
-                                            Programs:</h6>
-                                        <div class="d-flex flex-wrap gap-2 justify-content-center">
-                                            @foreach ($entry_points as $entry)
-                                                <span class="badge bg-info">{{ $entry }}</span>
-                                            @endforeach
-                                        </div>
-                                    </div>
-                                @else
-                                    <div class="alert alert-info mt-3 mb-0 py-2">
-                                        <small><i class="bx bx-info-circle me-1"></i>Patient has no program
-                                            registrations yet.</small>
-                                    </div>
-                                @endif
-
-                                {{-- Open Workspace Button --}}
-                                <button wire:click="openWorkspace" type="button"
-                                    class="btn btn-success btn-lg w-100 mt-3">
-                                    <span wire:loading.remove wire:target="openWorkspace">
-                                        <i class="bx bx-grid-alt me-1"></i>Open Patient Workspace
-                                    </span>
-                                    <span wire:loading wire:target="openWorkspace">
-                                        <span class="spinner-border spinner-border-sm" role="status"
-                                            aria-hidden="true"></span>
-                                        Opening...
-                                    </span>
-                                </button>
-
-                                <button wire:click="resetForNextPatient" type="button"
-                                    class="btn btn-outline-primary w-100 mt-2">
-                                    <i class="bx bx-user-plus me-1"></i>Access Another Patient
-                                </button>
-
-                                <button type="button" class="btn btn-secondary w-100 mt-2" data-bs-dismiss="modal"
-                                    wire:click="exit">
-                                    <i class="bx bx-x me-1"></i>Close
-                                </button>
-                            </div>
-                        @endif
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-    {{-- End DIN Verification Modal --}}
 
     @push('scripts')
         <script>
@@ -375,7 +447,6 @@
                     if (inst) inst.hide();
                 });
 
-                // Clear DIN inputs when resetting for next patient
                 Livewire.on('clear-din-inputs', () => {
                     document.querySelectorAll('#dinVerificationModal .numeral-mask').forEach(input => {
                         input.value = '';
@@ -386,6 +457,4 @@
             });
         </script>
     @endpush
-
 </div>
-{{-- End of wrapper --}}

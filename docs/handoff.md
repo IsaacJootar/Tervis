@@ -580,3 +580,136 @@
   - `php artisan route:list --name=laboratory-operations`
   - `php artisan view:cache`
   - `php artisan test` (`2 passed`)
+
+## Update (2026-03-17, Staff Management Consolidation)
+- Replaced legacy split Data Officer workflow (create/designation/status pages) with a unified facility module:
+  - Route: `/core/staff-management` (`staff-management`)
+  - Component: `app/Livewire/Core/StaffManagement.php`
+  - View: `resources/views/livewire/core/staff-management.blade.php`
+- Legacy routes were preserved as redirects to avoid breakage while removing duplicate module navigation:
+  - `/core/create-data-officers` -> `staff-management`
+  - `/core/update-officer-designation` -> `staff-management`
+  - `/core/disable-data-officer-account` -> `staff-management`
+- Sidebar cleanup:
+  - Removed repeated Data Officers dropdown entries.
+  - Added single `Staff Management` menu link.
+  - Moved `Facility Departments` to its own dedicated menu item.
+- Workflow now in one page:
+  - Create/update staff profile
+  - Designation-role alignment (`Verification Officer` designation maps to role)
+  - Activate/disable staff account status
+  - DataTable pagination/search/export with standard table markup (`wire:ignore`)
+- Model alignment:
+  - Added `account_status` to `User` model fillable/casts for consistent workflow writes.
+- Validation run:
+  - `php -l app/Livewire/Core/StaffManagement.php`
+  - `php -l app/Models/User.php`
+  - `php -l routes/web.php`
+  - `php artisan route:list --name=staff-management`
+  - `php artisan route:list --name=create-data-officers`
+  - `php artisan route:list --name=update-officer-designation`
+  - `php artisan route:list --name=disable-data-officer-account`
+  - `php artisan view:cache`
+  - `php artisan test` (`2 passed`)
+
+## Update (2026-03-17, Staff Management Enhancements)
+- Extended staff workflow beyond legacy cleanup:
+  - Department assignment added to staff profile form and table display.
+  - Password reset workflow added (admin generates temporary password in modal).
+  - Facility-scoped staff audit trail added with action history table.
+- Database changes:
+  - `users.department_id` added and linked to `facility_departments`.
+  - New table: `staff_management_audits`.
+  - Migration: `database/migrations/2026_03_17_030000_add_department_and_staff_audits.php`
+- New model:
+  - `app/Models/StaffManagementAudit.php`
+- Component/view updates:
+  - `app/Livewire/Core/StaffManagement.php`
+  - `resources/views/livewire/core/staff-management.blade.php`
+  - `app/Models/User.php` updated for `department_id` and `account_status` consistency.
+- Validation run:
+  - `php -l app/Livewire/Core/StaffManagement.php`
+  - `php -l app/Models/StaffManagementAudit.php`
+  - `php -l app/Models/User.php`
+  - `php -l database/migrations/2026_03_17_030000_add_department_and_staff_audits.php`
+  - `php artisan migrate --force`
+  - `php artisan route:list --name=staff-management`
+  - `php artisan view:cache`
+  - `php artisan test` (`2 passed`)
+
+## Update (2026-03-17, Facility Departments UI/Flow Refactor)
+- Refactored legacy `Facility Departments` page from hero-banner style to current simple template pattern:
+  - badge + clear header + right-aligned create button.
+- Fixed create button behavior by removing mixed modal triggers and using a single Livewire event path.
+- Added loading states to key actions:
+  - `openCreateModal`
+  - `saveDepartment`
+- Modal behavior standardized:
+  - open/close via Livewire events
+  - hidden event resets form safely (`onModalHidden`) without misfiring reload loops
+- Data table aligned to current standard:
+  - `wire:ignore` wrapper + DataTables init include.
+- Files updated:
+  - `app/Livewire/Core/FacilityDepartments.php`
+  - `resources/views/livewire/core/facility-departments.blade.php`
+  - `docs/APP1_CODING_RULES.md` (legacy-refactor hard rule)
+- Validation run:
+  - `php -l app/Livewire/Core/FacilityDepartments.php`
+  - `php artisan view:cache`
+  - `php artisan test` (`2 passed`)
+
+## Update (2026-03-17, Facility Administration Hardening)
+- Added a new facility-scoped operations module at `/core/facility-administration`:
+  - Facility profile settings management.
+  - Service catalog CRUD (code, name, category, base fee, status).
+  - Fee schedule CRUD (effective dates, active schedule control per service).
+  - Module access toggle matrix (enable/disable per workspace module key).
+  - Administration audit trail for all updates/toggles in this module.
+- New route and menu wiring:
+  - Route: `facility-administration`
+  - Sidebar: `Facility Administration` link added for Facility Admin users.
+- Data layer added (migration + models):
+  - `facility_service_catalog_items`
+  - `facility_fee_schedules`
+  - `facility_module_accesses`
+  - `facility_admin_audits`
+- Files added:
+  - `app/Livewire/Core/FacilityAdministration.php`
+  - `resources/views/livewire/core/facility-administration.blade.php`
+  - `app/Models/FacilityServiceCatalogItem.php`
+  - `app/Models/FacilityFeeSchedule.php`
+  - `app/Models/FacilityModuleAccess.php`
+  - `app/Models/FacilityAdminAudit.php`
+  - `database/migrations/2026_03_17_040000_create_facility_administration_tables.php`
+- Files updated:
+  - `routes/web.php`
+  - `resources/menu/facilityAdminMenu.json`
+  - `docs/APP1_MODULE_STATUS.md`
+  - `docs/APP1_WORKFLOW_ROADMAP.md`
+- Validation run:
+  - `php -l app/Livewire/Core/FacilityAdministration.php`
+  - `php -l app/Models/FacilityServiceCatalogItem.php`
+  - `php -l app/Models/FacilityFeeSchedule.php`
+  - `php -l app/Models/FacilityModuleAccess.php`
+  - `php -l app/Models/FacilityAdminAudit.php`
+  - `php -l resources/views/livewire/core/facility-administration.blade.php`
+  - `php artisan route:list` (route confirmed)
+
+## Update (2026-03-17, Activities Timeline Enrichment Completed)
+- Completed Section 17 quality upgrade for patient timeline at:
+  - Route: `/workspaces/{patientId}/activities` (`workspaces-activities`)
+- What was improved:
+  - Removed conflicting Livewire + DataTable double-pagination behavior.
+  - Added enriched KPI summary cards (total, today, modules involved, last activity) with inline SVG icons.
+  - Added action summary badges and module activity summary chips.
+  - Standardized timeline table to DataTable export/search/pagination controls (latest-first order).
+  - Added safe truncation to latest 1,000 timeline records for UI performance while preserving total counts.
+- Files updated:
+  - `app/Livewire/Workspaces/Modules/Activities.php`
+  - `resources/views/livewire/workspaces/modules/activities/index.blade.php`
+  - `docs/APP1_WORKFLOW_ROADMAP.md`
+  - `docs/APP1_MODULE_STATUS.md`
+- Validation run:
+  - `php artisan route:list` (routes compile)
+  - `php artisan view:cache` (blade compiles)
+  - `php artisan test` (suite passes)

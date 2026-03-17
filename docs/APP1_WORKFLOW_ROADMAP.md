@@ -1,6 +1,6 @@
 # APP1 Workflow and Roadmap
 
-Last updated: 2026-03-16  
+Last updated: 2026-03-17  
 Aligned to: HMS Vision Architecture v2.0 (Nov 2025)
 
 ## 1) Current End-to-End Workflow (Implemented)
@@ -86,7 +86,7 @@ Done criteria:
 1. Family Planning workspace activity module (Section 14 alignment) - completed
 2. Health Insurance module (Section 15) - completed
 3. Visits session grouping module (Section 16) - completed
-4. Timeline enrichment improvements (Section 17 quality upgrade) - pending
+4. Timeline enrichment improvements (Section 17 quality upgrade) - completed
 
 Done criteria:
 - Full patient workflow chain can run without side systems.
@@ -97,8 +97,8 @@ Done criteria:
 2. Admitted Patients (completed foundation)
 3. Pharmacy & Drug full ops (inventory foundation delivered: stock-in, adjustments, reorder levels, movement logs, dispense deduction; advanced supplier/LMIS remains)
 4. Laboratory full ops (completed: facility queue intake, sample tracking, processing batches, QC, reagents/movements, equipment logs)
-5. Staff Management
-6. Facility Administration hardening
+5. Staff Management (completed: unified facility staff module, legacy Data Officer pages redirected)
+6. Facility Administration hardening (completed: profile settings, service catalog, fee schedules, module access control, audit trail)
 
 Done criteria:
 - Facility modules can operate independently of single-patient pages.

@@ -4,7 +4,7 @@
 
 @section('title', 'Activities')
 
-<div x-data="dataTable()">
+<div>
     {{-- ============================================ --}}
     {{-- ACCESS DENIED VIEW --}}
     {{-- ============================================ --}}
@@ -87,6 +87,76 @@
             </div>
         </div>
 
+        <div class="row g-3 mb-4">
+            <div class="col-6 col-lg-3">
+                <div class="metric-card metric-card-primary h-100">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <div class="metric-label">Total Activities</div>
+                            <div class="metric-value">{{ number_format($totalActivities) }}</div>
+                        </div>
+                        <span class="metric-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                                <path d="M3 12h4l2-6 4 12 2-6h6"></path>
+                            </svg>
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-lg-3">
+                <div class="metric-card metric-card-info h-100">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <div class="metric-label">Today</div>
+                            <div class="metric-value">{{ number_format($activitiesToday) }}</div>
+                        </div>
+                        <span class="metric-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                                <rect x="3" y="4" width="18" height="17" rx="2"></rect>
+                                <path d="M8 2v4M16 2v4M3 9h18"></path>
+                            </svg>
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-lg-3">
+                <div class="metric-card metric-card-success h-100">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <div class="metric-label">Modules Involved</div>
+                            <div class="metric-value">{{ number_format($distinctModules) }}</div>
+                        </div>
+                        <span class="metric-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                                <rect x="3" y="3" width="7" height="7" rx="1"></rect>
+                                <rect x="14" y="3" width="7" height="7" rx="1"></rect>
+                                <rect x="3" y="14" width="7" height="7" rx="1"></rect>
+                                <rect x="14" y="14" width="7" height="7" rx="1"></rect>
+                            </svg>
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-lg-3">
+                <div class="metric-card metric-card-warning h-100">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <div class="metric-label">Last Activity</div>
+                            <div class="metric-value metric-value-sm">
+                                {{ $latestActivityAt ? Carbon::parse($latestActivityAt)->format('d M, h:i A') : 'N/A' }}
+                            </div>
+                        </div>
+                        <span class="metric-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                                <circle cx="12" cy="12" r="9"></circle>
+                                <path d="M12 7v6l4 2"></path>
+                            </svg>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div class="row g-4">
             {{-- Patient Overview --}}
             <div class="col-12 col-lg-4">
@@ -129,12 +199,32 @@
                         <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
                             <div>
                                 <h5 class="mb-0">Activity Timeline</h5>
-                                <small class="text-muted">Most recent actions first</small>
+                                <small class="text-muted">
+                                    Most recent actions first
+                                    @if ($isTruncated)
+                                        | Showing latest 1,000 entries
+                                    @endif
+                                </small>
+                            </div>
+                            <div class="d-flex flex-wrap gap-1">
+                                <span class="badge bg-label-success">Create: {{ (int) ($actionsSummary['create'] ?? 0) }}</span>
+                                <span class="badge bg-label-info">Update: {{ (int) ($actionsSummary['update'] ?? 0) }}</span>
+                                <span class="badge bg-label-danger">Delete: {{ (int) ($actionsSummary['delete'] ?? 0) }}</span>
+                                <span class="badge bg-label-secondary">View: {{ (int) ($actionsSummary['view'] ?? 0) }}</span>
                             </div>
                         </div>
                     </div>
-                    <div class="card-datatable table-responsive pt-0" wire:ignore>
-                        <table id="dataTable" class="table">
+                    <div class="px-3 pt-3 pb-1 d-flex flex-wrap gap-2">
+                        @forelse ($moduleSummary as $moduleItem)
+                            <span class="badge bg-label-primary text-capitalize">
+                                {{ str_replace('_', ' ', $moduleItem->module) }}: {{ $moduleItem->total }}
+                            </span>
+                        @empty
+                            <span class="text-muted small">No modules recorded yet.</span>
+                        @endforelse
+                    </div>
+                    <div class="card-datatable table-responsive pt-0">
+                        <table id="activitiesTimelineTable" class="table align-middle">
                             <thead class="table-dark">
                                 <tr>
                                     <th>Time</th>
@@ -169,23 +259,16 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td class="text-center py-4">
+                                        <td class="text-center py-4" colspan="5">
                                             <div class="text-muted">
                                                 <i class="bx bx-info-circle me-1"></i>
                                                 No activity records found yet.
                                             </div>
                                         </td>
-                                        <td></td>
-                                        <td></td>
-                                        <td></td>
-                                        <td></td>
                                     </tr>
                                 @endforelse
                             </tbody>
                         </table>
-                        <div class="mt-3">
-                            {{ $activities->links() }}
-                        </div>
                     </div>
                 </div>
             </div>
@@ -244,8 +327,80 @@
                 .activity-patient-name {
                     font-size: 1.1rem;
                 }
+
+                .metric-card {
+                    border: 1px solid #e5e7eb;
+                    border-radius: 12px;
+                    padding: 12px;
+                    min-height: 110px;
+                }
+
+                .metric-card-primary {
+                    background: #eff6ff;
+                    border-color: #bfdbfe;
+                    color: #1e40af;
+                }
+
+                .metric-card-info {
+                    background: #f0f9ff;
+                    border-color: #bae6fd;
+                    color: #075985;
+                }
+
+                .metric-card-success {
+                    background: #ecfdf3;
+                    border-color: #bbf7d0;
+                    color: #166534;
+                }
+
+                .metric-card-warning {
+                    background: #fff7ed;
+                    border-color: #fed7aa;
+                    color: #9a3412;
+                }
+
+                .metric-label {
+                    font-size: 11px;
+                    text-transform: uppercase;
+                    letter-spacing: 0.05em;
+                    font-weight: 700;
+                    color: rgba(15, 23, 42, 0.7);
+                }
+
+                .metric-value {
+                    font-size: 1.3rem;
+                    font-weight: 700;
+                    margin-top: 4px;
+                }
+
+                .metric-value-sm {
+                    font-size: 1rem;
+                    line-height: 1.25rem;
+                }
+
+                .metric-icon {
+                    width: 34px;
+                    height: 34px;
+                    border-radius: 10px;
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    background: rgba(255, 255, 255, 0.85);
+                    color: currentColor;
+                }
+
+                .metric-icon svg {
+                    width: 18px;
+                    height: 18px;
+                }
             </style>
         @endonce
     @endif
 </div>
 
+@include('_partials.datatables-init-multi', [
+    'tableIds' => ['activitiesTimelineTable'],
+    'orders' => [
+        'activitiesTimelineTable' => [0, 'desc'],
+    ],
+])

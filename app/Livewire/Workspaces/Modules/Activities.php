@@ -11,16 +11,11 @@ use Livewire\Attributes\Lazy;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 use Carbon\Carbon;
-use Livewire\WithPagination;
 
 #[Layout('layouts.dataOfficerLayout')]
 #[Lazy]
 class Activities extends Component
 {
-  use WithPagination;
-
-  protected $paginationTheme = 'bootstrap';
-
   public $patientId;
   public $patient;
 
@@ -120,16 +115,38 @@ class Activities extends Component
 
   public function render()
   {
-    $activitiesQuery = Activity::where('patient_id', $this->patientId)
+    $activitiesQuery = Activity::query()
+      ->where('patient_id', $this->patientId)
       ->where('facility_id', $this->facility_id)
       ->latest();
 
-    $activities = $activitiesQuery->paginate(15);
     $totalActivities = (clone $activitiesQuery)->count();
+    $activitiesToday = (clone $activitiesQuery)->whereDate('created_at', today())->count();
+    $distinctModules = (clone $activitiesQuery)->distinct('module')->count('module');
+    $latestActivityAt = (clone $activitiesQuery)->value('created_at');
+    $actionsSummary = (clone $activitiesQuery)
+      ->selectRaw('action, COUNT(*) as total')
+      ->groupBy('action')
+      ->pluck('total', 'action');
+    $moduleSummary = (clone $activitiesQuery)
+      ->selectRaw('module, COUNT(*) as total')
+      ->groupBy('module')
+      ->orderByDesc('total')
+      ->limit(6)
+      ->get();
+
+    $activities = (clone $activitiesQuery)->limit(1000)->get();
+    $isTruncated = $totalActivities > 1000;
 
     return view('livewire.workspaces.modules.activities.index', [
       'activities' => $activities,
       'totalActivities' => $totalActivities,
+      'activitiesToday' => $activitiesToday,
+      'distinctModules' => $distinctModules,
+      'latestActivityAt' => $latestActivityAt,
+      'actionsSummary' => $actionsSummary,
+      'moduleSummary' => $moduleSummary,
+      'isTruncated' => $isTruncated,
     ]);
   }
 }

@@ -449,8 +449,57 @@ class LaboratoryOperations extends Component
     }
   }
 
-  public function openAssignBatchModal(int $sampleId): void
+  public function updatedSampleLabTestOrderId($orderId): void
   {
+    if (!$orderId) {
+      return;
+    }
+
+    $this->preloadSampleFromOrder((int) $orderId);
+  }
+
+  public function updatedAssignSampleId($sampleId): void
+  {
+    if (!$sampleId) {
+      $this->assign_batch_id = null;
+      return;
+    }
+
+    $sample = LabSample::query()
+      ->where('facility_id', $this->facility_id)
+      ->find((int) $sampleId);
+
+    if (!$sample) {
+      $this->assign_batch_id = null;
+      return;
+    }
+
+    $this->assign_batch_id = $sample->processing_batch_id
+      ?: LabProcessingBatch::query()
+      ->where('facility_id', $this->facility_id)
+      ->whereIn('status', ['scheduled', 'running'])
+      ->orderByDesc('run_date')
+      ->value('id');
+  }
+
+  public function openAssignBatchModal(?int $sampleId = null): void
+  {
+    if (!$sampleId) {
+      $sampleId = LabSample::query()
+        ->where('facility_id', $this->facility_id)
+        ->latest('received_at')
+        ->latest('id')
+        ->value('id');
+    }
+
+    if (!$sampleId) {
+      $this->assign_sample_id = null;
+      $this->assign_batch_id = null;
+      toastr()->warning('No samples available yet. Save sample intake first.');
+      $this->dispatch('open-lab-sample-batch-modal');
+      return;
+    }
+
     $sample = LabSample::query()
       ->where('facility_id', $this->facility_id)
       ->find($sampleId);
@@ -940,4 +989,3 @@ class LaboratoryOperations extends Component
     ])->layout('layouts.facilityAdminLayout');
   }
 }
-

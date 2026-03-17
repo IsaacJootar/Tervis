@@ -15,8 +15,10 @@
                 <div class="text-muted small mt-1">Workflow: Queue Intake -> Batch Processing -> QC -> Reagents -> Equipment Logs.</div>
             </div>
             <div class="ms-auto d-flex gap-2">
-                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#assignSampleBatchModal">
-                    Assign Sample to Batch
+                <button type="button" class="btn btn-primary" wire:click="openAssignBatchModal"
+                    wire:loading.attr="disabled" wire:target="openAssignBatchModal">
+                    <span wire:loading.remove wire:target="openAssignBatchModal">Assign Sample to Batch</span>
+                    <span wire:loading wire:target="openAssignBatchModal"><span class="spinner-border spinner-border-sm me-1"></span>Opening...</span>
                 </button>
                 <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#reagentAdjustmentModal">
                     Reagent Adjustment
@@ -144,7 +146,7 @@
                 <div class="card-header">
                     <h5 class="mb-0">Step 1: Pending Order Queue (Sample Intake Source)</h5>
                 </div>
-                <div class="card-datatable table-responsive pt-0">
+                <div class="card-datatable table-responsive pt-0" wire:ignore>
                     <table id="labPendingOrdersTable" class="table align-middle">
                         <thead class="table-dark">
                             <tr>
@@ -200,9 +202,16 @@
                     <div class="row g-3">
                         <div class="col-12">
                             <label class="form-label">Source Order</label>
-                            <input type="text" class="form-control"
-                                value="{{ $sample_lab_test_order_id ? ('Pending Order #' . $sample_lab_test_order_id) : 'Manual / Not linked' }}"
-                                readonly>
+                            <select class="form-select" wire:model.live="sample_lab_test_order_id">
+                                <option value="">Manual / Not linked</option>
+                                @foreach ($pendingOrders as $order)
+                                    <option value="{{ $order->id }}">
+                                        #{{ $order->id }} - {{ $order->test_name }} -
+                                        {{ trim(($order->patient->first_name ?? '') . ' ' . ($order->patient->last_name ?? '')) ?: 'N/A' }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            <small class="text-muted">Select a pending order to auto-fill test and specimen details.</small>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Accession No.</label>
@@ -314,7 +323,7 @@
         <div class="card-header">
             <h5 class="mb-0">Step 2B: Processing Batches</h5>
         </div>
-        <div class="card-datatable table-responsive pt-0">
+        <div class="card-datatable table-responsive pt-0" wire:ignore>
             <table id="labBatchesTable" class="table align-middle">
                 <thead class="table-dark">
                     <tr>
@@ -370,7 +379,7 @@
         <div class="card-header">
             <h5 class="mb-0">Step 3: Samples Tracking</h5>
         </div>
-        <div class="card-datatable table-responsive pt-0">
+        <div class="card-datatable table-responsive pt-0" wire:ignore>
             <table id="labSamplesTable" class="table align-middle">
                 <thead class="table-dark">
                     <tr>
@@ -502,7 +511,7 @@
                 <div class="card-header">
                     <h5 class="mb-0">QC Log History</h5>
                 </div>
-                <div class="card-datatable table-responsive pt-0">
+                <div class="card-datatable table-responsive pt-0" wire:ignore>
                     <table id="labQcLogsTable" class="table align-middle">
                         <thead class="table-dark">
                             <tr>
@@ -516,24 +525,26 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @forelse ($qcLogs as $log)
-                                @php
-                                    $statusClass = $log->status === 'pass' ? 'success' : ($log->status === 'fail' ? 'danger' : 'warning');
-                                @endphp
-                                <tr>
-                                    <td data-order="{{ $log->qc_date?->format('Y-m-d') }}">{{ $log->qc_date?->format('M d, Y') ?: 'N/A' }}</td>
-                                    <td>{{ strtoupper($log->qc_type) }}</td>
-                                    <td>{{ $log->test_profile }}</td>
-                                    <td>{{ $log->expected_range ?: 'N/A' }}</td>
-                                    <td>{{ $log->observed_value ?: 'N/A' }}</td>
-                                    <td><span class="badge bg-label-{{ $statusClass }}">{{ strtoupper($log->status) }}</span></td>
-                                    <td>{{ $log->reviewed_by ?: 'N/A' }}</td>
-                                </tr>
-                            @empty
+                            @if ($qcLogs->isNotEmpty())
+                                @foreach ($qcLogs as $qcLog)
+                                    @php
+                                        $statusClass = $qcLog->status === 'pass' ? 'success' : ($qcLog->status === 'fail' ? 'danger' : 'warning');
+                                    @endphp
+                                    <tr>
+                                        <td data-order="{{ $qcLog->qc_date?->format('Y-m-d') }}">{{ $qcLog->qc_date?->format('M d, Y') ?: 'N/A' }}</td>
+                                        <td>{{ strtoupper($qcLog->qc_type) }}</td>
+                                        <td>{{ $qcLog->test_profile }}</td>
+                                        <td>{{ $qcLog->expected_range ?: 'N/A' }}</td>
+                                        <td>{{ $qcLog->observed_value ?: 'N/A' }}</td>
+                                        <td><span class="badge bg-label-{{ $statusClass }}">{{ strtoupper($qcLog->status) }}</span></td>
+                                        <td>{{ $qcLog->reviewed_by ?: 'N/A' }}</td>
+                                    </tr>
+                                @endforeach
+                            @else
                                 <tr>
                                     <td colspan="7" class="text-center py-4 text-muted">No QC logs available.</td>
                                 </tr>
-                            @endforelse
+                            @endif
                         </tbody>
                     </table>
                 </div>
@@ -596,7 +607,7 @@
         <div class="card-header">
             <h5 class="mb-0">Reagent Inventory Overview</h5>
         </div>
-        <div class="card-datatable table-responsive pt-0">
+        <div class="card-datatable table-responsive pt-0" wire:ignore>
             <table id="labReagentsTable" class="table align-middle">
                 <thead class="table-dark">
                     <tr>
@@ -660,7 +671,7 @@
         <div class="card-header">
             <h5 class="mb-0">Reagent Movement Log</h5>
         </div>
-        <div class="card-datatable table-responsive pt-0">
+        <div class="card-datatable table-responsive pt-0" wire:ignore>
             <table id="labReagentMovementsTable" class="table align-middle">
                 <thead class="table-dark">
                     <tr>
@@ -758,7 +769,7 @@
         <div class="card-header">
             <h5 class="mb-0">Equipment Log History</h5>
         </div>
-        <div class="card-datatable table-responsive pt-0">
+        <div class="card-datatable table-responsive pt-0" wire:ignore>
             <table id="labEquipmentLogsTable" class="table align-middle">
                 <thead class="table-dark">
                     <tr>
@@ -772,31 +783,33 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @forelse ($equipmentLogs as $log)
-                        @php
-                            $resultClass = $log->result_status === 'pass' ? 'success' : ($log->result_status === 'fail' ? 'danger' : 'warning');
-                            $isOverdue = $log->next_due_date && $log->next_due_date->isPast();
-                        @endphp
-                        <tr>
-                            <td data-order="{{ $log->performed_date?->format('Y-m-d') }}">{{ $log->performed_date?->format('M d, Y') ?: 'N/A' }}</td>
-                            <td class="fw-semibold">{{ $log->equipment_name }}<br><small class="text-muted">{{ $log->equipment_code ?: 'N/A' }}</small></td>
-                            <td>{{ ucwords($log->log_type) }}</td>
-                            <td><span class="badge bg-label-{{ $resultClass }}">{{ strtoupper($log->result_status) }}</span></td>
-                            <td>
-                                @if ($log->next_due_date)
-                                    <span class="{{ $isOverdue ? 'text-danger fw-semibold' : '' }}">{{ $log->next_due_date->format('M d, Y') }}</span>
-                                @else
-                                    N/A
-                                @endif
-                            </td>
-                            <td>{{ $log->performed_by ?: 'N/A' }}</td>
-                            <td>{{ $log->notes ?: 'N/A' }}</td>
-                        </tr>
-                    @empty
+                    <?php if ($equipmentLogs->isNotEmpty()): ?>
+                        <?php foreach ($equipmentLogs as $equipmentLog): ?>
+                            <?php
+                                $resultClass = $equipmentLog->result_status === 'pass' ? 'success' : ($equipmentLog->result_status === 'fail' ? 'danger' : 'warning');
+                                $isOverdue = $equipmentLog->next_due_date && $equipmentLog->next_due_date->isPast();
+                            ?>
+                            <tr>
+                                <td data-order="{{ $equipmentLog->performed_date?->format('Y-m-d') }}">{{ $equipmentLog->performed_date?->format('M d, Y') ?: 'N/A' }}</td>
+                                <td class="fw-semibold">{{ $equipmentLog->equipment_name }}<br><small class="text-muted">{{ $equipmentLog->equipment_code ?: 'N/A' }}</small></td>
+                                <td>{{ ucwords($equipmentLog->log_type) }}</td>
+                                <td><span class="badge bg-label-{{ $resultClass }}">{{ strtoupper($equipmentLog->result_status) }}</span></td>
+                                <td>
+                                    @if ($equipmentLog->next_due_date)
+                                        <span class="{{ $isOverdue ? 'text-danger fw-semibold' : '' }}">{{ $equipmentLog->next_due_date->format('M d, Y') }}</span>
+                                    @else
+                                        N/A
+                                    @endif
+                                </td>
+                                <td>{{ $equipmentLog->performed_by ?: 'N/A' }}</td>
+                                <td>{{ $equipmentLog->notes ?: 'N/A' }}</td>
+                            </tr>
+                        <?php endforeach; ?>
+                    <?php else: ?>
                         <tr>
                             <td colspan="7" class="text-center py-4 text-muted">No equipment logs available.</td>
                         </tr>
-                    @endforelse
+                    <?php endif; ?>
                 </tbody>
             </table>
         </div>
@@ -812,8 +825,16 @@
                 <div class="modal-body">
                     <div class="row g-3">
                         <div class="col-md-6">
-                            <label class="form-label">Sample ID</label>
-                            <input type="text" class="form-control" value="{{ $assign_sample_id ?: 'Not selected' }}" readonly>
+                            <label class="form-label">Sample ID <span class="text-danger">*</span></label>
+                            <select class="form-select" wire:model.live="assign_sample_id">
+                                <option value="">Select sample...</option>
+                                @foreach ($samples as $sampleOption)
+                                    <option value="{{ $sampleOption->id }}">
+                                        #{{ $sampleOption->id }} - {{ $sampleOption->accession_no }} -
+                                        {{ $sampleOption->test_name }}
+                                    </option>
+                                @endforeach
+                            </select>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Batch <span class="text-danger">*</span></label>
@@ -823,6 +844,9 @@
                                     <option value="{{ $batchOption->id }}">{{ $batchOption->batch_code }} ({{ ucfirst($batchOption->status) }})</option>
                                 @endforeach
                             </select>
+                            @if ($batches->whereIn('status', ['scheduled', 'running'])->count() === 0)
+                                <small class="text-muted">No open batch yet. Create one in Step 2 before assigning samples.</small>
+                            @endif
                         </div>
                     </div>
                 </div>

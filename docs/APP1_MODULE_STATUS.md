@@ -1,6 +1,6 @@
 # APP1 Module Status (Vision-Aligned Ground Truth)
 
-Last updated: 2026-03-16  
+Last updated: 2026-03-17  
 Reference vision: `Health Management System - Complete Architecture (Patient + Facility Modules).pdf` (v2.0, Nov 2025)
 
 Status legend:
@@ -30,7 +30,7 @@ Status legend:
 | 14. Family Planning | `workspaces/{patientId}/family-planning` (`workspaces-family-planning`) | Implemented | Follow-up assessment workspace for subsequent visits; one-time baseline remains in `registers/family-planning-register`. |
 | 15. Health Insurance | `workspaces/{patientId}/health-insurance` (`workspaces-health-insurance`) | Implemented | Patient insurance management hub for activate/deactivate, provider/plan/expiry updates, and audit history. Initial NHIS capture is now aligned across all 3 register entry points. |
 | 16. Visits | `workspaces/{patientId}/visits` (`workspaces-visits`) | Implemented | Auto-collates facility-scoped visit sessions from DIN activations + activity timeline events. |
-| 17. Timeline / Activities | `workspaces/{patientId}/activities` (`workspaces-activities`) | Implemented | Activity timeline page active (latest-first behavior requested earlier). |
+| 17. Timeline / Activities | `workspaces/{patientId}/activities` (`workspaces-activities`) | Implemented | Enriched timeline delivered: latest-first table with export/pagination controls, module/action summaries, and KPI cards. |
 
 ## 2) Facility-Centric Modules (Vision Scope)
 
@@ -42,8 +42,8 @@ Note: Vision text mentions both "7 modules" and "8 management modules" in differ
 | Pharmacy & Drug Management | Partial | Facility pharmacy operations now include stock-in batches, adjustments, reorder levels, and movement logs (`/core/pharmacy-operations`) with dispensing stock deduction wired; advanced supplier/LMIS procurement flow remains. |
 | Admitted Patients (Inpatient) | Implemented | Admission/discharge/referral workflow delivered (`/core/admitted-patients`) with bed occupancy sync + activity timeline logging. |
 | Laboratory Management | Implemented | Facility operations module delivered at `/core/laboratory-operations` with pending order intake queue, sample tracking, processing batches, QC logs, reagent inventory/movements, and equipment calibration-maintenance logs. |
-| Staff Management | Partial | User/officer management exists in core admin pages; full staff lifecycle module not yet implemented. |
-| Facility Administration | Partial | Facility creation/config pages exist; full service catalog/fee schedule/permissions/audit administration remains incomplete. |
+| Staff Management | Implemented | Unified facility-scoped staff module delivered at `/core/staff-management` (create/update profile, designation-role alignment, activate/disable, department assignment, password reset, and audit trail) with legacy Data Officer routes redirected to avoid duplicate modules. |
+| Facility Administration | Implemented | Dedicated module delivered at `/core/facility-administration` with facility profile settings, service catalog CRUD, fee schedule CRUD (active schedule control), module access toggles, and administration audit trail. |
 | Reporting & Analytics | Partial | Monthly report dashboard exists with partial NHMIS mapping; full 187-field complete mapping still pending. |
 
 ## 3) Integration Bridges (Vision-Critical)
@@ -67,6 +67,6 @@ Note: Vision text mentions both "7 modules" and "8 management modules" in differ
 
 ## 5) Immediate Priority Recommendation
 
-1. Continue facility ops hardening next: Staff module -> Facility Administration hardening.
-2. Add dedicated feature tests for Bed/Sections/Inpatient admission-discharge-referral transitions.
-3. Continue NHMIS mapping hardening with structured source coverage.
+1. Add dedicated feature tests for Facility Administration and Bed/Sections/Inpatient admission-discharge-referral transitions.
+2. Continue NHMIS mapping hardening with structured source coverage.
+3. Add dedicated feature tests for activities/reminders/appointments aggregation chains.

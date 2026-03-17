@@ -26,6 +26,9 @@ Primary UI reference for design decisions:
 2. Route names must follow `workspaces-*` naming convention and stay stable once used.
 3. If a module is renamed (example: `activity-register` -> `vaccination-schedule`), keep a redirect alias route until all links are migrated.
 4. Dashboard cards must only show routable modules; dead/nonexistent routes remain hidden.
+5. Do not split one workflow into multiple legacy pages in navigation (no repeated modules):
+   - Use one canonical module route/page per workflow (example: staff management).
+   - Keep old legacy routes as redirects to the canonical page for backward compatibility.
 
 ## 3) UI Rules (Project Standard)
 
@@ -61,6 +64,12 @@ Primary UI reference for design decisions:
 10. Exception for one-time registration gates:
    - duplicate-prevention checks for one-time registrations (example: Family Planning baseline registration) should check by `patient_id` globally.
    - once the gate passes, all follow-up/activity writes and reads remain facility-scoped.
+11. Legacy UI refactor rule (hard rule):
+   - When touching any legacy module/page, do not keep legacy hero-banner layouts.
+   - Refactor to the current simple template header pattern used in new modules (badge + title/time + right-aligned primary action).
+   - Primary create/open actions must have loading states.
+   - Every stat/metric card must include a visible icon; no icon-less placeholders or empty icon circles.
+   - Use inline SVG in `.metric-icon` for stat cards where possible to avoid icon-font rendering failures.
 
 ## 4) Interaction Rules
 
@@ -70,6 +79,10 @@ Primary UI reference for design decisions:
 4. No silent failures: success/error feedback must always appear (toast or inline error).
 5. Pending task flows (Lab Orders, Prescriptions) must require explicit user selection before completion/checkout.
 6. Persist cart-like workflows in session per user+patient where checkout is a single final commit.
+7. Modal save behavior hard rule:
+   - save actions inside modals must not auto-close the modal.
+   - success and error toasts must always be shown for save attempts.
+   - page refresh should occur only after the user manually closes the modal (when refresh is needed).
 
 ## 5) Validation Rules
 

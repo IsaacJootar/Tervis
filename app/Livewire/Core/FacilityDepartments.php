@@ -14,8 +14,8 @@ class FacilityDepartments extends Component
 {
   public $department_id, $name, $details, $is_active = true;
   public $facility_id;
-  public $modal_flag = false;
   public $edit_mode = false;
+  public $refresh_after_modal_close = false;
 
   protected function rules()
   {
@@ -55,7 +55,7 @@ class FacilityDepartments extends Component
   {
     $this->resetForm();
     $this->edit_mode = false;
-    $this->modal_flag = true;
+    $this->refresh_after_modal_close = false;
     $this->dispatch('open-department-modal');
   }
 
@@ -70,7 +70,7 @@ class FacilityDepartments extends Component
       $this->details = $department->details;
       $this->is_active = $department->is_active;
       $this->edit_mode = true;
-      $this->modal_flag = true;
+      $this->refresh_after_modal_close = false;
 
       $this->dispatch('open-department-modal');
     } catch (\Exception $e) {
@@ -83,41 +83,51 @@ class FacilityDepartments extends Component
     DB::beginTransaction();
     try {
       $this->validate();
+      $departmentName = trim((string) $this->name);
+      $isEdit = $this->edit_mode && $this->department_id;
 
       $data = [
         'facility_id' => $this->facility_id,
-        'name' => trim($this->name),
+        'name' => $departmentName,
         'details' => trim($this->details) ?: null,
         'is_active' => $this->is_active,
       ];
 
-      if ($this->edit_mode && $this->department_id) {
+      if ($isEdit) {
         // Update existing department
         $department = FacilityDepartment::where('facility_id', $this->facility_id)
           ->findOrFail($this->department_id);
 
         $department->update($data);
-        $message = "Department '{$this->name}' updated successfully";
+        $message = "Department '{$departmentName}' updated successfully.";
       } else {
         // Create new department
         FacilityDepartment::create($data);
-        $message = "Department '{$this->name}' created successfully";
+        $message = "Department '{$departmentName}' created successfully.";
       }
 
       DB::commit();
-      toastr()->info($message);
+      toastr()->success($message);
+      $this->clearDepartmentCaches();
+      // Keep modal open after save; refresh only after user manually closes the modal.
+      $this->refresh_after_modal_close = true;
 
-      // Only reset form, do NOT close modal - stays open for more operations
-      $this->resetForm();
+      if (!$isEdit) {
+        // Clear form for quick consecutive department entries.
+        $this->resetForm();
+        $this->edit_mode = false;
+      }
     } catch (ValidationException $e) {
       DB::rollBack();
-      foreach ($e->errors() as $field => $errors) {
-        toastr()->error($errors[0]);
+      $departmentName = trim((string) $this->name) ?: 'this department';
+      foreach ($e->errors() as $errors) {
+        toastr()->error("Unable to save '{$departmentName}': {$errors[0]}");
       }
     } catch (\Exception $e) {
       DB::rollBack();
-      toastr()->error('An error occurred while saving the department.');
-      throw $e;
+      $departmentName = trim((string) $this->name) ?: 'this department';
+      toastr()->error("An error occurred while saving '{$departmentName}'.");
+      report($e);
     }
   }
 
@@ -164,13 +174,22 @@ class FacilityDepartments extends Component
   public function exit()
   {
     $this->resetForm();
-    $this->closeModalAndRefresh();
+    $this->dispatch('close-department-modal');
   }
 
   public function closeModalAndRefresh()
   {
     $this->dispatch('close-department-modal');
-    $this->js('window.location.reload()');
+    $this->refreshPageSoon();
+  }
+
+  public function onModalHidden(): void
+  {
+    $this->resetForm();
+    if ($this->refresh_after_modal_close) {
+      $this->refresh_after_modal_close = false;
+      $this->refreshPageSoon(150);
+    }
   }
 
   private function clearDepartmentCaches()
@@ -187,10 +206,14 @@ class FacilityDepartments extends Component
       'name',
       'details',
       'is_active',
-      'modal_flag',
       'edit_mode',
     ]);
     $this->is_active = true; // Reset to default
+  }
+
+  private function refreshPageSoon(int $delayMs = 1000): void
+  {
+    $this->js("setTimeout(() => window.location.reload(), {$delayMs})");
   }
 
   public function render()

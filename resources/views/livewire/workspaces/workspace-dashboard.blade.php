@@ -33,43 +33,22 @@
         {{-- MAIN CONTENT (Access Granted) --}}
         {{-- ============================================ --}}
 
-        {{-- Hero Card Header --}}
-        <div class="row mb-4">
-            <div class="col-12">
-                <div class="hero-card">
-                    {{-- Floating Decorations --}}
-                    <div class="hero-decoration">
-                        <span class="floating-shape shape-1"></span>
-                        <span class="floating-shape shape-2"></span>
-                        <span class="floating-shape shape-3"></span>
-                    </div>
+        <div class="mb-3">
+            <span class="badge bg-label-primary text-uppercase">Workspace Dashboard</span>
+        </div>
 
-                    {{-- Hero Content --}}
-                    <div class="hero-content">
-                        <div class="hero-text">
-                            <h4 class="hero-title mb-1" style="color: white; font-size: 22px;">
-                                <i class='bx bx-grid-alt me-2'></i>
-                                Workspace Dashboard
-                            </h4>
-
-                            <p class="mb-2" style="color: rgba(255, 255, 255, 0.85); font-size: 0.875rem;">
-                                <i class="bx bx-time me-1"></i>
-                                {{ Carbon::now('Africa/Lagos')->format('l, F j, Y') }} |
-                                Checked in at {{ $activation_time }}
-                            </p>
-
-                            <div class="hero-stats">
-                                <span class="hero-stat">
-                                    <i class="bx bx-building"></i>
-                                    {{ $facility_name ?? 'N/A' }}
-                                </span>
-                                <span class="hero-stat">
-                                    <i class="bx bx-map-pin"></i>
-                                    {{ $facility_lga ?? 'N/A' }}, {{ $facility_state ?? 'N/A' }}
-                                </span>
-                            </div>
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
+                    <div>
+                        <h4 class="mb-1">Workspace Dashboard</h4>
+                        <div class="text-muted small">
+                            {{ Carbon::now('Africa/Lagos')->format('l, F j, Y') }} | Checked in at {{ $activation_time }}
                         </div>
-
+                    </div>
+                    <div class="d-flex flex-wrap gap-2">
+                        <span class="badge bg-label-primary">{{ $facility_name ?? 'N/A' }}</span>
+                        <span class="badge bg-label-secondary">{{ $facility_lga ?? 'N/A' }}, {{ $facility_state ?? 'N/A' }}</span>
                     </div>
                 </div>
             </div>

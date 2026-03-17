@@ -36,76 +36,35 @@
         @this.set('din', combined);
     }
 })">
-    {{-- Hero Card Header --}}
-    <div class="row mb-5">
-        <div class="col-12">
-            <div class="hero-card">
+    <div class="mb-3">
+        <span class="badge bg-label-primary text-uppercase">General Patient Registration</span>
+    </div>
 
-                {{-- Floating Decorations --}}
-                <div class="hero-decoration">
-                    <span class="floating-shape shape-1"></span>
-                    <span class="floating-shape shape-2"></span>
-                    <span class="floating-shape shape-3"></span>
+    <div class="card mb-4">
+        <div class="card-body d-flex flex-wrap align-items-center justify-content-between gap-3">
+            <div class="rounded-circle bg-primary text-white d-inline-flex align-items-center justify-content-center"
+                style="width:64px;height:64px;font-weight:700;">
+                {{ strtoupper(substr($facility_name ?? 'F', 0, 1)) }}{{ strtoupper(substr($officer_name ?? 'C', 0, 1)) }}
+            </div>
+            <div>
+                <h4 class="mb-1">General Patient Registration</h4>
+                <div class="text-muted small">{{ Carbon::now('Africa/Lagos')->format('l, F j, Y, h:i A') }}</div>
+                <div class="d-flex flex-wrap gap-2 mt-2">
+                    <span class="badge bg-label-primary">{{ $facility_name ?? 'N/A' }}</span>
+                    <span class="badge bg-label-secondary">{{ $facility_state ?? 'N/A' }}, {{ $facility_lga ?? 'N/A' }}</span>
+                    <span class="badge bg-label-dark">Ward: {{ $facility_ward ?? 'N/A' }}</span>
+                    <span class="badge bg-label-info">{{ count($registrations) }} Total Registrations</span>
+                    <span class="badge bg-label-success">{{ $registrations->where('patient.is_nhis_subscriber', true)->count() ?? 0 }} NHIS Subscribers</span>
                 </div>
-
-                {{-- Hero Content --}}
-                <div class="hero-content d-flex justify-content-between align-items-start flex-wrap gap-3">
-
-                    <div class="hero-text">
-                        <h4 class="hero-title mb-2" style="color: white; font-size: 28px;">
-                            <i class='bx bx-user-plus me-2'></i>
-                            General Patient Registration
-                        </h4>
-
-                        <div class="hero-stats">
-
-                            <span class="hero-stat">
-                                <i class="bx bx-building"></i>
-                                {{ $facility_name ?? 'N/A' }}
-                            </span>
-
-                            <span class="hero-stat">
-                                <i class="bx bx-time"></i>
-                                {{ Carbon::now('Africa/Lagos')->format('l, F j, Y, h:i A') }}
-                            </span>
-
-                            <span class="hero-stat">
-                                <i class="bx bx-map"></i>
-                                {{ $facility_state ?? 'N/A' }}
-                                • {{ $facility_lga ?? 'N/A' }}
-                                • Ward: {{ $facility_ward ?? 'N/A' }}
-                            </span>
-
-                            <span class="hero-stat">
-                                <i class="bx bx-list-check"></i>
-                                {{ count($registrations) }} Total Registrations
-                            </span>
-
-                            <span class="hero-stat">
-                                <i class="bx bx-shield-alt-2"></i>
-                                {{ $registrations->where('patient.is_nhis_subscriber', true)->count() ?? 0 }}
-                                NHIS Subscribers
-                            </span>
-
-                        </div>
-                    </div>
-
-                    {{-- CTA --}}
-                    <div class="demo-inline-spacing">
-                        <button type="button"
-                            class="btn btn-lg btn-dark px-5 py-3 d-inline-flex align-items-center shadow"
-                            style="border-radius: 8px;" data-bs-toggle="modal" data-bs-target="#dinVerificationModal"
-                            wire:click="openDinModal">
-                            <span class="icon-base ti tabler-plus icon-24px me-2 text-white"></span>
-                            <span class="fw-bold">New Patient</span>
-                        </button>
-                    </div>
-
-                </div>
+            </div>
+            <div class="ms-lg-auto">
+                <button type="button" class="btn btn-primary px-4" data-bs-toggle="modal"
+                    data-bs-target="#dinVerificationModal" wire:click="openDinModal">
+                    <i class="bx bx-plus me-1"></i>New Patient
+                </button>
             </div>
         </div>
     </div>
-
 
     {{-- DataTable --}}
     <div class="card">
@@ -246,7 +205,7 @@
                         {{-- SCENARIO 3: Patient has OPD - show dashboard button --}}
                         @if ($hasOpdRegistration)
                             <div class="text-center mt-3">
-                                <span class="badge bg-label-danger mb-2">✅ Patient Registration Found</span>
+                                <span class="badge bg-label-danger mb-2">âœ… Patient Registration Found</span>
                                 <div class="card p-3 bg-light">
                                     <p class="mb-1"><strong>Name:</strong> {{ $first_name }} {{ $last_name }}
                                     </p>
@@ -267,7 +226,7 @@
                         {{-- SCENARIO 1: NEW PATIENT (DIN not found) --}}
                         @if ($isNewPatient)
                             <div class="text-center mt-3">
-                                <span class="badge bg-label-warning mb-2">⚠️ DIN Not Found - New Patient</span>
+                                <span class="badge bg-label-warning mb-2">âš ï¸ DIN Not Found - New Patient</span>
                                 <div class="alert alert-info">
                                     <p class="mb-0"><strong>This patient does not exist in the system.</strong></p>
                                     <p class="mb-0">Click below to proceed with new patient registration.</p>
@@ -283,7 +242,7 @@
                         {{-- SCENARIO 2: VERIFIED PATIENT (DIN found, no OPD) --}}
                         @if ($isPatientVerified)
                             <div class="text-center mt-3">
-                                <span class="badge bg-label-success mb-2">✅ Patient Successfully Verified</span>
+                                <span class="badge bg-label-success mb-2">âœ… Patient Successfully Verified</span>
                                 <div class="card p-3 bg-light">
                                     <p class="mb-1"><strong>Name:</strong> {{ $first_name }} {{ $last_name }}
                                     </p>

@@ -7,31 +7,22 @@
       "slug": "facility-admin-dashboard"
     },
     {
-      "name": "Data Officers",
+      "url": "/core/facility-administration",
+      "name": "Facility Administration",
+      "icon": "menu-icon icon-base ti tabler-settings-cog",
+      "slug": "facility-administration"
+    },
+    {
+      "url": "/core/staff-management",
+      "name": "Staff Management",
       "icon": "menu-icon icon-base ti tabler-users",
-      "slug": "create-data-officers",
-      "submenu": [
-        {
-          "url": "/core/create-data-officers",
-          "name": "Create Officer Account",
-          "slug": "/core/create-data-officers"
-        },
-        {
-          "url": "/core/update-officer-designation",
-          "name": "Change Designation",
-          "slug": "update-officer-designation"
-        },
-        {
-          "url": "/core/disable-data-officer-account",
-          "name": "Disable Accounts",
-          "slug": "disable-data-officer-account"
-        },
-        {
-          "url": "/core/facility-departments",
-          "name": "Facility Departments",
-          "slug": "facility-departments"
-        }
-      ]
+      "slug": "staff-management"
+    },
+    {
+      "url": "/core/facility-departments",
+      "name": "Facility Departments",
+      "icon": "menu-icon icon-base ti tabler-building-community",
+      "slug": "facility-departments"
     },
     {
       "name": "Patient Management",
@@ -147,16 +138,10 @@
       ]
     },
     {
+      "url": "/core/facility-administration",
       "name": "Facility Settings",
       "icon": "menu-icon icon-base ti tabler-settings",
-      "slug": "facility-admin-settings",
-      "submenu": [
-        {
-          "url": "#",
-          "name": "General Settings",
-          "slug": "#"
-        }
-      ]
+      "slug": "facility-admin-settings"
     }
   ]
 }

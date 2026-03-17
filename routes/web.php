@@ -16,7 +16,8 @@ use App\Livewire\Central\CreateFacility;
 
 //
 use App\Livewire\Analytics\RiskDashboard;
-use App\Livewire\Core\CreateDataOfficers;
+use App\Livewire\Core\StaffManagement;
+use App\Livewire\Core\FacilityAdministration;
 
 //
 use App\Livewire\Core\FacilityDepartments;
@@ -36,7 +37,6 @@ use App\Livewire\Registers\AntenatalRegister;
 use App\Livewire\Workspaces\patientWorkspace;
 use App\Livewire\Central\CreateAdministrators;
 use App\Livewire\Central\CentralAdminDashboard;
-use App\Livewire\Core\UpdateOfficerDesignation;
 use App\Livewire\Workspaces\WorkspaceDashboard;
 use App\Livewire\Workspaces\Modules\Attendance;
 use App\Livewire\Workspaces\Modules\Activities;
@@ -59,7 +59,6 @@ use App\Livewire\Workspaces\Modules\Clinical\Referrals;
 use App\Livewire\Workspaces\Modules\Clinical\DrugCatalog;
 use App\Livewire\Workspaces\Modules\FamilyPlanning\ClientFollowUp;
 use App\Livewire\Analytics\MpdsrReportDashboard;
-use App\Livewire\Core\DisableDataOfficerAccount;
 use App\Livewire\Analytics\HealthTrendsDashboard;
 use App\Livewire\Analytics\MonthlyReportDashboard;
 use App\Livewire\Registers\FamilyPlanningRegister;
@@ -83,12 +82,20 @@ Route::middleware(['auth', 'role.redirect'])->prefix('central')->group(function 
 // Core (system) routes with middleware
 Route::middleware(['auth', 'role.redirect'])->prefix('core')->group(function () {
 
-  Route::get('/create-data-officers', CreateDataOfficers::class)->name('create-data-officers');
+  Route::get('/staff-management', StaffManagement::class)->name('staff-management');
+  Route::get('/facility-administration', FacilityAdministration::class)->name('facility-administration');
+  Route::get('/create-data-officers', function () {
+    return redirect()->route('staff-management');
+  })->name('create-data-officers');
   Route::get('/facility-admin-dashboard', FacilityAdminDashboard::class)->name('facility-admin-dashboard');
   Route::get('/lga-officer-dashboard', LgaOfficerDashboard::class)->name('lga-officer-dashboard');
   Route::get('/state-officer-dashboard', StateOfficerDashboard::class)->name('state-officer-dashboard');
-  Route::get('/update-officer-designation', UpdateOfficerDesignation::class)->name('update-officer-designation');
-  Route::get('/disable-data-officer-account', DisableDataOfficerAccount::class)->name('disable-data-officer-account');
+  Route::get('/update-officer-designation', function () {
+    return redirect()->route('staff-management');
+  })->name('update-officer-designation');
+  Route::get('/disable-data-officer-account', function () {
+    return redirect()->route('staff-management');
+  })->name('disable-data-officer-account');
   Route::get('/facility-departments', FacilityDepartments::class)->name('facility-departments');
   Route::get('/facility-sections', FacilitySections::class)->name('facility-sections');
   Route::get('/bed-management', BedManagement::class)->name('bed-management');

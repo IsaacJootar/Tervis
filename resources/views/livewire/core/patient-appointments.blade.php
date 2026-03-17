@@ -1,4 +1,4 @@
-﻿<div>
+<div>
     @php
         use Carbon\Carbon;
         use Illuminate\Support\Str;

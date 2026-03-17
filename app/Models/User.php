@@ -21,7 +21,9 @@ class User extends Authenticatable
     'password',
     'role',
     'designation',
+    'account_status',
     'facility_id',
+    'department_id',
     'lga_id',
     'state_id',
     'is_active',
@@ -36,7 +38,9 @@ class User extends Authenticatable
     'email_verified_at' => 'datetime',
     'password' => 'hashed',
     'is_active' => 'boolean',
+    'account_status' => 'string',
     'facility_id' => 'integer',
+    'department_id' => 'integer',
     'lga_id' => 'integer',
     'state_id' => 'integer',
   ];
@@ -47,6 +51,14 @@ class User extends Authenticatable
   public function facility(): BelongsTo
   {
     return $this->belongsTo(Facility::class);
+  }
+
+  /**
+   * Get the facility department this user belongs to.
+   */
+  public function department(): BelongsTo
+  {
+    return $this->belongsTo(FacilityDepartment::class, 'department_id');
   }
 
   /**

@@ -36,82 +36,35 @@
         @this.set('din', combined);
     }
 })">
-    {{-- Hero Card Header --}}
-    <div class="row mb-5">
-        <div class="col-12">
-            <div class="hero-card">
+    <div class="mb-3">
+        <span class="badge bg-label-primary text-uppercase">Antenatal Registration</span>
+    </div>
 
-                {{-- Floating Decorations --}}
-                <div class="hero-decoration">
-                    <span class="floating-shape shape-1"></span>
-                    <span class="floating-shape shape-2"></span>
-                    <span class="floating-shape shape-3"></span>
+    <div class="card mb-4">
+        <div class="card-body d-flex flex-wrap align-items-center justify-content-between gap-3">
+            <div class="rounded-circle bg-primary text-white d-inline-flex align-items-center justify-content-center"
+                style="width:64px;height:64px;font-weight:700;">
+                {{ strtoupper(substr($facility_name ?? 'F', 0, 1)) }}{{ strtoupper(substr($officer_name ?? 'C', 0, 1)) }}
+            </div>
+            <div>
+                <h4 class="mb-1">Antenatal Registration & Management</h4>
+                <div class="text-muted small">{{ Carbon::now('Africa/Lagos')->format('l, F j, Y, h:i A') }}</div>
+                <div class="d-flex flex-wrap gap-2 mt-2">
+                    <span class="badge bg-label-primary">{{ $facility_name ?? 'N/A' }}</span>
+                    <span class="badge bg-label-secondary">{{ $facility_state ?? 'N/A' }}, {{ $facility_lga ?? 'N/A' }}</span>
+                    <span class="badge bg-label-dark">Ward: {{ $facility_ward ?? 'N/A' }}</span>
+                    <span class="badge bg-label-info">{{ isset($antenatals) ? count($antenatals) : 0 }} Total Registrations</span>
+                    <span class="badge bg-label-success">{{ collect($antenatals ?? [])->where('is_active', true)->count() }} Active Pregnancies</span>
                 </div>
-
-                {{-- Hero Content --}}
-                <div class="hero-content">
-
-                    <div class="hero-text">
-                        <h4 class="hero-title mb-1" style="color: white; font-size: 22px;">
-                            <i class='bx bx-plus-medical me-2'></i>
-                            Antenatal Registration & Management
-                        </h4>
-
-                        <p class="mb-2" style="color: rgba(255, 255, 255, 0.85); font-size: 0.875rem;">
-                            <i class="bx bx-time me-1"></i>
-                            {{ Carbon::now('Africa/Lagos')->format('l, F j, Y, h:i A') }}
-                        </p>
-
-                        <div class="hero-stats">
-                            <span class="hero-stat">
-                                <i class="bx bx-building"></i>
-                                {{ $facility_name ?? 'N/A' }}
-                            </span>
-
-                            <span class="hero-stat">
-                                <i class="bx bx-map-pin"></i>
-                                {{ $facility_state ?? 'N/A' }}
-                            </span>
-
-                            <span class="hero-stat">
-                                <i class="bx bx-map"></i>
-                                {{ $facility_lga ?? 'N/A' }}
-                            </span>
-
-                            <span class="hero-stat">
-                                <i class="bx bx-current-location"></i>
-                                Ward: {{ $facility_ward ?? 'N/A' }}
-                            </span>
-
-                            <span class="hero-stat">
-                                <i class="bx bx-list-check"></i>
-                                {{ isset($antenatals) ? count($antenatals) : 0 }} Total Registrations
-                            </span>
-
-                            <span class="hero-stat">
-                                <i class="bx bx-check-circle"></i>
-                                {{ collect($antenatals ?? [])->where('is_active', true)->count() }}
-                                Active Pregnancies
-                            </span>
-                        </div>
-                    </div>
-
-                    {{-- CTA (same position as original) --}}
-                    <div class="demo-inline-spacing mt-3">
-                        <button type="button"
-                            class="btn btn-lg btn-dark px-5 py-3 d-inline-flex align-items-center shadow"
-                            style="border-radius: 8px;" data-bs-toggle="modal" data-bs-target="#dinVerificationModal"
-                            wire:click="openDinModal">
-                            <span class="icon-base ti tabler-plus icon-24px me-2 text-white"></span>
-                            <span class="fw-bold">New Registration</span>
-                        </button>
-                    </div>
-
-                </div>
+            </div>
+            <div class="ms-lg-auto">
+                <button type="button" class="btn btn-primary px-4" data-bs-toggle="modal"
+                    data-bs-target="#dinVerificationModal" wire:click="openDinModal">
+                    <i class="bx bx-plus me-1"></i>New Registration
+                </button>
             </div>
         </div>
     </div>
-
 
     {{-- DataTable --}}
     <div class="card">
@@ -246,7 +199,7 @@
                         {{-- SCENARIO 1: Patient has ACTIVE ANC - show message only --}}
                         @if ($hasActiveAncRegistration)
                             <div class="text-center mt-3">
-                                <span class="badge bg-label-danger mb-2">🫃 Patient Found: Active Pregnancy In
+                                <span class="badge bg-label-danger mb-2">ðŸ«ƒ Patient Found: Active Pregnancy In
                                     Progress</span>
                                 <div class="card p-3 bg-light">
                                     <p class="mb-1"><strong>Name:</strong> {{ $first_name }} {{ $last_name }}
@@ -274,7 +227,7 @@
                         {{-- SCENARIO 2: Patient NOT found - NEW PATIENT (can register via ANC entry point) --}}
                         @if ($isNewPatient)
                             <div class="text-center mt-3">
-                                <span class="badge bg-label-warning mb-2">⚠️ DIN Not Found - New Patient</span>
+                                <span class="badge bg-label-warning mb-2">âš ï¸ DIN Not Found - New Patient</span>
                                 <div class="alert alert-info">
                                     <p class="mb-0"><strong>This patient does not exist in the system.</strong></p>
                                     <p class="mb-0">Click below to register a new patient through ANC.</p>
@@ -290,7 +243,7 @@
                         {{-- SCENARIO 3: VERIFIED PATIENT (DIN found, no active ANC) --}}
                         @if ($isPatientVerified)
                             <div class="text-center mt-3">
-                                <span class="badge bg-label-success mb-2">✅ Patient Successfully Verified</span>
+                                <span class="badge bg-label-success mb-2">âœ… Patient Successfully Verified</span>
                                 <div class="card p-3 bg-light">
                                     <p class="mb-1"><strong>Name:</strong> {{ $first_name }} {{ $last_name }}
                                     </p>
