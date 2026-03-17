@@ -3,6 +3,7 @@
 use App\Models\Activity;
 use App\Models\Registrations\DinActivation;
 use App\Services\Communication\ReminderDispatchService;
+use App\Services\Reports\NhmisFieldRegistry;
 use App\Services\Visits\VisitCollationService;
 use Illuminate\Foundation\Console\ClosureCommand;
 use Illuminate\Foundation\Inspiring;
@@ -101,3 +102,17 @@ Artisan::command('visits:backfill {--facilityId=} {--patientId=} {--from=} {--to
         "Visits backfill complete. pairs={$pairs->count()}, dates={$totalDates}, visits_touched={$totalVisitsTouched}, events_upserted={$totalEventsUpserted}, events_deleted={$totalEventsDeleted}."
     );
 })->purpose('Build or refresh visits and visit events from DIN activations + activity timeline.');
+
+Artisan::command('nhmis:sync-matrix {--path=docs/nhmis-field-matrix.json}', function () {
+    /** @var ClosureCommand $this */
+    $path = (string) $this->option('path');
+
+    /** @var NhmisFieldRegistry $registry */
+    $registry = app(NhmisFieldRegistry::class);
+    $matrix = $registry->syncMatrix($path !== '' ? $path : null);
+
+    $statusCounts = collect($matrix)->countBy('status')->toArray();
+    $this->info('NHMIS matrix synced: ' . count($matrix) . ' fields.');
+    $this->line('Status counts: ' . json_encode($statusCounts));
+    $this->line('Path: ' . base_path($path !== '' ? $path : NhmisFieldRegistry::DEFAULT_MATRIX_PATH));
+})->purpose('Generate canonical 187-field NHMIS matrix JSON from template + key registry metadata.');

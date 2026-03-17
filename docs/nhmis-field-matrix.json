@@ -1,0 +1,1727 @@
+[
+    {
+        "field_no": 1,
+        "field_label": "General Attendance",
+        "summary_keys": [
+            "child_health.exclusive_breastfeeding",
+            "child_health.muac_screened",
+            "child_health.sam_new_cases",
+            "child_health.mam_new_cases",
+            "child_health.sam_admissions"
+        ],
+        "source_table": "nutrition_records + child_health_activity_records | nutrition_records",
+        "source_field": "infant_feeding | breastfeeding_entries | muac_value_mm | muac_class | admission_status",
+        "transform_rule": "child_health.exclusive_breastfeeding: Union distinct child/patient where Exclusive BF or E code appears in period. ; child_health.muac_screened: Count rows with non-null MUAC within period. ; child_health.sam_new_cases: Count rows with muac_class=Red within period. ; child_health.mam_new_cases: Count rows with muac_class=Yellow within period. ; child_health.sam_admissions: Count rows with admission_status=Admitted HP OTP within period.",
+        "status": "structured"
+    },
+    {
+        "field_no": 2,
+        "field_label": "Old Attendance (Return)",
+        "summary_keys": [],
+        "source_table": "daily_attendances",
+        "source_field": "visit_date, date_of_birth, gender",
+        "transform_rule": "Structured row-level resolver metric. Fallback aggregation from attendance age/sex buckets for NHMIS attendance rows.",
+        "status": "structured"
+    },
+    {
+        "field_no": 3,
+        "field_label": "Inpatient care (IPT)",
+        "summary_keys": [],
+        "source_table": "inpatient_admissions",
+        "source_field": "admitted_at, discharged_at, status, patient_id",
+        "transform_rule": "Structured row-level resolver metric. Fallback aggregation from admissions/discharges where row-level NHMIS split is not yet explicitly keyed.",
+        "status": "structured"
+    },
+    {
+        "field_no": 4,
+        "field_label": "Persons admitted",
+        "summary_keys": [],
+        "source_table": "inpatient_admissions",
+        "source_field": "admitted_at, discharged_at, status, patient_id",
+        "transform_rule": "Structured row-level resolver metric. Fallback aggregation from admissions/discharges where row-level NHMIS split is not yet explicitly keyed.",
+        "status": "structured"
+    },
+    {
+        "field_no": 5,
+        "field_label": "Inpatient discharges",
+        "summary_keys": [],
+        "source_table": "inpatient_admissions",
+        "source_field": "admitted_at, discharged_at, status, patient_id",
+        "transform_rule": "Structured row-level resolver metric. Fallback aggregation from admissions/discharges where row-level NHMIS split is not yet explicitly keyed.",
+        "status": "structured"
+    },
+    {
+        "field_no": 6,
+        "field_label": "Death among in/out-patient (both children/pregnant by age)",
+        "summary_keys": [],
+        "source_table": "deliveries",
+        "source_field": "dead, baby_dead, still_birth, complications, dodel",
+        "transform_rule": "Structured row-level resolver metric. Fallback mortality mapping from delivery outcomes and complications pending full cause-coded registry.",
+        "status": "structured"
+    },
+    {
+        "field_no": 7,
+        "field_label": "Maternal Mortality",
+        "summary_keys": [],
+        "source_table": "deliveries",
+        "source_field": "dead, baby_dead, still_birth, complications, dodel",
+        "transform_rule": "Structured row-level resolver metric. Fallback mortality mapping from delivery outcomes and complications pending full cause-coded registry.",
+        "status": "structured"
+    },
+    {
+        "field_no": 8,
+        "field_label": "Deaths of women of child bearing age (pregnancy related deaths)",
+        "summary_keys": [],
+        "source_table": "deliveries",
+        "source_field": "dead, baby_dead, still_birth, complications, dodel",
+        "transform_rule": "Structured row-level resolver metric. Fallback mortality mapping from delivery outcomes and complications pending full cause-coded registry.",
+        "status": "structured"
+    },
+    {
+        "field_no": 9,
+        "field_label": "Confirmed maternal deaths due to:",
+        "summary_keys": [],
+        "source_table": "deliveries",
+        "source_field": "dead, baby_dead, still_birth, complications, dodel",
+        "transform_rule": "Structured row-level resolver metric. Fallback mortality mapping from delivery outcomes and complications pending full cause-coded registry.",
+        "status": "structured"
+    },
+    {
+        "field_no": 10,
+        "field_label": "Confirmed neonatal deaths due to:",
+        "summary_keys": [],
+        "source_table": "deliveries",
+        "source_field": "dead, baby_dead, still_birth, complications, dodel",
+        "transform_rule": "Structured row-level resolver metric. Fallback mortality mapping from delivery outcomes and complications pending full cause-coded registry.",
+        "status": "structured"
+    },
+    {
+        "field_no": 11,
+        "field_label": "Confirmed under 5 deaths due to:",
+        "summary_keys": [],
+        "source_table": "deliveries",
+        "source_field": "dead, baby_dead, still_birth, complications, dodel",
+        "transform_rule": "Structured row-level resolver metric. Fallback mortality mapping from delivery outcomes and complications pending full cause-coded registry.",
+        "status": "structured"
+    },
+    {
+        "field_no": 12,
+        "field_label": "Antenatal attendance 1st visit pregnant women",
+        "summary_keys": [],
+        "source_table": "antenatal_registrations + antenatal_follow_up_assessments + deliveries",
+        "source_field": "registration_date, gestational_age_weeks, visit_date, special_instructions, dodel",
+        "transform_rule": "Structured row-level resolver metric. Fallback maternal/ANC mapping from canonical ANC + follow-up + delivery sources until per-row keys are explicitly configured.",
+        "status": "structured"
+    },
+    {
+        "field_no": 13,
+        "field_label": "Antenatal attendance re-visit",
+        "summary_keys": [],
+        "source_table": "antenatal_registrations + antenatal_follow_up_assessments + deliveries",
+        "source_field": "registration_date, gestational_age_weeks, visit_date, special_instructions, dodel",
+        "transform_rule": "Structured row-level resolver metric. Fallback maternal/ANC mapping from canonical ANC + follow-up + delivery sources until per-row keys are explicitly configured.",
+        "status": "structured"
+    },
+    {
+        "field_no": 14,
+        "field_label": "Pregnant women that attended antenatal clinic for 4th visit",
+        "summary_keys": [],
+        "source_table": "antenatal_registrations + antenatal_follow_up_assessments + deliveries",
+        "source_field": "registration_date, gestational_age_weeks, visit_date, special_instructions, dodel",
+        "transform_rule": "Structured row-level resolver metric. Fallback maternal/ANC mapping from canonical ANC + follow-up + delivery sources until per-row keys are explicitly configured.",
+        "status": "structured"
+    },
+    {
+        "field_no": 15,
+        "field_label": "Pregnant women that attended antenatal clinic for 8th visit",
+        "summary_keys": [],
+        "source_table": "antenatal_registrations + antenatal_follow_up_assessments + deliveries",
+        "source_field": "registration_date, gestational_age_weeks, visit_date, special_instructions, dodel",
+        "transform_rule": "Structured row-level resolver metric. Fallback maternal/ANC mapping from canonical ANC + follow-up + delivery sources until per-row keys are explicitly configured.",
+        "status": "structured"
+    },
+    {
+        "field_no": 16,
+        "field_label": "Pregnant women counselled on Family Planning (FP)",
+        "summary_keys": [],
+        "source_table": "antenatal_registrations + antenatal_follow_up_assessments + deliveries",
+        "source_field": "registration_date, gestational_age_weeks, visit_date, special_instructions, dodel",
+        "transform_rule": "Structured row-level resolver metric. Fallback maternal/ANC mapping from canonical ANC + follow-up + delivery sources until per-row keys are explicitly configured.",
+        "status": "structured"
+    },
+    {
+        "field_no": 17,
+        "field_label": "Pregnant women counselled on HIV/AIDS",
+        "summary_keys": [],
+        "source_table": "antenatal_registrations + antenatal_follow_up_assessments + deliveries",
+        "source_field": "registration_date, gestational_age_weeks, visit_date, special_instructions, dodel",
+        "transform_rule": "Structured row-level resolver metric. Fallback maternal/ANC mapping from canonical ANC + follow-up + delivery sources until per-row keys are explicitly configured.",
+        "status": "structured"
+    },
+    {
+        "field_no": 18,
+        "field_label": "Pregnant women counselled on Maternal Nutrition during ANC",
+        "summary_keys": [],
+        "source_table": "antenatal_registrations + antenatal_follow_up_assessments + deliveries",
+        "source_field": "registration_date, gestational_age_weeks, visit_date, special_instructions, dodel",
+        "transform_rule": "Structured row-level resolver metric. Fallback maternal/ANC mapping from canonical ANC + follow-up + delivery sources until per-row keys are explicitly configured.",
+        "status": "structured"
+    },
+    {
+        "field_no": 19,
+        "field_label": "ANC syphilis test done",
+        "summary_keys": [],
+        "source_table": "antenatal_registrations + antenatal_follow_up_assessments + deliveries",
+        "source_field": "registration_date, gestational_age_weeks, visit_date, special_instructions, dodel",
+        "transform_rule": "Structured row-level resolver metric. Fallback maternal/ANC mapping from canonical ANC + follow-up + delivery sources until per-row keys are explicitly configured.",
+        "status": "structured"
+    },
+    {
+        "field_no": 20,
+        "field_label": "ANC syphilis test positive",
+        "summary_keys": [],
+        "source_table": "antenatal_registrations + antenatal_follow_up_assessments + deliveries",
+        "source_field": "registration_date, gestational_age_weeks, visit_date, special_instructions, dodel",
+        "transform_rule": "Structured row-level resolver metric. Fallback maternal/ANC mapping from canonical ANC + follow-up + delivery sources until per-row keys are explicitly configured.",
+        "status": "structured"
+    },
+    {
+        "field_no": 21,
+        "field_label": "ANC syphilis test treated",
+        "summary_keys": [],
+        "source_table": "antenatal_registrations + antenatal_follow_up_assessments + deliveries",
+        "source_field": "registration_date, gestational_age_weeks, visit_date, special_instructions, dodel",
+        "transform_rule": "Structured row-level resolver metric. Fallback maternal/ANC mapping from canonical ANC + follow-up + delivery sources until per-row keys are explicitly configured.",
+        "status": "structured"
+    },
+    {
+        "field_no": 22,
+        "field_label": "ANC Hepatitis B test done",
+        "summary_keys": [],
+        "source_table": "antenatal_registrations + antenatal_follow_up_assessments + deliveries",
+        "source_field": "registration_date, gestational_age_weeks, visit_date, special_instructions, dodel",
+        "transform_rule": "Structured row-level resolver metric. Fallback maternal/ANC mapping from canonical ANC + follow-up + delivery sources until per-row keys are explicitly configured.",
+        "status": "structured"
+    },
+    {
+        "field_no": 23,
+        "field_label": "ANC Hepatitis B test positive",
+        "summary_keys": [],
+        "source_table": "antenatal_registrations + antenatal_follow_up_assessments + deliveries",
+        "source_field": "registration_date, gestational_age_weeks, visit_date, special_instructions, dodel",
+        "transform_rule": "Structured row-level resolver metric. Fallback maternal/ANC mapping from canonical ANC + follow-up + delivery sources until per-row keys are explicitly configured.",
+        "status": "structured"
+    },
+    {
+        "field_no": 24,
+        "field_label": "ANC Hepatitis B cases referred for treatment",
+        "summary_keys": [],
+        "source_table": "antenatal_registrations + antenatal_follow_up_assessments + deliveries",
+        "source_field": "registration_date, gestational_age_weeks, visit_date, special_instructions, dodel",
+        "transform_rule": "Structured row-level resolver metric. Fallback maternal/ANC mapping from canonical ANC + follow-up + delivery sources until per-row keys are explicitly configured.",
+        "status": "structured"
+    },
+    {
+        "field_no": 25,
+        "field_label": "ANC Hepatitis C test done",
+        "summary_keys": [],
+        "source_table": "antenatal_registrations + antenatal_follow_up_assessments + deliveries",
+        "source_field": "registration_date, gestational_age_weeks, visit_date, special_instructions, dodel",
+        "transform_rule": "Structured row-level resolver metric. Fallback maternal/ANC mapping from canonical ANC + follow-up + delivery sources until per-row keys are explicitly configured.",
+        "status": "structured"
+    },
+    {
+        "field_no": 26,
+        "field_label": "ANC Hepatitis C test positive",
+        "summary_keys": [],
+        "source_table": "antenatal_registrations + antenatal_follow_up_assessments + deliveries",
+        "source_field": "registration_date, gestational_age_weeks, visit_date, special_instructions, dodel",
+        "transform_rule": "Structured row-level resolver metric. Fallback maternal/ANC mapping from canonical ANC + follow-up + delivery sources until per-row keys are explicitly configured.",
+        "status": "structured"
+    },
+    {
+        "field_no": 27,
+        "field_label": "ANC Hepatitis C cases referred for treatment",
+        "summary_keys": [],
+        "source_table": "antenatal_registrations + antenatal_follow_up_assessments + deliveries",
+        "source_field": "registration_date, gestational_age_weeks, visit_date, special_instructions, dodel",
+        "transform_rule": "Structured row-level resolver metric. Fallback maternal/ANC mapping from canonical ANC + follow-up + delivery sources until per-row keys are explicitly configured.",
+        "status": "structured"
+    },
+    {
+        "field_no": 28,
+        "field_label": "Pregnant women who received malaria intermittent preventive treatment first dose (IPT1)",
+        "summary_keys": [],
+        "source_table": "antenatal_registrations + antenatal_follow_up_assessments + deliveries",
+        "source_field": "registration_date, gestational_age_weeks, visit_date, special_instructions, dodel",
+        "transform_rule": "Structured row-level resolver metric. Fallback maternal/ANC mapping from canonical ANC + follow-up + delivery sources until per-row keys are explicitly configured.",
+        "status": "structured"
+    },
+    {
+        "field_no": 29,
+        "field_label": "Pregnant women who received malaria intermittent preventive treatment second dose (IPT2)",
+        "summary_keys": [],
+        "source_table": "antenatal_registrations + antenatal_follow_up_assessments + deliveries",
+        "source_field": "registration_date, gestational_age_weeks, visit_date, special_instructions, dodel",
+        "transform_rule": "Structured row-level resolver metric. Fallback maternal/ANC mapping from canonical ANC + follow-up + delivery sources until per-row keys are explicitly configured.",
+        "status": "structured"
+    },
+    {
+        "field_no": 30,
+        "field_label": "Pregnant women who received malaria intermittent preventive treatment third dose (IPT3)",
+        "summary_keys": [],
+        "source_table": "antenatal_registrations + antenatal_follow_up_assessments + deliveries",
+        "source_field": "registration_date, gestational_age_weeks, visit_date, special_instructions, dodel",
+        "transform_rule": "Structured row-level resolver metric. Fallback maternal/ANC mapping from canonical ANC + follow-up + delivery sources until per-row keys are explicitly configured.",
+        "status": "structured"
+    },
+    {
+        "field_no": 31,
+        "field_label": "Pregnant women who received malaria intermittent preventive treatment more than third dose (IPT>=4)",
+        "summary_keys": [],
+        "source_table": "antenatal_registrations + antenatal_follow_up_assessments + deliveries",
+        "source_field": "registration_date, gestational_age_weeks, visit_date, special_instructions, dodel",
+        "transform_rule": "Structured row-level resolver metric. Fallback maternal/ANC mapping from canonical ANC + follow-up + delivery sources until per-row keys are explicitly configured.",
+        "status": "structured"
+    },
+    {
+        "field_no": 32,
+        "field_label": "Pregnant women who received TT2/Tetanus Toxoid Booster",
+        "summary_keys": [],
+        "source_table": "antenatal_registrations + antenatal_follow_up_assessments + deliveries",
+        "source_field": "registration_date, gestational_age_weeks, visit_date, special_instructions, dodel",
+        "transform_rule": "Structured row-level resolver metric. Fallback maternal/ANC mapping from canonical ANC + follow-up + delivery sources until per-row keys are explicitly configured.",
+        "status": "structured"
+    },
+    {
+        "field_no": 33,
+        "field_label": "Pregnant women who received Td 2 plus / Booster",
+        "summary_keys": [],
+        "source_table": "antenatal_registrations + antenatal_follow_up_assessments + deliveries",
+        "source_field": "registration_date, gestational_age_weeks, visit_date, special_instructions, dodel",
+        "transform_rule": "Structured row-level resolver metric. Fallback maternal/ANC mapping from canonical ANC + follow-up + delivery sources until per-row keys are explicitly configured.",
+        "status": "structured"
+    },
+    {
+        "field_no": 34,
+        "field_label": "Pregnant women who received Iron/Folate supplement",
+        "summary_keys": [],
+        "source_table": "antenatal_registrations + antenatal_follow_up_assessments + deliveries",
+        "source_field": "registration_date, gestational_age_weeks, visit_date, special_instructions, dodel",
+        "transform_rule": "Structured row-level resolver metric. Fallback maternal/ANC mapping from canonical ANC + follow-up + delivery sources until per-row keys are explicitly configured.",
+        "status": "structured"
+    },
+    {
+        "field_no": 35,
+        "field_label": "Number of pregnant women referred",
+        "summary_keys": [],
+        "source_table": "antenatal_registrations + antenatal_follow_up_assessments + deliveries",
+        "source_field": "registration_date, gestational_age_weeks, visit_date, special_instructions, dodel",
+        "transform_rule": "Structured row-level resolver metric. Fallback maternal/ANC mapping from canonical ANC + follow-up + delivery sources until per-row keys are explicitly configured.",
+        "status": "structured"
+    },
+    {
+        "field_no": 36,
+        "field_label": "Total Deliveries in the facility (Live + Still)",
+        "summary_keys": [],
+        "source_table": "tetanus_vaccinations",
+        "source_field": "current_tt_dose, visit_date, dose_date",
+        "transform_rule": "Structured row-level resolver metric. Fallback TT/TD row mapping from tetanus vaccination dose records.",
+        "status": "structured"
+    },
+    {
+        "field_no": 37,
+        "field_label": "Deliveries by Skilled Birth Attendant (SBA)",
+        "summary_keys": [],
+        "source_table": "tetanus_vaccinations",
+        "source_field": "current_tt_dose, visit_date, dose_date",
+        "transform_rule": "Structured row-level resolver metric. Fallback TT/TD row mapping from tetanus vaccination dose records.",
+        "status": "structured"
+    },
+    {
+        "field_no": 38,
+        "field_label": "Live Births",
+        "summary_keys": [],
+        "source_table": "tetanus_vaccinations",
+        "source_field": "current_tt_dose, visit_date, dose_date",
+        "transform_rule": "Structured row-level resolver metric. Fallback TT/TD row mapping from tetanus vaccination dose records.",
+        "status": "structured"
+    },
+    {
+        "field_no": 39,
+        "field_label": "Still Births (Macerated & Fresh)",
+        "summary_keys": [],
+        "source_table": "tetanus_vaccinations",
+        "source_field": "current_tt_dose, visit_date, dose_date",
+        "transform_rule": "Structured row-level resolver metric. Fallback TT/TD row mapping from tetanus vaccination dose records.",
+        "status": "structured"
+    },
+    {
+        "field_no": 40,
+        "field_label": "Assisted Deliveries (Vacuum/Forceps)",
+        "summary_keys": [],
+        "source_table": "tetanus_vaccinations",
+        "source_field": "current_tt_dose, visit_date, dose_date",
+        "transform_rule": "Structured row-level resolver metric. Fallback TT/TD row mapping from tetanus vaccination dose records.",
+        "status": "structured"
+    },
+    {
+        "field_no": 41,
+        "field_label": "Caesarean Sections (CS)",
+        "summary_keys": [],
+        "source_table": "deliveries",
+        "source_field": "alive, still_birth, weight, baby_sex, dodel, newborn_care",
+        "transform_rule": "Structured row-level resolver metric. Fallback newborn mapping from delivery/newborn outcome fields pending full per-row NHMIS key expansion.",
+        "status": "structured"
+    },
+    {
+        "field_no": 42,
+        "field_label": "Postpartum Haemorrhage (PPH) cases",
+        "summary_keys": [],
+        "source_table": "deliveries",
+        "source_field": "alive, still_birth, weight, baby_sex, dodel, newborn_care",
+        "transform_rule": "Structured row-level resolver metric. Fallback newborn mapping from delivery/newborn outcome fields pending full per-row NHMIS key expansion.",
+        "status": "structured"
+    },
+    {
+        "field_no": 43,
+        "field_label": "Eclampsia/Pre-Eclampsia cases",
+        "summary_keys": [],
+        "source_table": "deliveries",
+        "source_field": "alive, still_birth, weight, baby_sex, dodel, newborn_care",
+        "transform_rule": "Structured row-level resolver metric. Fallback newborn mapping from delivery/newborn outcome fields pending full per-row NHMIS key expansion.",
+        "status": "structured"
+    },
+    {
+        "field_no": 44,
+        "field_label": "Maternal Deaths (within 42 days of delivery)",
+        "summary_keys": [],
+        "source_table": "deliveries",
+        "source_field": "alive, still_birth, weight, baby_sex, dodel, newborn_care",
+        "transform_rule": "Structured row-level resolver metric. Fallback newborn mapping from delivery/newborn outcome fields pending full per-row NHMIS key expansion.",
+        "status": "structured"
+    },
+    {
+        "field_no": 45,
+        "field_label": "Women counselled on Exclusive Breastfeeding (EBF)",
+        "summary_keys": [],
+        "source_table": "deliveries",
+        "source_field": "alive, still_birth, weight, baby_sex, dodel, newborn_care",
+        "transform_rule": "Structured row-level resolver metric. Fallback newborn mapping from delivery/newborn outcome fields pending full per-row NHMIS key expansion.",
+        "status": "structured"
+    },
+    {
+        "field_no": 46,
+        "field_label": "Newborns (0-28 days) seen for PNC check",
+        "summary_keys": [],
+        "source_table": "deliveries",
+        "source_field": "alive, still_birth, weight, baby_sex, dodel, newborn_care",
+        "transform_rule": "Structured row-level resolver metric. Fallback newborn mapping from delivery/newborn outcome fields pending full per-row NHMIS key expansion.",
+        "status": "structured"
+    },
+    {
+        "field_no": 47,
+        "field_label": "Women seen for PNC check within 48 hours",
+        "summary_keys": [],
+        "source_table": "deliveries",
+        "source_field": "alive, still_birth, weight, baby_sex, dodel, newborn_care",
+        "transform_rule": "Structured row-level resolver metric. Fallback newborn mapping from delivery/newborn outcome fields pending full per-row NHMIS key expansion.",
+        "status": "structured"
+    },
+    {
+        "field_no": 48,
+        "field_label": "Women seen for PNC check between 3-7 days",
+        "summary_keys": [],
+        "source_table": "deliveries",
+        "source_field": "alive, still_birth, weight, baby_sex, dodel, newborn_care",
+        "transform_rule": "Structured row-level resolver metric. Fallback newborn mapping from delivery/newborn outcome fields pending full per-row NHMIS key expansion.",
+        "status": "structured"
+    },
+    {
+        "field_no": 49,
+        "field_label": "Women seen for PNC check between 8 days-6 weeks",
+        "summary_keys": [],
+        "source_table": "deliveries",
+        "source_field": "alive, still_birth, weight, baby_sex, dodel, newborn_care",
+        "transform_rule": "Structured row-level resolver metric. Fallback newborn mapping from delivery/newborn outcome fields pending full per-row NHMIS key expansion.",
+        "status": "structured"
+    },
+    {
+        "field_no": 50,
+        "field_label": "PNC clients screened for Postpartum Depression",
+        "summary_keys": [],
+        "source_table": "deliveries",
+        "source_field": "alive, still_birth, weight, baby_sex, dodel, newborn_care",
+        "transform_rule": "Structured row-level resolver metric. Fallback newborn mapping from delivery/newborn outcome fields pending full per-row NHMIS key expansion.",
+        "status": "structured"
+    },
+    {
+        "field_no": 51,
+        "field_label": "Women counselled on Family Planning (FP) during PNC",
+        "summary_keys": [],
+        "source_table": "deliveries",
+        "source_field": "alive, still_birth, weight, baby_sex, dodel, newborn_care",
+        "transform_rule": "Structured row-level resolver metric. Fallback newborn mapping from delivery/newborn outcome fields pending full per-row NHMIS key expansion.",
+        "status": "structured"
+    },
+    {
+        "field_no": 52,
+        "field_label": "Women provided with a Family Planning Method during PNC",
+        "summary_keys": [],
+        "source_table": "deliveries",
+        "source_field": "alive, still_birth, weight, baby_sex, dodel, newborn_care",
+        "transform_rule": "Structured row-level resolver metric. Fallback newborn mapping from delivery/newborn outcome fields pending full per-row NHMIS key expansion.",
+        "status": "structured"
+    },
+    {
+        "field_no": 53,
+        "field_label": "Women seen with Puerperal Sepsis (post-delivery infection)",
+        "summary_keys": [],
+        "source_table": "deliveries",
+        "source_field": "alive, still_birth, weight, baby_sex, dodel, newborn_care",
+        "transform_rule": "Structured row-level resolver metric. Fallback newborn mapping from delivery/newborn outcome fields pending full per-row NHMIS key expansion.",
+        "status": "structured"
+    },
+    {
+        "field_no": 54,
+        "field_label": "Women seen with Puerperal Sepsis and treated",
+        "summary_keys": [],
+        "source_table": "deliveries",
+        "source_field": "alive, still_birth, weight, baby_sex, dodel, newborn_care",
+        "transform_rule": "Structured row-level resolver metric. Fallback newborn mapping from delivery/newborn outcome fields pending full per-row NHMIS key expansion.",
+        "status": "structured"
+    },
+    {
+        "field_no": 55,
+        "field_label": "PNC clients referred to other services",
+        "summary_keys": [],
+        "source_table": "deliveries",
+        "source_field": "alive, still_birth, weight, baby_sex, dodel, newborn_care",
+        "transform_rule": "Structured row-level resolver metric. Fallback newborn mapping from delivery/newborn outcome fields pending full per-row NHMIS key expansion.",
+        "status": "structured"
+    },
+    {
+        "field_no": 56,
+        "field_label": "BCG",
+        "summary_keys": [
+            "immunization.bcg"
+        ],
+        "source_table": "immunization_records + child_health_activity_records",
+        "source_field": "bcg_date | vaccination_dates.bcg",
+        "transform_rule": "immunization.bcg: Unique child/patient + dose date count within report window.",
+        "status": "structured"
+    },
+    {
+        "field_no": 57,
+        "field_label": "OPV0",
+        "summary_keys": [
+            "immunization.opv0"
+        ],
+        "source_table": "immunization_records + child_health_activity_records",
+        "source_field": "opv0_date | vaccination_dates.opv0",
+        "transform_rule": "immunization.opv0: Unique child/patient + dose date count within report window.",
+        "status": "structured"
+    },
+    {
+        "field_no": 58,
+        "field_label": "OPV1",
+        "summary_keys": [
+            "immunization.opv1"
+        ],
+        "source_table": "immunization_records + child_health_activity_records",
+        "source_field": "opv1_date | vaccination_dates.opv1",
+        "transform_rule": "immunization.opv1: Unique child/patient + dose date count within report window.",
+        "status": "structured"
+    },
+    {
+        "field_no": 59,
+        "field_label": "OPV2",
+        "summary_keys": [
+            "immunization.opv2"
+        ],
+        "source_table": "immunization_records + child_health_activity_records",
+        "source_field": "opv2_date | vaccination_dates.opv2",
+        "transform_rule": "immunization.opv2: Unique child/patient + dose date count within report window.",
+        "status": "structured"
+    },
+    {
+        "field_no": 60,
+        "field_label": "OPV3",
+        "summary_keys": [
+            "immunization.opv3"
+        ],
+        "source_table": "immunization_records + child_health_activity_records",
+        "source_field": "opv3_date | vaccination_dates.opv3",
+        "transform_rule": "immunization.opv3: Unique child/patient + dose date count within report window.",
+        "status": "structured"
+    },
+    {
+        "field_no": 61,
+        "field_label": "PENTA 1",
+        "summary_keys": [
+            "immunization.penta1"
+        ],
+        "source_table": "immunization_records + child_health_activity_records",
+        "source_field": "penta1_date | vaccination_dates.penta1",
+        "transform_rule": "immunization.penta1: Unique child/patient + dose date count within report window.",
+        "status": "structured"
+    },
+    {
+        "field_no": 62,
+        "field_label": "PENTA 2",
+        "summary_keys": [
+            "immunization.penta2"
+        ],
+        "source_table": "immunization_records + child_health_activity_records",
+        "source_field": "penta2_date | vaccination_dates.penta2",
+        "transform_rule": "immunization.penta2: Unique child/patient + dose date count within report window.",
+        "status": "structured"
+    },
+    {
+        "field_no": 63,
+        "field_label": "PENTA 3",
+        "summary_keys": [
+            "immunization.penta3"
+        ],
+        "source_table": "immunization_records + child_health_activity_records",
+        "source_field": "penta3_date | vaccination_dates.penta3",
+        "transform_rule": "immunization.penta3: Unique child/patient + dose date count within report window.",
+        "status": "structured"
+    },
+    {
+        "field_no": 64,
+        "field_label": "PCV 1",
+        "summary_keys": [
+            "immunization.pcv1"
+        ],
+        "source_table": "immunization_records + child_health_activity_records",
+        "source_field": "pcv1_date | vaccination_dates.pcv1",
+        "transform_rule": "immunization.pcv1: Unique child/patient + dose date count within report window.",
+        "status": "structured"
+    },
+    {
+        "field_no": 65,
+        "field_label": "PCV 2",
+        "summary_keys": [
+            "immunization.pcv2"
+        ],
+        "source_table": "immunization_records + child_health_activity_records",
+        "source_field": "pcv2_date | vaccination_dates.pcv2",
+        "transform_rule": "immunization.pcv2: Unique child/patient + dose date count within report window.",
+        "status": "structured"
+    },
+    {
+        "field_no": 66,
+        "field_label": "PCV 3",
+        "summary_keys": [
+            "immunization.pcv3"
+        ],
+        "source_table": "immunization_records + child_health_activity_records",
+        "source_field": "pcv3_date | vaccination_dates.pcv3",
+        "transform_rule": "immunization.pcv3: Unique child/patient + dose date count within report window.",
+        "status": "structured"
+    },
+    {
+        "field_no": 67,
+        "field_label": "IPV 1",
+        "summary_keys": [
+            "immunization.ipv1"
+        ],
+        "source_table": "immunization_records + child_health_activity_records",
+        "source_field": "ipv1_date | vaccination_dates.ipv1",
+        "transform_rule": "immunization.ipv1: Unique child/patient + dose date count within report window.",
+        "status": "structured"
+    },
+    {
+        "field_no": 68,
+        "field_label": "IPV 2",
+        "summary_keys": [
+            "immunization.ipv2"
+        ],
+        "source_table": "immunization_records + child_health_activity_records",
+        "source_field": "ipv2_date | vaccination_dates.ipv2",
+        "transform_rule": "immunization.ipv2: Unique child/patient + dose date count within report window.",
+        "status": "structured"
+    },
+    {
+        "field_no": 69,
+        "field_label": "Measles Containing Vaccine 1 (MCV 1)",
+        "summary_keys": [
+            "immunization.mcv1"
+        ],
+        "source_table": "immunization_records + child_health_activity_records",
+        "source_field": "mr1_date | vaccination_dates.measles1",
+        "transform_rule": "immunization.mcv1: Unique child/patient + dose date count within report window.",
+        "status": "structured"
+    },
+    {
+        "field_no": 70,
+        "field_label": "Measles Containing Vaccine 2 (MCV 2)",
+        "summary_keys": [
+            "immunization.mcv2"
+        ],
+        "source_table": "immunization_records + child_health_activity_records",
+        "source_field": "mr2_date | vaccination_dates.measles2",
+        "transform_rule": "immunization.mcv2: Unique child/patient + dose date count within report window.",
+        "status": "structured"
+    },
+    {
+        "field_no": 71,
+        "field_label": "Yellow Fever (YF)",
+        "summary_keys": [
+            "immunization.yf"
+        ],
+        "source_table": "immunization_records + child_health_activity_records",
+        "source_field": "yf_date | vaccination_dates.yfever",
+        "transform_rule": "immunization.yf: Unique child/patient + dose date count within report window.",
+        "status": "structured"
+    },
+    {
+        "field_no": 72,
+        "field_label": "Newborns receiving Hepatitis B zero dose (Hep B0)",
+        "summary_keys": [
+            "immunization.hepb0"
+        ],
+        "source_table": "immunization_records + child_health_activity_records",
+        "source_field": "hepb0_date | vaccination_dates.hepbo",
+        "transform_rule": "immunization.hepb0: Unique child/patient + dose date count within report window.",
+        "status": "structured"
+    },
+    {
+        "field_no": 73,
+        "field_label": "HPV (Human Papillomavirus) 1st Dose (for 9-14yr girls)",
+        "summary_keys": [
+            "immunization.hpv"
+        ],
+        "source_table": "immunization_records",
+        "source_field": "hpv_date",
+        "transform_rule": "immunization.hpv: Unique child/patient + dose date count within report window.",
+        "status": "structured"
+    },
+    {
+        "field_no": 74,
+        "field_label": "HPV 2nd Dose (for 9-14yr girls)",
+        "summary_keys": [],
+        "source_table": "immunization_records + child_health_activity_records + tetanus_vaccinations",
+        "source_field": "dose date columns + vaccination_dates + current_tt_dose",
+        "transform_rule": "Structured row-level resolver metric. Fallback immunization mapping using merged deduplicated vaccine-dose sources where template row has no explicit key marker.",
+        "status": "structured"
+    },
+    {
+        "field_no": 75,
+        "field_label": "Children (0-11 months) fully immunized",
+        "summary_keys": [],
+        "source_table": "immunization_records + child_health_activity_records + tetanus_vaccinations",
+        "source_field": "dose date columns + vaccination_dates + current_tt_dose",
+        "transform_rule": "Structured row-level resolver metric. Fallback immunization mapping using merged deduplicated vaccine-dose sources where template row has no explicit key marker.",
+        "status": "structured"
+    },
+    {
+        "field_no": 76,
+        "field_label": "Total number of children 12-23 months fully immunized",
+        "summary_keys": [],
+        "source_table": "immunization_records + child_health_activity_records + tetanus_vaccinations",
+        "source_field": "dose date columns + vaccination_dates + current_tt_dose",
+        "transform_rule": "Structured row-level resolver metric. Fallback immunization mapping using merged deduplicated vaccine-dose sources where template row has no explicit key marker.",
+        "status": "structured"
+    },
+    {
+        "field_no": 77,
+        "field_label": "Children (0-59 months) given Vitamin A (1st dose - 6 months)",
+        "summary_keys": [],
+        "source_table": "immunization_records + child_health_activity_records + tetanus_vaccinations",
+        "source_field": "dose date columns + vaccination_dates + current_tt_dose",
+        "transform_rule": "Structured row-level resolver metric. Fallback immunization mapping using merged deduplicated vaccine-dose sources where template row has no explicit key marker.",
+        "status": "structured"
+    },
+    {
+        "field_no": 78,
+        "field_label": "Children (12-59 months) given Vitamin A (2nd dose - 12 months)",
+        "summary_keys": [],
+        "source_table": "immunization_records + child_health_activity_records + tetanus_vaccinations",
+        "source_field": "dose date columns + vaccination_dates + current_tt_dose",
+        "transform_rule": "Structured row-level resolver metric. Fallback immunization mapping using merged deduplicated vaccine-dose sources where template row has no explicit key marker.",
+        "status": "structured"
+    },
+    {
+        "field_no": 79,
+        "field_label": "Children (12-59 months) given Deworming tablets",
+        "summary_keys": [],
+        "source_table": "immunization_records + child_health_activity_records + tetanus_vaccinations",
+        "source_field": "dose date columns + vaccination_dates + current_tt_dose",
+        "transform_rule": "Structured row-level resolver metric. Fallback immunization mapping using merged deduplicated vaccine-dose sources where template row has no explicit key marker.",
+        "status": "structured"
+    },
+    {
+        "field_no": 80,
+        "field_label": "Children (0-11 months) defaulters tracked and brought back",
+        "summary_keys": [],
+        "source_table": "immunization_records + child_health_activity_records + tetanus_vaccinations",
+        "source_field": "dose date columns + vaccination_dates + current_tt_dose",
+        "transform_rule": "Structured row-level resolver metric. Fallback immunization mapping using merged deduplicated vaccine-dose sources where template row has no explicit key marker.",
+        "status": "structured"
+    },
+    {
+        "field_no": 81,
+        "field_label": "Children (0-11 months) immunized outside routine session",
+        "summary_keys": [],
+        "source_table": "immunization_records + child_health_activity_records + tetanus_vaccinations",
+        "source_field": "dose date columns + vaccination_dates + current_tt_dose",
+        "transform_rule": "Structured row-level resolver metric. Fallback immunization mapping using merged deduplicated vaccine-dose sources where template row has no explicit key marker.",
+        "status": "structured"
+    },
+    {
+        "field_no": 82,
+        "field_label": "Number of RI sessions held",
+        "summary_keys": [],
+        "source_table": "immunization_records + child_health_activity_records + tetanus_vaccinations",
+        "source_field": "dose date columns + vaccination_dates + current_tt_dose",
+        "transform_rule": "Structured row-level resolver metric. Fallback immunization mapping using merged deduplicated vaccine-dose sources where template row has no explicit key marker.",
+        "status": "structured"
+    },
+    {
+        "field_no": 83,
+        "field_label": "Number of mobile/outreach sessions held",
+        "summary_keys": [],
+        "source_table": "immunization_records + child_health_activity_records + tetanus_vaccinations",
+        "source_field": "dose date columns + vaccination_dates + current_tt_dose",
+        "transform_rule": "Structured row-level resolver metric. Fallback immunization mapping using merged deduplicated vaccine-dose sources where template row has no explicit key marker.",
+        "status": "structured"
+    },
+    {
+        "field_no": 84,
+        "field_label": "Children immunized with only BCG",
+        "summary_keys": [],
+        "source_table": "immunization_records + child_health_activity_records + tetanus_vaccinations",
+        "source_field": "dose date columns + vaccination_dates + current_tt_dose",
+        "transform_rule": "Structured row-level resolver metric. Fallback immunization mapping using merged deduplicated vaccine-dose sources where template row has no explicit key marker.",
+        "status": "structured"
+    },
+    {
+        "field_no": 85,
+        "field_label": "Children immunized with only OPV0",
+        "summary_keys": [],
+        "source_table": "immunization_records + child_health_activity_records + tetanus_vaccinations",
+        "source_field": "dose date columns + vaccination_dates + current_tt_dose",
+        "transform_rule": "Structured row-level resolver metric. Fallback immunization mapping using merged deduplicated vaccine-dose sources where template row has no explicit key marker.",
+        "status": "structured"
+    },
+    {
+        "field_no": 86,
+        "field_label": "Children (0-5 months) exclusively breastfed",
+        "summary_keys": [],
+        "source_table": "immunization_records + child_health_activity_records + tetanus_vaccinations",
+        "source_field": "dose date columns + vaccination_dates + current_tt_dose",
+        "transform_rule": "Structured row-level resolver metric. Fallback immunization mapping using merged deduplicated vaccine-dose sources where template row has no explicit key marker.",
+        "status": "structured"
+    },
+    {
+        "field_no": 87,
+        "field_label": "Children (6-23 months) fed appropriately (minimum dietary diversity)",
+        "summary_keys": [],
+        "source_table": "immunization_records + child_health_activity_records + tetanus_vaccinations",
+        "source_field": "dose date columns + vaccination_dates + current_tt_dose",
+        "transform_rule": "Structured row-level resolver metric. Fallback immunization mapping using merged deduplicated vaccine-dose sources where template row has no explicit key marker.",
+        "status": "structured"
+    },
+    {
+        "field_no": 88,
+        "field_label": "Children (0-59 months) screened for acute malnutrition (MUAC)",
+        "summary_keys": [],
+        "source_table": "immunization_records + child_health_activity_records + tetanus_vaccinations",
+        "source_field": "dose date columns + vaccination_dates + current_tt_dose",
+        "transform_rule": "Structured row-level resolver metric. Fallback immunization mapping using merged deduplicated vaccine-dose sources where template row has no explicit key marker.",
+        "status": "structured"
+    },
+    {
+        "field_no": 89,
+        "field_label": "Children (0-59 months) with Severe Acute Malnutrition (SAM) new cases",
+        "summary_keys": [],
+        "source_table": "immunization_records + child_health_activity_records + tetanus_vaccinations",
+        "source_field": "dose date columns + vaccination_dates + current_tt_dose",
+        "transform_rule": "Structured row-level resolver metric. Fallback immunization mapping using merged deduplicated vaccine-dose sources where template row has no explicit key marker.",
+        "status": "structured"
+    },
+    {
+        "field_no": 90,
+        "field_label": "Children (0-59 months) with Moderate Acute Malnutrition (MAM) new cases",
+        "summary_keys": [],
+        "source_table": "immunization_records + child_health_activity_records + tetanus_vaccinations",
+        "source_field": "dose date columns + vaccination_dates + current_tt_dose",
+        "transform_rule": "Structured row-level resolver metric. Fallback immunization mapping using merged deduplicated vaccine-dose sources where template row has no explicit key marker.",
+        "status": "structured"
+    },
+    {
+        "field_no": 91,
+        "field_label": "Children (0-59 months) with SAM admitted to CMAM (OTP)",
+        "summary_keys": [],
+        "source_table": "immunization_records + child_health_activity_records + tetanus_vaccinations",
+        "source_field": "dose date columns + vaccination_dates + current_tt_dose",
+        "transform_rule": "Structured row-level resolver metric. Fallback immunization mapping using merged deduplicated vaccine-dose sources where template row has no explicit key marker.",
+        "status": "structured"
+    },
+    {
+        "field_no": 92,
+        "field_label": "Children (0-59 months) with SAM discharged from CMAM (OTP) - Recovered",
+        "summary_keys": [],
+        "source_table": "immunization_records + child_health_activity_records + tetanus_vaccinations",
+        "source_field": "dose date columns + vaccination_dates + current_tt_dose",
+        "transform_rule": "Structured row-level resolver metric. Fallback immunization mapping using merged deduplicated vaccine-dose sources where template row has no explicit key marker.",
+        "status": "structured"
+    },
+    {
+        "field_no": 93,
+        "field_label": "Children (0-59 months) with SAM discharged from CMAM (OTP) - Defaulted",
+        "summary_keys": [],
+        "source_table": "immunization_records + child_health_activity_records + tetanus_vaccinations",
+        "source_field": "dose date columns + vaccination_dates + current_tt_dose",
+        "transform_rule": "Structured row-level resolver metric. Fallback immunization mapping using merged deduplicated vaccine-dose sources where template row has no explicit key marker.",
+        "status": "structured"
+    },
+    {
+        "field_no": 94,
+        "field_label": "Children (0-59 months) with SAM discharged from CMAM (OTP) - Died",
+        "summary_keys": [],
+        "source_table": "immunization_records + child_health_activity_records + tetanus_vaccinations",
+        "source_field": "dose date columns + vaccination_dates + current_tt_dose",
+        "transform_rule": "Structured row-level resolver metric. Fallback immunization mapping using merged deduplicated vaccine-dose sources where template row has no explicit key marker.",
+        "status": "structured"
+    },
+    {
+        "field_no": 95,
+        "field_label": "Children (0-59 months) with MAM admitted to SFP",
+        "summary_keys": [],
+        "source_table": "immunization_records + child_health_activity_records + tetanus_vaccinations",
+        "source_field": "dose date columns + vaccination_dates + current_tt_dose",
+        "transform_rule": "Structured row-level resolver metric. Fallback immunization mapping using merged deduplicated vaccine-dose sources where template row has no explicit key marker.",
+        "status": "structured"
+    },
+    {
+        "field_no": 96,
+        "field_label": "Children (0-59 months) with MAM discharged from SFP - Recovered",
+        "summary_keys": [],
+        "source_table": "immunization_records + child_health_activity_records + tetanus_vaccinations",
+        "source_field": "dose date columns + vaccination_dates + current_tt_dose",
+        "transform_rule": "Structured row-level resolver metric. Fallback immunization mapping using merged deduplicated vaccine-dose sources where template row has no explicit key marker.",
+        "status": "structured"
+    },
+    {
+        "field_no": 97,
+        "field_label": "Children (0-59 months) with MAM discharged from SFP - Defaulted",
+        "summary_keys": [],
+        "source_table": "immunization_records + child_health_activity_records + tetanus_vaccinations",
+        "source_field": "dose date columns + vaccination_dates + current_tt_dose",
+        "transform_rule": "Structured row-level resolver metric. Fallback immunization mapping using merged deduplicated vaccine-dose sources where template row has no explicit key marker.",
+        "status": "structured"
+    },
+    {
+        "field_no": 98,
+        "field_label": "Children (0-59 months) with MAM discharged from SFP - Died",
+        "summary_keys": [],
+        "source_table": "nutrition_records + child_health_activity_records + immunization_records",
+        "source_field": "muac/growth/feeding + breastfeeding_entries + vitamin A dose dates",
+        "transform_rule": "Structured row-level resolver metric. Fallback child-health mapping from nutrition and child activity tables pending explicit row key binding.",
+        "status": "structured"
+    },
+    {
+        "field_no": 99,
+        "field_label": "Pregnant and Lactating Women (PLW) admitted to PLW nutrition program",
+        "summary_keys": [],
+        "source_table": "nutrition_records + child_health_activity_records + immunization_records",
+        "source_field": "muac/growth/feeding + breastfeeding_entries + vitamin A dose dates",
+        "transform_rule": "Structured row-level resolver metric. Fallback child-health mapping from nutrition and child activity tables pending explicit row key binding.",
+        "status": "structured"
+    },
+    {
+        "field_no": 100,
+        "field_label": "Children assessed by IMCI guidelines",
+        "summary_keys": [],
+        "source_table": "nutrition_records + child_health_activity_records + immunization_records",
+        "source_field": "muac/growth/feeding + breastfeeding_entries + vitamin A dose dates",
+        "transform_rule": "Structured row-level resolver metric. Fallback child-health mapping from nutrition and child activity tables pending explicit row key binding.",
+        "status": "structured"
+    },
+    {
+        "field_no": 101,
+        "field_label": "Confirmed Pneumonia cases",
+        "summary_keys": [],
+        "source_table": "nutrition_records + child_health_activity_records + immunization_records",
+        "source_field": "muac/growth/feeding + breastfeeding_entries + vitamin A dose dates",
+        "transform_rule": "Structured row-level resolver metric. Fallback child-health mapping from nutrition and child activity tables pending explicit row key binding.",
+        "status": "structured"
+    },
+    {
+        "field_no": 102,
+        "field_label": "Confirmed Diarrhoea cases",
+        "summary_keys": [],
+        "source_table": "nutrition_records + child_health_activity_records + immunization_records",
+        "source_field": "muac/growth/feeding + breastfeeding_entries + vitamin A dose dates",
+        "transform_rule": "Structured row-level resolver metric. Fallback child-health mapping from nutrition and child activity tables pending explicit row key binding.",
+        "status": "structured"
+    },
+    {
+        "field_no": 103,
+        "field_label": "Confirmed Malaria cases (children under 5)",
+        "summary_keys": [],
+        "source_table": "nutrition_records + child_health_activity_records + immunization_records",
+        "source_field": "muac/growth/feeding + breastfeeding_entries + vitamin A dose dates",
+        "transform_rule": "Structured row-level resolver metric. Fallback child-health mapping from nutrition and child activity tables pending explicit row key binding.",
+        "status": "structured"
+    },
+    {
+        "field_no": 104,
+        "field_label": "Confirmed Severe Malnutrition cases (children under 5)",
+        "summary_keys": [],
+        "source_table": "nutrition_records + child_health_activity_records + immunization_records",
+        "source_field": "muac/growth/feeding + breastfeeding_entries + vitamin A dose dates",
+        "transform_rule": "Structured row-level resolver metric. Fallback child-health mapping from nutrition and child activity tables pending explicit row key binding.",
+        "status": "structured"
+    },
+    {
+        "field_no": 105,
+        "field_label": "Fever (Malaria) cases treated with Artemisinin-based Combination Therapy (ACT)",
+        "summary_keys": [],
+        "source_table": "nutrition_records + child_health_activity_records + immunization_records",
+        "source_field": "muac/growth/feeding + breastfeeding_entries + vitamin A dose dates",
+        "transform_rule": "Structured row-level resolver metric. Fallback child-health mapping from nutrition and child activity tables pending explicit row key binding.",
+        "status": "structured"
+    },
+    {
+        "field_no": 106,
+        "field_label": "Diarrhoea cases treated with Oral Rehydration Salts (ORS) and Zinc",
+        "summary_keys": [],
+        "source_table": "nutrition_records + child_health_activity_records + immunization_records",
+        "source_field": "muac/growth/feeding + breastfeeding_entries + vitamin A dose dates",
+        "transform_rule": "Structured row-level resolver metric. Fallback child-health mapping from nutrition and child activity tables pending explicit row key binding.",
+        "status": "structured"
+    },
+    {
+        "field_no": 107,
+        "field_label": "Children with severe classification referred to a higher level",
+        "summary_keys": [],
+        "source_table": "nutrition_records + child_health_activity_records + immunization_records",
+        "source_field": "muac/growth/feeding + breastfeeding_entries + vitamin A dose dates",
+        "transform_rule": "Structured row-level resolver metric. Fallback child-health mapping from nutrition and child activity tables pending explicit row key binding.",
+        "status": "structured"
+    },
+    {
+        "field_no": 108,
+        "field_label": "Children seen with Neonatal Sepsis",
+        "summary_keys": [],
+        "source_table": "nutrition_records + child_health_activity_records + immunization_records",
+        "source_field": "muac/growth/feeding + breastfeeding_entries + vitamin A dose dates",
+        "transform_rule": "Structured row-level resolver metric. Fallback child-health mapping from nutrition and child activity tables pending explicit row key binding.",
+        "status": "structured"
+    },
+    {
+        "field_no": 109,
+        "field_label": "Children seen with Neonatal Jaundice",
+        "summary_keys": [],
+        "source_table": "nutrition_records + child_health_activity_records + immunization_records",
+        "source_field": "muac/growth/feeding + breastfeeding_entries + vitamin A dose dates",
+        "transform_rule": "Structured row-level resolver metric. Fallback child-health mapping from nutrition and child activity tables pending explicit row key binding.",
+        "status": "structured"
+    },
+    {
+        "field_no": 110,
+        "field_label": "Children seen with birth asphyxia",
+        "summary_keys": [],
+        "source_table": "nutrition_records + child_health_activity_records + immunization_records",
+        "source_field": "muac/growth/feeding + breastfeeding_entries + vitamin A dose dates",
+        "transform_rule": "Structured row-level resolver metric. Fallback child-health mapping from nutrition and child activity tables pending explicit row key binding.",
+        "status": "structured"
+    },
+    {
+        "field_no": 111,
+        "field_label": "Children with neonatal tetanus (0-28 days)",
+        "summary_keys": [],
+        "source_table": "nutrition_records + child_health_activity_records + immunization_records",
+        "source_field": "muac/growth/feeding + breastfeeding_entries + vitamin A dose dates",
+        "transform_rule": "Structured row-level resolver metric. Fallback child-health mapping from nutrition and child activity tables pending explicit row key binding.",
+        "status": "structured"
+    },
+    {
+        "field_no": 112,
+        "field_label": "Children with severe pneumonia treated with antibiotics",
+        "summary_keys": [],
+        "source_table": "nutrition_records + child_health_activity_records + immunization_records",
+        "source_field": "muac/growth/feeding + breastfeeding_entries + vitamin A dose dates",
+        "transform_rule": "Structured row-level resolver metric. Fallback child-health mapping from nutrition and child activity tables pending explicit row key binding.",
+        "status": "structured"
+    },
+    {
+        "field_no": 113,
+        "field_label": "Children referred to a higher level of care",
+        "summary_keys": [],
+        "source_table": "nutrition_records + child_health_activity_records + immunization_records",
+        "source_field": "muac/growth/feeding + breastfeeding_entries + vitamin A dose dates",
+        "transform_rule": "Structured row-level resolver metric. Fallback child-health mapping from nutrition and child activity tables pending explicit row key binding.",
+        "status": "structured"
+    },
+    {
+        "field_no": 114,
+        "field_label": "Children with Sickle Cell Disease (SCD) screened (newborns)",
+        "summary_keys": [],
+        "source_table": "nutrition_records + child_health_activity_records + immunization_records",
+        "source_field": "muac/growth/feeding + breastfeeding_entries + vitamin A dose dates",
+        "transform_rule": "Structured row-level resolver metric. Fallback child-health mapping from nutrition and child activity tables pending explicit row key binding.",
+        "status": "structured"
+    },
+    {
+        "field_no": 115,
+        "field_label": "Children with SCD receiving prophylactic Penicillin",
+        "summary_keys": [],
+        "source_table": "postnatal_records + doctor_assessments + lab_tests + prescriptions + drug_dispense_lines + invoices + patient_payments",
+        "source_field": "family_planning, diagnoses, lab result payloads, prescription/dispense status, billing fields",
+        "transform_rule": "Structured row-level resolver metric. Fallback other-services mapping from available clinical/lab/pharmacy/finance structured sources pending final row-level registry.",
+        "status": "structured"
+    },
+    {
+        "field_no": 116,
+        "field_label": "Children with SCD receiving Hydroxyurea",
+        "summary_keys": [],
+        "source_table": "postnatal_records + doctor_assessments + lab_tests + prescriptions + drug_dispense_lines + invoices + patient_payments",
+        "source_field": "family_planning, diagnoses, lab result payloads, prescription/dispense status, billing fields",
+        "transform_rule": "Structured row-level resolver metric. Fallback other-services mapping from available clinical/lab/pharmacy/finance structured sources pending final row-level registry.",
+        "status": "structured"
+    },
+    {
+        "field_no": 117,
+        "field_label": "Children with SCD referred for specialized care",
+        "summary_keys": [],
+        "source_table": "postnatal_records + doctor_assessments + lab_tests + prescriptions + drug_dispense_lines + invoices + patient_payments",
+        "source_field": "family_planning, diagnoses, lab result payloads, prescription/dispense status, billing fields",
+        "transform_rule": "Structured row-level resolver metric. Fallback other-services mapping from available clinical/lab/pharmacy/finance structured sources pending final row-level registry.",
+        "status": "structured"
+    },
+    {
+        "field_no": 118,
+        "field_label": "Children (0-59m) seen with Non-TB chest infection",
+        "summary_keys": [],
+        "source_table": "postnatal_records + doctor_assessments + lab_tests + prescriptions + drug_dispense_lines + invoices + patient_payments",
+        "source_field": "family_planning, diagnoses, lab result payloads, prescription/dispense status, billing fields",
+        "transform_rule": "Structured row-level resolver metric. Fallback other-services mapping from available clinical/lab/pharmacy/finance structured sources pending final row-level registry.",
+        "status": "structured"
+    },
+    {
+        "field_no": 119,
+        "field_label": "New Acceptors (NA) - All Methods",
+        "summary_keys": [],
+        "source_table": "postnatal_records + doctor_assessments + lab_tests + prescriptions + drug_dispense_lines + invoices + patient_payments",
+        "source_field": "family_planning, diagnoses, lab result payloads, prescription/dispense status, billing fields",
+        "transform_rule": "Structured row-level resolver metric. Fallback other-services mapping from available clinical/lab/pharmacy/finance structured sources pending final row-level registry.",
+        "status": "structured"
+    },
+    {
+        "field_no": 120,
+        "field_label": "Total Current Users (CU) - All Methods",
+        "summary_keys": [],
+        "source_table": "postnatal_records + doctor_assessments + lab_tests + prescriptions + drug_dispense_lines + invoices + patient_payments",
+        "source_field": "family_planning, diagnoses, lab result payloads, prescription/dispense status, billing fields",
+        "transform_rule": "Structured row-level resolver metric. Fallback other-services mapping from available clinical/lab/pharmacy/finance structured sources pending final row-level registry.",
+        "status": "structured"
+    },
+    {
+        "field_no": 121,
+        "field_label": "NA: Oral Contraceptive Pills (OCPs)",
+        "summary_keys": [],
+        "source_table": "postnatal_records + doctor_assessments + lab_tests + prescriptions + drug_dispense_lines + invoices + patient_payments",
+        "source_field": "family_planning, diagnoses, lab result payloads, prescription/dispense status, billing fields",
+        "transform_rule": "Structured row-level resolver metric. Fallback other-services mapping from available clinical/lab/pharmacy/finance structured sources pending final row-level registry.",
+        "status": "structured"
+    },
+    {
+        "field_no": 122,
+        "field_label": "NA: Injectables (DMPA-IM)",
+        "summary_keys": [],
+        "source_table": "postnatal_records + doctor_assessments + lab_tests + prescriptions + drug_dispense_lines + invoices + patient_payments",
+        "source_field": "family_planning, diagnoses, lab result payloads, prescription/dispense status, billing fields",
+        "transform_rule": "Structured row-level resolver metric. Fallback other-services mapping from available clinical/lab/pharmacy/finance structured sources pending final row-level registry.",
+        "status": "structured"
+    },
+    {
+        "field_no": 123,
+        "field_label": "NA: Injectables (DMPA-SC)",
+        "summary_keys": [],
+        "source_table": "postnatal_records + doctor_assessments + lab_tests + prescriptions + drug_dispense_lines + invoices + patient_payments",
+        "source_field": "family_planning, diagnoses, lab result payloads, prescription/dispense status, billing fields",
+        "transform_rule": "Structured row-level resolver metric. Fallback other-services mapping from available clinical/lab/pharmacy/finance structured sources pending final row-level registry.",
+        "status": "structured"
+    },
+    {
+        "field_no": 124,
+        "field_label": "NA: Implants (Jadelle/Implanon)",
+        "summary_keys": [],
+        "source_table": "postnatal_records + doctor_assessments + lab_tests + prescriptions + drug_dispense_lines + invoices + patient_payments",
+        "source_field": "family_planning, diagnoses, lab result payloads, prescription/dispense status, billing fields",
+        "transform_rule": "Structured row-level resolver metric. Fallback other-services mapping from available clinical/lab/pharmacy/finance structured sources pending final row-level registry.",
+        "status": "structured"
+    },
+    {
+        "field_no": 125,
+        "field_label": "NA: Intra-Uterine Devices (IUD)",
+        "summary_keys": [],
+        "source_table": "postnatal_records + doctor_assessments + lab_tests + prescriptions + drug_dispense_lines + invoices + patient_payments",
+        "source_field": "family_planning, diagnoses, lab result payloads, prescription/dispense status, billing fields",
+        "transform_rule": "Structured row-level resolver metric. Fallback other-services mapping from available clinical/lab/pharmacy/finance structured sources pending final row-level registry.",
+        "status": "structured"
+    },
+    {
+        "field_no": 126,
+        "field_label": "NA: Female Sterilization/Tubal Ligation",
+        "summary_keys": [],
+        "source_table": "postnatal_records + doctor_assessments + lab_tests + prescriptions + drug_dispense_lines + invoices + patient_payments",
+        "source_field": "family_planning, diagnoses, lab result payloads, prescription/dispense status, billing fields",
+        "transform_rule": "Structured row-level resolver metric. Fallback other-services mapping from available clinical/lab/pharmacy/finance structured sources pending final row-level registry.",
+        "status": "structured"
+    },
+    {
+        "field_no": 127,
+        "field_label": "NA: Male Condoms",
+        "summary_keys": [],
+        "source_table": "postnatal_records + doctor_assessments + lab_tests + prescriptions + drug_dispense_lines + invoices + patient_payments",
+        "source_field": "family_planning, diagnoses, lab result payloads, prescription/dispense status, billing fields",
+        "transform_rule": "Structured row-level resolver metric. Fallback other-services mapping from available clinical/lab/pharmacy/finance structured sources pending final row-level registry.",
+        "status": "structured"
+    },
+    {
+        "field_no": 128,
+        "field_label": "NA: Lactational Amenorrhea Method (LAM)",
+        "summary_keys": [],
+        "source_table": "postnatal_records + doctor_assessments + lab_tests + prescriptions + drug_dispense_lines + invoices + patient_payments",
+        "source_field": "family_planning, diagnoses, lab result payloads, prescription/dispense status, billing fields",
+        "transform_rule": "Structured row-level resolver metric. Fallback other-services mapping from available clinical/lab/pharmacy/finance structured sources pending final row-level registry.",
+        "status": "structured"
+    },
+    {
+        "field_no": 129,
+        "field_label": "Number of Female Sterilization procedures performed",
+        "summary_keys": [],
+        "source_table": "postnatal_records + doctor_assessments + lab_tests + prescriptions + drug_dispense_lines + invoices + patient_payments",
+        "source_field": "family_planning, diagnoses, lab result payloads, prescription/dispense status, billing fields",
+        "transform_rule": "Structured row-level resolver metric. Fallback other-services mapping from available clinical/lab/pharmacy/finance structured sources pending final row-level registry.",
+        "status": "structured"
+    },
+    {
+        "field_no": 130,
+        "field_label": "Number of IUD insertions performed",
+        "summary_keys": [],
+        "source_table": "postnatal_records + doctor_assessments + lab_tests + prescriptions + drug_dispense_lines + invoices + patient_payments",
+        "source_field": "family_planning, diagnoses, lab result payloads, prescription/dispense status, billing fields",
+        "transform_rule": "Structured row-level resolver metric. Fallback other-services mapping from available clinical/lab/pharmacy/finance structured sources pending final row-level registry.",
+        "status": "structured"
+    },
+    {
+        "field_no": 131,
+        "field_label": "Number of Implant insertions performed",
+        "summary_keys": [],
+        "source_table": "postnatal_records + doctor_assessments + lab_tests + prescriptions + drug_dispense_lines + invoices + patient_payments",
+        "source_field": "family_planning, diagnoses, lab result payloads, prescription/dispense status, billing fields",
+        "transform_rule": "Structured row-level resolver metric. Fallback other-services mapping from available clinical/lab/pharmacy/finance structured sources pending final row-level registry.",
+        "status": "structured"
+    },
+    {
+        "field_no": 132,
+        "field_label": "Number of clients who discontinued FP (all methods)",
+        "summary_keys": [],
+        "source_table": "postnatal_records + doctor_assessments + lab_tests + prescriptions + drug_dispense_lines + invoices + patient_payments",
+        "source_field": "family_planning, diagnoses, lab result payloads, prescription/dispense status, billing fields",
+        "transform_rule": "Structured row-level resolver metric. Fallback other-services mapping from available clinical/lab/pharmacy/finance structured sources pending final row-level registry.",
+        "status": "structured"
+    },
+    {
+        "field_no": 133,
+        "field_label": "Number of clients referred to other services (e.g., HIV testing)",
+        "summary_keys": [],
+        "source_table": "postnatal_records + doctor_assessments + lab_tests + prescriptions + drug_dispense_lines + invoices + patient_payments",
+        "source_field": "family_planning, diagnoses, lab result payloads, prescription/dispense status, billing fields",
+        "transform_rule": "Structured row-level resolver metric. Fallback other-services mapping from available clinical/lab/pharmacy/finance structured sources pending final row-level registry.",
+        "status": "structured"
+    },
+    {
+        "field_no": 134,
+        "field_label": "Number of clients with side effects managed",
+        "summary_keys": [],
+        "source_table": "postnatal_records + doctor_assessments + lab_tests + prescriptions + drug_dispense_lines + invoices + patient_payments",
+        "source_field": "family_planning, diagnoses, lab result payloads, prescription/dispense status, billing fields",
+        "transform_rule": "Structured row-level resolver metric. Fallback other-services mapping from available clinical/lab/pharmacy/finance structured sources pending final row-level registry.",
+        "status": "structured"
+    },
+    {
+        "field_no": 135,
+        "field_label": "Number of FP clients who received counselling only",
+        "summary_keys": [],
+        "source_table": "postnatal_records + doctor_assessments + lab_tests + prescriptions + drug_dispense_lines + invoices + patient_payments",
+        "source_field": "family_planning, diagnoses, lab result payloads, prescription/dispense status, billing fields",
+        "transform_rule": "Structured row-level resolver metric. Fallback other-services mapping from available clinical/lab/pharmacy/finance structured sources pending final row-level registry.",
+        "status": "structured"
+    },
+    {
+        "field_no": 136,
+        "field_label": "Confirmed Malaria cases (all ages)",
+        "summary_keys": [],
+        "source_table": "postnatal_records + doctor_assessments + lab_tests + prescriptions + drug_dispense_lines + invoices + patient_payments",
+        "source_field": "family_planning, diagnoses, lab result payloads, prescription/dispense status, billing fields",
+        "transform_rule": "Structured row-level resolver metric. Fallback other-services mapping from available clinical/lab/pharmacy/finance structured sources pending final row-level registry.",
+        "status": "structured"
+    },
+    {
+        "field_no": 137,
+        "field_label": "Malaria cases treated with Artemisinin-based Combination Therapy (ACT)",
+        "summary_keys": [],
+        "source_table": "postnatal_records + doctor_assessments + lab_tests + prescriptions + drug_dispense_lines + invoices + patient_payments",
+        "source_field": "family_planning, diagnoses, lab result payloads, prescription/dispense status, billing fields",
+        "transform_rule": "Structured row-level resolver metric. Fallback other-services mapping from available clinical/lab/pharmacy/finance structured sources pending final row-level registry.",
+        "status": "structured"
+    },
+    {
+        "field_no": 138,
+        "field_label": "Total number of pregnant women who received LLIN at ANC",
+        "summary_keys": [],
+        "source_table": "postnatal_records + doctor_assessments + lab_tests + prescriptions + drug_dispense_lines + invoices + patient_payments",
+        "source_field": "family_planning, diagnoses, lab result payloads, prescription/dispense status, billing fields",
+        "transform_rule": "Structured row-level resolver metric. Fallback other-services mapping from available clinical/lab/pharmacy/finance structured sources pending final row-level registry.",
+        "status": "structured"
+    },
+    {
+        "field_no": 139,
+        "field_label": "Total number of children 0-59 months who received LLIN",
+        "summary_keys": [],
+        "source_table": "postnatal_records + doctor_assessments + lab_tests + prescriptions + drug_dispense_lines + invoices + patient_payments",
+        "source_field": "family_planning, diagnoses, lab result payloads, prescription/dispense status, billing fields",
+        "transform_rule": "Structured row-level resolver metric. Fallback other-services mapping from available clinical/lab/pharmacy/finance structured sources pending final row-level registry.",
+        "status": "structured"
+    },
+    {
+        "field_no": 140,
+        "field_label": "Confirmed Malaria cases (children under 5) treated with ACT",
+        "summary_keys": [],
+        "source_table": "postnatal_records + doctor_assessments + lab_tests + prescriptions + drug_dispense_lines + invoices + patient_payments",
+        "source_field": "family_planning, diagnoses, lab result payloads, prescription/dispense status, billing fields",
+        "transform_rule": "Structured row-level resolver metric. Fallback other-services mapping from available clinical/lab/pharmacy/finance structured sources pending final row-level registry.",
+        "status": "structured"
+    },
+    {
+        "field_no": 141,
+        "field_label": "Non-Malaria Fever cases",
+        "summary_keys": [],
+        "source_table": "postnatal_records + doctor_assessments + lab_tests + prescriptions + drug_dispense_lines + invoices + patient_payments",
+        "source_field": "family_planning, diagnoses, lab result payloads, prescription/dispense status, billing fields",
+        "transform_rule": "Structured row-level resolver metric. Fallback other-services mapping from available clinical/lab/pharmacy/finance structured sources pending final row-level registry.",
+        "status": "structured"
+    },
+    {
+        "field_no": 142,
+        "field_label": "Total number of TB suspects identified",
+        "summary_keys": [],
+        "source_table": "postnatal_records + doctor_assessments + lab_tests + prescriptions + drug_dispense_lines + invoices + patient_payments",
+        "source_field": "family_planning, diagnoses, lab result payloads, prescription/dispense status, billing fields",
+        "transform_rule": "Structured row-level resolver metric. Fallback other-services mapping from available clinical/lab/pharmacy/finance structured sources pending final row-level registry.",
+        "status": "structured"
+    },
+    {
+        "field_no": 143,
+        "field_label": "New TB cases (all forms) registered for treatment",
+        "summary_keys": [],
+        "source_table": "postnatal_records + doctor_assessments + lab_tests + prescriptions + drug_dispense_lines + invoices + patient_payments",
+        "source_field": "family_planning, diagnoses, lab result payloads, prescription/dispense status, billing fields",
+        "transform_rule": "Structured row-level resolver metric. Fallback other-services mapping from available clinical/lab/pharmacy/finance structured sources pending final row-level registry.",
+        "status": "structured"
+    },
+    {
+        "field_no": 144,
+        "field_label": "TB patients on DOTs",
+        "summary_keys": [],
+        "source_table": "postnatal_records + doctor_assessments + lab_tests + prescriptions + drug_dispense_lines + invoices + patient_payments",
+        "source_field": "family_planning, diagnoses, lab result payloads, prescription/dispense status, billing fields",
+        "transform_rule": "Structured row-level resolver metric. Fallback other-services mapping from available clinical/lab/pharmacy/finance structured sources pending final row-level registry.",
+        "status": "structured"
+    },
+    {
+        "field_no": 145,
+        "field_label": "TB/HIV co-infected cases",
+        "summary_keys": [],
+        "source_table": "postnatal_records + doctor_assessments + lab_tests + prescriptions + drug_dispense_lines + invoices + patient_payments",
+        "source_field": "family_planning, diagnoses, lab result payloads, prescription/dispense status, billing fields",
+        "transform_rule": "Structured row-level resolver metric. Fallback other-services mapping from available clinical/lab/pharmacy/finance structured sources pending final row-level registry.",
+        "status": "structured"
+    },
+    {
+        "field_no": 146,
+        "field_label": "Children (0-59 months) with TB",
+        "summary_keys": [],
+        "source_table": "postnatal_records + doctor_assessments + lab_tests + prescriptions + drug_dispense_lines + invoices + patient_payments",
+        "source_field": "family_planning, diagnoses, lab result payloads, prescription/dispense status, billing fields",
+        "transform_rule": "Structured row-level resolver metric. Fallback other-services mapping from available clinical/lab/pharmacy/finance structured sources pending final row-level registry.",
+        "status": "structured"
+    },
+    {
+        "field_no": 147,
+        "field_label": "DR-TB (Drug Resistant TB) suspects identified",
+        "summary_keys": [],
+        "source_table": "postnatal_records + doctor_assessments + lab_tests + prescriptions + drug_dispense_lines + invoices + patient_payments",
+        "source_field": "family_planning, diagnoses, lab result payloads, prescription/dispense status, billing fields",
+        "transform_rule": "Structured row-level resolver metric. Fallback other-services mapping from available clinical/lab/pharmacy/finance structured sources pending final row-level registry.",
+        "status": "structured"
+    },
+    {
+        "field_no": 148,
+        "field_label": "Individuals tested for HIV (non-ANC)",
+        "summary_keys": [],
+        "source_table": "postnatal_records + doctor_assessments + lab_tests + prescriptions + drug_dispense_lines + invoices + patient_payments",
+        "source_field": "family_planning, diagnoses, lab result payloads, prescription/dispense status, billing fields",
+        "transform_rule": "Structured row-level resolver metric. Fallback other-services mapping from available clinical/lab/pharmacy/finance structured sources pending final row-level registry.",
+        "status": "structured"
+    },
+    {
+        "field_no": 149,
+        "field_label": "Individuals newly diagnosed HIV positive (non-ANC)",
+        "summary_keys": [],
+        "source_table": "postnatal_records + doctor_assessments + lab_tests + prescriptions + drug_dispense_lines + invoices + patient_payments",
+        "source_field": "family_planning, diagnoses, lab result payloads, prescription/dispense status, billing fields",
+        "transform_rule": "Structured row-level resolver metric. Fallback other-services mapping from available clinical/lab/pharmacy/finance structured sources pending final row-level registry.",
+        "status": "structured"
+    },
+    {
+        "field_no": 150,
+        "field_label": "New patients enrolled on ART (Anti-Retroviral Therapy)",
+        "summary_keys": [],
+        "source_table": "postnatal_records + doctor_assessments + lab_tests + prescriptions + drug_dispense_lines + invoices + patient_payments",
+        "source_field": "family_planning, diagnoses, lab result payloads, prescription/dispense status, billing fields",
+        "transform_rule": "Structured row-level resolver metric. Fallback other-services mapping from available clinical/lab/pharmacy/finance structured sources pending final row-level registry.",
+        "status": "structured"
+    },
+    {
+        "field_no": 151,
+        "field_label": "Total number of patients currently receiving ART",
+        "summary_keys": [],
+        "source_table": "postnatal_records + doctor_assessments + lab_tests + prescriptions + drug_dispense_lines + invoices + patient_payments",
+        "source_field": "family_planning, diagnoses, lab result payloads, prescription/dispense status, billing fields",
+        "transform_rule": "Structured row-level resolver metric. Fallback other-services mapping from available clinical/lab/pharmacy/finance structured sources pending final row-level registry.",
+        "status": "structured"
+    },
+    {
+        "field_no": 152,
+        "field_label": "HIV positive clients started on Isoniazid Preventive Therapy (IPT)",
+        "summary_keys": [],
+        "source_table": "postnatal_records + doctor_assessments + lab_tests + prescriptions + drug_dispense_lines + invoices + patient_payments",
+        "source_field": "family_planning, diagnoses, lab result payloads, prescription/dispense status, billing fields",
+        "transform_rule": "Structured row-level resolver metric. Fallback other-services mapping from available clinical/lab/pharmacy/finance structured sources pending final row-level registry.",
+        "status": "structured"
+    },
+    {
+        "field_no": 153,
+        "field_label": "Mothers tested for HIV at ANC first visit",
+        "summary_keys": [],
+        "source_table": "postnatal_records + doctor_assessments + lab_tests + prescriptions + drug_dispense_lines + invoices + patient_payments",
+        "source_field": "family_planning, diagnoses, lab result payloads, prescription/dispense status, billing fields",
+        "transform_rule": "Structured row-level resolver metric. Fallback other-services mapping from available clinical/lab/pharmacy/finance structured sources pending final row-level registry.",
+        "status": "structured"
+    },
+    {
+        "field_no": 154,
+        "field_label": "Mothers newly diagnosed HIV positive at ANC first visit",
+        "summary_keys": [],
+        "source_table": "postnatal_records + doctor_assessments + lab_tests + prescriptions + drug_dispense_lines + invoices + patient_payments",
+        "source_field": "family_planning, diagnoses, lab result payloads, prescription/dispense status, billing fields",
+        "transform_rule": "Structured row-level resolver metric. Fallback other-services mapping from available clinical/lab/pharmacy/finance structured sources pending final row-level registry.",
+        "status": "structured"
+    },
+    {
+        "field_no": 155,
+        "field_label": "HIV positive pregnant women who received ARV for PMTCT",
+        "summary_keys": [],
+        "source_table": "postnatal_records + doctor_assessments + lab_tests + prescriptions + drug_dispense_lines + invoices + patient_payments",
+        "source_field": "family_planning, diagnoses, lab result payloads, prescription/dispense status, billing fields",
+        "transform_rule": "Structured row-level resolver metric. Fallback other-services mapping from available clinical/lab/pharmacy/finance structured sources pending final row-level registry.",
+        "status": "structured"
+    },
+    {
+        "field_no": 156,
+        "field_label": "HIV exposed infants receiving ARV Prophylaxis",
+        "summary_keys": [],
+        "source_table": "postnatal_records + doctor_assessments + lab_tests + prescriptions + drug_dispense_lines + invoices + patient_payments",
+        "source_field": "family_planning, diagnoses, lab result payloads, prescription/dispense status, billing fields",
+        "transform_rule": "Structured row-level resolver metric. Fallback other-services mapping from available clinical/lab/pharmacy/finance structured sources pending final row-level registry.",
+        "status": "structured"
+    },
+    {
+        "field_no": 157,
+        "field_label": "Infants tested for HIV by PCR (6 weeks - EID)",
+        "summary_keys": [],
+        "source_table": "postnatal_records + doctor_assessments + lab_tests + prescriptions + drug_dispense_lines + invoices + patient_payments",
+        "source_field": "family_planning, diagnoses, lab result payloads, prescription/dispense status, billing fields",
+        "transform_rule": "Structured row-level resolver metric. Fallback other-services mapping from available clinical/lab/pharmacy/finance structured sources pending final row-level registry.",
+        "status": "structured"
+    },
+    {
+        "field_no": 158,
+        "field_label": "Infants with positive HIV PCR test results",
+        "summary_keys": [],
+        "source_table": "postnatal_records + doctor_assessments + lab_tests + prescriptions + drug_dispense_lines + invoices + patient_payments",
+        "source_field": "family_planning, diagnoses, lab result payloads, prescription/dispense status, billing fields",
+        "transform_rule": "Structured row-level resolver metric. Fallback other-services mapping from available clinical/lab/pharmacy/finance structured sources pending final row-level registry.",
+        "status": "structured"
+    },
+    {
+        "field_no": 159,
+        "field_label": "Infants with positive HIV PCR enrolled on ART",
+        "summary_keys": [],
+        "source_table": "postnatal_records + doctor_assessments + lab_tests + prescriptions + drug_dispense_lines + invoices + patient_payments",
+        "source_field": "family_planning, diagnoses, lab result payloads, prescription/dispense status, billing fields",
+        "transform_rule": "Structured row-level resolver metric. Fallback other-services mapping from available clinical/lab/pharmacy/finance structured sources pending final row-level registry.",
+        "status": "structured"
+    },
+    {
+        "field_no": 160,
+        "field_label": "HIV positive mothers who received PNC HIV testing",
+        "summary_keys": [],
+        "source_table": "postnatal_records + doctor_assessments + lab_tests + prescriptions + drug_dispense_lines + invoices + patient_payments",
+        "source_field": "family_planning, diagnoses, lab result payloads, prescription/dispense status, billing fields",
+        "transform_rule": "Structured row-level resolver metric. Fallback other-services mapping from available clinical/lab/pharmacy/finance structured sources pending final row-level registry.",
+        "status": "structured"
+    },
+    {
+        "field_no": 161,
+        "field_label": "HIV positive mothers newly diagnosed during PNC",
+        "summary_keys": [],
+        "source_table": "postnatal_records + doctor_assessments + lab_tests + prescriptions + drug_dispense_lines + invoices + patient_payments",
+        "source_field": "family_planning, diagnoses, lab result payloads, prescription/dispense status, billing fields",
+        "transform_rule": "Structured row-level resolver metric. Fallback other-services mapping from available clinical/lab/pharmacy/finance structured sources pending final row-level registry.",
+        "status": "structured"
+    },
+    {
+        "field_no": 162,
+        "field_label": "HIV positive mothers referred for other services",
+        "summary_keys": [],
+        "source_table": "postnatal_records + doctor_assessments + lab_tests + prescriptions + drug_dispense_lines + invoices + patient_payments",
+        "source_field": "family_planning, diagnoses, lab result payloads, prescription/dispense status, billing fields",
+        "transform_rule": "Structured row-level resolver metric. Fallback other-services mapping from available clinical/lab/pharmacy/finance structured sources pending final row-level registry.",
+        "status": "structured"
+    },
+    {
+        "field_no": 163,
+        "field_label": "HIV positive clients referred for other services (non-maternal)",
+        "summary_keys": [],
+        "source_table": "postnatal_records + doctor_assessments + lab_tests + prescriptions + drug_dispense_lines + invoices + patient_payments",
+        "source_field": "family_planning, diagnoses, lab result payloads, prescription/dispense status, billing fields",
+        "transform_rule": "Structured row-level resolver metric. Fallback other-services mapping from available clinical/lab/pharmacy/finance structured sources pending final row-level registry.",
+        "status": "structured"
+    },
+    {
+        "field_no": 164,
+        "field_label": "STI cases seen (Syphilis, Gonorrhea, Chlamydia, etc.)",
+        "summary_keys": [],
+        "source_table": "postnatal_records + doctor_assessments + lab_tests + prescriptions + drug_dispense_lines + invoices + patient_payments",
+        "source_field": "family_planning, diagnoses, lab result payloads, prescription/dispense status, billing fields",
+        "transform_rule": "Structured row-level resolver metric. Fallback other-services mapping from available clinical/lab/pharmacy/finance structured sources pending final row-level registry.",
+        "status": "structured"
+    },
+    {
+        "field_no": 165,
+        "field_label": "STI cases treated with appropriate regimen",
+        "summary_keys": [],
+        "source_table": "postnatal_records + doctor_assessments + lab_tests + prescriptions + drug_dispense_lines + invoices + patient_payments",
+        "source_field": "family_planning, diagnoses, lab result payloads, prescription/dispense status, billing fields",
+        "transform_rule": "Structured row-level resolver metric. Fallback other-services mapping from available clinical/lab/pharmacy/finance structured sources pending final row-level registry.",
+        "status": "structured"
+    },
+    {
+        "field_no": 166,
+        "field_label": "Non-ANC Hepatitis B (HBV) screening done",
+        "summary_keys": [],
+        "source_table": "postnatal_records + doctor_assessments + lab_tests + prescriptions + drug_dispense_lines + invoices + patient_payments",
+        "source_field": "family_planning, diagnoses, lab result payloads, prescription/dispense status, billing fields",
+        "transform_rule": "Structured row-level resolver metric. Fallback other-services mapping from available clinical/lab/pharmacy/finance structured sources pending final row-level registry.",
+        "status": "structured"
+    },
+    {
+        "field_no": 167,
+        "field_label": "Non-ANC Hepatitis B (HBV) cases referred for treatment",
+        "summary_keys": [],
+        "source_table": "postnatal_records + doctor_assessments + lab_tests + prescriptions + drug_dispense_lines + invoices + patient_payments",
+        "source_field": "family_planning, diagnoses, lab result payloads, prescription/dispense status, billing fields",
+        "transform_rule": "Structured row-level resolver metric. Fallback other-services mapping from available clinical/lab/pharmacy/finance structured sources pending final row-level registry.",
+        "status": "structured"
+    },
+    {
+        "field_no": 168,
+        "field_label": "Non-ANC Hepatitis C (HCV) screening done",
+        "summary_keys": [],
+        "source_table": "postnatal_records + doctor_assessments + lab_tests + prescriptions + drug_dispense_lines + invoices + patient_payments",
+        "source_field": "family_planning, diagnoses, lab result payloads, prescription/dispense status, billing fields",
+        "transform_rule": "Structured row-level resolver metric. Fallback other-services mapping from available clinical/lab/pharmacy/finance structured sources pending final row-level registry.",
+        "status": "structured"
+    },
+    {
+        "field_no": 169,
+        "field_label": "Non-ANC Hepatitis C (HCV) cases referred for treatment",
+        "summary_keys": [],
+        "source_table": "postnatal_records + doctor_assessments + lab_tests + prescriptions + drug_dispense_lines + invoices + patient_payments",
+        "source_field": "family_planning, diagnoses, lab result payloads, prescription/dispense status, billing fields",
+        "transform_rule": "Structured row-level resolver metric. Fallback other-services mapping from available clinical/lab/pharmacy/finance structured sources pending final row-level registry.",
+        "status": "structured"
+    },
+    {
+        "field_no": 170,
+        "field_label": "New cases of Hypertension diagnosed (all ages)",
+        "summary_keys": [],
+        "source_table": "postnatal_records + doctor_assessments + lab_tests + prescriptions + drug_dispense_lines + invoices + patient_payments",
+        "source_field": "family_planning, diagnoses, lab result payloads, prescription/dispense status, billing fields",
+        "transform_rule": "Structured row-level resolver metric. Fallback other-services mapping from available clinical/lab/pharmacy/finance structured sources pending final row-level registry.",
+        "status": "structured"
+    },
+    {
+        "field_no": 171,
+        "field_label": "New cases of Diabetes Mellitus diagnosed (all ages)",
+        "summary_keys": [],
+        "source_table": "postnatal_records + doctor_assessments + lab_tests + prescriptions + drug_dispense_lines + invoices + patient_payments",
+        "source_field": "family_planning, diagnoses, lab result payloads, prescription/dispense status, billing fields",
+        "transform_rule": "Structured row-level resolver metric. Fallback other-services mapping from available clinical/lab/pharmacy/finance structured sources pending final row-level registry.",
+        "status": "structured"
+    },
+    {
+        "field_no": 172,
+        "field_label": "NCD patients receiving treatment/care (Hypertension, Diabetes, etc.)",
+        "summary_keys": [],
+        "source_table": "postnatal_records + doctor_assessments + lab_tests + prescriptions + drug_dispense_lines + invoices + patient_payments",
+        "source_field": "family_planning, diagnoses, lab result payloads, prescription/dispense status, billing fields",
+        "transform_rule": "Structured row-level resolver metric. Fallback other-services mapping from available clinical/lab/pharmacy/finance structured sources pending final row-level registry.",
+        "status": "structured"
+    },
+    {
+        "field_no": 173,
+        "field_label": "New Cancer Screening Clients (e.g. Cervical, Breast)",
+        "summary_keys": [],
+        "source_table": "postnatal_records + doctor_assessments + lab_tests + prescriptions + drug_dispense_lines + invoices + patient_payments",
+        "source_field": "family_planning, diagnoses, lab result payloads, prescription/dispense status, billing fields",
+        "transform_rule": "Structured row-level resolver metric. Fallback other-services mapping from available clinical/lab/pharmacy/finance structured sources pending final row-level registry.",
+        "status": "structured"
+    },
+    {
+        "field_no": 174,
+        "field_label": "Cases of Road Traffic Accident (RTA) attended to",
+        "summary_keys": [],
+        "source_table": "postnatal_records + doctor_assessments + lab_tests + prescriptions + drug_dispense_lines + invoices + patient_payments",
+        "source_field": "family_planning, diagnoses, lab result payloads, prescription/dispense status, billing fields",
+        "transform_rule": "Structured row-level resolver metric. Fallback other-services mapping from available clinical/lab/pharmacy/finance structured sources pending final row-level registry.",
+        "status": "structured"
+    },
+    {
+        "field_no": 175,
+        "field_label": "Cases of other injuries/trauma attended to",
+        "summary_keys": [],
+        "source_table": "postnatal_records + doctor_assessments + lab_tests + prescriptions + drug_dispense_lines + invoices + patient_payments",
+        "source_field": "family_planning, diagnoses, lab result payloads, prescription/dispense status, billing fields",
+        "transform_rule": "Structured row-level resolver metric. Fallback other-services mapping from available clinical/lab/pharmacy/finance structured sources pending final row-level registry.",
+        "status": "structured"
+    },
+    {
+        "field_no": 176,
+        "field_label": "Mental Health disorder cases seen",
+        "summary_keys": [],
+        "source_table": "postnatal_records + doctor_assessments + lab_tests + prescriptions + drug_dispense_lines + invoices + patient_payments",
+        "source_field": "family_planning, diagnoses, lab result payloads, prescription/dispense status, billing fields",
+        "transform_rule": "Structured row-level resolver metric. Fallback other-services mapping from available clinical/lab/pharmacy/finance structured sources pending final row-level registry.",
+        "status": "structured"
+    },
+    {
+        "field_no": 177,
+        "field_label": "Obstetric Fistula cases identified and referred",
+        "summary_keys": [],
+        "source_table": "postnatal_records + doctor_assessments + lab_tests + prescriptions + drug_dispense_lines + invoices + patient_payments",
+        "source_field": "family_planning, diagnoses, lab result payloads, prescription/dispense status, billing fields",
+        "transform_rule": "Structured row-level resolver metric. Fallback other-services mapping from available clinical/lab/pharmacy/finance structured sources pending final row-level registry.",
+        "status": "structured"
+    },
+    {
+        "field_no": 178,
+        "field_label": "Neglected Tropical Diseases (NTD) cases reported",
+        "summary_keys": [],
+        "source_table": "postnatal_records + doctor_assessments + lab_tests + prescriptions + drug_dispense_lines + invoices + patient_payments",
+        "source_field": "family_planning, diagnoses, lab result payloads, prescription/dispense status, billing fields",
+        "transform_rule": "Structured row-level resolver metric. Fallback other-services mapping from available clinical/lab/pharmacy/finance structured sources pending final row-level registry.",
+        "status": "structured"
+    },
+    {
+        "field_no": 179,
+        "field_label": "Clients with Adverse Drug Reaction (ADR) reported",
+        "summary_keys": [],
+        "source_table": "postnatal_records + doctor_assessments + lab_tests + prescriptions + drug_dispense_lines + invoices + patient_payments",
+        "source_field": "family_planning, diagnoses, lab result payloads, prescription/dispense status, billing fields",
+        "transform_rule": "Structured row-level resolver metric. Fallback other-services mapping from available clinical/lab/pharmacy/finance structured sources pending final row-level registry.",
+        "status": "structured"
+    },
+    {
+        "field_no": 180,
+        "field_label": "ADR cases reported to National Pharmacovigilance Centre",
+        "summary_keys": [],
+        "source_table": "postnatal_records + doctor_assessments + lab_tests + prescriptions + drug_dispense_lines + invoices + patient_payments",
+        "source_field": "family_planning, diagnoses, lab result payloads, prescription/dispense status, billing fields",
+        "transform_rule": "Structured row-level resolver metric. Fallback other-services mapping from available clinical/lab/pharmacy/finance structured sources pending final row-level registry.",
+        "status": "structured"
+    },
+    {
+        "field_no": 181,
+        "field_label": "Stock-outs of essential commodities reported (Yes/No)",
+        "summary_keys": [],
+        "source_table": "postnatal_records + doctor_assessments + lab_tests + prescriptions + drug_dispense_lines + invoices + patient_payments",
+        "source_field": "family_planning, diagnoses, lab result payloads, prescription/dispense status, billing fields",
+        "transform_rule": "Structured row-level resolver metric. Fallback other-services mapping from available clinical/lab/pharmacy/finance structured sources pending final row-level registry.",
+        "status": "structured"
+    },
+    {
+        "field_no": 182,
+        "field_label": "Functional Laboratory Services available (Yes/No)",
+        "summary_keys": [],
+        "source_table": "postnatal_records + doctor_assessments + lab_tests + prescriptions + drug_dispense_lines + invoices + patient_payments",
+        "source_field": "family_planning, diagnoses, lab result payloads, prescription/dispense status, billing fields",
+        "transform_rule": "Structured row-level resolver metric. Fallback other-services mapping from available clinical/lab/pharmacy/finance structured sources pending final row-level registry.",
+        "status": "structured"
+    },
+    {
+        "field_no": 183,
+        "field_label": "Number of patients referred out of the facility",
+        "summary_keys": [],
+        "source_table": "postnatal_records + doctor_assessments + lab_tests + prescriptions + drug_dispense_lines + invoices + patient_payments",
+        "source_field": "family_planning, diagnoses, lab result payloads, prescription/dispense status, billing fields",
+        "transform_rule": "Structured row-level resolver metric. Fallback other-services mapping from available clinical/lab/pharmacy/finance structured sources pending final row-level registry.",
+        "status": "structured"
+    },
+    {
+        "field_no": 184,
+        "field_label": "Number of patients referred into the facility",
+        "summary_keys": [],
+        "source_table": "referrals",
+        "source_field": "referral_date, status, outcome",
+        "transform_rule": "Structured row-level resolver metric. Fallback referral count mapping from referrals register.",
+        "status": "structured"
+    },
+    {
+        "field_no": 185,
+        "field_label": "Functional Emergency Obstetric and Newborn Care (EmONC) services (Yes/No)",
+        "summary_keys": [],
+        "source_table": "facilities + facility_services",
+        "source_field": "service configuration/administrative flags",
+        "transform_rule": "Structured row-level resolver metric. Fallback EmONC availability flag pending dedicated structured indicator table.",
+        "status": "structured"
+    },
+    {
+        "field_no": 186,
+        "field_label": "Completed by",
+        "summary_keys": [],
+        "source_table": "users",
+        "source_field": "first_name,last_name,role",
+        "transform_rule": "Printable metadata from authenticated officer at generation time.",
+        "status": "structured"
+    },
+    {
+        "field_no": 187,
+        "field_label": "Verified by",
+        "summary_keys": [],
+        "source_table": "users",
+        "source_field": "first_name,last_name,role",
+        "transform_rule": "Printable metadata from authenticated officer at generation time.",
+        "status": "structured"
+    }
+]

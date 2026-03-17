@@ -29,6 +29,15 @@ Primary UI reference for design decisions:
 5. Do not split one workflow into multiple legacy pages in navigation (no repeated modules):
    - Use one canonical module route/page per workflow (example: staff management).
    - Keep old legacy routes as redirects to the canonical page for backward compatibility.
+6. Module access hard rule:
+   - All module routes under `workspaces/{patientId}/...` must include `module.enabled:{module_key}` middleware.
+   - Core routes that represent facility module operations (for example laboratory/pharmacy operations, reminders hub, appointments, reports hub) must also include `module.enabled:{module_key}` middleware where a module key exists.
+   - Missing `facility_module_accesses` rows default to allowed; explicit disabled rows must return `403`.
+   - Enable/disable control must be performed in Central Admin only (`/central/facility-module-management`); facility-side pages may display status but must not own toggle actions.
+7. Central menu/link hygiene hard rule:
+   - Central sidebar entries must point only to real, routable URLs.
+   - When replacing or removing central legacy URLs, add compatibility redirects for old bookmarks under `/central-admin/*`.
+   - No dead placeholder links should remain in `resources/menu/centralAdminMenu.json`.
 
 ## 3) UI Rules (Project Standard)
 
@@ -107,7 +116,11 @@ Primary UI reference for design decisions:
    - `php artisan route:list`
    - `php artisan test`
 2. For new workflow-heavy modules, add feature tests for critical transitions (`pending` -> `completed` / `dispensed`).
-3. No handover without documentation updates:
+3. For new module routes, add access tests for `module.enabled` enforcement:
+   - disabled module row returns `403`
+   - enabled module row returns `200`
+   - missing module row remains allowed unless product policy changes
+4. No handover without documentation updates:
    - `docs/APP1_MODULE_STATUS.md`
    - `docs/APP1_WORKFLOW_ROADMAP.md`
    - relevant gap/handoff docs.

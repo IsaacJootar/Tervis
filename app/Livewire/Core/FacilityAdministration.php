@@ -164,6 +164,7 @@ class FacilityAdministration extends Component
       ['key' => 'family_planning', 'label' => 'Family Planning'],
       ['key' => 'health_insurance', 'label' => 'Health Insurance'],
       ['key' => 'visits', 'label' => 'Visits'],
+      ['key' => 'reports', 'label' => 'Reports'],
     ];
   }
 
@@ -616,36 +617,7 @@ class FacilityAdministration extends Component
 
   public function toggleModuleAccess(int $id): void
   {
-    if (!$this->ensureTablesReady()) {
-      return;
-    }
-
-    try {
-      $module = FacilityModuleAccess::query()
-        ->where('facility_id', $this->facility_id)
-        ->findOrFail($id);
-
-      $oldStatus = (bool) $module->is_enabled;
-      $module->update([
-        'is_enabled' => !$oldStatus,
-        'last_changed_by_user_id' => $this->admin_user_id,
-      ]);
-
-      $this->logAudit(
-        'module_access_toggled',
-        'facility_module_access',
-        (int) $module->id,
-        ['is_enabled' => $oldStatus],
-        ['is_enabled' => (bool) $module->is_enabled],
-        "{$module->module_label} module access toggled."
-      );
-
-      toastr()->success("Module access updated for '{$module->module_label}'.");
-      $this->refreshPageSoon(800);
-    } catch (\Throwable $e) {
-      toastr()->error('Unable to update module access.');
-      report($e);
-    }
+    toastr()->error('Module access is managed from Central Admin.');
   }
 
   public function onServiceModalHidden(): void

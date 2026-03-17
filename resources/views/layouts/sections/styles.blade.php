@@ -293,6 +293,88 @@
         background-color: #f8f9fa !important;
         color: #696cff !important;
     }
+
+    /* Sidebar brand + scroll support for long tenant menus */
+    #layout-menu .app-brand-logo.cureva-logo {
+        width: 34px;
+        height: 34px;
+        border-radius: 8px;
+        object-fit: contain;
+    }
+
+    #layout-menu .app-brand-text .brand-name {
+        font-weight: 700;
+        letter-spacing: 0.01em;
+    }
+
+    #layout-menu .app-brand-text .brand-name .brand-icon {
+        width: 20px;
+        height: 20px;
+        object-fit: contain;
+        border-radius: 4px;
+    }
+
+    #layout-menu .app-brand-text .brand-name .brand-wordmark {
+        height: 48px;
+        max-width: 186px;
+        width: auto;
+        object-fit: contain;
+        display: block;
+    }
+
+    #layout-menu .app-brand-link.single-logo-role {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        justify-content: center;
+        gap: 0.35rem;
+    }
+
+    #layout-menu .app-brand-link.single-logo-role .app-brand-text {
+        margin-left: 0 !important;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.2rem;
+        line-height: 1;
+    }
+
+    #layout-menu .app-brand-link.single-logo-role .badge {
+        margin-top: 0 !important;
+        display: inline-flex;
+        white-space: nowrap;
+        position: relative;
+        z-index: 2;
+    }
+
+    #layout-menu .app-brand {
+        height: auto !important;
+        min-height: 92px;
+        overflow: visible;
+        padding-top: 0.5rem;
+        padding-bottom: 0.5rem;
+    }
+
+    #layout-menu {
+        height: 100vh;
+        overflow: hidden;
+    }
+
+    #layout-menu .menu-inner {
+        max-height: calc(100vh - 124px);
+        overflow-y: auto;
+        overflow-x: hidden;
+        scrollbar-width: thin;
+    }
+
+    #layout-menu .menu-inner::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    #layout-menu .menu-inner::-webkit-scrollbar-thumb {
+        background: rgba(15, 23, 42, 0.35);
+        border-radius: 999px;
+    }
 </style>
 <!-- DataTables CSS -->
 

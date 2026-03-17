@@ -1,0 +1,1462 @@
+[
+    {
+        "file":  "app/Livewire/Analytics/BatchDiagnosticDashboard.php",
+        "models":  "Facility",
+        "fields":  {
+
+                   },
+        "date_anchors":  {
+
+                         },
+        "tenancy_keys":  {
+
+                         },
+        "field_count":  0
+    },
+    {
+        "file":  "app/Livewire/Analytics/BatchPredictiveDashboard.php",
+        "models":  "Facility",
+        "fields":  {
+
+                   },
+        "date_anchors":  {
+
+                         },
+        "tenancy_keys":  {
+
+                         },
+        "field_count":  0
+    },
+    {
+        "file":  "app/Livewire/Analytics/HealthTrendsDashboard.php",
+        "models":  [
+                       "Facility",
+                       "HealthTrend",
+                       "RiskPrediction"
+                   ],
+        "fields":  [
+                       "alert_level",
+                       "assessment_date",
+                       "metric_name",
+                       "name",
+                       "period_start",
+                       "requires_intervention",
+                       "trend_category",
+                       "trend_direction",
+                       "trend_severity",
+                       "trend_type"
+                   ],
+        "date_anchors":  [
+                             "assessment_date",
+                             "period_start"
+                         ],
+        "tenancy_keys":  {
+
+                         },
+        "field_count":  10
+    },
+    {
+        "file":  "app/Livewire/Analytics/MonthlyReportDashboard.php",
+        "models":  [
+                       "Antenatal",
+                       "ChildHealthActivityRecord",
+                       "ClinicalNote",
+                       "DailyAttendance",
+                       "Delivery",
+                       "DoctorAssessment",
+                       "Facility",
+                       "ImmunizationRecord",
+                       "InpatientAdmission",
+                       "LabTest",
+                       "NutritionRecord",
+                       "PostnatalRecord",
+                       "TetanusVaccination",
+                       "User"
+                   ],
+        "fields":  [
+                       "admission_status",
+                       "admitted_at",
+                       "aefi_cases",
+                       "age",
+                       "alive",
+                       "assessment_note",
+                       "baby_dead",
+                       "baby_sex",
+                       "breast",
+                       "breastfeeding_entries",
+                       "breathing",
+                       "CKX_gel",
+                       "clamped",
+                       "clinician_diagnosis",
+                       "current_tt_dose",
+                       "date_of_booking",
+                       "dead",
+                       "discharged_at",
+                       "dodel",
+                       "family_planning",
+                       "final_diagnosis",
+                       "growth_status",
+                       "linked_child_id",
+                       "mcs_results",
+                       "mnp_given",
+                       "mod",
+                       "muac_class",
+                       "name",
+                       "newborn_care",
+                       "oxytocin",
+                       "partograph",
+                       "patient_id",
+                       "pre_term",
+                       "report_values",
+                       "report_values.mp",
+                       "seeking_care",
+                       "still_birth",
+                       "vaccination_dates",
+                       "visit_date",
+                       "vita1_date",
+                       "vita2_date",
+                       "weight",
+                       "weight_entries"
+                   ],
+        "date_anchors":  [
+                             "admitted_at",
+                             "discharged_at",
+                             "dodel",
+                             "still_birth",
+                             "visit_date",
+                             "vita1_date",
+                             "vita2_date"
+                         ],
+        "tenancy_keys":  [
+                             "linked_child_id",
+                             "patient_id"
+                         ],
+        "field_count":  43
+    },
+    {
+        "file":  "app/Livewire/Analytics/MpdsrReportDashboard.php",
+        "models":  [
+                       "ClinicalNote",
+                       "Delivery",
+                       "Facility",
+                       "PostnatalRecord",
+                       "User"
+                   ],
+        "fields":  [
+                       "alive",
+                       "dead",
+                       "death_type",
+                       "dodel",
+                       "name"
+                   ],
+        "date_anchors":  "dodel",
+        "tenancy_keys":  {
+
+                         },
+        "field_count":  5
+    },
+    {
+        "file":  "app/Livewire/Analytics/RealTimeDashboard.php",
+        "models":  "Facility",
+        "fields":  "name",
+        "date_anchors":  {
+
+                         },
+        "tenancy_keys":  {
+
+                         },
+        "field_count":  1
+    },
+    {
+        "file":  "app/Livewire/Analytics/RiskDashboard.php",
+        "models":  [
+                       "DailyAttendance",
+                       "Facility",
+                       "RiskPrediction",
+                       "User"
+                   ],
+        "fields":  [
+                       "assessment_date",
+                       "name"
+                   ],
+        "date_anchors":  "assessment_date",
+        "tenancy_keys":  {
+
+                         },
+        "field_count":  2
+    },
+    {
+        "file":  "app/Livewire/Central/CentralAdminDashboard.php",
+        "models":  {
+
+                   },
+        "fields":  {
+
+                   },
+        "date_anchors":  {
+
+                         },
+        "tenancy_keys":  {
+
+                         },
+        "field_count":  0
+    },
+    {
+        "file":  "app/Livewire/Central/CreateAdministrators.php",
+        "models":  [
+                       "Facility",
+                       "Lga",
+                       "State",
+                       "User"
+                   ],
+        "fields":  [
+                       "id",
+                       "last_name",
+                       "lga_id",
+                       "name",
+                       "role",
+                       "state_id"
+                   ],
+        "date_anchors":  {
+
+                         },
+        "tenancy_keys":  [
+                             "lga_id",
+                             "state_id"
+                         ],
+        "field_count":  6
+    },
+    {
+        "file":  "app/Livewire/Central/CreateFacility.php",
+        "models":  [
+                       "Facility",
+                       "Lga",
+                       "State",
+                       "Ward"
+                   ],
+        "fields":  [
+                       "id",
+                       "lga_id",
+                       "name",
+                       "state_id"
+                   ],
+        "date_anchors":  {
+
+                         },
+        "tenancy_keys":  [
+                             "lga_id",
+                             "state_id"
+                         ],
+        "field_count":  4
+    },
+    {
+        "file":  "app/Livewire/Core/AdmittedPatients.php",
+        "models":  [
+                       "Activity",
+                       "Bed",
+                       "BedSection",
+                       "Facility",
+                       "InpatientAdmission",
+                       "Patient"
+                   ],
+        "fields":  [
+                       "admission_code",
+                       "admitted_at",
+                       "bed_code",
+                       "bed_id",
+                       "bed_section_id",
+                       "din",
+                       "discharged_at",
+                       "facility_id",
+                       "first_name",
+                       "id",
+                       "is_active",
+                       "last_name",
+                       "name",
+                       "patient_id",
+                       "phone",
+                       "room_label",
+                       "status"
+                   ],
+        "date_anchors":  [
+                             "admitted_at",
+                             "discharged_at"
+                         ],
+        "tenancy_keys":  [
+                             "facility_id",
+                             "patient_id"
+                         ],
+        "field_count":  17
+    },
+    {
+        "file":  "app/Livewire/Core/BedManagement.php",
+        "models":  [
+                       "Bed",
+                       "BedSection",
+                       "Facility"
+                   ],
+        "fields":  [
+                       "bed_code",
+                       "facility_id",
+                       "id",
+                       "is_active",
+                       "name",
+                       "status"
+                   ],
+        "date_anchors":  {
+
+                         },
+        "tenancy_keys":  "facility_id",
+        "field_count":  6
+    },
+    {
+        "file":  "app/Livewire/Core/CreateDataOfficers.php",
+        "models":  [
+                       "Facility",
+                       "User"
+                   ],
+        "fields":  [
+                       "facility_id",
+                       "id",
+                       "last_name"
+                   ],
+        "date_anchors":  {
+
+                         },
+        "tenancy_keys":  "facility_id",
+        "field_count":  3
+    },
+    {
+        "file":  "app/Livewire/Core/DisableDataOfficerAccount.php",
+        "models":  "User",
+        "fields":  [
+                       "facility_id",
+                       "role"
+                   ],
+        "date_anchors":  {
+
+                         },
+        "tenancy_keys":  "facility_id",
+        "field_count":  2
+    },
+    {
+        "file":  "app/Livewire/Core/FacilityAdminDashboard.php",
+        "models":  [
+                       "Antenatal",
+                       "DailyAttendance",
+                       "Delivery",
+                       "Facility",
+                       "PostnatalRecord",
+                       "State",
+                       "TetanusVaccination",
+                       "User"
+                   ],
+        "fields":  [
+                       "age",
+                       "count",
+                       "created_at",
+                       "dose_number",
+                       "edd",
+                       "facility_id",
+                       "mod",
+                       "newborn_weight",
+                       "next_appointment_date",
+                       "systolic_bp",
+                       "user_id",
+                       "visit_date"
+                   ],
+        "date_anchors":  [
+                             "created_at",
+                             "edd",
+                             "next_appointment_date",
+                             "visit_date"
+                         ],
+        "tenancy_keys":  [
+                             "facility_id",
+                             "user_id"
+                         ],
+        "field_count":  12
+    },
+    {
+        "file":  "app/Livewire/Core/FacilityAdministration.php",
+        "models":  [
+                       "Facility",
+                       "FacilityAdminAudit",
+                       "FacilityFeeSchedule",
+                       "FacilityModuleAccess",
+                       "FacilityServiceCatalogItem"
+                   ],
+        "fields":  [
+                       "facility_id",
+                       "facility_service_catalog_item_id",
+                       "id",
+                       "is_active",
+                       "is_enabled",
+                       "module_key",
+                       "module_label"
+                   ],
+        "date_anchors":  {
+
+                         },
+        "tenancy_keys":  "facility_id",
+        "field_count":  7
+    },
+    {
+        "file":  "app/Livewire/Core/FacilityDepartments.php",
+        "models":  "FacilityDepartment",
+        "fields":  "facility_id",
+        "date_anchors":  {
+
+                         },
+        "tenancy_keys":  "facility_id",
+        "field_count":  1
+    },
+    {
+        "file":  "app/Livewire/Core/FacilityPatients.php",
+        "models":  "User",
+        "fields":  [
+                       "daily_attendances.facility_id",
+                       "facility_id",
+                       "user_id",
+                       "users.role",
+                       "visit_date"
+                   ],
+        "date_anchors":  "visit_date",
+        "tenancy_keys":  [
+                             "facility_id",
+                             "user_id"
+                         ],
+        "field_count":  5
+    },
+    {
+        "file":  "app/Livewire/Core/FacilityRemindersHub.php",
+        "models":  [
+                       "AntenatalFollowUpAssessment",
+                       "DoctorAssessment",
+                       "FamilyPlanningFollowUp",
+                       "FamilyPlanningRegistration",
+                       "Reminder",
+                       "ReminderDispatchLog",
+                       "TetanusVaccination"
+                   ],
+        "fields":  [
+                       "channel",
+                       "created_at",
+                       "din",
+                       "facility_id",
+                       "id",
+                       "patient_id",
+                       "recipient",
+                       "reminder_date",
+                       "status",
+                       "title"
+                   ],
+        "date_anchors":  [
+                             "created_at",
+                             "reminder_date"
+                         ],
+        "tenancy_keys":  [
+                             "facility_id",
+                             "patient_id"
+                         ],
+        "field_count":  10
+    },
+    {
+        "file":  "app/Livewire/Core/FacilityReports.php",
+        "models":  [
+                       "AntenatalFollowUpAssessment",
+                       "AntenatalRegistration",
+                       "ChildHealthActivityRecord",
+                       "DailyAttendance",
+                       "Delivery",
+                       "DoctorAssessment",
+                       "Facility",
+                       "FamilyPlanningFollowUp",
+                       "FamilyPlanningRegistration",
+                       "ImmunizationRecord",
+                       "InpatientAdmission",
+                       "Invoice",
+                       "LabTest",
+                       "NutritionRecord",
+                       "PostnatalRecord",
+                       "Prescription",
+                       "Referral",
+                       "TetanusVaccination"
+                   ],
+        "fields":  [
+                       "admitted_at",
+                       "dodel",
+                       "dose_date",
+                       "id",
+                       "invoice_date",
+                       "lga",
+                       "name",
+                       "prescribed_date",
+                       "referral_date",
+                       "registration_date",
+                       "state",
+                       "visit_date",
+                       "ward"
+                   ],
+        "date_anchors":  [
+                             "admitted_at",
+                             "dodel",
+                             "dose_date",
+                             "invoice_date",
+                             "prescribed_date",
+                             "referral_date",
+                             "registration_date",
+                             "visit_date"
+                         ],
+        "tenancy_keys":  {
+
+                         },
+        "field_count":  13
+    },
+    {
+        "file":  "app/Livewire/Core/FacilitySections.php",
+        "models":  [
+                       "Bed",
+                       "BedSection",
+                       "Facility"
+                   ],
+        "fields":  [
+                       "bed_section_id",
+                       "beds_count",
+                       "facility_id",
+                       "is_active",
+                       "status"
+                   ],
+        "date_anchors":  {
+
+                         },
+        "tenancy_keys":  "facility_id",
+        "field_count":  5
+    },
+    {
+        "file":  "app/Livewire/Core/LaboratoryOperations.php",
+        "models":  [
+                       "Facility",
+                       "LabEquipmentLog",
+                       "LabProcessingBatch",
+                       "LabQcLog",
+                       "LabReagentMovement",
+                       "LabReagentStock",
+                       "LabSample",
+                       "LabTestOrder"
+                   ],
+        "fields":  [
+                       "accession_no",
+                       "batch_code",
+                       "expiry_date",
+                       "facility_id",
+                       "id",
+                       "is_active",
+                       "lab_test_order_id",
+                       "lot_number",
+                       "manufacturer",
+                       "moved_at",
+                       "next_due_date",
+                       "performed_date",
+                       "processing_batch_id",
+                       "qc_date",
+                       "reagent_name",
+                       "received_at",
+                       "requested_at",
+                       "run_date",
+                       "sample_status",
+                       "status",
+                       "unit"
+                   ],
+        "date_anchors":  [
+                             "expiry_date",
+                             "moved_at",
+                             "next_due_date",
+                             "performed_date",
+                             "qc_date",
+                             "received_at",
+                             "requested_at",
+                             "run_date"
+                         ],
+        "tenancy_keys":  "facility_id",
+        "field_count":  21
+    },
+    {
+        "file":  "app/Livewire/Core/LgaOfficerDashboard.php",
+        "models":  [
+                       "Antenatal",
+                       "DailyAttendance",
+                       "Delivery",
+                       "Facility",
+                       "Lga",
+                       "PostnatalRecord",
+                       "TetanusVaccination",
+                       "User"
+                   ],
+        "fields":  [
+                       "age",
+                       "count",
+                       "created_at",
+                       "dose_number",
+                       "edd",
+                       "id",
+                       "mod",
+                       "newborn_weight",
+                       "next_appointment_date",
+                       "systolic_bp",
+                       "user_id",
+                       "visit_date"
+                   ],
+        "date_anchors":  [
+                             "created_at",
+                             "edd",
+                             "next_appointment_date",
+                             "visit_date"
+                         ],
+        "tenancy_keys":  "user_id",
+        "field_count":  12
+    },
+    {
+        "file":  "app/Livewire/Core/PatientAppointments.php",
+        "models":  [
+                       "AntenatalFollowUpAssessment",
+                       "DinActivation",
+                       "DoctorAssessment",
+                       "FamilyPlanningFollowUp",
+                       "FamilyPlanningRegistration",
+                       "Patient",
+                       "TetanusVaccination"
+                   ],
+        "fields":  [
+                       "created_at",
+                       "din",
+                       "email",
+                       "facility_id",
+                       "first_name",
+                       "id",
+                       "last_name",
+                       "next_appointment",
+                       "next_appointment_date",
+                       "next_return_date",
+                       "patient_id",
+                       "phone",
+                       "status",
+                       "visit_date"
+                   ],
+        "date_anchors":  [
+                             "created_at",
+                             "next_appointment_date",
+                             "next_return_date",
+                             "visit_date"
+                         ],
+        "tenancy_keys":  [
+                             "facility_id",
+                             "patient_id"
+                         ],
+        "field_count":  14
+    },
+    {
+        "file":  "app/Livewire/Core/PharmacyOperations.php",
+        "models":  [
+                       "DrugCatalogItem",
+                       "DrugStockBatch",
+                       "DrugStockMovement",
+                       "Facility"
+                   ],
+        "fields":  [
+                       "drug_name",
+                       "expiry_date",
+                       "facility_id",
+                       "formulation",
+                       "id",
+                       "is_active",
+                       "moved_at",
+                       "quantity_available",
+                       "received_date",
+                       "strength"
+                   ],
+        "date_anchors":  [
+                             "expiry_date",
+                             "moved_at",
+                             "received_date"
+                         ],
+        "tenancy_keys":  "facility_id",
+        "field_count":  10
+    },
+    {
+        "file":  "app/Livewire/Core/StaffManagement.php",
+        "models":  [
+                       "Facility",
+                       "FacilityDepartment",
+                       "StaffManagementAudit",
+                       "User"
+                   ],
+        "fields":  [
+                       "facility_id",
+                       "id",
+                       "is_active",
+                       "name",
+                       "role"
+                   ],
+        "date_anchors":  {
+
+                         },
+        "tenancy_keys":  "facility_id",
+        "field_count":  5
+    },
+    {
+        "file":  "app/Livewire/Core/StateOfficerDashboard.php",
+        "models":  [
+                       "Antenatal",
+                       "DailyAttendance",
+                       "Delivery",
+                       "Facility",
+                       "PostnatalRecord",
+                       "State",
+                       "TetanusVaccination",
+                       "User"
+                   ],
+        "fields":  [
+                       "age",
+                       "count",
+                       "created_at",
+                       "dose_number",
+                       "edd",
+                       "id",
+                       "mod",
+                       "newborn_weight",
+                       "next_appointment_date",
+                       "systolic_bp",
+                       "user_id",
+                       "visit_date"
+                   ],
+        "date_anchors":  [
+                             "created_at",
+                             "edd",
+                             "next_appointment_date",
+                             "visit_date"
+                         ],
+        "tenancy_keys":  "user_id",
+        "field_count":  12
+    },
+    {
+        "file":  "app/Livewire/Core/UpdateOfficerDesignation.php",
+        "models":  "User",
+        "fields":  [
+                       "facility_id",
+                       "role"
+                   ],
+        "date_anchors":  {
+
+                         },
+        "tenancy_keys":  "facility_id",
+        "field_count":  2
+    },
+    {
+        "file":  "app/Livewire/Registers/AntenatalRegister.php",
+        "models":  [
+                       "AntenatalRegistration",
+                       "Facility",
+                       "Lga",
+                       "Patient",
+                       "State",
+                       "Ward"
+                   ],
+        "fields":  [
+                       "created_at",
+                       "facility_id",
+                       "name",
+                       "registration_date"
+                   ],
+        "date_anchors":  [
+                             "created_at",
+                             "registration_date"
+                         ],
+        "tenancy_keys":  "facility_id",
+        "field_count":  4
+    },
+    {
+        "file":  "app/Livewire/Registers/FamilyPlanningRegister.php",
+        "models":  [
+                       "Facility",
+                       "FamilyPlanningRegistration",
+                       "Lga",
+                       "Patient",
+                       "State",
+                       "Ward"
+                   ],
+        "fields":  [
+                       "facility_id",
+                       "lga_id",
+                       "name",
+                       "state_id"
+                   ],
+        "date_anchors":  {
+
+                         },
+        "tenancy_keys":  [
+                             "facility_id",
+                             "lga_id",
+                             "state_id"
+                         ],
+        "field_count":  4
+    },
+    {
+        "file":  "app/Livewire/Registers/GeneralPatientsRegister.php",
+        "models":  [
+                       "Facility",
+                       "GeneralPatientsRegistration",
+                       "Lga",
+                       "Patient",
+                       "State",
+                       "Ward"
+                   ],
+        "fields":  [
+                       "facility_id",
+                       "name",
+                       "registration_date"
+                   ],
+        "date_anchors":  "registration_date",
+        "tenancy_keys":  "facility_id",
+        "field_count":  3
+    },
+    {
+        "file":  "app/Livewire/Workspaces/Modules/Activities.php",
+        "models":  [
+                       "Activity",
+                       "DinActivation",
+                       "Facility",
+                       "Patient"
+                   ],
+        "fields":  [
+                       "created_at",
+                       "facility_id",
+                       "patient_id",
+                       "total",
+                       "visit_date"
+                   ],
+        "date_anchors":  [
+                             "created_at",
+                             "visit_date"
+                         ],
+        "tenancy_keys":  [
+                             "facility_id",
+                             "patient_id"
+                         ],
+        "field_count":  5
+    },
+    {
+        "file":  "app/Livewire/Workspaces/Modules/ANC/AncOverview.php",
+        "models":  [
+                       "DinActivation",
+                       "Facility",
+                       "Lga",
+                       "Patient",
+                       "State",
+                       "Ward"
+                   ],
+        "fields":  [
+                       "facility_id",
+                       "lga_id",
+                       "state_id",
+                       "visit_date"
+                   ],
+        "date_anchors":  "visit_date",
+        "tenancy_keys":  [
+                             "facility_id",
+                             "lga_id",
+                             "state_id"
+                         ],
+        "field_count":  4
+    },
+    {
+        "file":  "app/Livewire/Workspaces/Modules/ANC/Deliveries.php",
+        "models":  [
+                       "Antenatal",
+                       "Delivery",
+                       "DinActivation",
+                       "Facility",
+                       "Lga",
+                       "LinkedChild",
+                       "Patient",
+                       "State",
+                       "Ward"
+                   ],
+        "fields":  [
+                       "birth_order",
+                       "date_of_birth",
+                       "dodel",
+                       "facility_id",
+                       "gender",
+                       "lga_id",
+                       "name",
+                       "patient_id",
+                       "state_id",
+                       "visit_date"
+                   ],
+        "date_anchors":  [
+                             "birth_order",
+                             "date_of_birth",
+                             "dodel",
+                             "visit_date"
+                         ],
+        "tenancy_keys":  [
+                             "facility_id",
+                             "lga_id",
+                             "patient_id",
+                             "state_id"
+                         ],
+        "field_count":  10
+    },
+    {
+        "file":  "app/Livewire/Workspaces/Modules/ANC/FollowUpAssessment.php",
+        "models":  [
+                       "AntenatalFollowUpAssessment",
+                       "DinActivation",
+                       "Facility",
+                       "Lga",
+                       "Patient",
+                       "State",
+                       "Ward"
+                   ],
+        "fields":  [
+                       "facility_id",
+                       "lga_id",
+                       "patient_id",
+                       "state_id",
+                       "visit_date"
+                   ],
+        "date_anchors":  "visit_date",
+        "tenancy_keys":  [
+                             "facility_id",
+                             "lga_id",
+                             "patient_id",
+                             "state_id"
+                         ],
+        "field_count":  5
+    },
+    {
+        "file":  "app/Livewire/Workspaces/Modules/ANC/Postnatal.php",
+        "models":  [
+                       "Delivery",
+                       "DinActivation",
+                       "Facility",
+                       "Lga",
+                       "Patient",
+                       "PostnatalRecord",
+                       "State",
+                       "Ward"
+                   ],
+        "fields":  [
+                       "dodel",
+                       "facility_id",
+                       "lga_id",
+                       "name",
+                       "patient_id",
+                       "state_id",
+                       "visit_date"
+                   ],
+        "date_anchors":  [
+                             "dodel",
+                             "visit_date"
+                         ],
+        "tenancy_keys":  [
+                             "facility_id",
+                             "lga_id",
+                             "patient_id",
+                             "state_id"
+                         ],
+        "field_count":  7
+    },
+    {
+        "file":  "app/Livewire/Workspaces/Modules/ANC/TetanusVaccinations.php",
+        "models":  [
+                       "Activity",
+                       "DinActivation",
+                       "Facility",
+                       "Patient",
+                       "TetanusVaccination"
+                   ],
+        "fields":  [
+                       "antenatal_registration_id",
+                       "current_tt_dose",
+                       "dose_number",
+                       "facility_id",
+                       "patient_id",
+                       "visit_date"
+                   ],
+        "date_anchors":  "visit_date",
+        "tenancy_keys":  [
+                             "facility_id",
+                             "patient_id"
+                         ],
+        "field_count":  6
+    },
+    {
+        "file":  "app/Livewire/Workspaces/Modules/Appointments.php",
+        "models":  [
+                       "AntenatalFollowUpAssessment",
+                       "DinActivation",
+                       "DoctorAssessment",
+                       "Facility",
+                       "FamilyPlanningFollowUp",
+                       "FamilyPlanningRegistration",
+                       "Patient",
+                       "TetanusVaccination"
+                   ],
+        "fields":  [
+                       "clinical_remarks",
+                       "contraceptive_selected",
+                       "current_tt_dose",
+                       "dose_date",
+                       "facility_id",
+                       "final_diagnosis",
+                       "id",
+                       "method_supplied",
+                       "next_appointment",
+                       "next_appointment_date",
+                       "next_return_date",
+                       "patient_id",
+                       "registration_date",
+                       "status",
+                       "visit_date"
+                   ],
+        "date_anchors":  [
+                             "dose_date",
+                             "next_appointment_date",
+                             "next_return_date",
+                             "registration_date",
+                             "visit_date"
+                         ],
+        "tenancy_keys":  [
+                             "facility_id",
+                             "patient_id"
+                         ],
+        "field_count":  15
+    },
+    {
+        "file":  "app/Livewire/Workspaces/Modules/Attendance.php",
+        "models":  [
+                       "Activity",
+                       "DinActivation",
+                       "Facility",
+                       "Patient"
+                   ],
+        "fields":  [
+                       "facility_id",
+                       "visit_date"
+                   ],
+        "date_anchors":  "visit_date",
+        "tenancy_keys":  "facility_id",
+        "field_count":  2
+    },
+    {
+        "file":  "app/Livewire/Workspaces/Modules/Child/ActivityRegister.php",
+        "models":  [
+                       "Activity",
+                       "ChildHealthActivityRecord",
+                       "DinActivation",
+                       "Facility",
+                       "LinkedChild",
+                       "Patient"
+                   ],
+        "fields":  [
+                       "date_of_birth",
+                       "facility_id",
+                       "id",
+                       "is_active",
+                       "linked_child_id",
+                       "patient_id",
+                       "visit_date",
+                       "weight_entries"
+                   ],
+        "date_anchors":  [
+                             "date_of_birth",
+                             "visit_date"
+                         ],
+        "tenancy_keys":  [
+                             "facility_id",
+                             "linked_child_id",
+                             "patient_id"
+                         ],
+        "field_count":  8
+    },
+    {
+        "file":  "app/Livewire/Workspaces/Modules/Child/Immunizations.php",
+        "models":  [
+                       "Activity",
+                       "DinActivation",
+                       "Facility",
+                       "ImmunizationRecord",
+                       "LinkedChild",
+                       "Patient"
+                   ],
+        "fields":  [
+                       "date_of_birth",
+                       "facility_id",
+                       "id",
+                       "is_active",
+                       "patient_id",
+                       "visit_date"
+                   ],
+        "date_anchors":  [
+                             "date_of_birth",
+                             "visit_date"
+                         ],
+        "tenancy_keys":  [
+                             "facility_id",
+                             "patient_id"
+                         ],
+        "field_count":  6
+    },
+    {
+        "file":  "app/Livewire/Workspaces/Modules/Child/Nutrition.php",
+        "models":  [
+                       "Activity",
+                       "DinActivation",
+                       "Facility",
+                       "Lga",
+                       "LinkedChild",
+                       "NutritionRecord",
+                       "Patient",
+                       "State",
+                       "Ward"
+                   ],
+        "fields":  [
+                       "date_of_birth",
+                       "facility_id",
+                       "id",
+                       "is_active",
+                       "lga_id",
+                       "patient_id",
+                       "state_id",
+                       "visit_date"
+                   ],
+        "date_anchors":  [
+                             "date_of_birth",
+                             "visit_date"
+                         ],
+        "tenancy_keys":  [
+                             "facility_id",
+                             "lga_id",
+                             "patient_id",
+                             "state_id"
+                         ],
+        "field_count":  8
+    },
+    {
+        "file":  "app/Livewire/Workspaces/Modules/Clinical/DoctorAssessments.php",
+        "models":  [
+                       "Activity",
+                       "DinActivation",
+                       "DoctorAssessment",
+                       "Facility",
+                       "LabTestOrder",
+                       "Patient",
+                       "Prescription"
+                   ],
+        "fields":  [
+                       "dosage",
+                       "drug_name",
+                       "duration",
+                       "facility_id",
+                       "frequency",
+                       "id",
+                       "instructions",
+                       "patient_id",
+                       "quantity_prescribed",
+                       "route",
+                       "specimen",
+                       "status",
+                       "test_name",
+                       "visit_date"
+                   ],
+        "date_anchors":  "visit_date",
+        "tenancy_keys":  [
+                             "facility_id",
+                             "patient_id"
+                         ],
+        "field_count":  14
+    },
+    {
+        "file":  "app/Livewire/Workspaces/Modules/Clinical/DrugCatalog.php",
+        "models":  [
+                       "DinActivation",
+                       "DrugCatalogItem",
+                       "Facility",
+                       "Patient"
+                   ],
+        "fields":  [
+                       "facility_id",
+                       "id",
+                       "visit_date"
+                   ],
+        "date_anchors":  "visit_date",
+        "tenancy_keys":  "facility_id",
+        "field_count":  3
+    },
+    {
+        "file":  "app/Livewire/Workspaces/Modules/Clinical/Invoices.php",
+        "models":  [
+                       "Activity",
+                       "DinActivation",
+                       "Facility",
+                       "Invoice",
+                       "Patient",
+                       "PatientPayment"
+                   ],
+        "fields":  [
+                       "facility_id",
+                       "id",
+                       "invoice_date",
+                       "outstanding_amount",
+                       "patient_id",
+                       "payment_date",
+                       "visit_date"
+                   ],
+        "date_anchors":  [
+                             "invoice_date",
+                             "payment_date",
+                             "visit_date"
+                         ],
+        "tenancy_keys":  [
+                             "facility_id",
+                             "patient_id"
+                         ],
+        "field_count":  7
+    },
+    {
+        "file":  "app/Livewire/Workspaces/Modules/Clinical/Laboratory.php",
+        "models":  [
+                       "Activity",
+                       "DinActivation",
+                       "Facility",
+                       "LabTest",
+                       "LabTestOrder",
+                       "Patient"
+                   ],
+        "fields":  [
+                       "facility_id",
+                       "id",
+                       "patient_id",
+                       "requested_at",
+                       "status",
+                       "visit_date"
+                   ],
+        "date_anchors":  [
+                             "requested_at",
+                             "visit_date"
+                         ],
+        "tenancy_keys":  [
+                             "facility_id",
+                             "patient_id"
+                         ],
+        "field_count":  6
+    },
+    {
+        "file":  "app/Livewire/Workspaces/Modules/Clinical/Prescriptions.php",
+        "models":  [
+                       "Activity",
+                       "DinActivation",
+                       "DrugCatalogItem",
+                       "DrugDispenseLine",
+                       "Facility",
+                       "Invoice",
+                       "Patient",
+                       "Prescription"
+                   ],
+        "fields":  [
+                       "COUNT(*) as lines_count",
+                       "dispense_code",
+                       "dispensed_date",
+                       "drug_name",
+                       "facility_id",
+                       "id",
+                       "is_active",
+                       "patient_id",
+                       "prescribed_date",
+                       "status",
+                       "SUM(quantity) as total_quantity",
+                       "visit_date"
+                   ],
+        "date_anchors":  [
+                             "dispensed_date",
+                             "prescribed_date",
+                             "visit_date"
+                         ],
+        "tenancy_keys":  [
+                             "facility_id",
+                             "patient_id"
+                         ],
+        "field_count":  12
+    },
+    {
+        "file":  "app/Livewire/Workspaces/Modules/Clinical/Referrals.php",
+        "models":  [
+                       "Activity",
+                       "DinActivation",
+                       "Facility",
+                       "Patient",
+                       "Referral"
+                   ],
+        "fields":  [
+                       "facility_id",
+                       "id",
+                       "patient_id",
+                       "referral_date",
+                       "visit_date"
+                   ],
+        "date_anchors":  [
+                             "referral_date",
+                             "visit_date"
+                         ],
+        "tenancy_keys":  [
+                             "facility_id",
+                             "patient_id"
+                         ],
+        "field_count":  5
+    },
+    {
+        "file":  "app/Livewire/Workspaces/Modules/FamilyPlanning/ClientFollowUp.php",
+        "models":  [
+                       "Activity",
+                       "DinActivation",
+                       "Facility",
+                       "FamilyPlanningFollowUp",
+                       "FamilyPlanningRegistration",
+                       "Patient"
+                   ],
+        "fields":  [
+                       "facility_id",
+                       "id",
+                       "patient_id",
+                       "registration_date",
+                       "visit_date"
+                   ],
+        "date_anchors":  [
+                             "registration_date",
+                             "visit_date"
+                         ],
+        "tenancy_keys":  [
+                             "facility_id",
+                             "patient_id"
+                         ],
+        "field_count":  5
+    },
+    {
+        "file":  "app/Livewire/Workspaces/Modules/HealthInsurance.php",
+        "models":  [
+                       "Activity",
+                       "DinActivation",
+                       "Facility",
+                       "Patient"
+                   ],
+        "fields":  [
+                       "action",
+                       "facility_id",
+                       "id",
+                       "module",
+                       "patient_id",
+                       "visit_date"
+                   ],
+        "date_anchors":  "visit_date",
+        "tenancy_keys":  [
+                             "facility_id",
+                             "patient_id"
+                         ],
+        "field_count":  6
+    },
+    {
+        "file":  "app/Livewire/Workspaces/Modules/Reminders.php",
+        "models":  [
+                       "Activity",
+                       "DinActivation",
+                       "Facility",
+                       "Patient",
+                       "Reminder",
+                       "ReminderDispatchLog"
+                   ],
+        "fields":  [
+                       "facility_id",
+                       "id",
+                       "patient_id",
+                       "reminder_date",
+                       "status",
+                       "visit_date"
+                   ],
+        "date_anchors":  [
+                             "reminder_date",
+                             "visit_date"
+                         ],
+        "tenancy_keys":  [
+                             "facility_id",
+                             "patient_id"
+                         ],
+        "field_count":  6
+    },
+    {
+        "file":  "app/Livewire/Workspaces/Modules/Visits.php",
+        "models":  [
+                       "DinActivation",
+                       "Facility",
+                       "Patient",
+                       "Visit",
+                       "VisitEvent"
+                   ],
+        "fields":  [
+                       "event_time",
+                       "facility_id",
+                       "id",
+                       "status",
+                       "visit_date",
+                       "visit_id"
+                   ],
+        "date_anchors":  "visit_date",
+        "tenancy_keys":  "facility_id",
+        "field_count":  6
+    },
+    {
+        "file":  "app/Livewire/Workspaces/Patientworkspace.php",
+        "models":  [
+                       "DinActivation",
+                       "Facility",
+                       "Patient"
+                   ],
+        "fields":  [
+                       "facility_id",
+                       "visit_date"
+                   ],
+        "date_anchors":  "visit_date",
+        "tenancy_keys":  "facility_id",
+        "field_count":  2
+    },
+    {
+        "file":  "app/Livewire/Workspaces/WorkspaceDashboard.php",
+        "models":  [
+                       "AntenatalFollowUpAssessment",
+                       "DinActivation",
+                       "DoctorAssessment",
+                       "Facility",
+                       "FamilyPlanningFollowUp",
+                       "FamilyPlanningRegistration",
+                       "Patient",
+                       "TetanusVaccination"
+                   ],
+        "fields":  [
+                       "facility_id",
+                       "id",
+                       "patient_id",
+                       "registration_date",
+                       "visit_date"
+                   ],
+        "date_anchors":  [
+                             "registration_date",
+                             "visit_date"
+                         ],
+        "tenancy_keys":  [
+                             "facility_id",
+                             "patient_id"
+                         ],
+        "field_count":  5
+    }
+]

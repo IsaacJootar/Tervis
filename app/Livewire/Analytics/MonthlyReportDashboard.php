@@ -5,22 +5,26 @@ namespace App\Livewire\Analytics;
 use Carbon\Carbon;
 use App\Models\User;
 use Livewire\Component;
+use App\Models\Bed;
 use App\Models\Facility;
 use App\Models\Delivery;
 use App\Models\InpatientAdmission;
-use App\Models\Antenatal;
-use App\Models\ClinicalNote;
+use App\Models\AntenatalFollowUpAssessment;
 use App\Models\DoctorAssessment;
 use App\Models\LabTest;
 use App\Models\ChildHealthActivityRecord;
 use App\Models\ImmunizationRecord;
 use App\Models\NutritionRecord;
 use App\Models\PostnatalRecord;
+use App\Models\Prescription;
+use App\Models\DrugDispenseLine;
 use App\Models\DailyAttendance;
+use App\Models\Registrations\AntenatalRegistration;
 use App\Services\DataScopeService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Schema;
 use App\Models\TetanusVaccination;
 
 class MonthlyReportDashboard extends Component
@@ -145,15 +149,24 @@ class MonthlyReportDashboard extends Component
 
   private function loadFacilityInfo($facilityIds)
   {
+    $bedsCount = 0;
+    if (Schema::hasTable('beds')) {
+      $bedsQuery = Bed::query()->whereIn('facility_id', $facilityIds);
+      if (Schema::hasColumn('beds', 'is_active')) {
+        $bedsQuery->where('is_active', true);
+      }
+      $bedsCount = (int) $bedsQuery->count();
+    }
+
     if (count($facilityIds) === 1) {
       $facility = Facility::find($facilityIds[0]);
       $this->facilityInfo = [
-        'name' => $facility->name,
-        'state' => $facility->state,
-        'lga' => $facility->lga,
-        'ward' => $facility->ward,
+        'name' => $facility->name ?? 'Facility',
+        'state' => $facility->state ?? '-',
+        'lga' => $facility->lga ?? '-',
+        'ward' => $facility->ward ?? '-',
         'type' => 'Public', // You can add this to facilities table
-        'beds' => 0 // You can add this to facilities table
+        'beds' => $bedsCount
       ];
     } else {
       $this->facilityInfo = [
@@ -162,7 +175,7 @@ class MonthlyReportDashboard extends Component
         'lga' => $this->scopeInfo['scope_type'] === 'lga' ? Auth::user()->lga->name : 'Multiple',
         'ward' => 'Multiple',
         'type' => 'Multiple',
-        'beds' => 0
+        'beds' => $bedsCount
       ];
     }
   }
@@ -362,9 +375,11 @@ class MonthlyReportDashboard extends Component
   {
     $maternalData = [];
 
-    // Antenatal attendance
-    $antenatals = Antenatal::whereIn('registration_facility_id', $facilityIds)
-      ->whereBetween('date_of_booking', [$startDate, $endDate])
+    // Canonical ANC source: AntenatalRegistration
+    $antenatalRegs = AntenatalRegistration::query()
+      ->with(['patient:id,date_of_birth'])
+      ->whereIn('facility_id', $facilityIds)
+      ->whereBetween('registration_date', [$startDate, $endDate])
       ->get();
 
     $ageGroups = [
@@ -376,20 +391,64 @@ class MonthlyReportDashboard extends Component
     ];
 
     foreach ($ageGroups as $group => $range) {
-      $maternalData["anc_attendance_{$group}"] = $antenatals
-        ->whereBetween('age', $range)->count();
+      $maternalData["anc_attendance_{$group}"] = $antenatalRegs
+        ->filter(function ($record) use ($range) {
+          $dob = $record->patient?->date_of_birth;
+          $visitDate = $record->registration_date;
+          if (!$dob || !$visitDate) {
+            return false;
+          }
+          $age = Carbon::parse($dob)->diffInYears(Carbon::parse($visitDate));
+          return $age >= $range[0] && $age <= $range[1];
+        })->count();
     }
 
     // First visit by gestational age
-    $maternalData['anc_first_before20wks'] = 0;
-    $maternalData['anc_first_after20wks'] = 0;
+    $maternalData['anc_first_before20wks'] = $antenatalRegs
+      ->filter(fn($record) => (int) ($record->gestational_age_weeks ?? 0) > 0 && (int) $record->gestational_age_weeks < 20)
+      ->count();
+    $maternalData['anc_first_after20wks'] = $antenatalRegs
+      ->filter(fn($record) => (int) ($record->gestational_age_weeks ?? 0) >= 20)
+      ->count();
 
-    // Other ANC metrics
-    $maternalData['4th_anc_visit'] = 0;
-    $maternalData['8th_anc_visit'] = 0;
-    $maternalData['ipt1'] = 0;
-    $maternalData['ipt2'] = 0;
-    $maternalData['ipt3'] = 0;
+    $followUps = AntenatalFollowUpAssessment::query()
+      ->whereIn('facility_id', $facilityIds)
+      ->whereBetween('visit_date', [$startDate, $endDate])
+      ->get(['patient_id']);
+
+    $visitCounts = $followUps
+      ->groupBy('patient_id')
+      ->map(fn($rows) => $rows->count());
+
+    // Structured monthly proxy from follow-up contact frequency in period.
+    $maternalData['4th_anc_visit'] = $visitCounts->filter(fn($count) => $count >= 4)->count();
+    $maternalData['8th_anc_visit'] = $visitCounts->filter(fn($count) => $count >= 8)->count();
+
+    $ipt1 = 0;
+    $ipt2 = 0;
+    $ipt3 = 0;
+    foreach ($antenatalRegs as $record) {
+      $notes = strtolower(trim(
+        (string) ($record->special_instructions ?? '') . ' ' .
+          (string) ($record->special_points ?? '') . ' ' .
+          (string) ($record->comments ?? '')
+      ));
+      if ($notes === '') {
+        continue;
+      }
+      if (str_contains($notes, 'ipt1')) {
+        $ipt1++;
+      }
+      if (str_contains($notes, 'ipt2')) {
+        $ipt2++;
+      }
+      if (str_contains($notes, 'ipt3')) {
+        $ipt3++;
+      }
+    }
+    $maternalData['ipt1'] = $ipt1;
+    $maternalData['ipt2'] = $ipt2;
+    $maternalData['ipt3'] = $ipt3;
 
     // Delivery data
     $deliveries = Delivery::whereIn('facility_id', $facilityIds)
@@ -807,6 +866,43 @@ class MonthlyReportDashboard extends Component
 
     $otherServicesData['diabetes_cases'] = 0;
     $otherServicesData['hypertension_cases'] = 0;
+
+    // Pharmacy/dispensing indicators used by monthly reporting and reports hub.
+    if (Schema::hasTable('prescriptions')) {
+      $prescriptions = Prescription::query()
+        ->whereIn('facility_id', $facilityIds)
+        ->whereBetween('prescribed_date', [$startDate, $endDate])
+        ->get(['status', 'quantity_prescribed', 'quantity_dispensed']);
+
+      $otherServicesData['prescriptions_total'] = $prescriptions->count();
+      $otherServicesData['prescriptions_dispensed'] = $prescriptions
+        ->where('status', 'dispensed')
+        ->count();
+      $otherServicesData['prescriptions_pending'] = $prescriptions
+        ->where('status', 'pending')
+        ->count();
+      $otherServicesData['prescriptions_partial'] = $prescriptions
+        ->where('status', 'partial')
+        ->count();
+    } else {
+      $otherServicesData['prescriptions_total'] = 0;
+      $otherServicesData['prescriptions_dispensed'] = 0;
+      $otherServicesData['prescriptions_pending'] = 0;
+      $otherServicesData['prescriptions_partial'] = 0;
+    }
+
+    if (Schema::hasTable('drug_dispense_lines')) {
+      $dispensedLines = DrugDispenseLine::query()
+        ->whereIn('facility_id', $facilityIds)
+        ->whereBetween('dispensed_date', [$startDate, $endDate])
+        ->get(['quantity']);
+
+      $otherServicesData['dispensing_lines'] = $dispensedLines->count();
+      $otherServicesData['dispensing_quantity_total'] = (float) $dispensedLines->sum(fn($line) => (float) ($line->quantity ?? 0));
+    } else {
+      $otherServicesData['dispensing_lines'] = 0;
+      $otherServicesData['dispensing_quantity_total'] = 0;
+    }
 
     return $otherServicesData;
   }

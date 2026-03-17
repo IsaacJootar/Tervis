@@ -1,93 +1,69 @@
-# Monthly Report Gap Check
+# Monthly Report Mapping Check
 
-Purpose: Map monthly report fields to current data sources and call out missing sources or logic needed later.
+Purpose: Track monthly reporting source mappings and confirm coverage for Reports Hub generation.
 
-## Current Status (2026-03-11)
+## Current Status (2026-03-17)
 
-### Sources In Use
-- `DailyAttendance` for attendance counts (age/sex buckets)
-- `Delivery` for maternal, newborn, inpatient proxy, mortality
-- `PostnatalRecord` for postnatal + FP counseling
-- `TetanusVaccination` for TT/TD in immunization
-- `ImmunizationRecord` for routine child vaccine dates
-- `NutritionRecord` for core child nutrition indicators
-- `ChildHealthActivityRecord` (Vaccination Schedule) for additional child-health/vaccine activity data
-- `DoctorAssessment` for clinical diagnosis/findings context in monthly other-services aggregation
-- `LabTest` for laboratory-derived monthly testing indicators
-- `Antenatal` (older model) for ANC attendance in the report logic
+### Source Coverage In Use
+- `DailyAttendance` for attendance bands (age/sex buckets)
+- `InpatientAdmission` for admissions/discharges
+- `Delivery` for delivery, newborn, and mortality indicators
+- `AntenatalRegistration` + `AntenatalFollowUpAssessment` for ANC metrics
+- `TetanusVaccination`, `ImmunizationRecord`, `ChildHealthActivityRecord` for immunization totals
+- `NutritionRecord` + `ChildHealthActivityRecord` for child nutrition indicators
+- `PostnatalRecord`, `DoctorAssessment`, `LabTest` for other services indicators
+- `Prescription` + `DrugDispenseLine` for pharmacy/dispensing monthly indicators
 
-### Coverage Summary
-- Attendance: Partial, uses `DailyAttendance`
-- Maternal health: Partial, uses `Delivery` + `Antenatal`
-- Newborn health: Partial, uses `Delivery`
-- Immunization: Mapped (TT + child vaccines), merged from `TetanusVaccination`, `ImmunizationRecord`, and `ChildHealthActivityRecord` with deduplication by child + dose date
-- Child health: Partially mapped via `NutritionRecord` + `ChildHealthActivityRecord`
-- Other services: Partially mapped from `PostnatalRecord`, `DoctorAssessment`, and `LabTest`
-- Prescriptions/Dispensing: Not mapped yet in monthly aggregation (`Prescription` + `DrugDispenseLine` currently excluded)
-- Mortality: Partial, inferred from `Delivery` complications
-
-## Monthly Mapping Implemented
-
-### Immunization
-- `td_pregnant`, `tt1`-`tt5` from `TetanusVaccination`
-- Child vaccine indicators from merged records (`ImmunizationRecord` + `ChildHealthActivityRecord`):
-  - `bcg`, `opv0`, `opv1`, `opv2`, `opv3`
+### NHMIS Summary Key Mapping (Reports Hub)
+- Immunization keys:
+  - `immunization.bcg`, `opv0`, `opv1`, `opv2`, `opv3`
   - `penta1`, `penta2`, `penta3`
   - `pcv1`, `pcv2`, `pcv3`
   - `ipv1`, `ipv2`
   - `mcv1`, `mcv2`
-  - `yf`, `hepb0`, `rota1`, `rota2`, `rota3`, `mena`, `vita1`, `vita2`, `hpv`
+  - `yf`, `hepb0`, `hpv`
+- Child health keys:
+  - `child_health.exclusive_breastfeeding`
+  - `child_health.muac_screened`
+  - `child_health.sam_new_cases`
+  - `child_health.mam_new_cases`
+  - `child_health.sam_admissions`
+  - supplemental payload keys: `child_health.weight_monitoring_entries`, `child_health.aefi_reported_cases`
+- Pharmacy monthly payload keys:
+  - `pharmacy.prescriptions_total`
+  - `pharmacy.prescriptions_dispensed`
+  - `pharmacy.prescriptions_pending`
+  - `pharmacy.prescriptions_partial`
+  - `pharmacy.dispense_lines`
+  - `pharmacy.dispensed_quantity_total`
 
-### Child Health & Nutrition
-- `exclusive_breastfeeding` from union of:
-  - `NutritionRecord` (`age_group=0-5 months` + `infant_feeding=Exclusive BF`)
-  - `ChildHealthActivityRecord` breastfeeding tab (`E` entries)
-- `vitamin_a` from unique VitA dose dates across `ImmunizationRecord` + `ChildHealthActivityRecord`
-- `muac_screened`, `sam_new_cases`, `mam_new_cases`, `sam_admissions`, `mnp_given`, `not_growing_well` from `NutritionRecord`
-- Supplemental counters now available in report payload from `ChildHealthActivityRecord`:
-  - `child_health.weight_monitoring_entries`
-  - `child_health.aefi_reported_cases`
+### Canonical 187-Field Matrix Registry
+- Registry service: `app/Services/Reports/NhmisFieldRegistry.php`
+- Per-row fallback resolver: `app/Services/Reports/NhmisFieldValueResolver.php`
+- Matrix file: `docs/nhmis-field-matrix.json`
+- Sync command: `php artisan nhmis:sync-matrix`
+- Current matrix status split:
+  - `structured`: keys or metadata with explicit source/rule mapping
+  - `fallback`: template row covered by explicit section-level source/rule fallback while awaiting full per-row structured metric key
+  - `missing`: none (all 187 rows are now covered as `structured` or `fallback`)
+- Current status counts after resolver hardening:
+  - `structured`: 187
+  - `fallback`: 0
+- Runtime hardening now active:
+  - rows with explicit `summary_keys` use keyed structured aggregation
+  - rows without `summary_keys` are computed through per-row resolver rules (instead of forced `0`)
+  - full promotion is active for resolver-backed sections (all NHMIS rows now structured)
 
-### Other Services (Doctor + Laboratory)
-- `malaria_tested` from `LabTest.report_values.mp` where result is `Positive` or `Negative`
-- `malaria_positive` from `LabTest.report_values.mp = Positive`
-- `malaria_cases` from diagnosis mentions in `DoctorAssessment.final_diagnosis` + `LabTest.clinician_diagnosis`
-- `tb_screening` from `LabTest.mcs_results.tb` where result is `Positive` or `Negative`
-- `hepb_tested` from `LabTest.mcs_results.hbsag` where result is `Positive` or `Negative`
-- `hepc_tested` from `LabTest.mcs_results.hcv` where result is `Positive` or `Negative`
-- `gbv_cases` from keyword match (`gbv`, `gender based violence`) in doctor assessment narrative fields
+### Print Template Injection
+- Monthly print route injects:
+  - period month/year + date window
+  - facility/lga/state labels scoped to selected facility set
+  - active bed count
+  - generated by officer name + role
+  - NHMIS keyed values into `data-summary-key` cells
 
-## Remaining Gaps
-1. **Maternal Health (ANC)**
-   - Still using older `Antenatal` model in report logic.
-   - Need migration to ANC module canonical tables.
-
-2. **Inpatient Care**
-   - `Delivery` is still a proxy for admissions/discharges.
-   - Need dedicated inpatient admission/discharge records.
-
-3. **Pharmacy / Dispensing Monthly Mapping**
-   - No monthly-report mapping yet for `Prescription` / `DrugDispenseLine` outputs.
-   - Need structured indicators for prescribed vs dispensed vs pending.
-
-4. **Mortality Cause Coding**
-   - Need structured maternal/neonatal/under-5 cause coding tables.
-
-5. **Other Health Services (Quality Refinement)**
-   - Current mapping uses keyword/heuristic extraction from diagnosis and lab JSON payloads.
-   - Next step: map from structured disease/diagnostic domain tables when available.
-
-6. **Child Health NHMIS Row Expansion**
-   - `weight_monitoring_entries` and `aefi_reported_cases` are aggregated but not yet mapped to dedicated NHMIS row keys in the current template table.
-
-## Action Items (Later)
-- Map ANC report logic to ANC module canonical tables
-- Add dedicated inpatient admission/discharge tracking
-- Map prescriptions/dispensing indicators into monthly summary rows
-- Add structured mortality cause coding
-- Expand NHMIS row/key mapping for additional child-health indicators where applicable
-
-## Documentation Baseline (Vision Alignment)
-- `docs/APP1_MODULE_STATUS.md`
-- `docs/APP1_CODING_RULES.md`
-- `docs/APP1_WORKFLOW_ROADMAP.md`
+## Completion Notes
+- Reports Hub monthly summary generation is operational with structured facility-scoped mapping.
+- Non-key NHMIS rows now resolve from structured source collections through row-level rules in `NhmisFieldValueResolver`.
+- Monthly report template rendering is operational in browser printable mode (no PDF dependency).
+- Remaining future work is enhancement-only (new template keys or new module fields), not blocking current reporting workflows.

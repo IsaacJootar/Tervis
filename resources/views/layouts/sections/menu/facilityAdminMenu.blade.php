@@ -15,10 +15,10 @@
     <!-- ! Hide app brand if navbar-full -->
     @if (!isset($navbarFull))
         <div class="app-brand demo">
-            <a href="{{ url('/core/facility-admin-dashboard') }}" class="app-brand-link">
-                <span class="app-brand-logo demo">@include('_partials.macros')</span>
-                                <span class="app-brand-text demo menu-text fw-bold ms-3 d-flex flex-column lh-sm">
-                    <span>mpro</span>                    @php
+            <a href="{{ url('/core/facility-admin-dashboard') }}" class="app-brand-link single-logo-role">
+                <span class="app-brand-text demo menu-text fw-bold ms-0 d-flex flex-column lh-sm">
+                    <span class="brand-name d-inline-flex align-items-center"><img src="{{ asset('assets/cureva-c19-blue-2.png') }}" alt="Cureva" class="brand-wordmark"></span>
+                    @php
                         $roleLabel = auth()->user()->role ?? null;
                         $roleBadgeClass = match ($roleLabel) {
                             'Central Admin' => 'bg-label-danger',

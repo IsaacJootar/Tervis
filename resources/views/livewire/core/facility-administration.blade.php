@@ -12,7 +12,7 @@
             <div>
                 <h4 class="mb-1"><i class="bx bx-cog me-1"></i>Facility Administration</h4>
                 <div class="text-muted small">{{ Carbon::now('Africa/Lagos')->format('l, F j, Y, h:i A') }}</div>
-                <div class="text-muted small mt-1">Manage facility profile, service catalog, fee schedules, module access, and audit logs.</div>
+                <div class="text-muted small mt-1">Manage facility profile, service catalog, fee schedules, view module access, and audit logs.</div>
             </div>
             <div class="ms-auto d-flex gap-2">
                 <button type="button" class="btn btn-outline-primary" wire:click="openServiceModal" wire:loading.attr="disabled" wire:target="openServiceModal" {{ !$tables_ready ? 'disabled' : '' }}>
@@ -175,6 +175,7 @@
 
     <div class="card mb-4">
         <div class="card-header"><h5 class="mb-0">Module Access Control</h5></div>
+        <div class="px-4 pt-3 text-muted small">Module access toggles are controlled from Central Admin.</div>
         <div class="card-datatable table-responsive pt-0" wire:ignore>
             <table id="facilityModuleAccessTable" class="table align-middle">
                 <thead class="table-dark"><tr><th>Module</th><th>Access Status</th><th>Last Updated</th><th>Action</th></tr></thead>
@@ -184,7 +185,7 @@
                             <td class="fw-semibold">{{ $module->module_label }}</td>
                             <td><span class="badge {{ $module->is_enabled ? 'bg-label-success' : 'bg-label-danger' }}">{{ $module->is_enabled ? 'Enabled' : 'Disabled' }}</span></td>
                             <td data-order="{{ optional($module->updated_at)->format('Y-m-d H:i:s') }}">{{ optional($module->updated_at)->format('M d, Y h:i A') ?: 'N/A' }}</td>
-                            <td><button type="button" class="btn btn-sm {{ $module->is_enabled ? 'btn-outline-danger' : 'btn-outline-success' }}" wire:click="toggleModuleAccess({{ $module->id }})" wire:loading.attr="disabled" wire:target="toggleModuleAccess({{ $module->id }})">{{ $module->is_enabled ? 'Disable' : 'Enable' }}</button></td>
+                            <td><span class="badge bg-label-secondary">Managed By Central Admin</span></td>
                         </tr>
                     @empty
                         <tr><td colspan="4" class="text-center py-4 text-muted">No module access records found.</td></tr>

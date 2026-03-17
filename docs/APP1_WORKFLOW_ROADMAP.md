@@ -36,6 +36,8 @@ Aligned to: HMS Vision Architecture v2.0 (Nov 2025)
    - Visit events remain facility-scoped and are sync/backfill-safe.
 11. Monthly report:
    - Monthly dashboard aggregates mapped data from attendance, maternal/child, doctor, and lab sources.
+12. Reports Hub:
+   - Core Reports Hub (`/core/reports-hub`) allows section-based report selection, date/facility filters, generation history, and CSV export.
 
 ## 1b) Clinical Order Bridges (Implemented)
 
@@ -95,10 +97,11 @@ Done criteria:
 ## Phase C: Facility Operations Buildout
 1. Bed Management (completed foundation)
 2. Admitted Patients (completed foundation)
-3. Pharmacy & Drug full ops (inventory foundation delivered: stock-in, adjustments, reorder levels, movement logs, dispense deduction; advanced supplier/LMIS remains)
+3. Pharmacy & Drug full ops (inventory foundation delivered: stock-in, adjustments, reorder levels, movement logs, dispense deduction; advanced supplier/LMIS full operations deferred to Version 2)
 4. Laboratory full ops (completed: facility queue intake, sample tracking, processing batches, QC, reagents/movements, equipment logs)
 5. Staff Management (completed: unified facility staff module, legacy Data Officer pages redirected)
-6. Facility Administration hardening (completed: profile settings, service catalog, fee schedules, module access control, audit trail)
+6. Facility Administration hardening (completed: profile settings, service catalog, fee schedules, module access status view, audit trail; module toggle control centralized in Central Admin)
+7. Central Admin hardening (completed: live central dashboard metrics, route-valid sidebar cleanup, legacy `/central-admin/*` compatibility redirects)
 
 Done criteria:
 - Facility modules can operate independently of single-patient pages.
@@ -112,6 +115,9 @@ Done criteria:
 Done criteria:
 - Monthly report has clear source traceability for each mapped field.
 - Gap document shows no critical unmapped production metrics.
+
+## Deferred To Version 2
+1. Pharmacy & Drug advanced supplier/procurement + LMIS full operations.
 
 ## 4) Required Update Checklist Per Module Delivery
 

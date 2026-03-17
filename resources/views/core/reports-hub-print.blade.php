@@ -1,0 +1,209 @@
+@php
+    $columns = $payload['columns'] ?? [];
+    $rows = $payload['rows'] ?? [];
+@endphp
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ $payload['title'] ?? 'Reports Hub Print View' }}</title>
+    <style>
+        :root {
+            --ink: #0f172a;
+            --muted: #475569;
+            --border: #cbd5e1;
+            --bg: #f8fafc;
+        }
+
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+            color: var(--ink);
+            background: #fff;
+        }
+
+        .toolbar {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 14px;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 8px 12px;
+            border: 1px solid #111827;
+            background: #111827;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 13px;
+            cursor: pointer;
+        }
+
+        .btn.secondary {
+            background: #fff;
+            color: #111827;
+        }
+
+        .meta {
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 12px;
+            background: var(--bg);
+        }
+
+        .meta h2 {
+            margin: 0 0 6px 0;
+            font-size: 18px;
+        }
+
+        .meta p {
+            margin: 0 0 8px 0;
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        .meta-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 8px;
+            font-size: 12px;
+        }
+
+        .table-wrap {
+            overflow-x: auto;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+        }
+
+        table {
+            width: max-content;
+            min-width: 100%;
+            border-collapse: collapse;
+            font-size: 11px;
+        }
+
+        thead th {
+            background: #111827;
+            color: #fff;
+            text-align: left;
+            border: 1px solid #111827;
+            padding: 6px;
+            white-space: nowrap;
+        }
+
+        tbody td {
+            border: 1px solid var(--border);
+            padding: 6px;
+            vertical-align: top;
+            white-space: nowrap;
+        }
+
+        tbody tr:nth-child(even) td {
+            background: #f8fafc;
+        }
+
+        .empty {
+            border: 1px solid #fecaca;
+            background: #fef2f2;
+            color: #991b1b;
+            padding: 12px;
+            border-radius: 8px;
+        }
+
+        @page {
+            size: A3 landscape;
+            margin: 10mm;
+        }
+
+        @media print {
+            body {
+                padding: 0;
+            }
+
+            .toolbar {
+                display: none;
+            }
+
+            .meta {
+                border: 1px solid #000;
+                margin-bottom: 8px;
+            }
+
+            .table-wrap {
+                overflow: visible;
+                border: 1px solid #000;
+            }
+
+            thead th {
+                background: #fff !important;
+                color: #000 !important;
+                border: 1px solid #000;
+            }
+
+            tbody td {
+                border: 1px solid #000;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="toolbar">
+        <a href="{{ route('reports-hub') }}" class="btn secondary">Back To Reports Hub</a>
+        <button type="button" class="btn" onclick="window.print()">Print</button>
+    </div>
+
+    @if (empty($payload) || empty($columns))
+        <div class="empty">
+            No generated report found yet. Go back, generate a report, then open Print View again.
+        </div>
+    @else
+        <div class="meta">
+            <h2>{{ $payload['title'] ?? 'Report' }}</h2>
+            @if (!empty($payload['description']))
+                <p>{{ $payload['description'] }}</p>
+            @endif
+            <div class="meta-grid">
+                <div><strong>Report Name:</strong> {{ $payload['title'] ?? '-' }}</div>
+                <div><strong>Section:</strong> {{ $payload['section_label'] ?? '-' }}</div>
+                <div><strong>Scope:</strong> {{ $payload['scope_label'] ?? '-' }}</div>
+                <div><strong>Date Window:</strong> {{ $payload['date_from'] ?? '-' }} to {{ $payload['date_to'] ?? '-' }}</div>
+                <div><strong>Rows:</strong> {{ $payload['rows_count'] ?? 0 }}</div>
+                <div><strong>Generated At:</strong> {{ $payload['generated_at'] ?? '-' }}</div>
+                <div><strong>Generated By:</strong> {{ $payload['generated_by'] ?? '-' }} @if(!empty($payload['generated_by_role'])) ({{ $payload['generated_by_role'] }}) @endif</div>
+            </div>
+        </div>
+
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        @foreach ($columns as $column)
+                            <th>{{ $column['label'] ?? $column['key'] ?? '-' }}</th>
+                        @endforeach
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse ($rows as $row)
+                        <tr>
+                            @foreach ($columns as $column)
+                                <td>{{ $row[$column['key']] ?? '-' }}</td>
+                            @endforeach
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="{{ max(count($columns), 1) }}">No rows found.</td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+    @endif
+</body>
+</html>

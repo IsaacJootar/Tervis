@@ -103,12 +103,12 @@
     {
       "name": "Reports & Analytics",
       "icon": "menu-icon icon-base ti tabler-chart-bar",
-      "slug": "facility-admin-reports",
+      "slug": "reports-hub",
       "submenu": [
         {
-          "url": "/core/facility-reports",
-          "name": "Maternal Reports",
-          "slug": "facility-admin-finance"
+          "url": "/core/reports-hub",
+          "name": "Reports Hub",
+          "slug": "reports-hub"
         },
         {
           "url": "/analytics/mpdsr-report-dashboard",

@@ -39,12 +39,12 @@ Note: Vision text mentions both "7 modules" and "8 management modules" in differ
 | Vision Facility Module | Current App1 Status | Notes |
 | --- | --- | --- |
 | Bed Management | Implemented | Facility-scoped bed catalog and status management delivered (`/core/bed-management`) with section linkage + occupancy state updates. |
-| Pharmacy & Drug Management | Partial | Facility pharmacy operations now include stock-in batches, adjustments, reorder levels, and movement logs (`/core/pharmacy-operations`) with dispensing stock deduction wired; advanced supplier/LMIS procurement flow remains. |
+| Pharmacy & Drug Management | Partial (Deferred To V2) | Facility pharmacy operations now include stock-in batches, adjustments, reorder levels, and movement logs (`/core/pharmacy-operations`) with dispensing stock deduction wired. Advanced supplier/procurement + LMIS full operations are intentionally deferred to Version 2 by product decision. |
 | Admitted Patients (Inpatient) | Implemented | Admission/discharge/referral workflow delivered (`/core/admitted-patients`) with bed occupancy sync + activity timeline logging. |
 | Laboratory Management | Implemented | Facility operations module delivered at `/core/laboratory-operations` with pending order intake queue, sample tracking, processing batches, QC logs, reagent inventory/movements, and equipment calibration-maintenance logs. |
 | Staff Management | Implemented | Unified facility-scoped staff module delivered at `/core/staff-management` (create/update profile, designation-role alignment, activate/disable, department assignment, password reset, and audit trail) with legacy Data Officer routes redirected to avoid duplicate modules. |
-| Facility Administration | Implemented | Dedicated module delivered at `/core/facility-administration` with facility profile settings, service catalog CRUD, fee schedule CRUD (active schedule control), module access toggles, and administration audit trail. |
-| Reporting & Analytics | Partial | Monthly report dashboard exists with partial NHMIS mapping; full 187-field complete mapping still pending. |
+| Facility Administration | Implemented | Dedicated module delivered at `/core/facility-administration` with facility profile settings, service catalog CRUD, fee schedule CRUD (active schedule control), module access status view, and administration audit trail. |
+| Reporting & Analytics | Implemented | Dedicated Reports Hub delivered at `/core/reports-hub` with section/report-name/date/facility filters, generation history, DataTables pagination/export, CSV export, and printable template report view; monthly NHMIS key mapping includes immunization, child-health, and pharmacy indicators, and now uses canonical matrix registry (`app/Services/Reports/NhmisFieldRegistry.php` + `docs/nhmis-field-matrix.json`) plus per-row fallback resolver hardening (`app/Services/Reports/NhmisFieldValueResolver.php`). |
 
 ## 3) Integration Bridges (Vision-Critical)
 
@@ -54,19 +54,37 @@ Note: Vision text mentions both "7 modules" and "8 management modules" in differ
 | Doctor Assessment -> Prescriptions | Implemented | `DoctorAssessments` creates `Prescription` records as `pending`. |
 | Laboratory -> Mark Ordered Tests Completed | Implemented | Save requires pending selection when pending exists; selected orders set to `completed`. |
 | Prescriptions Checkout -> Resolve Pending Prescriptions | Implemented | Selected pending prescriptions required for checkout; dispensed lines saved and linked records marked `dispensed`. |
-| Child Health -> Monthly NHMIS Aggregation | Partial | Immunization/nutrition/vaccination schedule wired; some NHMIS row mappings still pending. |
-| Doctor/Lab -> Monthly NHMIS Aggregation | Partial | Keyword/structured extraction present; requires stronger structured mapping later. |
+| Child Health -> Monthly NHMIS Aggregation | Implemented | Immunization + nutrition + vaccination schedule are deduplicated and mapped into NHMIS summary keys. |
+| Doctor/Lab -> Monthly NHMIS Aggregation | Implemented | Structured indicators for malaria/TB/HepB/HepC/GBV and monthly summary integration are active. |
 | Inpatient -> Monthly NHMIS Aggregation | Implemented | Monthly inpatient totals now sourced from `inpatient_admissions` (admissions/discharges) instead of delivery proxy. |
 | Prescriptions -> Pharmacy Inventory | Implemented | Patient dispensing checkout now deducts facility stock using FIFO batches and logs stock movement records. |
+
+## 3b) Module Access Governance
+
+| Governance Rule | Status | Current Implementation |
+| --- | --- | --- |
+| Module enable/disable controlled from Central | Implemented | Central admin route `/central/facility-module-management` owns facility module toggles. |
+| Facility-side toggle control removed | Implemented | `/core/facility-administration` now shows module status as read-only. |
+
+## 3c) Central Admin Surface
+
+| Central Area | Status | Current Implementation |
+| --- | --- | --- |
+| Central Dashboard | Implemented | `/central/central-admin-dashboard` now shows live cross-facility metrics, module distribution, dispatch logs, and quick actions. |
+| Central Sidebar Links | Implemented | `resources/menu/centralAdminMenu.json` now contains only valid route targets. |
+| Legacy Central URL Compatibility | Implemented | Deprecated `/central-admin/*` links now redirect to active central/core destinations to prevent broken bookmarks. |
 
 ## 4) Testing & Quality Snapshot
 
 - `php artisan route:list` passes (routes compile and load).
-- Automated test suite currently only has example tests (`tests/Feature/ExampleTest.php`, `tests/Unit/ExampleTest.php`).
-- Gap: No dedicated feature tests yet for Doctor/Lab/Prescriptions/Child Health/Health Insurance module workflows.
+- `module.enabled` route-level enforcement is active for key workspace/core module routes.
+- Automated tests now include:
+  - NHMIS registry/value resolver unit tests
+  - module access middleware feature tests (`tests/Feature/ModuleEnabledMiddlewareTest.php`)
+- Remaining gap: broader end-to-end feature coverage for Doctor/Lab/Prescriptions/Child Health/Health Insurance workflow transitions.
 
 ## 5) Immediate Priority Recommendation
 
 1. Add dedicated feature tests for Facility Administration and Bed/Sections/Inpatient admission-discharge-referral transitions.
-2. Continue NHMIS mapping hardening with structured source coverage.
+2. Maintain mapping coverage as new template keys or module fields are introduced.
 3. Add dedicated feature tests for activities/reminders/appointments aggregation chains.

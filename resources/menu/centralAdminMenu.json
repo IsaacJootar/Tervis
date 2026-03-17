@@ -9,113 +9,95 @@
     {
       "name": "Admin Management",
       "icon": "menu-icon icon-base ti tabler-users",
-      "slug": "create-administrators",
+      "slug": ["create-administrators"],
       "submenu": [
         {
-          "url": "/central/central-admin/users",
-          "name": "All Users",
-          "slug": "create-administrators"
-        },
-        {
           "url": "/central/create-administrators",
-          "name": "Create Admin",
+          "name": "Administrators",
           "slug": "create-administrators"
-        },
-        {
-          "url": "/central-admin/roles",
-          "name": "Roles & Permissions",
-          "slug": "central-admin-roles"
         }
       ]
     },
     {
       "name": "Facilities Management",
       "icon": "menu-icon icon-base ti tabler-building-hospital",
-      "slug": "central-admin-facilities",
+      "slug": ["create-facility", "central-facility-module-management"],
       "submenu": [
         {
-          "url": "/central-admin/facilities",
-          "name": "All Facilities",
-          "slug": "central-admin-facilities-index"
-        },
-        {
           "url": "/central/create-facility",
-          "name": "Add Tenant Facility",
+          "name": "Manage Facilities",
           "slug": "create-facility"
         },
         {
-          "url": "/central-admin/facilities/approval",
-          "name": "Facility Approvals",
-          "slug": "central-admin-facilities-approval"
+          "url": "/central/facility-module-management",
+          "name": "Facility Module Access",
+          "slug": "central-facility-module-management"
         }
       ]
     },
     {
-      "name": "System Reports",
+      "name": "Platform Operations",
+      "icon": "menu-icon icon-base ti tabler-layout-grid",
+      "slug": ["reports-hub", "facility-reminders-hub", "facility-patients", "facility-administration", "staff-management"],
+      "submenu": [
+        {
+          "url": "/core/reports-hub",
+          "name": "Reports Hub",
+          "slug": "reports-hub"
+        },
+        {
+          "url": "/core/reminders-notifications-hub",
+          "name": "Reminders Hub",
+          "slug": "facility-reminders-hub"
+        },
+        {
+          "url": "/core/facility-patients",
+          "name": "Facility Patients",
+          "slug": "facility-patients"
+        },
+        {
+          "url": "/core/facility-administration",
+          "name": "Facility Admin",
+          "slug": "facility-administration"
+        },
+        {
+          "url": "/core/staff-management",
+          "name": "Staff Management",
+          "slug": "staff-management"
+        }
+      ]
+    },
+    {
+      "name": "Operations Modules",
       "icon": "menu-icon icon-base ti tabler-chart-bar",
-      "slug": "central-admin-reports",
+      "slug": ["bed-management", "admitted-patients", "laboratory-operations", "pharmacy-operations", "patient-appointments"],
       "submenu": [
         {
-          "url": "/central-admin/reports/system",
-          "name": "System Analytics",
-          "slug": "central-admin-reports-system"
+          "url": "/core/bed-management",
+          "name": "Bed Management",
+          "slug": "bed-management"
         },
         {
-          "url": "/central-admin/reports/users",
-          "name": "User Activity",
-          "slug": "central-admin-reports-users"
+          "url": "/core/admitted-patients",
+          "name": "Admitted Patients",
+          "slug": "admitted-patients"
         },
         {
-          "url": "/central-admin/reports/facilities",
-          "name": "Facility Reports",
-          "slug": "central-admin-reports-facilities"
+          "url": "/core/laboratory-operations",
+          "name": "Laboratory Operations",
+          "slug": "laboratory-operations"
+        },
+        {
+          "url": "/core/pharmacy-operations",
+          "name": "Pharmacy Operations",
+          "slug": "pharmacy-operations"
+        },
+        {
+          "url": "/core/patient-appointments",
+          "name": "Patient Appointments",
+          "slug": "patient-appointments"
         }
       ]
-    },
-    {
-      "name": "System Configuration",
-      "icon": "menu-icon icon-base ti tabler-settings",
-      "slug": "central-admin-config",
-      "submenu": [
-        {
-          "url": "/central-admin/settings/general",
-          "name": "General Settings",
-          "slug": "central-admin-settings-general"
-        },
-        {
-          "url": "/central-admin/settings/security",
-          "name": "Security Settings",
-          "slug": "central-admin-settings-security"
-        },
-        {
-          "url": "/central-admin/settings/backup",
-          "name": "Backup & Restore",
-          "slug": "central-admin-settings-backup"
-        }
-      ]
-    },
-    {
-      "name": "Audit Logs",
-      "icon": "menu-icon icon-base ti tabler-file-text",
-      "slug": "central-admin-audit",
-      "submenu": [
-        {
-          "url": "/central-admin/audit/system",
-          "name": "System Logs",
-          "slug": "central-admin-audit-system"
-        },
-        {
-          "url": "/central-admin/audit/user",
-          "name": "User Activity Logs",
-          "slug": "central-admin-audit-user"
-        }
-      ]
-    },
-    {
-      "url": "/central-admin/notifications",
-      "name": "Notifications",
-      "icon": "menu-icon icon-base ti tabler-bell",
-      "slug": "central-admin-notifications"
     }
   ]
 }
