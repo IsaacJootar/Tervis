@@ -29,12 +29,12 @@ class UserRoleMiddleware
     $roleAccess = [
 
       'Central Admin' => [
-        'prefixes' => ['central', 'core'],
+        'prefixes' => ['central'],
         'index'     => 'central-admin-dashboard',
       ],
 
       'Central Administrator' => [
-        'prefixes' => ['central', 'core'],
+        'prefixes' => ['central'],
         'index'     => 'central-admin-dashboard',
       ],
 

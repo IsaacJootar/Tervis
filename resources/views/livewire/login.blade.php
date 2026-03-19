@@ -1,35 +1,31 @@
-<div>
+﻿<div>
     <x-input-error-messages />
     <!-- Content -->
     <div class="container-xxl">
-        <div class="authentication-wrapper authentication-basic container-p-y">
-            <div class="authentication-inner py-6">
+        <div class="authentication-wrapper authentication-basic py-3" style="align-items:flex-start; padding-top:1rem;">
+            <div class="authentication-inner py-2">
                 <!-- Login -->
                 <div class="card">
-                    <div class="card-body">
+                    <div class="card-body p-4">
                         <!-- Logo -->
-                        <div class="app-brand justify-content-center mb-6">
+                        <div class="app-brand justify-content-center mb-4">
                             <a href="{{ url('/') }}" class="app-brand-link">
                                 <span class="app-brand-logo demo">@include('_partials.macros')</span>
                             </a>
                         </div>
                         <!-- /Logo -->
-                        <h4 class="mb-1">Welcome to {{ config('variables.templateName') }}! 🙋 </h4>
-                        <p class="mb-6">Please sign-in to your account to begin your maternal process</p>
 
                         <form wire:submit.prevent="login">
                             @csrf
 
-                            <div class="mb-6">
-                                <label for="username" class="form-label">Username<strong
-                                        style="color: red">*</strong></label>
+                            <div class="mb-4">
+                                <label for="username" class="form-label">Username<strong style="color: red">*</strong></label>
                                 <input wire:model='username' type="text" class="form-control" id="email"
                                     placeholder="Enter your username" autofocus>
                             </div>
 
-                            <div class="mb-6 form-password-toggle form-control-validation">
-                                <label class="form-label" for="password">Password <strong
-                                        class="text-danger">*</strong></label>
+                            <div class="mb-4 form-password-toggle form-control-validation">
+                                <label class="form-label" for="password">Password <strong class="text-danger">*</strong></label>
                                 <div class="input-group input-group-merge">
                                     <input wire:model="password" id="password" type="password" class="form-control"
                                         name="password" placeholder="••••••••••••" aria-describedby="password" />
@@ -39,7 +35,7 @@
                                 </div>
                             </div>
 
-                            <div class="my-8">
+                            <div class="my-4">
                                 <div class="d-flex justify-content-between">
                                     <div class="form-check mb-0 ms-2">
                                         <input type="checkbox" class="form-check-input" id="remember-me" />
@@ -48,27 +44,16 @@
                                 </div>
                             </div>
 
-                            <div class="mb-6">
-                                <!-- USING LOADING BUTTON COMPONENT -->
+                            <div class="mb-2">
                                 <x-app-loader target="login" type="submit" icon="bx-log-in" loadingText="Logging in..."
                                     class="d-grid w-100">
                                     Login In
                                 </x-app-loader>
                             </div>
-                        </form> <!-- FIXED: Added closing form tag -->
+                        </form>
 
-                        <div class="text-body">
-                            &#169;
-                            @php
-                                print Date('Y');
-                            @endphp, Made with ❤️ by
-                            <a href="{{ !empty(config('variables.creatorUrl')) ? config('variables.creatorUrl') : '' }}"
-                                target="_blank"
-                                class="footer-link">{{ !empty(config('variables.creatorName')) ? config('variables.creatorName') : '' }}</a>
-                        </div>
-
-                        <div class="divider my-6">
-                            <div class="divider-text">or</div>
+                        <div class="divider my-3">
+                            <div class="divider-text" style="font-size:.72rem; letter-spacing:.04em;">follow us</div>
                         </div>
 
                         <div class="d-flex justify-content-center">

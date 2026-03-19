@@ -1,5 +1,8 @@
 @php
+    use App\Services\Security\RolePermissionService;
     use Carbon\Carbon;
+    $authUser = auth()->user();
+    $canManageSections = RolePermissionService::can($authUser, 'core.sections.manage');
 @endphp
 
 @section('title', 'Facility Sections')
@@ -14,13 +17,17 @@
                 <div class="text-muted small">{{ Carbon::now('Africa/Lagos')->format('l, F j, Y, h:i A') }}</div>
                 <div class="text-muted small mt-1">Manage sections once, then Bed Management uses them.</div>
             </div>
-            <button wire:click="openCreateModal" type="button" class="btn btn-primary" wire:loading.attr="disabled"
-                wire:target="openCreateModal,saveSection">
-                <span wire:loading.remove wire:target="openCreateModal,saveSection"><i class="bx bx-plus me-1"></i>Add
-                    Section</span>
-                <span wire:loading wire:target="openCreateModal,saveSection"><span
-                        class="spinner-border spinner-border-sm me-1"></span>Opening...</span>
-            </button>
+            @if ($canManageSections)
+                <button wire:click="openCreateModal" type="button" class="btn btn-primary" wire:loading.attr="disabled"
+                    wire:target="openCreateModal,saveSection">
+                    <span wire:loading.remove wire:target="openCreateModal,saveSection"><i class="bx bx-plus me-1"></i>Add
+                        Section</span>
+                    <span wire:loading wire:target="openCreateModal,saveSection"><span
+                            class="spinner-border spinner-border-sm me-1"></span>Opening...</span>
+                </button>
+            @else
+                <span class="badge bg-label-secondary">View Only</span>
+            @endif
         </div>
     </div>
 
@@ -108,29 +115,33 @@
                             </td>
                             <td>{{ $section->beds_count }}</td>
                             <td>
-                                <div class="dropdown">
-                                    <button type="button" class="btn p-0 dropdown-toggle hide-arrow"
-                                        data-bs-toggle="dropdown">
-                                        <i class="icon-base ti tabler-dots-vertical"></i>
-                                    </button>
-                                    <div class="dropdown-menu">
-                                        <a class="dropdown-item" href="javascript:void(0)"
-                                            wire:click="openEditModal({{ $section->id }})">
-                                            <i class="icon-base ti tabler-edit me-1"></i>Edit
-                                        </a>
-                                        <a class="dropdown-item" href="javascript:void(0)"
-                                            wire:click="toggleStatus({{ $section->id }})">
-                                            <i
-                                                class="icon-base ti tabler-power me-1"></i>{{ $section->is_active ? 'Deactivate' : 'Activate' }}
-                                        </a>
-                                        <div class="dropdown-divider"></div>
-                                        <a class="dropdown-item text-danger" href="javascript:void(0)"
-                                            wire:click="deleteSection({{ $section->id }})"
-                                            wire:confirm="Delete this section? Beds must not be linked to it.">
-                                            <i class="icon-base ti tabler-trash me-1"></i>Delete
-                                        </a>
+                                @if ($canManageSections)
+                                    <div class="dropdown">
+                                        <button type="button" class="btn p-0 dropdown-toggle hide-arrow"
+                                            data-bs-toggle="dropdown">
+                                            <i class="icon-base ti tabler-dots-vertical"></i>
+                                        </button>
+                                        <div class="dropdown-menu">
+                                            <a class="dropdown-item" href="javascript:void(0)"
+                                                wire:click="openEditModal({{ $section->id }})">
+                                                <i class="icon-base ti tabler-edit me-1"></i>Edit
+                                            </a>
+                                            <a class="dropdown-item" href="javascript:void(0)"
+                                                wire:click="toggleStatus({{ $section->id }})">
+                                                <i
+                                                    class="icon-base ti tabler-power me-1"></i>{{ $section->is_active ? 'Deactivate' : 'Activate' }}
+                                            </a>
+                                            <div class="dropdown-divider"></div>
+                                            <a class="dropdown-item text-danger" href="javascript:void(0)"
+                                                wire:click="deleteSection({{ $section->id }})"
+                                                wire:confirm="Delete this section? Beds must not be linked to it.">
+                                                <i class="icon-base ti tabler-trash me-1"></i>Delete
+                                            </a>
+                                        </div>
                                     </div>
-                                </div>
+                                @else
+                                    <span class="badge bg-label-secondary">View Only</span>
+                                @endif
                             </td>
                         </tr>
                     @endforeach
@@ -177,12 +188,14 @@
                         </div>
 
                         <div class="col-12 text-center mt-4">
-                            <button wire:click="saveSection" type="button" class="btn btn-primary"
-                                wire:loading.attr="disabled" wire:target="saveSection">
-                                <span wire:loading.remove wire:target="saveSection">{{ $edit_mode ? 'Update Section' : 'Save Section' }}</span>
-                                <span wire:loading wire:target="saveSection"><span
-                                        class="spinner-border spinner-border-sm me-1"></span>Saving...</span>
-                            </button>
+                            @if ($canManageSections)
+                                <button wire:click="saveSection" type="button" class="btn btn-primary"
+                                    wire:loading.attr="disabled" wire:target="saveSection">
+                                    <span wire:loading.remove wire:target="saveSection">{{ $edit_mode ? 'Update Section' : 'Save Section' }}</span>
+                                    <span wire:loading wire:target="saveSection"><span
+                                            class="spinner-border spinner-border-sm me-1"></span>Saving...</span>
+                                </button>
+                            @endif
                             <button wire:click="exit" type="button" class="btn btn-label-secondary" aria-label="Close">
                                 Cancel
                             </button>

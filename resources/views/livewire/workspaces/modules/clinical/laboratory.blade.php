@@ -63,6 +63,16 @@
                     <span wire:loading.remove wire:target="backToDashboard"><i class="bx bx-arrow-back me-1"></i>Back to Workspace</span>
                     <span wire:loading wire:target="backToDashboard"><span class="spinner-border spinner-border-sm me-1"></span>Opening...</span>
                 </button>
+                @if ($showAiAssistant)
+                    <button type="button" class="btn btn-outline-secondary" wire:click="hideAiAssistant">
+                        Hide AI Assistant
+                    </button>
+                @else
+                    <button type="button" class="btn btn-outline-dark" wire:click="useAiAssistant" wire:loading.attr="disabled" wire:target="useAiAssistant">
+                        <span wire:loading.remove wire:target="useAiAssistant"><i class="bx bx-bot me-1"></i>Use AI Assistant</span>
+                        <span wire:loading wire:target="useAiAssistant"><span class="spinner-border spinner-border-sm me-1"></span>Opening...</span>
+                    </button>
+                @endif
             </div>
         </div>
 
@@ -386,6 +396,17 @@
             </div>
         </div>
     @endif
+
+    @include('livewire.partials.ai-assistant-panel', [
+        'show' => $showAiAssistant,
+        'summary' => $aiAssistantSummary,
+        'riskLevel' => $aiAssistantRiskLevel,
+        'generatedAt' => $aiAssistantGeneratedAt,
+        'items' => $aiAssistantItems,
+        'refreshAction' => 'refreshAiAssistant',
+        'hideAction' => 'hideAiAssistant',
+        'title' => 'AI Assistant',
+    ])
 </div>
 
 @once

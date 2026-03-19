@@ -1,5 +1,8 @@
 @php
+    use App\Services\Security\RolePermissionService;
     use Carbon\Carbon;
+    $authUser = auth()->user();
+    $canManageInpatient = RolePermissionService::can($authUser, 'core.inpatient.manage');
 @endphp
 
 @section('title', 'Admitted Patients')
@@ -154,13 +157,15 @@
                 </div>
             </div>
 
-            <div class="mt-4">
-                <button type="button" class="btn btn-primary" wire:click="admitPatient" wire:loading.attr="disabled"
-                    wire:target="admitPatient">
-                    <span wire:loading.remove wire:target="admitPatient"><i class="bx bx-check-circle me-1"></i>Save Admission</span>
-                    <span wire:loading wire:target="admitPatient"><span class="spinner-border spinner-border-sm me-1"></span>Saving...</span>
-                </button>
-            </div>
+            @if ($canManageInpatient)
+                <div class="mt-4">
+                    <button type="button" class="btn btn-primary" wire:click="admitPatient" wire:loading.attr="disabled"
+                        wire:target="admitPatient">
+                        <span wire:loading.remove wire:target="admitPatient"><i class="bx bx-check-circle me-1"></i>Save Admission</span>
+                        <span wire:loading wire:target="admitPatient"><span class="spinner-border spinner-border-sm me-1"></span>Saving...</span>
+                    </button>
+                </div>
+            @endif
         </div>
     </div>
 
@@ -197,16 +202,20 @@
                             </td>
                             <td>{{ $admission->admitted_by ?: 'N/A' }}</td>
                             <td>
-                                <div class="d-flex gap-1">
-                                    <button type="button" class="btn btn-sm btn-light text-dark border"
-                                        wire:click="startClose({{ $admission->id }}, 'discharged')">
-                                        Discharge
-                                    </button>
-                                    <button type="button" class="btn btn-sm btn-light text-dark border"
-                                        wire:click="startClose({{ $admission->id }}, 'referred')">
-                                        Refer Out
-                                    </button>
-                                </div>
+                                @if ($canManageInpatient)
+                                    <div class="d-flex gap-1">
+                                        <button type="button" class="btn btn-sm btn-light text-dark border"
+                                            wire:click="startClose({{ $admission->id }}, 'discharged')">
+                                            Discharge
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-light text-dark border"
+                                            wire:click="startClose({{ $admission->id }}, 'referred')">
+                                            Refer Out
+                                        </button>
+                                    </div>
+                                @else
+                                    <span class="badge bg-label-secondary">View Only</span>
+                                @endif
                             </td>
                         </tr>
                     @empty
@@ -333,7 +342,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">Cancel</button>
-                    @if ($close_admission_id && $selectedCloseAdmission)
+                    @if ($canManageInpatient && $close_admission_id && $selectedCloseAdmission)
                         <button type="button" class="btn btn-primary" wire:click="completeCloseAdmission"
                             wire:loading.attr="disabled" wire:target="completeCloseAdmission">
                             <span wire:loading.remove wire:target="completeCloseAdmission">

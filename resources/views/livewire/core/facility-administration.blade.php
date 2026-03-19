@@ -1,5 +1,8 @@
 @php
+    use App\Services\Security\RolePermissionService;
     use Carbon\Carbon;
+    $authUser = auth()->user();
+    $canManageFacilityAdministration = RolePermissionService::can($authUser, 'core.facility_administration.manage');
 @endphp
 
 @section('title', 'Facility Administration')
@@ -15,14 +18,18 @@
                 <div class="text-muted small mt-1">Manage facility profile, service catalog, fee schedules, view module access, and audit logs.</div>
             </div>
             <div class="ms-auto d-flex gap-2">
-                <button type="button" class="btn btn-outline-primary" wire:click="openServiceModal" wire:loading.attr="disabled" wire:target="openServiceModal" {{ !$tables_ready ? 'disabled' : '' }}>
-                    <span wire:loading.remove wire:target="openServiceModal"><i class="bx bx-plus me-1"></i>New Service</span>
-                    <span wire:loading wire:target="openServiceModal"><span class="spinner-border spinner-border-sm me-1"></span>Opening...</span>
-                </button>
-                <button type="button" class="btn btn-primary" wire:click="openFeeModal" wire:loading.attr="disabled" wire:target="openFeeModal" {{ !$tables_ready ? 'disabled' : '' }}>
-                    <span wire:loading.remove wire:target="openFeeModal"><i class="bx bx-receipt me-1"></i>New Fee Schedule</span>
-                    <span wire:loading wire:target="openFeeModal"><span class="spinner-border spinner-border-sm me-1"></span>Opening...</span>
-                </button>
+                @if ($canManageFacilityAdministration)
+                    <button type="button" class="btn btn-outline-primary" wire:click="openServiceModal" wire:loading.attr="disabled" wire:target="openServiceModal" {{ !$tables_ready ? 'disabled' : '' }}>
+                        <span wire:loading.remove wire:target="openServiceModal"><i class="bx bx-plus me-1"></i>New Service</span>
+                        <span wire:loading wire:target="openServiceModal"><span class="spinner-border spinner-border-sm me-1"></span>Opening...</span>
+                    </button>
+                    <button type="button" class="btn btn-primary" wire:click="openFeeModal" wire:loading.attr="disabled" wire:target="openFeeModal" {{ !$tables_ready ? 'disabled' : '' }}>
+                        <span wire:loading.remove wire:target="openFeeModal"><i class="bx bx-receipt me-1"></i>New Fee Schedule</span>
+                        <span wire:loading wire:target="openFeeModal"><span class="spinner-border spinner-border-sm me-1"></span>Opening...</span>
+                    </button>
+                @else
+                    <span class="badge bg-label-secondary">View Only</span>
+                @endif
             </div>
         </div>
     </div>
@@ -103,13 +110,15 @@
                 <div class="col-md-4"><label class="form-label">Ownership</label><input type="text" class="form-control" wire:model.live="facility_ownership">@error('facility_ownership') <small class="text-danger">{{ $message }}</small> @enderror</div>
                 <div class="col-md-4"><label class="form-label d-block">Status</label><div class="form-check mt-2"><input type="checkbox" class="form-check-input" id="facilityStatus" wire:model.live="facility_is_active"><label class="form-check-label" for="facilityStatus">Facility Active</label></div></div>
                 <div class="col-12"><label class="form-label">Address</label><textarea class="form-control" rows="2" wire:model.live="facility_address"></textarea>@error('facility_address') <small class="text-danger">{{ $message }}</small> @enderror</div>
-                <div class="col-12 d-flex justify-content-end"><button type="button" class="btn btn-primary" wire:click="saveFacilityProfile" wire:loading.attr="disabled" wire:target="saveFacilityProfile"><span wire:loading.remove wire:target="saveFacilityProfile"><i class="bx bx-save me-1"></i>Save Profile Settings</span><span wire:loading wire:target="saveFacilityProfile"><span class="spinner-border spinner-border-sm me-1"></span>Saving...</span></button></div>
+                @if ($canManageFacilityAdministration)
+                    <div class="col-12 d-flex justify-content-end"><button type="button" class="btn btn-primary" wire:click="saveFacilityProfile" wire:loading.attr="disabled" wire:target="saveFacilityProfile"><span wire:loading.remove wire:target="saveFacilityProfile"><i class="bx bx-save me-1"></i>Save Profile Settings</span><span wire:loading wire:target="saveFacilityProfile"><span class="spinner-border spinner-border-sm me-1"></span>Saving...</span></button></div>
+                @endif
             </div>
         </div>
     </div>
 
     <div class="card mb-4">
-        <div class="card-header d-flex justify-content-between align-items-center"><h5 class="mb-0">Service Catalog</h5><button type="button" class="btn btn-primary btn-sm" wire:click="openServiceModal" wire:loading.attr="disabled" wire:target="openServiceModal"><span wire:loading.remove wire:target="openServiceModal"><i class="bx bx-plus me-1"></i>Add Service</span><span wire:loading wire:target="openServiceModal"><span class="spinner-border spinner-border-sm me-1"></span>Opening...</span></button></div>
+        <div class="card-header d-flex justify-content-between align-items-center"><h5 class="mb-0">Service Catalog</h5>@if ($canManageFacilityAdministration)<button type="button" class="btn btn-primary btn-sm" wire:click="openServiceModal" wire:loading.attr="disabled" wire:target="openServiceModal"><span wire:loading.remove wire:target="openServiceModal"><i class="bx bx-plus me-1"></i>Add Service</span><span wire:loading wire:target="openServiceModal"><span class="spinner-border spinner-border-sm me-1"></span>Opening...</span></button>@endif</div>
         <div class="px-4 pt-3 text-muted small">Services are the billable facility activities (example: ANC Booking, Full Blood Count, Ultrasound).</div>
         <div class="card-datatable table-responsive pt-0" wire:ignore>
             <table id="facilityServiceCatalogTable" class="table align-middle">
@@ -123,13 +132,17 @@
                             <td>NGN {{ number_format((float) $service->base_fee, 2) }}</td>
                             <td><span class="badge {{ $service->is_active ? 'bg-label-success' : 'bg-label-danger' }}">{{ $service->is_active ? 'Active' : 'Inactive' }}</span></td>
                             <td>
-                                <div class="dropdown">
-                                    <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown"><i class="icon-base ti tabler-dots-vertical"></i></button>
-                                    <div class="dropdown-menu">
-                                        <a class="dropdown-item" href="javascript:void(0)" wire:click="openServiceModal({{ $service->id }})"><i class="icon-base ti tabler-edit me-1"></i>Edit</a>
-                                        <a class="dropdown-item" href="javascript:void(0)" wire:click="toggleServiceStatus({{ $service->id }})" wire:loading.attr="disabled" wire:target="toggleServiceStatus({{ $service->id }})"><i class="icon-base ti tabler-{{ $service->is_active ? 'eye-off' : 'eye' }} me-1"></i>{{ $service->is_active ? 'Deactivate' : 'Activate' }}</a>
+                                @if ($canManageFacilityAdministration)
+                                    <div class="dropdown">
+                                        <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown"><i class="icon-base ti tabler-dots-vertical"></i></button>
+                                        <div class="dropdown-menu">
+                                            <a class="dropdown-item" href="javascript:void(0)" wire:click="openServiceModal({{ $service->id }})"><i class="icon-base ti tabler-edit me-1"></i>Edit</a>
+                                            <a class="dropdown-item" href="javascript:void(0)" wire:click="toggleServiceStatus({{ $service->id }})" wire:loading.attr="disabled" wire:target="toggleServiceStatus({{ $service->id }})"><i class="icon-base ti tabler-{{ $service->is_active ? 'eye-off' : 'eye' }} me-1"></i>{{ $service->is_active ? 'Deactivate' : 'Activate' }}</a>
+                                        </div>
                                     </div>
-                                </div>
+                                @else
+                                    <span class="badge bg-label-secondary">View Only</span>
+                                @endif
                             </td>
                         </tr>
                     @empty
@@ -141,7 +154,7 @@
     </div>
 
     <div class="card mb-4">
-        <div class="card-header d-flex justify-content-between align-items-center"><h5 class="mb-0">Fee Schedule</h5><button type="button" class="btn btn-primary btn-sm" wire:click="openFeeModal" wire:loading.attr="disabled" wire:target="openFeeModal"><span wire:loading.remove wire:target="openFeeModal"><i class="bx bx-plus me-1"></i>Add Fee</span><span wire:loading wire:target="openFeeModal"><span class="spinner-border spinner-border-sm me-1"></span>Opening...</span></button></div>
+        <div class="card-header d-flex justify-content-between align-items-center"><h5 class="mb-0">Fee Schedule</h5>@if ($canManageFacilityAdministration)<button type="button" class="btn btn-primary btn-sm" wire:click="openFeeModal" wire:loading.attr="disabled" wire:target="openFeeModal"><span wire:loading.remove wire:target="openFeeModal"><i class="bx bx-plus me-1"></i>Add Fee</span><span wire:loading wire:target="openFeeModal"><span class="spinner-border spinner-border-sm me-1"></span>Opening...</span></button>@endif</div>
         <div class="px-4 pt-3 text-muted small">Fee Schedule sets the amount and effective dates for each service. Only one active schedule should apply per service.</div>
         <div class="card-datatable table-responsive pt-0" wire:ignore>
             <table id="facilityFeeScheduleTable" class="table align-middle">
@@ -156,13 +169,17 @@
                             <td><span class="badge {{ $fee->is_active ? 'bg-label-success' : 'bg-label-secondary' }}">{{ $fee->is_active ? 'Active' : 'Inactive' }}</span></td>
                             <td>{{ $fee->notes ?: 'N/A' }}</td>
                             <td>
-                                <div class="dropdown">
-                                    <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown"><i class="icon-base ti tabler-dots-vertical"></i></button>
-                                    <div class="dropdown-menu">
-                                        <a class="dropdown-item" href="javascript:void(0)" wire:click="openFeeModal({{ $fee->id }})"><i class="icon-base ti tabler-edit me-1"></i>Edit</a>
-                                        <a class="dropdown-item" href="javascript:void(0)" wire:click="toggleFeeStatus({{ $fee->id }})" wire:loading.attr="disabled" wire:target="toggleFeeStatus({{ $fee->id }})"><i class="icon-base ti tabler-{{ $fee->is_active ? 'eye-off' : 'eye' }} me-1"></i>{{ $fee->is_active ? 'Deactivate' : 'Activate' }}</a>
+                                @if ($canManageFacilityAdministration)
+                                    <div class="dropdown">
+                                        <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown"><i class="icon-base ti tabler-dots-vertical"></i></button>
+                                        <div class="dropdown-menu">
+                                            <a class="dropdown-item" href="javascript:void(0)" wire:click="openFeeModal({{ $fee->id }})"><i class="icon-base ti tabler-edit me-1"></i>Edit</a>
+                                            <a class="dropdown-item" href="javascript:void(0)" wire:click="toggleFeeStatus({{ $fee->id }})" wire:loading.attr="disabled" wire:target="toggleFeeStatus({{ $fee->id }})"><i class="icon-base ti tabler-{{ $fee->is_active ? 'eye-off' : 'eye' }} me-1"></i>{{ $fee->is_active ? 'Deactivate' : 'Activate' }}</a>
+                                        </div>
                                     </div>
-                                </div>
+                                @else
+                                    <span class="badge bg-label-secondary">View Only</span>
+                                @endif
                             </td>
                         </tr>
                     @empty
@@ -231,7 +248,7 @@
                         <div class="col-12"><div class="form-check mt-1"><input class="form-check-input" type="checkbox" id="serviceIsActive" wire:model.live="service_is_active"><label class="form-check-label" for="serviceIsActive"><strong>Service Active</strong></label></div></div>
                     </div>
                 </div>
-                <div class="modal-footer"><button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">Close</button><button type="button" class="btn btn-primary" wire:click="saveService" wire:loading.attr="disabled" wire:target="saveService"><span wire:loading.remove wire:target="saveService">{{ $service_mode === 'edit' ? 'Update Service' : 'Create Service' }}</span><span wire:loading wire:target="saveService"><span class="spinner-border spinner-border-sm me-1"></span>Saving...</span></button></div>
+                <div class="modal-footer"><button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">Close</button>@if ($canManageFacilityAdministration)<button type="button" class="btn btn-primary" wire:click="saveService" wire:loading.attr="disabled" wire:target="saveService"><span wire:loading.remove wire:target="saveService">{{ $service_mode === 'edit' ? 'Update Service' : 'Create Service' }}</span><span wire:loading wire:target="saveService"><span class="spinner-border spinner-border-sm me-1"></span>Saving...</span></button>@endif</div>
             </div>
         </div>
     </div>
@@ -250,7 +267,7 @@
                         <div class="col-12"><div class="form-check mt-1"><input class="form-check-input" type="checkbox" id="feeIsActive" wire:model.live="fee_is_active"><label class="form-check-label" for="feeIsActive"><strong>Set as Active Schedule</strong></label></div></div>
                     </div>
                 </div>
-                <div class="modal-footer"><button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">Close</button><button type="button" class="btn btn-primary" wire:click="saveFeeSchedule" wire:loading.attr="disabled" wire:target="saveFeeSchedule"><span wire:loading.remove wire:target="saveFeeSchedule">{{ $fee_mode === 'edit' ? 'Update Fee Schedule' : 'Create Fee Schedule' }}</span><span wire:loading wire:target="saveFeeSchedule"><span class="spinner-border spinner-border-sm me-1"></span>Saving...</span></button></div>
+                <div class="modal-footer"><button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">Close</button>@if ($canManageFacilityAdministration)<button type="button" class="btn btn-primary" wire:click="saveFeeSchedule" wire:loading.attr="disabled" wire:target="saveFeeSchedule"><span wire:loading.remove wire:target="saveFeeSchedule">{{ $fee_mode === 'edit' ? 'Update Fee Schedule' : 'Create Fee Schedule' }}</span><span wire:loading wire:target="saveFeeSchedule"><span class="spinner-border spinner-border-sm me-1"></span>Saving...</span></button>@endif</div>
             </div>
         </div>
     </div>

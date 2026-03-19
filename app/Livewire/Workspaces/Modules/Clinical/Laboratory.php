@@ -8,6 +8,7 @@ use App\Models\LabTest;
 use App\Models\LabTestOrder;
 use App\Models\Patient;
 use App\Models\Registrations\DinActivation;
+use App\Services\AI\WorkspaceAiAssistantService;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Database\QueryException;
@@ -26,6 +27,10 @@ class Laboratory extends Component
   use WithPagination;
 
   protected $paginationTheme = 'bootstrap';
+
+  // Pagination and UI constants
+  private const RECORDS_PER_PAGE = 10;
+  private const FORM_SECTIONS = ['report_values', 'stool_values', 'mcs_results', 'microscopy_results', 'sensitivity_results'];
 
   public const REPORT_INPUT_FIELDS = [
     'fbs',
@@ -149,6 +154,14 @@ class Laboratory extends Component
   public $comment, $mlt_sign, $sign_date;
   public $selected_test_order_ids = [];
   public $selected_test_order_map = [];
+  public bool $showAiAssistant = false;
+  public string $aiAssistantSummary = '';
+  public string $aiAssistantRiskLevel = 'low';
+  public ?string $aiAssistantGeneratedAt = null;
+  public array $aiAssistantItems = [];
+
+  // Cache for pending order IDs to avoid repeated queries
+  private ?\Illuminate\Support\Collection $cachedPendingIds = null;
 
   protected $rules = [
     'patientId' => 'required',
@@ -263,6 +276,23 @@ class Laboratory extends Component
   public function updatedVisitDate(): void
   {
     $this->autoFillMonthYear();
+    $this->refreshAiAssistantIfOpen();
+  }
+
+  public function updatedSelectedTestOrderMap(): void
+  {
+    $this->refreshAiAssistantIfOpen();
+  }
+
+  public function updated($name): void
+  {
+    if (
+      in_array((string) $name, ['comment'], true)
+      || str_starts_with((string) $name, 'report_values.')
+      || str_starts_with((string) $name, 'mcs_results.')
+    ) {
+      $this->refreshAiAssistantIfOpen();
+    }
   }
 
   private function autoFillMonthYear(): void
@@ -333,24 +363,62 @@ class Laboratory extends Component
 
   public function setSelection(string $group, string $field, string $value): void
   {
-    if (!in_array($group, ['report_values', 'stool_values', 'mcs_results', 'microscopy_results', 'sensitivity_results'], true)) {
+    if (!in_array($group, self::FORM_SECTIONS, true)) {
       return;
     }
 
     $payload = (array) ($this->{$group} ?? []);
     $payload[$field] = $value;
     $this->{$group} = $payload;
+    $this->refreshAiAssistantIfOpen();
   }
 
   public function clearSelection(string $group, string $field): void
   {
-    if (!in_array($group, ['report_values', 'stool_values', 'mcs_results', 'microscopy_results', 'sensitivity_results'], true)) {
+    if (!in_array($group, self::FORM_SECTIONS, true)) {
       return;
     }
 
     $payload = (array) ($this->{$group} ?? []);
     $payload[$field] = null;
     $this->{$group} = $payload;
+    $this->refreshAiAssistantIfOpen();
+  }
+
+  public function useAiAssistant(): void
+  {
+    $this->showAiAssistant = true;
+    $this->refreshAiAssistant();
+  }
+
+  public function hideAiAssistant(): void
+  {
+    $this->showAiAssistant = false;
+  }
+
+  public function refreshAiAssistant(): void
+  {
+    $analysis = app(WorkspaceAiAssistantService::class)->analyzeLaboratory([
+      'report_values' => $this->report_values,
+      'mcs_results' => $this->mcs_results,
+      'comment' => $this->comment,
+      'pending_count' => $this->getPendingOrderIds()->count(),
+      'selected_pending_count' => $this->getSelectedPendingOrderIds()->count(),
+    ]);
+
+    $this->aiAssistantSummary = (string) ($analysis['summary'] ?? '');
+    $this->aiAssistantRiskLevel = (string) ($analysis['risk_level'] ?? 'low');
+    $this->aiAssistantItems = (array) ($analysis['items'] ?? []);
+    $this->aiAssistantGeneratedAt = (string) ($analysis['generated_at'] ?? now()->format('M d, Y h:i A'));
+  }
+
+  private function refreshAiAssistantIfOpen(): void
+  {
+    if (!$this->showAiAssistant) {
+      return;
+    }
+
+    $this->refreshAiAssistant();
   }
 
   private function buildSummaryMap(): array
@@ -366,7 +434,12 @@ class Laboratory extends Component
   }
   private function getPendingOrderIds()
   {
-    return LabTestOrder::query()
+    // Cache pending IDs to avoid repeated queries during render cycle
+    if ($this->cachedPendingIds !== null) {
+      return $this->cachedPendingIds;
+    }
+
+    return $this->cachedPendingIds = LabTestOrder::query()
       ->where('patient_id', $this->patientId)
       ->where('facility_id', $this->facility_id)
       ->where('status', 'pending')
@@ -433,6 +506,8 @@ class Laboratory extends Component
 
     $this->selected_test_order_ids = [];
     $this->selected_test_order_map = [];
+    // Invalidate cache after modifying orders
+    $this->cachedPendingIds = null;
 
     if ($updated > 0) {
       toastr()->info($updated . ' pending requested test(s) marked completed.');
@@ -441,8 +516,7 @@ class Laboratory extends Component
 
   private function payload(): array
   {
-    $this->initializeFormCollections();
-
+    // No need to reinitialize—data is already loaded/validated
     return [
       'patient_id' => $this->patientId,
       'facility_id' => $this->facility_id,
@@ -487,6 +561,7 @@ class Laboratory extends Component
       DB::commit();
       $this->logActivity('create', 'Recorded laboratory test/report');
       $this->edit($record->id);
+      $this->refreshAiAssistantIfOpen();
       toastr()->success('Laboratory record saved.');
     } catch (ValidationException $e) {
       DB::rollBack();
@@ -533,6 +608,7 @@ class Laboratory extends Component
     $this->initializeFormCollections();
     $this->selected_test_order_ids = [];
     $this->selected_test_order_map = [];
+    $this->refreshAiAssistantIfOpen();
   }
 
   public function update(): void
@@ -554,6 +630,7 @@ class Laboratory extends Component
       DB::commit();
       $this->logActivity('update', 'Updated laboratory test/report');
       $this->edit($record->id);
+      $this->refreshAiAssistantIfOpen();
       toastr()->success('Laboratory record updated.');
     } catch (ValidationException $e) {
       DB::rollBack();
@@ -582,6 +659,7 @@ class Laboratory extends Component
       if ($this->record_id === (int) $id) {
         $this->openCreate();
       }
+      $this->refreshAiAssistantIfOpen();
       toastr()->success('Laboratory record deleted.');
     } catch (Exception $e) {
       DB::rollBack();
@@ -642,6 +720,7 @@ class Laboratory extends Component
     $this->initializeFormCollections();
     $this->selected_test_order_ids = [];
     $this->selected_test_order_map = [];
+    $this->refreshAiAssistantIfOpen();
   }
 
   public function backToDashboard()
@@ -651,12 +730,15 @@ class Laboratory extends Component
 
   public function render()
   {
+    // Invalidate pending orders cache when rendering layout
+    $this->cachedPendingIds = null;
+
     $records = LabTest::query()
       ->where('patient_id', $this->patientId)
       ->where('facility_id', $this->facility_id)
       ->latest('visit_date')
       ->latest('id')
-      ->paginate(10, ['*'], 'lab_records_page');
+      ->paginate(self::RECORDS_PER_PAGE, ['*'], 'lab_records_page');
 
     $pendingOrdersBaseQuery = LabTestOrder::query()
       ->where('patient_id', $this->patientId)
@@ -666,7 +748,7 @@ class Laboratory extends Component
     $pendingTestOrders = (clone $pendingOrdersBaseQuery)
       ->latest('requested_at')
       ->latest('id')
-      ->paginate(10, ['*'], 'lab_pending_page');
+      ->paginate(self::RECORDS_PER_PAGE, ['*'], 'lab_pending_page');
 
     $pendingIds = (clone $pendingOrdersBaseQuery)->pluck('id')->map(fn($id) => (string) $id)->all();
     $this->selected_test_order_map = collect((array) $this->selected_test_order_map)

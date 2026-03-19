@@ -15,6 +15,35 @@ use Illuminate\Support\Facades\Log;
 
 class RiskAssessmentService
 {
+  private const AGE_TEEN_THRESHOLD = 18;
+  private const AGE_ADVANCED_THRESHOLD = 35;
+  private const HEMOGLOBIN_ANEMIA_THRESHOLD = 11.0;
+  private const BP_SYSTOLIC_HYPERTENSION = 140;
+  private const BP_DIASTOLIC_HYPERTENSION = 90;
+  private const BMI_LOW_THRESHOLD = 18.5;
+  private const BMI_HIGH_THRESHOLD = 30.0;
+  private const BIRTH_WEIGHT_EXTREMELY_LOW = 1.0;
+  private const BIRTH_WEIGHT_VERY_LOW = 1.5;
+  private const BIRTH_WEIGHT_LOW = 2.5;
+  private const NEONATAL_TEMP_LOW = 36.0;
+  private const NEONATAL_TEMP_HIGH = 37.5;
+  private const MULTI_FACTOR_THRESHOLD = 2;
+  private const CLINICAL_NOTES_FREQUENT_VISITS_THRESHOLD = 5;
+  private const CLINICAL_NOTES_RECURRING_INFECTION_THRESHOLD = 3;
+  private const RISK_SCORE_CRITICAL_MIN = 70;
+  private const RISK_SCORE_HIGH_MIN = 40;
+  private const RISK_SCORE_MODERATE_MIN = 20;
+  private const BP_PATTERN = '/(\d{2,3})\s*[\/\-]\s*(\d{2,3})/';
+  private const BP_SYSTOLIC_MIN = 70;
+  private const BP_SYSTOLIC_MAX = 250;
+  private const BP_DIASTOLIC_MIN = 40;
+  private const BP_DIASTOLIC_MAX = 150;
+  private const BMI_WEIGHT_MIN = 20;
+  private const BMI_WEIGHT_MAX = 200;
+  private const BMI_HEIGHT_CM_MIN = 100;
+  private const BMI_HEIGHT_CM_MAX = 220;
+  private const INFECTION_KEYWORDS = ['infection', 'fever', 'UTI', 'sepsis', 'antibiotics'];
+
   protected $scopeService;
 
   public function __construct(DataScopeService $scopeService)
@@ -347,7 +376,7 @@ class RiskAssessmentService
     $recommendations = [];
 
     // Age-based assessment
-    if ($antenatal->age < 18) {
+    if ($antenatal->age < self::AGE_TEEN_THRESHOLD) {
       $riskScore += $this->riskFactors['teen_pregnancy']['weight'];
       $identifiedRisks[] = [
         'factor' => 'teen_pregnancy',
@@ -358,7 +387,7 @@ class RiskAssessmentService
       $recommendations[] = 'Nutritional counseling and support';
     }
 
-    if ($antenatal->age > 35) {
+    if ($antenatal->age > self::AGE_ADVANCED_THRESHOLD) {
       $riskScore += $this->riskFactors['advanced_maternal_age']['weight'];
       $identifiedRisks[] = [
         'factor' => 'advanced_maternal_age',
@@ -426,7 +455,7 @@ class RiskAssessmentService
     }
 
     // Clinical measurements
-    if ($antenatal->hemoglobin < 11.0) {
+    if ($antenatal->hemoglobin < self::HEMOGLOBIN_ANEMIA_THRESHOLD) {
       $riskScore += $this->riskFactors['anemia']['weight'];
       $identifiedRisks[] = [
         'factor' => 'anemia',
@@ -439,7 +468,7 @@ class RiskAssessmentService
 
     // Blood pressure assessment
     $bp = $this->parseBloodPressure($antenatal->blood_pressure);
-    if ($bp && ($bp['systolic'] >= 140 || $bp['diastolic'] >= 90)) {
+    if ($bp && ($bp['systolic'] >= self::BP_SYSTOLIC_HYPERTENSION || $bp['diastolic'] >= self::BP_DIASTOLIC_HYPERTENSION)) {
       $riskScore += $this->riskFactors['hypertension']['weight'];
       $identifiedRisks[] = [
         'factor' => 'hypertension',
@@ -464,7 +493,7 @@ class RiskAssessmentService
 
     // BMI assessment
     $bmi = $this->calculateBMI($antenatal->weight, $antenatal->height);
-    if ($bmi < 18.5) {
+    if ($bmi < self::BMI_LOW_THRESHOLD) {
       $riskScore += $this->riskFactors['low_bmi']['weight'];
       $identifiedRisks[] = [
         'factor' => 'low_bmi',
@@ -472,7 +501,7 @@ class RiskAssessmentService
         'weight' => $this->riskFactors['low_bmi']['weight']
       ];
       $recommendations[] = 'Nutritional support and weight gain monitoring';
-    } elseif ($bmi >= 30) {
+    } elseif ($bmi >= self::BMI_HIGH_THRESHOLD) {
       $riskScore += $this->riskFactors['high_bmi']['weight'];
       $identifiedRisks[] = [
         'factor' => 'high_bmi',
@@ -510,7 +539,7 @@ class RiskAssessmentService
 
     // Birth weight assessment
     if ($delivery->weight) {
-      if ($delivery->weight < 1.0) {
+      if ($delivery->weight < self::BIRTH_WEIGHT_EXTREMELY_LOW) {
         $riskScore += $this->riskFactors['extremely_low_birth_weight']['weight'];
         $identifiedRisks[] = [
           'factor' => 'extremely_low_birth_weight',
@@ -518,7 +547,7 @@ class RiskAssessmentService
           'weight' => $this->riskFactors['extremely_low_birth_weight']['weight']
         ];
         $recommendations[] = 'Immediate NICU admission required';
-      } elseif ($delivery->weight < 1.5) {
+      } elseif ($delivery->weight < self::BIRTH_WEIGHT_VERY_LOW) {
         $riskScore += $this->riskFactors['very_low_birth_weight']['weight'];
         $identifiedRisks[] = [
           'factor' => 'very_low_birth_weight',
@@ -526,7 +555,7 @@ class RiskAssessmentService
           'weight' => $this->riskFactors['very_low_birth_weight']['weight']
         ];
         $recommendations[] = 'NICU consultation required';
-      } elseif ($delivery->weight < 2.5) {
+      } elseif ($delivery->weight < self::BIRTH_WEIGHT_LOW) {
         $riskScore += $this->riskFactors['preterm_delivery']['weight'];
         $identifiedRisks[] = [
           'factor' => 'low_birth_weight',
@@ -562,14 +591,14 @@ class RiskAssessmentService
 
     // Temperature assessment
     if ($delivery->temperature) {
-      if ($delivery->temperature < 36.0) {
+      if ($delivery->temperature < self::NEONATAL_TEMP_LOW) {
         $riskScore += $this->riskFactors['neonatal_hypothermia']['weight'];
         $identifiedRisks[] = [
           'factor' => 'neonatal_hypothermia',
           'description' => $this->riskFactors['neonatal_hypothermia']['description'],
           'weight' => $this->riskFactors['neonatal_hypothermia']['weight']
         ];
-      } elseif ($delivery->temperature > 37.5) {
+      } elseif ($delivery->temperature > self::NEONATAL_TEMP_HIGH) {
         $riskScore += $this->riskFactors['neonatal_hyperthermia']['weight'];
         $identifiedRisks[] = [
           'factor' => 'neonatal_hyperthermia',
@@ -616,7 +645,7 @@ class RiskAssessmentService
     if ($delivery->misoprostol === 'yes') $interventionCount++;
     if ($delivery->partograph === 'yes') $interventionCount++;
 
-    if ($interventionCount >= 2) {
+    if ($interventionCount >= self::MULTI_FACTOR_THRESHOLD) {
       $riskScore += $this->riskFactors['multiple_interventions']['weight'];
       $identifiedRisks[] = [
         'factor' => 'multiple_interventions',
@@ -633,7 +662,7 @@ class RiskAssessmentService
     if ($delivery->referred_out === 'yes') $complicationCount++;
     if ($delivery->pac === 'yes') $complicationCount++;
 
-    if ($complicationCount >= 2) {
+    if ($complicationCount >= self::MULTI_FACTOR_THRESHOLD) {
       $riskScore += $this->riskFactors['delivery_complications_pattern']['weight'];
       $identifiedRisks[] = [
         'factor' => 'delivery_complications_pattern',
@@ -654,7 +683,7 @@ class RiskAssessmentService
     $recommendations = [];
 
     // High blood pressure postpartum
-    if ($postnatal->systolic_bp > 140 || $postnatal->diastolic_bp > 90) {
+    if ($postnatal->systolic_bp > self::BP_SYSTOLIC_HYPERTENSION || $postnatal->diastolic_bp > self::BP_DIASTOLIC_HYPERTENSION) {
       $riskScore += $this->riskFactors['postpartum_hypertension']['weight'];
       $identifiedRisks[] = [
         'factor' => 'postpartum_hypertension',
@@ -700,7 +729,7 @@ class RiskAssessmentService
     $identifiedRisks = [];
     $recommendations = [];
 
-    if ($clinicalNotes->count() > 5) {
+    if ($clinicalNotes->count() > self::CLINICAL_NOTES_FREQUENT_VISITS_THRESHOLD) {
       $riskScore += $this->riskFactors['frequent_hospital_visits']['weight'];
       $identifiedRisks[] = [
         'factor' => 'frequent_hospital_visits',
@@ -712,19 +741,15 @@ class RiskAssessmentService
     }
 
     // Check for infection patterns in notes
-    $infectionKeywords = ['infection', 'fever', 'UTI', 'sepsis', 'antibiotics'];
     $infectionCount = 0;
 
     foreach ($clinicalNotes as $note) {
-      foreach ($infectionKeywords as $keyword) {
-        if (stripos($note->note, $keyword) !== false) {
-          $infectionCount++;
-          break;
-        }
+      if ($this->detectClinicalSignals((string)($note->note ?? ''), self::INFECTION_KEYWORDS)) {
+        $infectionCount++;
       }
     }
 
-    if ($infectionCount >= 3) {
+    if ($infectionCount >= self::CLINICAL_NOTES_RECURRING_INFECTION_THRESHOLD) {
       $riskScore += $this->riskFactors['recurring_infections']['weight'];
       $identifiedRisks[] = [
         'factor' => 'recurring_infections',
@@ -748,12 +773,17 @@ class RiskAssessmentService
     $bpString = trim($bpString);
 
     // Handle different formats: 120/80, 120 / 80, 120-80
-    if (preg_match('/(\d{2,3})\s*[\/\-]\s*(\d{2,3})/', $bpString, $matches)) {
+    if (preg_match(self::BP_PATTERN, $bpString, $matches)) {
       $systolic = (int)$matches[1];
       $diastolic = (int)$matches[2];
 
       // Validate reasonable ranges, i can add later maybe
-      if ($systolic >= 70 && $systolic <= 250 && $diastolic >= 40 && $diastolic <= 150) {
+      if (
+        $systolic >= self::BP_SYSTOLIC_MIN
+        && $systolic <= self::BP_SYSTOLIC_MAX
+        && $diastolic >= self::BP_DIASTOLIC_MIN
+        && $diastolic <= self::BP_DIASTOLIC_MAX
+      ) {
         return [
           'systolic' => $systolic,
           'diastolic' => $diastolic
@@ -770,7 +800,12 @@ class RiskAssessmentService
     }
 
     // Validate reasonable ranges- will play with some values later also to see
-    if ($weight < 20 || $weight > 200 || $height < 100 || $height > 220) {
+    if (
+      $weight < self::BMI_WEIGHT_MIN
+      || $weight > self::BMI_WEIGHT_MAX
+      || $height < self::BMI_HEIGHT_CM_MIN
+      || $height > self::BMI_HEIGHT_CM_MAX
+    ) {
       return null;
     }
 
@@ -802,10 +837,26 @@ class RiskAssessmentService
   }
   private function determineRiskLevel($score)
   {
-    if ($score >= 70) return 'critical';
-    if ($score >= 40) return 'high';
-    if ($score >= 20) return 'moderate';
+    if ($score >= self::RISK_SCORE_CRITICAL_MIN) return 'critical';
+    if ($score >= self::RISK_SCORE_HIGH_MIN) return 'high';
+    if ($score >= self::RISK_SCORE_MODERATE_MIN) return 'moderate';
     return 'low';
+  }
+
+  private function detectClinicalSignals(string $text, array $keywords): bool
+  {
+    $cleanText = trim($text);
+    if ($cleanText === '' || empty($keywords)) {
+      return false;
+    }
+
+    $escapedKeywords = array_map(
+      static fn(string $keyword) => preg_quote(strtolower($keyword), '/'),
+      $keywords
+    );
+    $pattern = '/\b(' . implode('|', $escapedKeywords) . ')\b/i';
+
+    return preg_match($pattern, strtolower($cleanText)) === 1;
   }
 
   private function getNextVisitRecommendation($riskLevel, $edd)

@@ -1,10 +1,15 @@
 @php
+    use App\Services\Security\RolePermissionService;
     use Illuminate\Support\Facades\Route;
+    $authUser = auth()->user();
 @endphp
 
 <ul class="menu-sub">
     @if (isset($menu))
         @foreach ($menu as $submenu)
+            @if (!RolePermissionService::canRenderMenuNode($authUser, $submenu))
+                @continue
+            @endif
             {{-- active menu method --}}
             @php
                 $activeClass = null;

@@ -39,22 +39,22 @@ class CentralLegacyRoutesTest extends TestCase
       ->assertRedirect('/central/create-facility');
   }
 
-  public function test_legacy_central_admin_reports_route_redirects_to_reports_hub(): void
+  public function test_legacy_central_admin_reports_route_redirects_to_central_dashboard(): void
   {
     $user = $this->createCentralAdmin();
 
     $this->actingAs($user)
       ->get('/central-admin/reports/system')
-      ->assertRedirect('/core/reports-hub');
+      ->assertRedirect('/central/central-admin-dashboard');
   }
 
-  public function test_legacy_central_admin_notifications_route_redirects_to_reminders_hub(): void
+  public function test_legacy_central_admin_notifications_route_redirects_to_central_dashboard(): void
   {
     $user = $this->createCentralAdmin();
 
     $this->actingAs($user)
       ->get('/central-admin/notifications')
-      ->assertRedirect('/core/reminders-notifications-hub');
+      ->assertRedirect('/central/central-admin-dashboard');
   }
 
   public function test_legacy_central_users_route_redirects_to_create_administrators(): void
@@ -83,4 +83,3 @@ class CentralLegacyRoutesTest extends TestCase
     ]);
   }
 }
-

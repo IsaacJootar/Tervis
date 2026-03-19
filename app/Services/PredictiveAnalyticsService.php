@@ -14,6 +14,29 @@ use Illuminate\Support\Facades\Log;
 
 class PredictiveAnalyticsService
 {
+  private const RISK_LEVELS = ['critical', 'high', 'moderate', 'low'];
+  private const RISK_HISTORY_DAYS = 90;
+  private const SERVICE_HISTORY_DAYS = 60;
+  private const OUTCOME_HISTORY_DAYS = 30;
+  private const TREND_LOOKBACK_DAYS = 14;
+  private const MIN_POINTS_FOR_PREDICTION = 7;
+  private const TREND_SLOPE_THRESHOLD = 0.1;
+  private const HIGH_RISK_ALERT_CASES = 5;
+  private const LOW_CONFIDENCE_ALERT_THRESHOLD = 70;
+  private const POSTNATAL_COVERAGE_THRESHOLD = 60;
+  private const HIGH_PREDICTED_CASES_THRESHOLD = 10;
+  private const STAFF_PER_HIGH_RISK_CASES = 10;
+  private const SPECIALIST_HOURS_PER_HIGH_RISK_CASE = 2;
+  private const MONITORING_EQUIPMENT_CAPACITY = 20;
+  private const DELIVERY_BED_MULTIPLIER = 1.2;
+  private const POSTNATAL_BED_MULTIPLIER = 2.5;
+  private const OCCUPANCY_MULTIPLIER = 3;
+  private const TOTAL_BED_CAPACITY = 20;
+  private const EMERGENCY_KIT_PER_CRITICAL_CASES = 5;
+  private const RATE_HIGH_MULTIPLIER = 1.2;
+  private const RATE_IMPROVING_MULTIPLIER = 0.8;
+  private const RISK_INCREASE_INFLUENCE = 0.3;
+
   protected $scopeService;
 
   public function __construct(DataScopeService $scopeService)
@@ -66,7 +89,7 @@ class PredictiveAnalyticsService
 
     // Get historical risk data
     $historicalData = RiskPrediction::whereIn('facility_id', $facilityIds)
-      ->where('assessment_date', '>=', Carbon::now()->subDays(90))
+      ->where('assessment_date', '>=', Carbon::now()->subDays(self::RISK_HISTORY_DAYS))
       ->select(
         DB::raw('DATE(assessment_date) as date'),
         DB::raw('COUNT(*) as total_assessments'),
@@ -79,35 +102,40 @@ class PredictiveAnalyticsService
       ->orderBy('date')
       ->get();
 
-    if ($historicalData->count() < 7) {
+    if ($historicalData->count() < self::MIN_POINTS_FOR_PREDICTION) {
       return ['error' => 'Insufficient historical data for prediction'];
     }
 
     // Calculate trends for each risk level
     $predictions = [];
-    $riskLevels = ['critical', 'high', 'moderate', 'low'];
+    $riskLevels = self::RISK_LEVELS;
 
     foreach ($riskLevels as $level) {
       $values = $historicalData->pluck($level . '_count')->toArray();
       $trend = $this->calculateLinearTrend($values);
 
-      $currentAverage = array_sum(array_slice($values, -7)) / 7;
+      $windowValues = array_slice($values, -1 * self::MIN_POINTS_FOR_PREDICTION);
+      $currentAverage = count($windowValues) > 0 ? array_sum($windowValues) / count($windowValues) : 0;
       $predictedValue = $currentAverage + ($trend['slope'] * $days);
 
       $predictions[$level] = [
         'current_average' => round($currentAverage, 1),
         'predicted_value' => max(0, round($predictedValue, 1)),
-        'trend_direction' => $trend['slope'] > 0.1 ? 'increasing' : ($trend['slope'] < -0.1 ? 'decreasing' : 'stable'),
+        'trend_direction' => $this->resolveTrendDirection((float)$trend['slope']),
         'confidence' => $this->calculatePredictionConfidence($trend['r_squared']),
         'change_percentage' => $currentAverage > 0 ? round((($predictedValue - $currentAverage) / $currentAverage) * 100, 1) : 0
       ];
     }
 
+    $totalPredicted = array_sum(array_column($predictions, 'predicted_value'));
+
     return [
       'prediction_horizon_days' => $days,
       'risk_levels' => $predictions,
-      'total_predicted_assessments' => array_sum(array_column($predictions, 'predicted_value')),
-      'high_risk_percentage' => round((($predictions['critical']['predicted_value'] + $predictions['high']['predicted_value']) / array_sum(array_column($predictions, 'predicted_value'))) * 100, 1),
+      'total_predicted_assessments' => $totalPredicted,
+      'high_risk_percentage' => $totalPredicted > 0
+        ? round((($predictions['critical']['predicted_value'] + $predictions['high']['predicted_value']) / $totalPredicted) * 100, 1)
+        : 0,
       'recommendations' => $this->generateRiskPredictionRecommendations($predictions)
     ];
   }
@@ -132,7 +160,7 @@ class PredictiveAnalyticsService
       $facilityField = $serviceName === 'antenatal' ? 'registration_facility_id' : 'facility_id';
 
       $historicalData = $model::whereIn($facilityField, $facilityIds)
-        ->where($dateField, '>=', Carbon::now()->subDays(60))
+        ->where($dateField, '>=', Carbon::now()->subDays(self::SERVICE_HISTORY_DAYS))
         ->select(
           DB::raw("DATE($dateField) as date"),
           DB::raw('COUNT(*) as count')
@@ -141,17 +169,18 @@ class PredictiveAnalyticsService
         ->orderBy('date')
         ->get();
 
-      if ($historicalData->count() >= 7) {
+      if ($historicalData->count() >= self::MIN_POINTS_FOR_PREDICTION) {
         $values = $historicalData->pluck('count')->toArray();
         $trend = $this->calculateLinearTrend($values);
-        $currentAverage = array_sum(array_slice($values, -7)) / 7;
+        $windowValues = array_slice($values, -1 * self::MIN_POINTS_FOR_PREDICTION);
+        $currentAverage = count($windowValues) > 0 ? array_sum($windowValues) / count($windowValues) : 0;
         $predictedDaily = max(0, $currentAverage + ($trend['slope'] * ($days / 7)));
 
         $predictions[$serviceName] = [
           'current_daily_average' => round($currentAverage, 1),
           'predicted_daily_average' => round($predictedDaily, 1),
           'predicted_total' => round($predictedDaily * $days),
-          'trend_direction' => $trend['slope'] > 0.1 ? 'increasing' : ($trend['slope'] < -0.1 ? 'decreasing' : 'stable'),
+          'trend_direction' => $this->resolveTrendDirection((float)$trend['slope']),
           'confidence' => $this->calculatePredictionConfidence($trend['r_squared'])
         ];
       }
@@ -178,25 +207,25 @@ class PredictiveAnalyticsService
         $riskPredictions['risk_levels']['high']['predicted_value'];
 
       $predictions['staffing'] = [
-        'additional_nurses_needed' => ceil($highRiskCases / 10),
-        'specialist_hours_needed' => ceil($highRiskCases * 2),
-        'monitoring_equipment_utilization' => min(100, ($highRiskCases / 20) * 100)
+        'additional_nurses_needed' => ceil($highRiskCases / self::STAFF_PER_HIGH_RISK_CASES),
+        'specialist_hours_needed' => ceil($highRiskCases * self::SPECIALIST_HOURS_PER_HIGH_RISK_CASE),
+        'monitoring_equipment_utilization' => min(100, ($highRiskCases / self::MONITORING_EQUIPMENT_CAPACITY) * 100)
       ];
     }
 
     // Bed capacity requirements
     if (isset($servicePredictions['delivery'])) {
       $predictions['bed_capacity'] = [
-        'delivery_beds_needed' => ceil($servicePredictions['delivery']['predicted_daily_average'] * 1.2),
-        'postnatal_beds_needed' => ceil($servicePredictions['delivery']['predicted_daily_average'] * 2.5),
-        'occupancy_rate_prediction' => min(100, ($servicePredictions['delivery']['predicted_daily_average'] * 3) / 20 * 100)
+        'delivery_beds_needed' => ceil($servicePredictions['delivery']['predicted_daily_average'] * self::DELIVERY_BED_MULTIPLIER),
+        'postnatal_beds_needed' => ceil($servicePredictions['delivery']['predicted_daily_average'] * self::POSTNATAL_BED_MULTIPLIER),
+        'occupancy_rate_prediction' => min(100, ($servicePredictions['delivery']['predicted_daily_average'] * self::OCCUPANCY_MULTIPLIER) / self::TOTAL_BED_CAPACITY * 100)
       ];
     }
 
     // Supply requirements
     $predictions['supplies'] = [
       'emergency_kits_needed' => isset($riskPredictions['risk_levels']) ?
-        ceil($riskPredictions['risk_levels']['critical']['predicted_value'] / 5) : 0,
+        ceil($riskPredictions['risk_levels']['critical']['predicted_value'] / self::EMERGENCY_KIT_PER_CRITICAL_CASES) : 0,
       'medication_stock_multiplier' => $this->calculateMedicationMultiplier($facilityIds),
       'equipment_maintenance_priority' => $this->getEquipmentMaintenancePriority($facilityIds)
     ];
@@ -213,7 +242,7 @@ class PredictiveAnalyticsService
 
     // Analyze recent outcomes
     $recentDeliveries = Delivery::whereIn('facility_id', $facilityIds)
-      ->where('dodel', '>=', Carbon::now()->subDays(30))
+      ->where('dodel', '>=', Carbon::now()->subDays(self::OUTCOME_HISTORY_DAYS))
       ->get();
 
     if ($recentDeliveries->count() < 5) {
@@ -234,15 +263,17 @@ class PredictiveAnalyticsService
       $riskMultiplier = 1.0;
       if (isset($riskTrends['risk_levels'])) {
         $highRiskIncrease = $riskTrends['risk_levels']['high']['change_percentage'] ?? 0;
-        $riskMultiplier = 1 + ($highRiskIncrease / 100 * 0.3);
+        $riskMultiplier = 1 + ($highRiskIncrease / 100 * self::RISK_INCREASE_INFLUENCE);
       }
 
       $predictedRate = $currentRate * $riskMultiplier;
       $predictions[$outcome] = [
         'current_rate' => round($currentRate, 1),
         'predicted_rate' => round($predictedRate, 1),
-        'change_percentage' => round((($predictedRate - $currentRate) / $currentRate) * 100, 1),
-        'risk_level' => $predictedRate > $currentRate * 1.2 ? 'high' : ($predictedRate < $currentRate * 0.8 ? 'improving' : 'stable')
+        'change_percentage' => $currentRate > 0 ? round((($predictedRate - $currentRate) / $currentRate) * 100, 1) : 0,
+        'risk_level' => $predictedRate > $currentRate * self::RATE_HIGH_MULTIPLIER
+          ? 'high'
+          : ($predictedRate < $currentRate * self::RATE_IMPROVING_MULTIPLIER ? 'improving' : 'stable')
       ];
     }
 
@@ -309,13 +340,13 @@ class PredictiveAnalyticsService
 
     // Check for increasing trends that could be addressed
     $recentTrends = HealthTrend::whereIn('facility_id', $facilityIds)
-      ->where('period_start', '>=', Carbon::now()->subDays(14))
+      ->where('period_start', '>=', Carbon::now()->subDays(self::TREND_LOOKBACK_DAYS))
       ->where('trend_direction', 'increasing')
       ->where('trend_severity', '!=', 'minimal')
       ->get();
 
     foreach ($recentTrends as $trend) {
-      if (str_contains($trend->metric_name, 'critical') && $trend->current_value > 5) {
+      if (str_contains($trend->metric_name, 'critical') && $trend->current_value > self::HIGH_RISK_ALERT_CASES) {
         $opportunities[] = [
           'type' => 'immediate_intervention',
           'priority' => 'high',
@@ -328,7 +359,7 @@ class PredictiveAnalyticsService
         ];
       }
 
-      if (str_contains($trend->metric_name, 'confidence') && $trend->current_value < 70) {
+      if (str_contains($trend->metric_name, 'confidence') && $trend->current_value < self::LOW_CONFIDENCE_ALERT_THRESHOLD) {
         $opportunities[] = [
           'type' => 'system_improvement',
           'priority' => 'medium',
@@ -344,7 +375,7 @@ class PredictiveAnalyticsService
 
     // Check for underutilized services
     $serviceUtilization = $this->analyzeServiceUtilization($facilityIds);
-    if ($serviceUtilization['postnatal_coverage'] < 60) {
+    if ($serviceUtilization['postnatal_coverage'] < self::POSTNATAL_COVERAGE_THRESHOLD) {
       $opportunities[] = [
         'type' => 'service_enhancement',
         'priority' => 'medium',
@@ -412,6 +443,19 @@ class PredictiveAnalyticsService
     return 'Very Low';
   }
 
+  private function resolveTrendDirection(float $slope): string
+  {
+    if ($slope > self::TREND_SLOPE_THRESHOLD) {
+      return 'increasing';
+    }
+
+    if ($slope < (-1 * self::TREND_SLOPE_THRESHOLD)) {
+      return 'decreasing';
+    }
+
+    return 'stable';
+  }
+
   // Helper methods
   private function generateRiskPredictionRecommendations($predictions)
   {
@@ -421,7 +465,7 @@ class PredictiveAnalyticsService
       $recommendations[] = 'Prepare emergency protocols for increasing critical cases';
     }
 
-    if ($predictions['high']['predicted_value'] > 10) {
+    if ($predictions['high']['predicted_value'] > self::HIGH_PREDICTED_CASES_THRESHOLD) {
       $recommendations[] = 'Consider additional specialist consultations';
     }
 

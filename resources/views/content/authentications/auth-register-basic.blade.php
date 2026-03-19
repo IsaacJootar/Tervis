@@ -1,4 +1,4 @@
-@php
+﻿@php
 $customizerHidden = 'customizer-hide';
 @endphp
 
@@ -35,11 +35,11 @@ $customizerHidden = 'customizer-hide';
           <div class="app-brand justify-content-center mb-6">
             <a href="{{ url('/') }}" class="app-brand-link">
               <span class="app-brand-logo demo">@include('_partials.macros')</span>
-              <span class="app-brand-text demo text-heading fw-bold">{{ config('variables.templateName') }}</span>
+              
             </a>
           </div>
           <!-- /Logo -->
-          <h4 class="mb-1">Adventure starts here 🚀</h4>
+          <h4 class="mb-1">Adventure starts here ðŸš€</h4>
           <p class="mb-6">Make your app management easy and fun!</p>
 
           <form id="formAuthentication" class="mb-6" action="{{ url('/') }}" method="GET">
@@ -108,3 +108,4 @@ $customizerHidden = 'customizer-hide';
   </div>
 </div>
 @endsection
+

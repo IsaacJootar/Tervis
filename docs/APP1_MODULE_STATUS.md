@@ -1,6 +1,6 @@
 # APP1 Module Status (Vision-Aligned Ground Truth)
 
-Last updated: 2026-03-17  
+Last updated: 2026-03-19  
 Reference vision: `Health Management System - Complete Architecture (Patient + Facility Modules).pdf` (v2.0, Nov 2025)
 
 Status legend:
@@ -39,7 +39,7 @@ Note: Vision text mentions both "7 modules" and "8 management modules" in differ
 | Vision Facility Module | Current App1 Status | Notes |
 | --- | --- | --- |
 | Bed Management | Implemented | Facility-scoped bed catalog and status management delivered (`/core/bed-management`) with section linkage + occupancy state updates. |
-| Pharmacy & Drug Management | Partial (Deferred To V2) | Facility pharmacy operations now include stock-in batches, adjustments, reorder levels, and movement logs (`/core/pharmacy-operations`) with dispensing stock deduction wired. Advanced supplier/procurement + LMIS full operations are intentionally deferred to Version 2 by product decision. |
+| Pharmacy & Drug Management | Partial (Deferred To V2 - Frozen In V1) | Facility pharmacy operations now include stock-in batches, adjustments, reorder levels, and movement logs (`/core/pharmacy-operations`) with dispensing stock deduction wired. Advanced supplier/procurement + LMIS full operations are intentionally deferred to Version 2 by product decision. |
 | Admitted Patients (Inpatient) | Implemented | Admission/discharge/referral workflow delivered (`/core/admitted-patients`) with bed occupancy sync + activity timeline logging. |
 | Laboratory Management | Implemented | Facility operations module delivered at `/core/laboratory-operations` with pending order intake queue, sample tracking, processing batches, QC logs, reagent inventory/movements, and equipment calibration-maintenance logs. |
 | Staff Management | Implemented | Unified facility-scoped staff module delivered at `/core/staff-management` (create/update profile, designation-role alignment, activate/disable, department assignment, password reset, and audit trail) with legacy Data Officer routes redirected to avoid duplicate modules. |
@@ -71,8 +71,25 @@ Note: Vision text mentions both "7 modules" and "8 management modules" in differ
 | Central Area | Status | Current Implementation |
 | --- | --- | --- |
 | Central Dashboard | Implemented | `/central/central-admin-dashboard` now shows live cross-facility metrics, module distribution, dispatch logs, and quick actions. |
-| Central Sidebar Links | Implemented | `resources/menu/centralAdminMenu.json` now contains only valid route targets. |
-| Legacy Central URL Compatibility | Implemented | Deprecated `/central-admin/*` links now redirect to active central/core destinations to prevent broken bookmarks. |
+| Central Sidebar Links | Implemented | `resources/menu/centralAdminMenu.json` now contains only valid central route targets (no `/core/*` entries). |
+| Central Route Boundary | Implemented | `UserRoleMiddleware` now restricts central roles to `/central/*`; central actions trigger facility outcomes by assignment/configuration flows. |
+| Legacy Central URL Compatibility | Implemented | Deprecated `/central-admin/*` links now redirect to active central destinations to prevent broken bookmarks. |
+
+## 3d) RBAC Governance
+
+| RBAC Area | Status | Current Implementation |
+| --- | --- | --- |
+| Central Roles & Permissions Module | Implemented | `/central/roles-permissions` allows Central Admin to toggle role-permission matrix entries. |
+| Permission Middleware Enforcement | Implemented | `permission.check:{permission_key}` is wired across central/core/workspace/register/analytics/avo routes. |
+| Default + Override Model | Implemented | Defaults come from `RolePermissionService`; Central overrides persist in `role_permissions`. |
+
+## 3e) AI Assistant Advisory Layer
+
+| Area | Status | Current Implementation |
+| --- | --- | --- |
+| Workspace/Operations AI Assistant | Implemented (Advisory) | Flowdesk-style side panel with `Use AI Assistant` / `Hide AI Assistant`, risk flags, and suggestions (no auto-actions). |
+| No AI Gate Policy (Current Rollout) | Implemented | AI assistant visibility is not controlled by separate AI entitlement flags in App1; normal module permission/middleware still applies. |
+| Initial Coverage | Implemented | Doctor Assessments, Laboratory, Prescriptions, Child Vaccination Schedule, and Facility Reminders Hub. |
 
 ## 4) Testing & Quality Snapshot
 
@@ -81,10 +98,18 @@ Note: Vision text mentions both "7 modules" and "8 management modules" in differ
 - Automated tests now include:
   - NHMIS registry/value resolver unit tests
   - module access middleware feature tests (`tests/Feature/ModuleEnabledMiddlewareTest.php`)
-- Remaining gap: broader end-to-end feature coverage for Doctor/Lab/Prescriptions/Child Health/Health Insurance workflow transitions.
+  - role permission middleware feature tests (`tests/Feature/RolePermissionMiddlewareTest.php`)
+  - facility administration workflow transitions (`tests/Feature/FacilityAdministrationWorkflowTest.php`)
+  - bed/sections/inpatient workflow transitions (`tests/Feature/CoreFacilityWorkflowTransitionsTest.php`)
+  - workspace aggregation + clinical order bridge checks (`tests/Feature/WorkspaceAggregationChainTest.php`), including Doctor -> pending orders -> dispensing -> invoice creation path.
+  - strict-scope cross-facility checks in workspace flows (`tests/Feature/WorkspaceAggregationChainTest.php`):
+    - one-time Family Planning registration gate recognized across facilities during patient verification
+    - appointments and activity totals remain facility-scoped for the same patient
+  - child health + health insurance workflow transitions and validations (`tests/Feature/ChildHealthInsuranceWorkflowTest.php`).
+- Remaining gap: extend long-range monthly aggregation drift/regression scenarios.
 
 ## 5) Immediate Priority Recommendation
 
-1. Add dedicated feature tests for Facility Administration and Bed/Sections/Inpatient admission-discharge-referral transitions.
+1. Add long-range monthly NHMIS drift tests with seeded multi-month datasets.
 2. Maintain mapping coverage as new template keys or module fields are introduced.
-3. Add dedicated feature tests for activities/reminders/appointments aggregation chains.
+3. Expand strict-scope tests to include additional one-time registration gates beyond Family Planning.

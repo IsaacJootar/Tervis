@@ -38,6 +38,7 @@ use App\Livewire\Workspaces\patientWorkspace;
 use App\Livewire\Central\CreateAdministrators;
 use App\Livewire\Central\CentralAdminDashboard;
 use App\Livewire\Central\FacilityModuleManagement;
+use App\Livewire\Central\RolePermissionsManagement;
 use App\Livewire\Workspaces\WorkspaceDashboard;
 use App\Livewire\Workspaces\Modules\Attendance;
 use App\Livewire\Workspaces\Modules\Activities;
@@ -74,10 +75,11 @@ Route::get('/login', Login::class)->name('login');
 
 // Central Admin, this is like our main central system for the tenancy
 Route::middleware(['auth', 'role.redirect'])->prefix('central')->group(function () {
-  Route::get('/create-administrators', CreateAdministrators::class)->name('create-administrators');
-  Route::get('/create-facility', CreateFacility::class)->name('create-facility');
-  Route::get('/facility-module-management', FacilityModuleManagement::class)->name('central-facility-module-management');
-  Route::get('/central-admin-dashboard', CentralAdminDashboard::class)->name('central-admin-dashboard');
+  Route::get('/create-administrators', CreateAdministrators::class)->middleware('permission.check:central.admins.manage')->name('create-administrators');
+  Route::get('/create-facility', CreateFacility::class)->middleware('permission.check:central.facilities.manage')->name('create-facility');
+  Route::get('/facility-module-management', FacilityModuleManagement::class)->middleware('permission.check:central.module_access.manage')->name('central-facility-module-management');
+  Route::get('/roles-permissions', RolePermissionsManagement::class)->middleware('permission.check:central.roles_permissions.manage')->name('central-role-permissions');
+  Route::get('/central-admin-dashboard', CentralAdminDashboard::class)->middleware('permission.check:central.dashboard.view')->name('central-admin-dashboard');
   Route::redirect('/central-admin/users', '/central/create-administrators');
 });
 
@@ -87,48 +89,48 @@ Route::middleware(['auth'])->prefix('central-admin')->group(function () {
   Route::redirect('/facilities', '/central/create-facility');
   Route::redirect('/facilities/approval', '/central/create-facility');
 
-  Route::redirect('/reports/system', '/core/reports-hub');
-  Route::redirect('/reports/users', '/core/reports-hub');
-  Route::redirect('/reports/facilities', '/core/reports-hub');
+  Route::redirect('/reports/system', '/central/central-admin-dashboard');
+  Route::redirect('/reports/users', '/central/central-admin-dashboard');
+  Route::redirect('/reports/facilities', '/central/central-admin-dashboard');
 
   Route::redirect('/settings/general', '/central/central-admin-dashboard');
   Route::redirect('/settings/security', '/central/central-admin-dashboard');
   Route::redirect('/settings/backup', '/central/central-admin-dashboard');
 
-  Route::redirect('/audit/system', '/core/facility-administration');
-  Route::redirect('/audit/user', '/core/facility-administration');
-  Route::redirect('/notifications', '/core/reminders-notifications-hub');
+  Route::redirect('/audit/system', '/central/central-admin-dashboard');
+  Route::redirect('/audit/user', '/central/central-admin-dashboard');
+  Route::redirect('/notifications', '/central/central-admin-dashboard');
 });
 
 
 // Core (system) routes with middleware
 Route::middleware(['auth', 'role.redirect'])->prefix('core')->group(function () {
 
-  Route::get('/staff-management', StaffManagement::class)->name('staff-management');
-  Route::get('/facility-administration', FacilityAdministration::class)->name('facility-administration');
+  Route::get('/staff-management', StaffManagement::class)->middleware('permission.check:core.staff.manage')->name('staff-management');
+  Route::get('/facility-administration', FacilityAdministration::class)->middleware('permission.check:core.facility_administration.manage')->name('facility-administration');
   Route::get('/create-data-officers', function () {
     return redirect()->route('staff-management');
-  })->name('create-data-officers');
-  Route::get('/facility-admin-dashboard', FacilityAdminDashboard::class)->name('facility-admin-dashboard');
-  Route::get('/lga-officer-dashboard', LgaOfficerDashboard::class)->name('lga-officer-dashboard');
-  Route::get('/state-officer-dashboard', StateOfficerDashboard::class)->name('state-officer-dashboard');
+  })->middleware('permission.check:core.staff.manage')->name('create-data-officers');
+  Route::get('/facility-admin-dashboard', FacilityAdminDashboard::class)->middleware('permission.check:core.facility_dashboard.view')->name('facility-admin-dashboard');
+  Route::get('/lga-officer-dashboard', LgaOfficerDashboard::class)->middleware('permission.check:core.lga_dashboard.view')->name('lga-officer-dashboard');
+  Route::get('/state-officer-dashboard', StateOfficerDashboard::class)->middleware('permission.check:core.state_dashboard.view')->name('state-officer-dashboard');
   Route::get('/update-officer-designation', function () {
     return redirect()->route('staff-management');
-  })->name('update-officer-designation');
+  })->middleware('permission.check:core.staff.manage')->name('update-officer-designation');
   Route::get('/disable-data-officer-account', function () {
     return redirect()->route('staff-management');
-  })->name('disable-data-officer-account');
-  Route::get('/facility-departments', FacilityDepartments::class)->name('facility-departments');
-  Route::get('/facility-sections', FacilitySections::class)->name('facility-sections');
-  Route::get('/bed-management', BedManagement::class)->name('bed-management');
-  Route::get('/admitted-patients', AdmittedPatients::class)->name('admitted-patients');
-  Route::get('/pharmacy-operations', PharmacyOperations::class)->middleware('module.enabled:prescriptions')->name('pharmacy-operations');
-  Route::get('/laboratory-operations', LaboratoryOperations::class)->middleware('module.enabled:laboratory')->name('laboratory-operations');
-  Route::get('/facility-patients', FacilityPatients::class)->name('facility-patients');
-  Route::get('/patient-appointments', PatientAppointments::class)->middleware('module.enabled:appointments')->name('patient-appointments');
-  Route::get('/reminders-notifications-hub', FacilityRemindersHub::class)->middleware('module.enabled:reminders')->name('facility-reminders-hub');
-  Route::get('/facility-reports', FacilityReports::class)->middleware('module.enabled:reports')->name('patient-reports');
-  Route::get('/reports-hub', FacilityReports::class)->middleware('module.enabled:reports')->name('reports-hub');
+  })->middleware('permission.check:core.staff.manage')->name('disable-data-officer-account');
+  Route::get('/facility-departments', FacilityDepartments::class)->middleware('permission.check:core.sections.manage')->name('facility-departments');
+  Route::get('/facility-sections', FacilitySections::class)->middleware('permission.check:core.sections.manage')->name('facility-sections');
+  Route::get('/bed-management', BedManagement::class)->middleware('permission.check:core.beds.manage')->name('bed-management');
+  Route::get('/admitted-patients', AdmittedPatients::class)->middleware('permission.check:core.inpatient.manage')->name('admitted-patients');
+  Route::get('/pharmacy-operations', PharmacyOperations::class)->middleware(['permission.check:core.pharmacy.manage', 'module.enabled:prescriptions'])->name('pharmacy-operations');
+  Route::get('/laboratory-operations', LaboratoryOperations::class)->middleware(['permission.check:core.laboratory.manage', 'module.enabled:laboratory'])->name('laboratory-operations');
+  Route::get('/facility-patients', FacilityPatients::class)->middleware('permission.check:core.patients.view')->name('facility-patients');
+  Route::get('/patient-appointments', PatientAppointments::class)->middleware(['permission.check:core.appointments.view', 'module.enabled:appointments'])->name('patient-appointments');
+  Route::get('/reminders-notifications-hub', FacilityRemindersHub::class)->middleware(['permission.check:core.reminders.manage', 'module.enabled:reminders'])->name('facility-reminders-hub');
+  Route::get('/facility-reports', FacilityReports::class)->middleware(['permission.check:core.reports.view', 'module.enabled:reports'])->name('patient-reports');
+  Route::get('/reports-hub', FacilityReports::class)->middleware(['permission.check:core.reports.view', 'module.enabled:reports'])->name('reports-hub');
   Route::get('/reports-hub/print', function () {
     $payload = session('reports_hub_print_payload', []);
 
@@ -274,11 +276,11 @@ Route::middleware(['auth', 'role.redirect'])->prefix('core')->group(function () 
     }
 
     return view('core.reports-hub-print', compact('payload'));
-  })->middleware('module.enabled:reports')->name('reports-hub-print');
+  })->middleware(['permission.check:core.reports.view', 'module.enabled:reports'])->name('reports-hub-print');
 });
 
 // Analytics middleware
-Route::middleware(['auth', 'role.redirect'])->prefix('analytics')->group(function () {
+Route::middleware(['auth', 'role.redirect', 'permission.check:analytics.view'])->prefix('analytics')->group(function () {
 
   Route::get('/real-time-dashboard', RealTimeDashboard::class)->name('real-time-dashboard');
   Route::get('/risk-dashboard', RiskDashboard::class)->name('risk-dashboard');
@@ -294,65 +296,67 @@ Route::middleware(['auth', 'role.redirect'])->prefix('analytics')->group(functio
 // Patient Din Activation and Workspace routes with middleware
 Route::middleware(['auth', 'role.redirect'])->prefix('avo')->group(function () {
 
-  Route::get('/din-activations', DinActivations::class)->name('din-activations');
+  Route::get('/din-activations', DinActivations::class)->middleware('permission.check:avo.din_activation.manage')->name('din-activations');
 });
 
 
 // Patient Workspace Access route with middleware
 Route::middleware(['auth', 'role.redirect'])->prefix('workspaces')->group(function () {
 
-  Route::get('/patient-workspace', PatientWorkspace::class)->name('patient-workspace');
+  Route::get('/patient-workspace', PatientWorkspace::class)->middleware('permission.check:workspace.dashboard.view')->name('patient-workspace');
 
   Route::get('/drug-catalog', DrugCatalog::class)
-    ->middleware('module.enabled:prescriptions')
+    ->middleware(['permission.check:workspace.drug_catalog.manage', 'module.enabled:prescriptions'])
     ->name('workspaces-drug-catalog-management');
 
   Route::get('/{patientId}/dashboard', WorkspaceDashboard::class)
+    ->middleware('permission.check:workspace.dashboard.view')
     ->name('workspace-dashboard');
 
   Route::get('/{patientId}/attendance', Attendance::class)
-    ->middleware('module.enabled:attendance')
+    ->middleware(['permission.check:workspace.attendance.manage', 'module.enabled:attendance'])
     ->name('workspaces-attendance');
 
   Route::get('/{patientId}/activities', Activities::class)
+    ->middleware('permission.check:workspace.activities.view')
     ->name('workspaces-activities');
 
   Route::get('/{patientId}/assessments', DoctorAssessments::class)
-    ->middleware('module.enabled:assessments')
+    ->middleware(['permission.check:workspace.assessments.manage', 'module.enabled:assessments'])
     ->name('workspaces-assessments');
 
 
   Route::get('/{patientId}/anc', AncOverview::class)
-    ->middleware('module.enabled:anc')
+    ->middleware(['permission.check:workspace.anc.manage', 'module.enabled:anc'])
     ->name('workspaces-antenatal');
 
   Route::get('/{patientId}/anc/follow-up-assessment', FollowUpAssessment::class)
-    ->middleware('module.enabled:anc')
+    ->middleware(['permission.check:workspace.anc.manage', 'module.enabled:anc'])
     ->name('workspaces-antenatal-followup');
 
   // TT Vaccinations inside Antenatal workspace
   Route::get('/{patientId}/anc/tetanus-vaccinations', TetanusVaccinations::class)
-    ->middleware('module.enabled:anc')
+    ->middleware(['permission.check:workspace.anc.manage', 'module.enabled:anc'])
     ->name('workspaces-antenatal-tt-vaccinations');
 
   Route::get('/{patientId}/anc/deliveries', Deliveries::class)
-    ->middleware('module.enabled:anc')
+    ->middleware(['permission.check:workspace.anc.manage', 'module.enabled:anc'])
     ->name('workspaces-antenatal-deliveries');
 
   Route::get('/{patientId}/anc/postnatal', Postnatal::class)
-    ->middleware('module.enabled:anc')
+    ->middleware(['permission.check:workspace.anc.manage', 'module.enabled:anc'])
     ->name('workspaces-antenatal-postnatal');
 
   Route::get('/{patientId}/child-health/nutrition', Nutrition::class)
-    ->middleware('module.enabled:child_health')
+    ->middleware(['permission.check:workspace.child_health.manage', 'module.enabled:child_health'])
     ->name('workspaces-child-health-nutrition');
 
   Route::get('/{patientId}/child-health/immunizations', Immunizations::class)
-    ->middleware('module.enabled:child_health')
+    ->middleware(['permission.check:workspace.child_health.manage', 'module.enabled:child_health'])
     ->name('workspaces-child-health-immunizations');
 
   Route::get('/{patientId}/child-health/vaccination-schedule', ActivityRegister::class)
-    ->middleware('module.enabled:child_health')
+    ->middleware(['permission.check:workspace.child_health.manage', 'module.enabled:child_health'])
     ->name('workspaces-child-health-vaccination-schedule');
 
   Route::get('/{patientId}/child-health/activity-register', function ($patientId) {
@@ -361,39 +365,39 @@ Route::middleware(['auth', 'role.redirect'])->prefix('workspaces')->group(functi
 
   
   Route::get('/{patientId}/laboratory', Laboratory::class)
-    ->middleware('module.enabled:laboratory')
+    ->middleware(['permission.check:workspace.laboratory.manage', 'module.enabled:laboratory'])
     ->name('workspaces-laboratory');
 
   Route::get('/{patientId}/prescriptions', Prescriptions::class)
-    ->middleware('module.enabled:prescriptions')
+    ->middleware(['permission.check:workspace.prescriptions.manage', 'module.enabled:prescriptions'])
     ->name('workspaces-prescriptions');
 
   Route::get('/{patientId}/invoices', Invoices::class)
-    ->middleware('module.enabled:invoices')
+    ->middleware(['permission.check:workspace.invoices.manage', 'module.enabled:invoices'])
     ->name('workspaces-invoices');
 
   Route::get('/{patientId}/appointments', Appointments::class)
-    ->middleware('module.enabled:appointments')
+    ->middleware(['permission.check:workspace.appointments.view', 'module.enabled:appointments'])
     ->name('workspaces-appointments');
 
   Route::get('/{patientId}/visits', Visits::class)
-    ->middleware('module.enabled:visits')
+    ->middleware(['permission.check:workspace.visits.view', 'module.enabled:visits'])
     ->name('workspaces-visits');
 
   Route::get('/{patientId}/reminders', Reminders::class)
-    ->middleware('module.enabled:reminders')
+    ->middleware(['permission.check:workspace.reminders.manage', 'module.enabled:reminders'])
     ->name('workspaces-reminders');
 
   Route::get('/{patientId}/family-planning', ClientFollowUp::class)
-    ->middleware('module.enabled:family_planning')
+    ->middleware(['permission.check:workspace.family_planning.manage', 'module.enabled:family_planning'])
     ->name('workspaces-family-planning');
 
   Route::get('/{patientId}/health-insurance', HealthInsurance::class)
-    ->middleware('module.enabled:health_insurance')
+    ->middleware(['permission.check:workspace.health_insurance.manage', 'module.enabled:health_insurance'])
     ->name('workspaces-health-insurance');
 
   Route::get('/{patientId}/referrals', Referrals::class)
-    ->middleware('module.enabled:referrals')
+    ->middleware(['permission.check:workspace.referrals.manage', 'module.enabled:referrals'])
     ->name('workspaces-referrals');
 
   Route::get('/{patientId}/drug-catalog', function ($patientId) {
@@ -408,10 +412,12 @@ Route::middleware(['auth', 'role.redirect'])->prefix('workspaces')->group(functi
 // Registers routes with middleware
 Route::middleware(['auth', 'role.redirect'])->prefix('registers')->group(function () {
   //3 Tier Entry Points
-  Route::get('/antenatal-register', AntenatalRegister::class)->name('antenatal-register');
+  Route::get('/antenatal-register', AntenatalRegister::class)->middleware('permission.check:registers.manage')->name('antenatal-register');
   Route::get('/general-patients-register', GeneralPatientsRegister::class)
+    ->middleware('permission.check:registers.manage')
     ->name('general-patients-register');
   Route::get('/family-planning-register', FamilyPlanningRegister::class)
+    ->middleware('permission.check:registers.manage')
     ->name('family-planning-register');
 });
 

@@ -2,10 +2,32 @@
 {{-- Usage: @include('livewire.partials.workspace-card', ['key' => 'attendance', 'title' => 'Attendance', ...]) --}}
 
 @php
+    use App\Services\Security\RolePermissionService;
+
     $status = isset($key) && is_string($key) ? ($cardStatus[$key] ?? ['enabled' => false, 'count' => 0, 'label' => 'Records']) : ['enabled' => false, 'count' => 0, 'label' => 'Records'];
+    $authUser = auth()->user();
+    $permissionMap = [
+        'attendance' => 'workspace.attendance.manage',
+        'assessments' => 'workspace.assessments.manage',
+        'anc' => 'workspace.anc.manage',
+        'immunizations' => 'workspace.child_health.manage',
+        'nutrition' => 'workspace.child_health.manage',
+        'laboratory' => 'workspace.laboratory.manage',
+        'prescriptions' => 'workspace.prescriptions.manage',
+        'invoices' => 'workspace.invoices.manage',
+        'appointments' => 'workspace.appointments.view',
+        'referrals' => 'workspace.referrals.manage',
+        'reminders' => 'workspace.reminders.manage',
+        'family_planning' => 'workspace.family_planning.manage',
+        'health_insurance' => 'workspace.health_insurance.manage',
+        'visits' => 'workspace.visits.view',
+        'activities' => 'workspace.activities.view',
+    ];
+    $permissionKey = $permissionMap[$key] ?? null;
+    $hasPermission = $permissionKey ? RolePermissionService::can($authUser, $permissionKey) : true;
     $routeExists = (bool) ($status['route_exists'] ?? true);
-    $isEnabled = (bool) ($status['enabled'] ?? false) && $routeExists;
-    $isHidden = !$routeExists;
+    $isEnabled = (bool) ($status['enabled'] ?? false) && $routeExists && $hasPermission;
+    $isHidden = !$routeExists || !$hasPermission;
     $count = $status['count'] ?? 0;
     $label = $status['label'] ?? 'Records';
     $requires = $status['requires'] ?? null;

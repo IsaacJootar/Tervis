@@ -3,7 +3,7 @@
 return [
   "creatorName" => "PrimeSafepath solutions.",
   "creatorUrl" => "https://primesafepathsolutions.com/",
-  "templateName" => "MRPro",
+  "templateName" => "Cureva",
   "templateSuffix" => "v 1.0",
   "templateVersion" => "3.0.0",
   "templateFree" => false,

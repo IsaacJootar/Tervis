@@ -1,4 +1,4 @@
-<!-- BEGIN: Theme CSS-->
+﻿<!-- BEGIN: Theme CSS-->
 <!-- Fonts -->
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -375,9 +375,30 @@
         background: rgba(15, 23, 42, 0.35);
         border-radius: 999px;
     }
+
+    /* Shared Cureva wordmark sizing across navbar/auth/footer/sidebar */
+    .app-brand-logo .brand-wordmark {
+        height: 38px;
+        width: auto;
+        max-width: 200px;
+        object-fit: contain;
+        display: block;
+    }
+
+    .navbar .app-brand-logo .brand-wordmark {
+        height: 36px;
+        max-width: 190px;
+    }
+
+    .authentication-wrapper .app-brand-logo .brand-wordmark {
+        height: 42px;
+        max-width: 220px;
+        margin-inline: auto;
+    }
 </style>
 <!-- DataTables CSS -->
 
 <!-- app CSS -->
 @vite(['resources/css/app.css'])
 <!-- END: app CSS-->
+

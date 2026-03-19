@@ -1,5 +1,9 @@
 @php
+    use App\Services\Security\RolePermissionService;
     use Carbon\Carbon;
+    $authUser = auth()->user();
+    $canManageStaff = RolePermissionService::can($authUser, 'core.staff.manage');
+    $canManageSections = RolePermissionService::can($authUser, 'core.sections.manage');
 @endphp
 
 @section('title', 'Staff Management')
@@ -15,14 +19,20 @@
                 <div class="text-muted small mt-1">Single workflow: create/update profiles, designation alignment, and account status control.</div>
             </div>
             <div class="ms-auto d-flex gap-2">
-                <a href="{{ route('facility-departments') }}" class="btn btn-outline-primary">
-                    <i class="bx bx-building-house me-1"></i>Facility Departments
-                </a>
-                <button type="button" class="btn btn-primary" wire:click="openCreateModal" wire:loading.attr="disabled"
-                    wire:target="openCreateModal">
-                    <span wire:loading.remove wire:target="openCreateModal"><i class="bx bx-user-plus me-1"></i>Add Staff</span>
-                    <span wire:loading wire:target="openCreateModal"><span class="spinner-border spinner-border-sm me-1"></span>Opening...</span>
-                </button>
+                @if ($canManageSections)
+                    <a href="{{ route('facility-departments') }}" class="btn btn-outline-primary">
+                        <i class="bx bx-building-house me-1"></i>Facility Departments
+                    </a>
+                @endif
+                @if ($canManageStaff)
+                    <button type="button" class="btn btn-primary" wire:click="openCreateModal" wire:loading.attr="disabled"
+                        wire:target="openCreateModal">
+                        <span wire:loading.remove wire:target="openCreateModal"><i class="bx bx-user-plus me-1"></i>Add Staff</span>
+                        <span wire:loading wire:target="openCreateModal"><span class="spinner-border spinner-border-sm me-1"></span>Opening...</span>
+                    </button>
+                @else
+                    <span class="badge bg-label-secondary">View Only</span>
+                @endif
             </div>
         </div>
     </div>
@@ -161,22 +171,26 @@
                             <td>{{ $staff->department?->name ?: 'Unassigned' }}</td>
                             <td><span class="badge bg-label-{{ $statusClass }}">{{ ucfirst($status) }}</span></td>
                             <td>
-                                <div class="dropdown">
-                                    <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
-                                        <i class="icon-base ti tabler-dots-vertical"></i>
-                                    </button>
-                                    <div class="dropdown-menu">
-                                        <a class="dropdown-item" href="javascript:void(0)" wire:click="openEditModal({{ $staff->id }})">
-                                            <i class="icon-base ti tabler-pencil me-1"></i>Edit Profile
-                                        </a>
-                                        <a class="dropdown-item" href="javascript:void(0)" wire:click="openStatusModal({{ $staff->id }})">
-                                            <i class="icon-base ti tabler-lock me-1"></i>Manage Status
-                                        </a>
-                                        <a class="dropdown-item" href="javascript:void(0)" wire:click="openResetPasswordModal({{ $staff->id }})">
-                                            <i class="icon-base ti tabler-key me-1"></i>Reset Password
-                                        </a>
+                                @if ($canManageStaff)
+                                    <div class="dropdown">
+                                        <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
+                                            <i class="icon-base ti tabler-dots-vertical"></i>
+                                        </button>
+                                        <div class="dropdown-menu">
+                                            <a class="dropdown-item" href="javascript:void(0)" wire:click="openEditModal({{ $staff->id }})">
+                                                <i class="icon-base ti tabler-pencil me-1"></i>Edit Profile
+                                            </a>
+                                            <a class="dropdown-item" href="javascript:void(0)" wire:click="openStatusModal({{ $staff->id }})">
+                                                <i class="icon-base ti tabler-lock me-1"></i>Manage Status
+                                            </a>
+                                            <a class="dropdown-item" href="javascript:void(0)" wire:click="openResetPasswordModal({{ $staff->id }})">
+                                                <i class="icon-base ti tabler-key me-1"></i>Reset Password
+                                            </a>
+                                        </div>
                                     </div>
-                                </div>
+                                @else
+                                    <span class="badge bg-label-secondary">View Only</span>
+                                @endif
                             </td>
                         </tr>
                     @empty
@@ -298,11 +312,13 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-label-secondary" wire:click="closeFormModal"
                         wire:loading.attr="disabled" wire:target="closeFormModal">Close</button>
-                    <button type="button" class="btn btn-primary" wire:click="saveStaff"
-                        wire:loading.attr="disabled" wire:target="saveStaff">
-                        <span wire:loading.remove wire:target="saveStaff">{{ $modal_mode === 'edit' ? 'Update Staff' : 'Create Staff' }}</span>
-                        <span wire:loading wire:target="saveStaff"><span class="spinner-border spinner-border-sm me-1"></span>Saving...</span>
-                    </button>
+                    @if ($canManageStaff)
+                        <button type="button" class="btn btn-primary" wire:click="saveStaff"
+                            wire:loading.attr="disabled" wire:target="saveStaff">
+                            <span wire:loading.remove wire:target="saveStaff">{{ $modal_mode === 'edit' ? 'Update Staff' : 'Create Staff' }}</span>
+                            <span wire:loading wire:target="saveStaff"><span class="spinner-border spinner-border-sm me-1"></span>Saving...</span>
+                        </button>
+                    @endif
                 </div>
             </div>
         </div>
@@ -339,11 +355,13 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-label-secondary" wire:click="closeStatusModal"
                         wire:loading.attr="disabled" wire:target="closeStatusModal">Close</button>
-                    <button type="button" class="btn btn-primary" wire:click="updateStatus"
-                        wire:loading.attr="disabled" wire:target="updateStatus">
-                        <span wire:loading.remove wire:target="updateStatus">Update Status</span>
-                        <span wire:loading wire:target="updateStatus"><span class="spinner-border spinner-border-sm me-1"></span>Saving...</span>
-                    </button>
+                    @if ($canManageStaff)
+                        <button type="button" class="btn btn-primary" wire:click="updateStatus"
+                            wire:loading.attr="disabled" wire:target="updateStatus">
+                            <span wire:loading.remove wire:target="updateStatus">Update Status</span>
+                            <span wire:loading wire:target="updateStatus"><span class="spinner-border spinner-border-sm me-1"></span>Saving...</span>
+                        </button>
+                    @endif
                 </div>
             </div>
         </div>
@@ -380,11 +398,13 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-label-secondary" wire:click="closeResetPasswordModal"
                         wire:loading.attr="disabled" wire:target="closeResetPasswordModal">Close</button>
-                    <button type="button" class="btn btn-primary" wire:click="confirmResetPassword"
-                        wire:loading.attr="disabled" wire:target="confirmResetPassword">
-                        <span wire:loading.remove wire:target="confirmResetPassword">Generate Temporary Password</span>
-                        <span wire:loading wire:target="confirmResetPassword"><span class="spinner-border spinner-border-sm me-1"></span>Generating...</span>
-                    </button>
+                    @if ($canManageStaff)
+                        <button type="button" class="btn btn-primary" wire:click="confirmResetPassword"
+                            wire:loading.attr="disabled" wire:target="confirmResetPassword">
+                            <span wire:loading.remove wire:target="confirmResetPassword">Generate Temporary Password</span>
+                            <span wire:loading wire:target="confirmResetPassword"><span class="spinner-border spinner-border-sm me-1"></span>Generating...</span>
+                        </button>
+                    @endif
                 </div>
             </div>
         </div>

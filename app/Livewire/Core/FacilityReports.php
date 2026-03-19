@@ -57,6 +57,11 @@ class FacilityReports extends Component
   public $history_rows = [];
   public $feedback_message = '';
   public $feedback_type = 'info';
+  public $cards_ready = false;
+  public $card_reports_in_view = 0;
+  public $card_generated_records = 0;
+  public $card_facilities_in_scope = 0;
+  public $card_date_window = '-';
 
   protected $scopeService;
 
@@ -93,6 +98,7 @@ class FacilityReports extends Component
     $this->date_to = Carbon::now()->format('Y-m-d');
 
     $this->history_rows = session()->get('reports_hub_history', []);
+    $this->refreshCardStats();
   }
 
   public function updatedSelectedSection()
@@ -107,6 +113,7 @@ class FacilityReports extends Component
     $this->result_columns = [];
     $this->result_count = 0;
     $this->feedback_message = '';
+    $this->refreshCardStats();
   }
 
   public function updatedSelectedReport()
@@ -116,6 +123,7 @@ class FacilityReports extends Component
     $this->result_columns = [];
     $this->result_count = 0;
     $this->feedback_message = '';
+    $this->refreshCardStats();
   }
 
   public function selectFacility($facilityId)
@@ -126,6 +134,7 @@ class FacilityReports extends Component
     $this->result_columns = [];
     $this->result_count = 0;
     $this->feedback_message = '';
+    $this->refreshCardStats();
   }
 
   public function resetToScope()
@@ -136,6 +145,17 @@ class FacilityReports extends Component
     $this->result_columns = [];
     $this->result_count = 0;
     $this->feedback_message = '';
+    $this->refreshCardStats();
+  }
+
+  public function updatedDateFrom()
+  {
+    $this->refreshCardStats();
+  }
+
+  public function updatedDateTo()
+  {
+    $this->refreshCardStats();
   }
 
   public function generateReport()
@@ -171,6 +191,7 @@ class FacilityReports extends Component
 
       $this->persistPrintablePayload($definition, $columns, $rows);
       $this->appendHistory($definition['name'], $this->result_count);
+      $this->refreshCardStats();
 
       $this->notify('success', 'Report generated successfully.');
     } catch (\Throwable $e) {
@@ -180,6 +201,12 @@ class FacilityReports extends Component
       ]);
       $this->notify('error', 'Unable to generate report. Please try again.');
     }
+  }
+
+  public function loadStatsCards()
+  {
+    $this->refreshCardStats();
+    $this->cards_ready = true;
   }
 
   public function exportCurrentCsv()
@@ -324,6 +351,17 @@ class FacilityReports extends Component
   private function getFacilityIds(): array
   {
     return $this->selectedFacilityId ? [(int) $this->selectedFacilityId] : $this->scopeInfo['facility_ids'];
+  }
+
+  private function refreshCardStats(): void
+  {
+    $this->card_reports_in_view = count($this->getFilteredReports());
+    $this->card_generated_records = (int) $this->result_count;
+    $this->card_facilities_in_scope = count($this->scopeInfo['facility_ids'] ?? []);
+
+    $from = $this->date_from ? Carbon::parse($this->date_from)->format('d M Y') : '-';
+    $to = $this->date_to ? Carbon::parse($this->date_to)->format('d M Y') : '-';
+    $this->card_date_window = "{$from} - {$to}";
   }
 
   private function getFilteredReports(): array

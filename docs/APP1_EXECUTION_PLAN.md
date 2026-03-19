@@ -17,7 +17,7 @@ Mode: Lean (no over-engineering)
 4. Baseline resolver + registry unit tests are active:
    - `tests/Unit/NhmisFieldRegistryTest.php`
    - `tests/Unit/NhmisFieldValueResolverTest.php`
-5. Product decision recorded: advanced Pharmacy supplier/procurement + LMIS full operations are deferred to Version 2.
+5. Product decision recorded: advanced Pharmacy supplier/procurement + LMIS full operations are deferred to Version 2 (V1 scope frozen).
 6. Access control hardening is implemented:
    - `module.enabled` middleware alias added in `bootstrap/app.php`
    - key workspace/core module routes now enforce facility module toggles
@@ -29,6 +29,11 @@ Mode: Lean (no over-engineering)
    - central sidebar now contains only valid links
    - legacy `/central-admin/*` links are redirect-compatible
    - feature tests added in `tests/Feature/CentralLegacyRoutesTest.php`
+8. Lean RBAC hardening is implemented:
+   - `role_permissions` table + central management page (`/central/roles-permissions`)
+   - `permission.check` middleware alias + route-level enforcement across central/core/workspace/register/analytics/avo
+   - default policy in `RolePermissionService` with central override persistence
+   - feature tests added in `tests/Feature/RolePermissionMiddlewareTest.php`
 
 ## Proposal Scope
 

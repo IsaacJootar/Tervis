@@ -9,12 +9,17 @@
     {
       "name": "Admin Management",
       "icon": "menu-icon icon-base ti tabler-users",
-      "slug": ["create-administrators"],
+      "slug": ["create-administrators", "central-role-permissions"],
       "submenu": [
         {
           "url": "/central/create-administrators",
           "name": "Administrators",
           "slug": "create-administrators"
+        },
+        {
+          "url": "/central/roles-permissions",
+          "name": "Roles & Permissions",
+          "slug": "central-role-permissions"
         }
       ]
     },
@@ -32,70 +37,6 @@
           "url": "/central/facility-module-management",
           "name": "Facility Module Access",
           "slug": "central-facility-module-management"
-        }
-      ]
-    },
-    {
-      "name": "Platform Operations",
-      "icon": "menu-icon icon-base ti tabler-layout-grid",
-      "slug": ["reports-hub", "facility-reminders-hub", "facility-patients", "facility-administration", "staff-management"],
-      "submenu": [
-        {
-          "url": "/core/reports-hub",
-          "name": "Reports Hub",
-          "slug": "reports-hub"
-        },
-        {
-          "url": "/core/reminders-notifications-hub",
-          "name": "Reminders Hub",
-          "slug": "facility-reminders-hub"
-        },
-        {
-          "url": "/core/facility-patients",
-          "name": "Facility Patients",
-          "slug": "facility-patients"
-        },
-        {
-          "url": "/core/facility-administration",
-          "name": "Facility Admin",
-          "slug": "facility-administration"
-        },
-        {
-          "url": "/core/staff-management",
-          "name": "Staff Management",
-          "slug": "staff-management"
-        }
-      ]
-    },
-    {
-      "name": "Operations Modules",
-      "icon": "menu-icon icon-base ti tabler-chart-bar",
-      "slug": ["bed-management", "admitted-patients", "laboratory-operations", "pharmacy-operations", "patient-appointments"],
-      "submenu": [
-        {
-          "url": "/core/bed-management",
-          "name": "Bed Management",
-          "slug": "bed-management"
-        },
-        {
-          "url": "/core/admitted-patients",
-          "name": "Admitted Patients",
-          "slug": "admitted-patients"
-        },
-        {
-          "url": "/core/laboratory-operations",
-          "name": "Laboratory Operations",
-          "slug": "laboratory-operations"
-        },
-        {
-          "url": "/core/pharmacy-operations",
-          "name": "Pharmacy Operations",
-          "slug": "pharmacy-operations"
-        },
-        {
-          "url": "/core/patient-appointments",
-          "name": "Patient Appointments",
-          "slug": "patient-appointments"
         }
       ]
     }

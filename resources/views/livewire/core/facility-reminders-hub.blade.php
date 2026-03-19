@@ -1,5 +1,8 @@
 @php
+    use App\Services\Security\RolePermissionService;
     use Carbon\Carbon;
+    $authUser = auth()->user();
+    $canManageReminders = RolePermissionService::can($authUser, 'core.reminders.manage');
 @endphp
 
 <div>
@@ -12,16 +15,30 @@
                 <div class="text-muted small">{{ Carbon::now('Africa/Lagos')->format('l, F j, Y, h:i A') }}</div>
                 <div class="text-muted small mt-1">Manage reminder collation and dispatch for your facility only.</div>
             </div>
-            <div class="d-flex gap-2">
-                <button type="button" class="btn btn-outline-primary" wire:click="syncFacilitySources" wire:loading.attr="disabled" wire:target="syncFacilitySources">
-                    <span wire:loading.remove wire:target="syncFacilitySources"><i class="bx bx-refresh me-1"></i>Sync Facility Sources</span>
-                    <span wire:loading wire:target="syncFacilitySources"><span class="spinner-border spinner-border-sm me-1"></span>Syncing...</span>
-                </button>
-                <button type="button" class="btn btn-primary" wire:click="dispatchDueFacility" wire:loading.attr="disabled" wire:target="dispatchDueFacility">
-                    <span wire:loading.remove wire:target="dispatchDueFacility"><i class="bx bx-send me-1"></i>Dispatch Due</span>
-                    <span wire:loading wire:target="dispatchDueFacility"><span class="spinner-border spinner-border-sm me-1"></span>Dispatching...</span>
-                </button>
-            </div>
+            @if ($canManageReminders)
+                <div class="d-flex gap-2">
+                    <button type="button" class="btn btn-outline-primary" wire:click="syncFacilitySources" wire:loading.attr="disabled" wire:target="syncFacilitySources">
+                        <span wire:loading.remove wire:target="syncFacilitySources"><i class="bx bx-refresh me-1"></i>Sync Facility Sources</span>
+                        <span wire:loading wire:target="syncFacilitySources"><span class="spinner-border spinner-border-sm me-1"></span>Syncing...</span>
+                    </button>
+                    <button type="button" class="btn btn-primary" wire:click="dispatchDueFacility" wire:loading.attr="disabled" wire:target="dispatchDueFacility">
+                        <span wire:loading.remove wire:target="dispatchDueFacility"><i class="bx bx-send me-1"></i>Dispatch Due</span>
+                        <span wire:loading wire:target="dispatchDueFacility"><span class="spinner-border spinner-border-sm me-1"></span>Dispatching...</span>
+                    </button>
+                    @if ($showAiAssistant)
+                        <button type="button" class="btn btn-outline-secondary" wire:click="hideAiAssistant">
+                            Hide AI Assistant
+                        </button>
+                    @else
+                        <button type="button" class="btn btn-outline-dark" wire:click="useAiAssistant" wire:loading.attr="disabled" wire:target="useAiAssistant">
+                            <span wire:loading.remove wire:target="useAiAssistant"><i class="bx bx-bot me-1"></i>Use AI Assistant</span>
+                            <span wire:loading wire:target="useAiAssistant"><span class="spinner-border spinner-border-sm me-1"></span>Opening...</span>
+                        </button>
+                    @endif
+                </div>
+            @else
+                <span class="badge bg-label-secondary">View Only</span>
+            @endif
         </div>
     </div>
 
@@ -181,23 +198,27 @@
                             <td>{{ strtoupper(implode(', ', (array) ($reminder->channels ?? []))) ?: 'N/A' }}</td>
                             <td><span class="badge bg-label-{{ $statusClass }}">{{ ucfirst($reminder->status) }}</span></td>
                             <td>
-                                <div class="d-flex gap-1">
-                                    <button type="button" class="btn btn-sm btn-light text-dark border" wire:click="dispatchSingle({{ $reminder->id }})" wire:loading.attr="disabled" wire:target="dispatchSingle({{ $reminder->id }})">
-                                        <span wire:loading.remove wire:target="dispatchSingle({{ $reminder->id }})">Send</span>
-                                        <span wire:loading wire:target="dispatchSingle({{ $reminder->id }})"><span class="spinner-border spinner-border-sm"></span></span>
-                                    </button>
-                                    @if ($reminder->status !== 'canceled')
-                                        <button type="button" class="btn btn-sm btn-light text-dark border" wire:click="cancelReminder({{ $reminder->id }})" wire:loading.attr="disabled" wire:target="cancelReminder({{ $reminder->id }})">
-                                            <span wire:loading.remove wire:target="cancelReminder({{ $reminder->id }})">Cancel</span>
-                                            <span wire:loading wire:target="cancelReminder({{ $reminder->id }})"><span class="spinner-border spinner-border-sm"></span></span>
+                                @if ($canManageReminders)
+                                    <div class="d-flex gap-1">
+                                        <button type="button" class="btn btn-sm btn-light text-dark border" wire:click="dispatchSingle({{ $reminder->id }})" wire:loading.attr="disabled" wire:target="dispatchSingle({{ $reminder->id }})">
+                                            <span wire:loading.remove wire:target="dispatchSingle({{ $reminder->id }})">Send</span>
+                                            <span wire:loading wire:target="dispatchSingle({{ $reminder->id }})"><span class="spinner-border spinner-border-sm"></span></span>
                                         </button>
-                                    @else
-                                        <button type="button" class="btn btn-sm btn-light text-dark border" wire:click="requeueReminder({{ $reminder->id }})" wire:loading.attr="disabled" wire:target="requeueReminder({{ $reminder->id }})">
-                                            <span wire:loading.remove wire:target="requeueReminder({{ $reminder->id }})">Requeue</span>
-                                            <span wire:loading wire:target="requeueReminder({{ $reminder->id }})"><span class="spinner-border spinner-border-sm"></span></span>
-                                        </button>
-                                    @endif
-                                </div>
+                                        @if ($reminder->status !== 'canceled')
+                                            <button type="button" class="btn btn-sm btn-light text-dark border" wire:click="cancelReminder({{ $reminder->id }})" wire:loading.attr="disabled" wire:target="cancelReminder({{ $reminder->id }})">
+                                                <span wire:loading.remove wire:target="cancelReminder({{ $reminder->id }})">Cancel</span>
+                                                <span wire:loading wire:target="cancelReminder({{ $reminder->id }})"><span class="spinner-border spinner-border-sm"></span></span>
+                                            </button>
+                                        @else
+                                            <button type="button" class="btn btn-sm btn-light text-dark border" wire:click="requeueReminder({{ $reminder->id }})" wire:loading.attr="disabled" wire:target="requeueReminder({{ $reminder->id }})">
+                                                <span wire:loading.remove wire:target="requeueReminder({{ $reminder->id }})">Requeue</span>
+                                                <span wire:loading wire:target="requeueReminder({{ $reminder->id }})"><span class="spinner-border spinner-border-sm"></span></span>
+                                            </button>
+                                        @endif
+                                    </div>
+                                @else
+                                    <span class="badge bg-label-secondary">View Only</span>
+                                @endif
                             </td>
                         </tr>
                     @empty
@@ -332,6 +353,17 @@
             color: #64748b;
         }
     </style>
+
+    @include('livewire.partials.ai-assistant-panel', [
+        'show' => $showAiAssistant,
+        'summary' => $aiAssistantSummary,
+        'riskLevel' => $aiAssistantRiskLevel,
+        'generatedAt' => $aiAssistantGeneratedAt,
+        'items' => $aiAssistantItems,
+        'refreshAction' => 'refreshAiAssistant',
+        'hideAction' => 'hideAiAssistant',
+        'title' => 'AI Assistant',
+    ])
 
     @include('_partials.datatables-init-multi', [
         'tableIds' => ['facilityReminderQueueTable', 'facilityDispatchLogTable'],

@@ -1,5 +1,8 @@
 @php
+    use App\Services\Security\RolePermissionService;
     use Carbon\Carbon;
+    $authUser = auth()->user();
+    $canManageBeds = RolePermissionService::can($authUser, 'core.beds.manage');
 @endphp
 
 @section('title', 'Bed Management')
@@ -13,13 +16,17 @@
                 <h4 class="mb-1"><i class="bx bx-bed me-1"></i>Facility Bed Management</h4>
                 <div class="text-muted small">{{ Carbon::now('Africa/Lagos')->format('l, F j, Y, h:i A') }}</div>
             </div>
-            <button wire:click="openCreateModal" type="button" class="btn btn-primary" wire:loading.attr="disabled"
-                wire:target="openCreateModal,saveBed">
-                <span wire:loading.remove wire:target="openCreateModal,saveBed"><i class="bx bx-plus me-1"></i>Add
-                    Bed</span>
-                <span wire:loading wire:target="openCreateModal,saveBed"><span
-                        class="spinner-border spinner-border-sm me-1"></span>Opening...</span>
-            </button>
+            @if ($canManageBeds)
+                <button wire:click="openCreateModal" type="button" class="btn btn-primary" wire:loading.attr="disabled"
+                    wire:target="openCreateModal,saveBed">
+                    <span wire:loading.remove wire:target="openCreateModal,saveBed"><i class="bx bx-plus me-1"></i>Add
+                        Bed</span>
+                    <span wire:loading wire:target="openCreateModal,saveBed"><span
+                            class="spinner-border spinner-border-sm me-1"></span>Opening...</span>
+                </button>
+            @else
+                <span class="badge bg-label-secondary">View Only</span>
+            @endif
         </div>
     </div>
 
@@ -144,40 +151,44 @@
                             </td>
                             <td>{{ $bed->updated_at?->format('M d, Y h:i A') }}</td>
                             <td>
-                                <div class="dropdown">
-                                    <button type="button" class="btn p-0 dropdown-toggle hide-arrow"
-                                        data-bs-toggle="dropdown">
-                                        <i class="icon-base ti tabler-dots-vertical"></i>
-                                    </button>
-                                    <div class="dropdown-menu">
-                                        <a class="dropdown-item" href="javascript:void(0)"
-                                            wire:click="openEditModal({{ $bed->id }})">
-                                            <i class="icon-base ti tabler-edit me-1"></i>Edit
-                                        </a>
-                                        <a class="dropdown-item" href="javascript:void(0)"
-                                            wire:click="setStatus({{ $bed->id }}, 'available')">
-                                            <i class="icon-base ti tabler-check me-1"></i>Mark Available
-                                        </a>
-                                        <a class="dropdown-item" href="javascript:void(0)"
-                                            wire:click="setStatus({{ $bed->id }}, 'occupied')">
-                                            <i class="icon-base ti tabler-bed me-1"></i>Mark Occupied
-                                        </a>
-                                        <a class="dropdown-item" href="javascript:void(0)"
-                                            wire:click="setStatus({{ $bed->id }}, 'maintenance')">
-                                            <i class="icon-base ti tabler-tool me-1"></i>Mark Maintenance
-                                        </a>
-                                        <a class="dropdown-item" href="javascript:void(0)"
-                                            wire:click="toggleActive({{ $bed->id }})">
-                                            <i class="icon-base ti tabler-power me-1"></i>{{ $bed->is_active ? 'Deactivate' : 'Activate' }}
-                                        </a>
-                                        <div class="dropdown-divider"></div>
-                                        <a class="dropdown-item text-danger" href="javascript:void(0)"
-                                            wire:click="deleteBed({{ $bed->id }})"
-                                            wire:confirm="Delete this bed? This action cannot be undone.">
-                                            <i class="icon-base ti tabler-trash me-1"></i>Delete
-                                        </a>
+                                @if ($canManageBeds)
+                                    <div class="dropdown">
+                                        <button type="button" class="btn p-0 dropdown-toggle hide-arrow"
+                                            data-bs-toggle="dropdown">
+                                            <i class="icon-base ti tabler-dots-vertical"></i>
+                                        </button>
+                                        <div class="dropdown-menu">
+                                            <a class="dropdown-item" href="javascript:void(0)"
+                                                wire:click="openEditModal({{ $bed->id }})">
+                                                <i class="icon-base ti tabler-edit me-1"></i>Edit
+                                            </a>
+                                            <a class="dropdown-item" href="javascript:void(0)"
+                                                wire:click="setStatus({{ $bed->id }}, 'available')">
+                                                <i class="icon-base ti tabler-check me-1"></i>Mark Available
+                                            </a>
+                                            <a class="dropdown-item" href="javascript:void(0)"
+                                                wire:click="setStatus({{ $bed->id }}, 'occupied')">
+                                                <i class="icon-base ti tabler-bed me-1"></i>Mark Occupied
+                                            </a>
+                                            <a class="dropdown-item" href="javascript:void(0)"
+                                                wire:click="setStatus({{ $bed->id }}, 'maintenance')">
+                                                <i class="icon-base ti tabler-tool me-1"></i>Mark Maintenance
+                                            </a>
+                                            <a class="dropdown-item" href="javascript:void(0)"
+                                                wire:click="toggleActive({{ $bed->id }})">
+                                                <i class="icon-base ti tabler-power me-1"></i>{{ $bed->is_active ? 'Deactivate' : 'Activate' }}
+                                            </a>
+                                            <div class="dropdown-divider"></div>
+                                            <a class="dropdown-item text-danger" href="javascript:void(0)"
+                                                wire:click="deleteBed({{ $bed->id }})"
+                                                wire:confirm="Delete this bed? This action cannot be undone.">
+                                                <i class="icon-base ti tabler-trash me-1"></i>Delete
+                                            </a>
+                                        </div>
                                     </div>
-                                </div>
+                                @else
+                                    <span class="badge bg-label-secondary">View Only</span>
+                                @endif
                             </td>
                         </tr>
                     @endforeach
@@ -266,12 +277,14 @@
                         </div>
 
                         <div class="col-12 text-center mt-4">
-                            <button wire:click="saveBed" type="button" class="btn btn-primary"
-                                wire:loading.attr="disabled" wire:target="saveBed">
-                                <span wire:loading.remove wire:target="saveBed">{{ $edit_mode ? 'Update Bed' : 'Save Bed' }}</span>
-                                <span wire:loading wire:target="saveBed"><span
-                                        class="spinner-border spinner-border-sm me-1"></span>Saving...</span>
-                            </button>
+                            @if ($canManageBeds)
+                                <button wire:click="saveBed" type="button" class="btn btn-primary"
+                                    wire:loading.attr="disabled" wire:target="saveBed">
+                                    <span wire:loading.remove wire:target="saveBed">{{ $edit_mode ? 'Update Bed' : 'Save Bed' }}</span>
+                                    <span wire:loading wire:target="saveBed"><span
+                                            class="spinner-border spinner-border-sm me-1"></span>Saving...</span>
+                                </button>
+                            @endif
                             <button wire:click="exit" type="button" class="btn btn-label-secondary" aria-label="Close">
                                 Cancel
                             </button>

@@ -1,4 +1,4 @@
-<!-- Footer: Start -->
+﻿<!-- Footer: Start -->
 <footer class="landing-footer bg-body footer-text">
   <div class="footer-top position-relative overflow-hidden z-1">
     <img src="{{ asset('assets/img/front-pages/backgrounds/footer-bg.png') }}" alt="footer bg"
@@ -8,7 +8,7 @@
         <div class="col-lg-5">
           <a href="javascript:;" class="app-brand-link mb-6">
             <span class="app-brand-logo demo">@include('_partials.macros')</span>
-            <span class="app-brand-text demo text-white fw-bold ms-2 ps-1">{{ config('variables.templateName') }}</span>
+            
           </a>
           <p class="footer-text footer-logo-description mb-6">Most developer friendly & highly customisable
             Admin
@@ -77,14 +77,14 @@
   <div class="footer-bottom py-3 py-md-5">
     <div class="container d-flex flex-wrap justify-content-between flex-md-row flex-column text-center text-md-start">
       <div class="mb-2 mb-md-0">
-        <span class="footer-bottom-text">©
+        <span class="footer-bottom-text">Â©
           <script>
             document.write(new Date().getFullYear());
           </script>
         </span>
         <a href="{{ config('variables.creatorUrl') }}" target="_blank"
           class="text-white">{{ config('variables.creatorName') }},</a>
-        <span class="footer-bottom-text"> Made with ❤️ for a better web.</span>
+        <span class="footer-bottom-text"> Made with â¤ï¸ for a better web.</span>
       </div>
       <div>
         <a href="{{ config('variables.githubFreeUrl') }}" class="me-4 text-white" target="_blank">
@@ -130,3 +130,4 @@
   </div>
 </footer>
 <!-- Footer: End -->
+

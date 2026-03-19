@@ -1,7 +1,10 @@
 <div>
     @php
+        use App\Services\Security\RolePermissionService;
         use Carbon\Carbon;
         use Illuminate\Support\Str;
+        $authUser = auth()->user();
+        $canManageReminders = RolePermissionService::can($authUser, 'core.reminders.manage');
     @endphp
     @section('title', 'Patient Appointments')
     <div>
@@ -326,9 +329,11 @@
                                 <div>
                                     <button wire:click="closeModal" type="button"
                                         class="btn btn-secondary">Close</button>
-                                    <button wire:click="sendNotifications" type="button" class="btn btn-warning">
-                                        <i class="bx bx-message-dots me-2"></i>Send SMS Notifications
-                                    </button>
+                                    @if ($canManageReminders)
+                                        <button wire:click="sendNotifications" type="button" class="btn btn-warning">
+                                            <i class="bx bx-message-dots me-2"></i>Send SMS Notifications
+                                        </button>
+                                    @endif
                                 </div>
                             </div>
                         @else
@@ -355,7 +360,7 @@
                                     </div>
                                     <button wire:click="openDueSoonModal" class="btn btn-warning">
                                         <i class="bx bx-message-dots me-2"></i>
-                                        View Due Soon & Send Notifications
+                                        {{ $canManageReminders ? 'View Due Soon & Send Notifications' : 'View Due Soon' }}
                                         @php
                                             $dueSoonCount = $patients->sum(function ($patient) {
                                                 return $patient->appointments

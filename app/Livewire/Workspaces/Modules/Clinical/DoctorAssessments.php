@@ -9,6 +9,7 @@ use App\Models\LabTestOrder;
 use App\Models\Patient;
 use App\Models\Prescription;
 use App\Models\Registrations\DinActivation;
+use App\Services\AI\WorkspaceAiAssistantService;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Facades\Auth;
@@ -44,6 +45,11 @@ class DoctorAssessments extends Component
 
   public $test_entry_name, $test_entry_specimen;
   public $drug_entry_name, $drug_entry_dosage, $drug_entry_frequency, $drug_entry_duration, $drug_entry_route, $drug_entry_instructions, $drug_entry_quantity_prescribed;
+  public bool $showAiAssistant = false;
+  public string $aiAssistantSummary = '';
+  public string $aiAssistantRiskLevel = 'low';
+  public ?string $aiAssistantGeneratedAt = null;
+  public array $aiAssistantItems = [];
 
   protected $rules = [
     'patientId' => 'required',
@@ -150,6 +156,18 @@ class DoctorAssessments extends Component
   public function updatedVisitDate(): void
   {
     $this->autoFillMonthYear();
+    $this->refreshAiAssistantIfOpen();
+  }
+
+  public function updated($name): void
+  {
+    if (
+      in_array((string) $name, ['next_appointment_date', 'final_diagnosis', 'assessment_note', 'management_plan'], true)
+      || str_starts_with((string) $name, 'test_orders.')
+      || str_starts_with((string) $name, 'drug_orders.')
+    ) {
+      $this->refreshAiAssistantIfOpen();
+    }
   }
 
   private function autoFillMonthYear(): void
@@ -173,6 +191,7 @@ class DoctorAssessments extends Component
     ];
 
     $this->reset(['test_entry_name', 'test_entry_specimen']);
+    $this->refreshAiAssistantIfOpen();
   }
 
   public function removeTestOrder(int $index): void
@@ -183,6 +202,7 @@ class DoctorAssessments extends Component
 
     unset($this->test_orders[$index]);
     $this->test_orders = array_values($this->test_orders);
+    $this->refreshAiAssistantIfOpen();
   }
 
   public function addDrugOrder(): void
@@ -218,6 +238,8 @@ class DoctorAssessments extends Component
       'drug_entry_instructions',
       'drug_entry_quantity_prescribed',
     ]);
+
+    $this->refreshAiAssistantIfOpen();
   }
 
   public function removeDrugOrder(int $index): void
@@ -228,6 +250,45 @@ class DoctorAssessments extends Component
 
     unset($this->drug_orders[$index]);
     $this->drug_orders = array_values($this->drug_orders);
+    $this->refreshAiAssistantIfOpen();
+  }
+
+  public function useAiAssistant(): void
+  {
+    $this->showAiAssistant = true;
+    $this->refreshAiAssistant();
+  }
+
+  public function hideAiAssistant(): void
+  {
+    $this->showAiAssistant = false;
+  }
+
+  public function refreshAiAssistant(): void
+  {
+    $analysis = app(WorkspaceAiAssistantService::class)->analyzeDoctorAssessment([
+      'visit_date' => $this->visit_date,
+      'next_appointment_date' => $this->next_appointment_date,
+      'final_diagnosis' => $this->final_diagnosis,
+      'assessment_note' => $this->assessment_note,
+      'management_plan' => $this->management_plan,
+      'test_orders' => $this->test_orders,
+      'drug_orders' => $this->drug_orders,
+    ]);
+
+    $this->aiAssistantSummary = (string) ($analysis['summary'] ?? '');
+    $this->aiAssistantRiskLevel = (string) ($analysis['risk_level'] ?? 'low');
+    $this->aiAssistantItems = (array) ($analysis['items'] ?? []);
+    $this->aiAssistantGeneratedAt = (string) ($analysis['generated_at'] ?? now()->format('M d, Y h:i A'));
+  }
+
+  private function refreshAiAssistantIfOpen(): void
+  {
+    if (!$this->showAiAssistant) {
+      return;
+    }
+
+    $this->refreshAiAssistant();
   }
 
   private function payload(): array
@@ -327,6 +388,7 @@ class DoctorAssessments extends Component
       DB::commit();
       $this->logActivity('create', 'Recorded doctor assessment with pending lab and prescription orders');
       $this->edit($record->id);
+      $this->refreshAiAssistantIfOpen();
       toastr()->success('Doctor assessment saved. Pending lab and prescription orders routed.');
     } catch (ValidationException $e) {
       DB::rollBack();
@@ -374,6 +436,8 @@ class DoctorAssessments extends Component
       })
       ->values()
       ->toArray();
+
+    $this->refreshAiAssistantIfOpen();
   }
 
   public function update(): void
@@ -395,6 +459,7 @@ class DoctorAssessments extends Component
       DB::commit();
       $this->logActivity('update', 'Updated doctor assessment with refreshed pending lab/prescription orders');
       $this->edit($record->id);
+      $this->refreshAiAssistantIfOpen();
       toastr()->success('Doctor assessment updated. Pending lab and prescription orders refreshed.');
     } catch (ValidationException $e) {
       DB::rollBack();
@@ -437,6 +502,7 @@ class DoctorAssessments extends Component
       if ($this->record_id === (int) $id) {
         $this->openCreate();
       }
+      $this->refreshAiAssistantIfOpen();
       toastr()->success('Doctor assessment deleted. Pending lab and prescription orders cancelled.');
     } catch (Exception $e) {
       DB::rollBack();
@@ -493,6 +559,7 @@ class DoctorAssessments extends Component
 
     $this->visit_date = now()->format('Y-m-d');
     $this->autoFillMonthYear();
+    $this->refreshAiAssistantIfOpen();
   }
 
   public function backToDashboard()

@@ -27,16 +27,20 @@ Aligned to: HMS Vision Architecture v2.0 (Nov 2025)
 8. Reminder orchestration:
    - Reminders module syncs due dates from Doctor Assessment, TT, ANC follow-up, and Family Planning.
    - Due reminders dispatch through placeholder SMS/Email services with per-channel dispatch logs.
-9. Insurance management:
+9. AI Assistant advisory layer:
+   - Key modules expose `Use AI Assistant` -> side panel suggestions -> `Hide AI Assistant`.
+   - Suggestions are predictive/flagging/advisory only (no auto-submit or auto-complete actions).
+   - Initial coverage: Doctor Assessments, Laboratory, Prescriptions, Child Vaccination Schedule, Facility Reminders Hub.
+10. Insurance management:
    - Initial NHIS capture is aligned across all register entry points (General, ANC, Family Planning).
    - Health Insurance workspace manages activation/deactivation and NHIS detail updates with audit history.
-10. Visit collation:
+11. Visit collation:
    - Visits module auto-groups visit sessions by date from DIN activation + activity records.
    - Sync is automatic on activity/activation create-update-delete events (staff do not click manual sync).
    - Visit events remain facility-scoped and are sync/backfill-safe.
-11. Monthly report:
+12. Monthly report:
    - Monthly dashboard aggregates mapped data from attendance, maternal/child, doctor, and lab sources.
-12. Reports Hub:
+13. Reports Hub:
    - Core Reports Hub (`/core/reports-hub`) allows section-based report selection, date/facility filters, generation history, and CSV export.
 
 ## 1b) Clinical Order Bridges (Implemented)
@@ -102,6 +106,7 @@ Done criteria:
 5. Staff Management (completed: unified facility staff module, legacy Data Officer pages redirected)
 6. Facility Administration hardening (completed: profile settings, service catalog, fee schedules, module access status view, audit trail; module toggle control centralized in Central Admin)
 7. Central Admin hardening (completed: live central dashboard metrics, route-valid sidebar cleanup, legacy `/central-admin/*` compatibility redirects)
+8. RBAC hardening (completed: central roles-permissions matrix, route-level `permission.check` enforcement, central-to-facility access propagation model)
 
 Done criteria:
 - Facility modules can operate independently of single-patient pages.
@@ -118,6 +123,12 @@ Done criteria:
 
 ## Deferred To Version 2
 1. Pharmacy & Drug advanced supplier/procurement + LMIS full operations.
+2. V2 LMIS scope (not in current V1 sprint):
+   - Supplier master management
+   - Purchase order workflow
+   - Goods received notes (GRN)
+   - Stock valuation and procurement analytics
+   - Multi-store transfer controls
 
 ## 4) Required Update Checklist Per Module Delivery
 

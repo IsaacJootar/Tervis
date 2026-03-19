@@ -10,6 +10,38 @@ use Illuminate\Support\Facades\Log;
 
 class DiagnosticAssistantService
 {
+  private const STALE_PREDICTION_DAYS = 7;
+  private const RISK_TREND_DELTA_THRESHOLD = 5;
+  private const PRIMARY_CONCERN_WEIGHT_THRESHOLD = 20;
+  private const BP_SYSTOLIC_SEVERE = 160;
+  private const BP_DIASTOLIC_SEVERE = 110;
+  private const BP_SYSTOLIC_HYPERTENSION = 140;
+  private const BP_DIASTOLIC_HYPERTENSION = 90;
+  private const BP_SYSTOLIC_ELEVATED = 120;
+  private const BP_DIASTOLIC_ELEVATED = 80;
+  private const HEMOGLOBIN_SEVERE_THRESHOLD = 7.0;
+  private const HEMOGLOBIN_MODERATE_THRESHOLD = 10.0;
+  private const HEMOGLOBIN_MILD_THRESHOLD = 11.0;
+  private const BMI_UNDERWEIGHT_THRESHOLD = 18.5;
+  private const BMI_OVERWEIGHT_THRESHOLD = 25.0;
+  private const BMI_OBESE_THRESHOLD = 30.0;
+  private const SEVERITY_CRITICAL_WEIGHT = 25;
+  private const SEVERITY_HIGH_WEIGHT = 15;
+  private const SEVERITY_MODERATE_WEIGHT = 10;
+  private const TRIMESTER_ONE_END_WEEK = 13;
+  private const TRIMESTER_TWO_END_WEEK = 27;
+  private const FETAL_MOVEMENT_MONITORING_START_WEEK = 28;
+  private const MIN_TETANUS_DOSES = 2;
+  private const EXPECTED_VISITS_HIGH_GA_WEEK = 36;
+  private const EXPECTED_VISITS_MEDIUM_GA_WEEK = 28;
+  private const BATCH_DAYS_DEFAULT = 30;
+  private const BATCH_DAYS_MIN = 1;
+  private const BP_PATTERN = '/(\d{2,3})\s*[\/\-]\s*(\d{2,3})/';
+  private const BP_SYSTOLIC_MIN = 70;
+  private const BP_SYSTOLIC_MAX = 250;
+  private const BP_DIASTOLIC_MIN = 40;
+  private const BP_DIASTOLIC_MAX = 150;
+
   private $riskService;
   private $enhancedRiskService;
   protected $scopeService;
@@ -46,7 +78,7 @@ class DiagnosticAssistantService
         ->latest('assessment_date')
         ->first();
 
-      if (!$latestPrediction || $latestPrediction->assessment_date < Carbon::now()->subDays(7)) {
+      if (!$latestPrediction || $latestPrediction->assessment_date < Carbon::now()->subDays(self::STALE_PREDICTION_DAYS)) {
         // Generate fresh assessment if older than 7 days
         $latestPrediction = $this->enhancedRiskService->performAIRiskAssessment($userId);
       }
@@ -100,10 +132,9 @@ class DiagnosticAssistantService
 
     // Calculate gestational age
     $gestationalAge = 'N/A';
-    $gestationalWeeks = 0;
+    $gestationalWeeks = $this->calculateGestationalWeeks($antenatal->lmp);
     if ($antenatal->lmp) {
       $lmp = Carbon::parse($antenatal->lmp);
-      $gestationalWeeks = $lmp->diffInWeeks(Carbon::now());
       $days = $lmp->diffInDays(Carbon::now()) % 7;
       $gestationalAge = "{$gestationalWeeks}w {$days}d";
     }
@@ -159,7 +190,7 @@ class DiagnosticAssistantService
 
     // Group risks by severity
     $criticalRisks = collect($risks)->filter(function ($risk) {
-      return ($risk['weight'] ?? 0) >= 20;
+      return ($risk['weight'] ?? 0) >= self::PRIMARY_CONCERN_WEIGHT_THRESHOLD;
     })->sortByDesc('weight')->take(3);
 
     foreach ($criticalRisks as $risk) {
@@ -275,7 +306,9 @@ class DiagnosticAssistantService
     $previous = $predictions->slice(-2, 1)->first();
 
     $scoreChange = $latest->total_risk_score - $previous->total_risk_score;
-    $trend = $scoreChange > 5 ? 'increasing' : ($scoreChange < -5 ? 'decreasing' : 'stable');
+    $trend = $scoreChange > self::RISK_TREND_DELTA_THRESHOLD
+      ? 'increasing'
+      : ($scoreChange < (-1 * self::RISK_TREND_DELTA_THRESHOLD) ? 'decreasing' : 'stable');
 
     return [
       'trend' => $trend,
@@ -357,10 +390,7 @@ class DiagnosticAssistantService
    */
   private function createMonitoringSchedule($prediction, $user)
   {
-    $gestationalWeeks = 0;
-    if ($user->antenatal && $user->antenatal->lmp) {
-      $gestationalWeeks = Carbon::parse($user->antenatal->lmp)->diffInWeeks(Carbon::now());
-    }
+    $gestationalWeeks = $this->calculateGestationalWeeks($user->antenatal?->lmp);
 
     $riskLevel = $prediction->risk_level;
 
@@ -395,16 +425,16 @@ class DiagnosticAssistantService
     // Add specific parameters based on risks
     $risks = collect($prediction->identified_risks)->pluck('factor')->toArray();
 
-    if (in_array('hypertension', $risks)) {
+    if ($this->riskListContains($risks, 'hypertension')) {
       $baseParameters[] = 'Urine protein';
       $baseParameters[] = 'Edema assessment';
     }
 
-    if (in_array('anemia', $risks)) {
+    if ($this->riskListContains($risks, 'anemia')) {
       $baseParameters[] = 'Hemoglobin level';
     }
 
-    if ($gestationalWeeks >= 28) {
+    if ($gestationalWeeks >= self::FETAL_MOVEMENT_MONITORING_START_WEEK) {
       $baseParameters[] = 'Fetal movement count';
     }
 
@@ -419,15 +449,15 @@ class DiagnosticAssistantService
     $referrals = [];
     $risks = collect($prediction->identified_risks)->pluck('factor')->toArray();
 
-    if (in_array('heart_disease', $risks)) {
+    if ($this->riskListContains($risks, 'heart_disease')) {
       $referrals[] = ['specialist' => 'Cardiologist', 'urgency' => 'high', 'reason' => 'Cardiac disease management'];
     }
 
-    if (in_array('kidney_disease', $risks)) {
+    if ($this->riskListContains($risks, 'kidney_disease')) {
       $referrals[] = ['specialist' => 'Nephrologist', 'urgency' => 'high', 'reason' => 'Renal function monitoring'];
     }
 
-    if (in_array('sickle_cell', $risks)) {
+    if ($this->riskListContains($risks, 'sickle_cell')) {
       $referrals[] = ['specialist' => 'Hematologist', 'urgency' => 'medium', 'reason' => 'Sickle cell disease management'];
     }
 
@@ -457,12 +487,12 @@ class DiagnosticAssistantService
     // Risk-specific labs
     $risks = collect($prediction->identified_risks)->pluck('factor')->toArray();
 
-    if (in_array('hypertension', $risks)) {
+    if ($this->riskListContains($risks, 'hypertension')) {
       $labs[] = ['test' => 'Renal function tests', 'timing' => 'Monthly'];
       $labs[] = ['test' => 'Liver function tests', 'timing' => 'Monthly'];
     }
 
-    if (in_array('anemia', $risks)) {
+    if ($this->riskListContains($risks, 'anemia')) {
       $labs[] = ['test' => 'Hemoglobin', 'timing' => 'Every 4 weeks'];
     }
 
@@ -511,7 +541,7 @@ class DiagnosticAssistantService
 
     // Check tetanus vaccination
     $tetanusCount = $user->tetanusVaccinations->count();
-    if ($tetanusCount < 2) {
+    if ($tetanusCount < self::MIN_TETANUS_DOSES) {
       $gaps[] = [
         'category' => 'Immunization',
         'gap' => 'Incomplete tetanus toxoid series',
@@ -522,13 +552,12 @@ class DiagnosticAssistantService
     }
 
     // Check visit frequency
-    $gestationalWeeks = 0;
-    if ($user->antenatal && $user->antenatal->lmp) {
-      $gestationalWeeks = Carbon::parse($user->antenatal->lmp)->diffInWeeks(Carbon::now());
-    }
+    $gestationalWeeks = $this->calculateGestationalWeeks($user->antenatal?->lmp);
 
     $visitCount = $user->dailyAttendances()->where('visit_date', '>=', Carbon::now()->subMonths(1))->count();
-    $expectedVisits = $gestationalWeeks >= 36 ? 4 : ($gestationalWeeks >= 28 ? 2 : 1);
+    $expectedVisits = $gestationalWeeks >= self::EXPECTED_VISITS_HIGH_GA_WEEK
+      ? 4
+      : ($gestationalWeeks >= self::EXPECTED_VISITS_MEDIUM_GA_WEEK ? 2 : 1);
 
     if ($visitCount < $expectedVisits) {
       $gaps[] = [
@@ -555,15 +584,43 @@ class DiagnosticAssistantService
   }
 
   // Helper methods
+  private function calculateGestationalWeeks($lmp): int
+  {
+    if (empty($lmp)) {
+      return 0;
+    }
+
+    try {
+      return Carbon::parse($lmp)->diffInWeeks(Carbon::now());
+    } catch (\Throwable $e) {
+      return 0;
+    }
+  }
+
+  private function riskListContains(array $risks, string $factor): bool
+  {
+    return in_array($factor, $risks, true);
+  }
+
   private function parseBloodPressure($bpString)
   {
-    if (empty($bpString)) return [];
+    if (empty($bpString) || !is_string($bpString)) return [];
 
-    if (preg_match('/(\d{2,3})\s*[\/\-]\s*(\d{2,3})/', $bpString, $matches)) {
-      return [
-        'systolic' => (int)$matches[1],
-        'diastolic' => (int)$matches[2]
-      ];
+    if (preg_match(self::BP_PATTERN, $bpString, $matches)) {
+      $systolic = (int)$matches[1];
+      $diastolic = (int)$matches[2];
+
+      if (
+        $systolic >= self::BP_SYSTOLIC_MIN
+        && $systolic <= self::BP_SYSTOLIC_MAX
+        && $diastolic >= self::BP_DIASTOLIC_MIN
+        && $diastolic <= self::BP_DIASTOLIC_MAX
+      ) {
+        return [
+          'systolic' => $systolic,
+          'diastolic' => $diastolic
+        ];
+      }
     }
 
     return [];
@@ -571,8 +628,8 @@ class DiagnosticAssistantService
 
   private function determineTrimester($weeks)
   {
-    if ($weeks < 13) return '1st Trimester';
-    if ($weeks < 27) return '2nd Trimester';
+    if ($weeks < self::TRIMESTER_ONE_END_WEEK) return '1st Trimester';
+    if ($weeks < self::TRIMESTER_TWO_END_WEEK) return '2nd Trimester';
     return '3rd Trimester';
   }
 
@@ -583,35 +640,35 @@ class DiagnosticAssistantService
     $systolic = $bp['systolic'];
     $diastolic = $bp['diastolic'];
 
-    if ($systolic >= 160 || $diastolic >= 110) return 'Severe Hypertension';
-    if ($systolic >= 140 || $diastolic >= 90) return 'Hypertension';
-    if ($systolic >= 120 || $diastolic >= 80) return 'Elevated';
+    if ($systolic >= self::BP_SYSTOLIC_SEVERE || $diastolic >= self::BP_DIASTOLIC_SEVERE) return 'Severe Hypertension';
+    if ($systolic >= self::BP_SYSTOLIC_HYPERTENSION || $diastolic >= self::BP_DIASTOLIC_HYPERTENSION) return 'Hypertension';
+    if ($systolic >= self::BP_SYSTOLIC_ELEVATED || $diastolic >= self::BP_DIASTOLIC_ELEVATED) return 'Elevated';
     return 'Normal';
   }
 
   private function getHemoglobinStatus($hb)
   {
     if (!$hb) return 'Unknown';
-    if ($hb < 7) return 'Severe Anemia';
-    if ($hb < 10) return 'Moderate Anemia';
-    if ($hb < 11) return 'Mild Anemia';
+    if ($hb < self::HEMOGLOBIN_SEVERE_THRESHOLD) return 'Severe Anemia';
+    if ($hb < self::HEMOGLOBIN_MODERATE_THRESHOLD) return 'Moderate Anemia';
+    if ($hb < self::HEMOGLOBIN_MILD_THRESHOLD) return 'Mild Anemia';
     return 'Normal';
   }
 
   private function getBMICategory($bmi)
   {
     if (!$bmi) return 'Unknown';
-    if ($bmi < 18.5) return 'Underweight';
-    if ($bmi < 25) return 'Normal';
-    if ($bmi < 30) return 'Overweight';
+    if ($bmi < self::BMI_UNDERWEIGHT_THRESHOLD) return 'Underweight';
+    if ($bmi < self::BMI_OVERWEIGHT_THRESHOLD) return 'Normal';
+    if ($bmi < self::BMI_OBESE_THRESHOLD) return 'Overweight';
     return 'Obese';
   }
 
   private function getSeverityLevel($weight)
   {
-    if ($weight >= 25) return 'Critical';
-    if ($weight >= 15) return 'High';
-    if ($weight >= 10) return 'Moderate';
+    if ($weight >= self::SEVERITY_CRITICAL_WEIGHT) return 'Critical';
+    if ($weight >= self::SEVERITY_HIGH_WEIGHT) return 'High';
+    if ($weight >= self::SEVERITY_MODERATE_WEIGHT) return 'Moderate';
     return 'Low';
   }
 
@@ -619,9 +676,9 @@ class DiagnosticAssistantService
   {
     $weight = $risk['weight'] ?? 0;
 
-    if ($weight >= 25) return 'Major impact on pregnancy outcome';
-    if ($weight >= 15) return 'Significant risk requiring intervention';
-    if ($weight >= 10) return 'Moderate risk requiring monitoring';
+    if ($weight >= self::SEVERITY_CRITICAL_WEIGHT) return 'Major impact on pregnancy outcome';
+    if ($weight >= self::SEVERITY_HIGH_WEIGHT) return 'Significant risk requiring intervention';
+    if ($weight >= self::SEVERITY_MODERATE_WEIGHT) return 'Moderate risk requiring monitoring';
     return 'Minor risk factor';
   }
 
@@ -662,7 +719,7 @@ class DiagnosticAssistantService
 
     // Get high-risk patients from recent assessments
     $riskLevel = $options['risk_level'] ?? ['high', 'critical'];
-    $days = $options['days'] ?? 30;
+    $days = max(self::BATCH_DAYS_MIN, (int)($options['days'] ?? self::BATCH_DAYS_DEFAULT));
 
     $highRiskPatients = RiskPrediction::whereIn('facility_id', $facilityIds)
       ->whereIn('risk_level', (array)$riskLevel)

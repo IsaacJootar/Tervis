@@ -47,7 +47,33 @@ class ModuleEnabledMiddlewareTest extends TestCase
 
     $this->actingAs($user)
       ->get('/__test/module-enabled/attendance')
-      ->assertForbidden();
+      ->assertForbidden()
+      ->assertSeeText('Go Back')
+      ->assertSeeText('Module Unavailable');
+  }
+
+  public function test_disabled_module_json_request_returns_structured_payload(): void
+  {
+    $facilityId = $this->firstFacilityIdOrSkip();
+    $user = $this->createDataOfficer($facilityId);
+
+    FacilityModuleAccess::query()->updateOrCreate(
+      ['facility_id' => $facilityId, 'module_key' => 'attendance'],
+      [
+        'module_label' => 'Attendance',
+        'is_enabled' => false,
+        'last_changed_by_user_id' => $user->id,
+      ]
+    );
+
+    $this->actingAs($user)
+      ->getJson('/__test/module-enabled/attendance')
+      ->assertForbidden()
+      ->assertJson([
+        'message' => 'This module is currently disabled for your facility.',
+        'module_key' => 'attendance',
+        'module_label' => 'Attendance',
+      ]);
   }
 
   public function test_enabled_module_route_returns_200(): void

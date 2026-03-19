@@ -1,4 +1,4 @@
-<div class="dashboard-container">
+<div class="dashboard-container" wire:init="loadDeferredDashboardData">
     <!-- Hero Card Header -->
     <div class="row mb-5">
         <div class="col-12">
@@ -83,6 +83,13 @@
         </div>
     </div>
 
+    @if (!$deferredMetricsReady)
+        <div class="alert alert-info py-2 mb-4">
+            <i class="bx bx-loader-circle bx-spin me-1"></i>
+            Loading detailed analytics and risk metrics...
+        </div>
+    @endif
+
     <!-- Overview Stats Cards -->
     <div class="row mb-4">
         <div class="col-lg-3 col-md-6 mb-3">
@@ -146,7 +153,13 @@
                             </span>
                         </div>
                         <div>
-                            <h5 class="mb-0">{{ $highRiskCases }}</h5>
+                            <h5 class="mb-0">
+                                @if ($deferredMetricsReady)
+                                    {{ $highRiskCases }}
+                                @else
+                                    <span class="text-muted">...</span>
+                                @endif
+                            </h5>
                             <small class="text-muted">High Risk Cases</small>
                         </div>
                     </div>
@@ -189,6 +202,12 @@
                     <h5 class="card-title mb-0">Register Statistics</h5>
                 </div>
                 <div class="card-body">
+                    @if (!$deferredMetricsReady)
+                        <div class="text-muted small mb-2">
+                            <i class="bx bx-loader-circle bx-spin me-1"></i>
+                            Register stats are loading...
+                        </div>
+                    @endif
                     <div class="row">
                         <div class="col-md-4 col-sm-6 mb-3">
                             <div class="border rounded p-3">

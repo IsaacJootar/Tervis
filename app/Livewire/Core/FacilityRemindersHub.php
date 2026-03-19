@@ -9,6 +9,7 @@ use App\Models\Reminder;
 use App\Models\ReminderDispatchLog;
 use App\Models\Registrations\FamilyPlanningRegistration;
 use App\Models\TetanusVaccination;
+use App\Services\AI\WorkspaceAiAssistantService;
 use App\Services\Communication\ReminderDispatchService;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
@@ -25,6 +26,11 @@ class FacilityRemindersHub extends Component
   public $channelFilter = 'all';
   public $dateFrom = '';
   public $dateTo = '';
+  public bool $showAiAssistant = false;
+  public string $aiAssistantSummary = '';
+  public string $aiAssistantRiskLevel = 'low';
+  public ?string $aiAssistantGeneratedAt = null;
+  public array $aiAssistantItems = [];
 
   public function mount()
   {
@@ -39,6 +45,13 @@ class FacilityRemindersHub extends Component
 
     $this->dateTo = now()->format('Y-m-d');
     $this->dateFrom = now()->subDays(30)->format('Y-m-d');
+  }
+
+  public function updated($name): void
+  {
+    if (in_array((string) $name, ['search', 'statusFilter', 'channelFilter', 'dateFrom', 'dateTo'], true)) {
+      $this->refreshAiAssistantIfOpen();
+    }
   }
 
   public function syncFacilitySources(): void
@@ -62,6 +75,7 @@ class FacilityRemindersHub extends Component
   {
     $result = app(ReminderDispatchService::class)->dispatchDueGlobal((int) $this->facility_id, null);
     toastr()->success("Dispatch complete: {$result['sent']} sent, {$result['failed']} failed, {$result['skipped']} skipped.");
+    $this->refreshAiAssistantIfOpen();
   }
 
   public function dispatchSingle(int $reminderId): void
@@ -73,6 +87,7 @@ class FacilityRemindersHub extends Component
     $result = app(ReminderDispatchService::class)->dispatchReminder($reminder);
     if (($result['status'] ?? '') === 'sent') {
       toastr()->success('Reminder sent.');
+      $this->refreshAiAssistantIfOpen();
       return;
     }
 
@@ -89,6 +104,7 @@ class FacilityRemindersHub extends Component
     $reminder->save();
 
     toastr()->success('Reminder canceled.');
+    $this->refreshAiAssistantIfOpen();
   }
 
   public function requeueReminder(int $reminderId): void
@@ -103,6 +119,90 @@ class FacilityRemindersHub extends Component
     $reminder->save();
 
     toastr()->success('Reminder requeued.');
+    $this->refreshAiAssistantIfOpen();
+  }
+
+  public function useAiAssistant(): void
+  {
+    $this->showAiAssistant = true;
+    $this->refreshAiAssistant();
+  }
+
+  public function hideAiAssistant(): void
+  {
+    $this->showAiAssistant = false;
+  }
+
+  public function refreshAiAssistant(): void
+  {
+    $summary = $this->buildReminderSummary();
+    $analysis = app(WorkspaceAiAssistantService::class)->analyzeRemindersHub($summary);
+
+    $this->aiAssistantSummary = (string) ($analysis['summary'] ?? '');
+    $this->aiAssistantRiskLevel = (string) ($analysis['risk_level'] ?? 'low');
+    $this->aiAssistantItems = (array) ($analysis['items'] ?? []);
+    $this->aiAssistantGeneratedAt = (string) ($analysis['generated_at'] ?? now()->format('M d, Y h:i A'));
+  }
+
+  private function refreshAiAssistantIfOpen(): void
+  {
+    if (!$this->showAiAssistant) {
+      return;
+    }
+
+    $this->refreshAiAssistant();
+  }
+
+  private function applyReminderFilters($query)
+  {
+    if ($this->dateFrom) {
+      $query->whereDate('reminder_date', '>=', $this->dateFrom);
+    }
+
+    if ($this->dateTo) {
+      $query->whereDate('reminder_date', '<=', $this->dateTo);
+    }
+
+    if ($this->statusFilter !== 'all') {
+      $query->where('status', $this->statusFilter);
+    }
+
+    if ($this->channelFilter !== 'all') {
+      $query->whereJsonContains('channels', $this->channelFilter);
+    }
+
+    if ($this->search !== '') {
+      $search = trim($this->search);
+      $query->where(function ($q) use ($search) {
+        $q->where('title', 'like', '%' . $search . '%')
+          ->orWhere('message', 'like', '%' . $search . '%')
+          ->orWhere('source_module', 'like', '%' . $search . '%')
+          ->orWhereHas('patient', function ($patientQuery) use ($search) {
+            $patientQuery->where('din', 'like', '%' . $search . '%')
+              ->orWhere('first_name', 'like', '%' . $search . '%')
+              ->orWhere('last_name', 'like', '%' . $search . '%')
+              ->orWhere('phone', 'like', '%' . $search . '%')
+              ->orWhere('email', 'like', '%' . $search . '%');
+          });
+      });
+    }
+
+    return $query;
+  }
+
+  private function buildReminderSummary(): array
+  {
+    $query = $this->applyReminderFilters(
+      Reminder::query()->where('facility_id', $this->facility_id)
+    );
+
+    return [
+      'total' => (clone $query)->count(),
+      'pending' => (clone $query)->where('status', 'pending')->count(),
+      'sent' => (clone $query)->where('status', 'sent')->count(),
+      'failed' => (clone $query)->where('status', 'failed')->count(),
+      'canceled' => (clone $query)->where('status', 'canceled')->count(),
+    ];
   }
 
   private function collectPatientIdsForFacilitySources(): Collection
@@ -137,49 +237,13 @@ class FacilityRemindersHub extends Component
 
   public function render()
   {
-    $remindersQuery = Reminder::query()
-      ->where('facility_id', $this->facility_id)
-      ->with('patient:id,first_name,last_name,din,phone,email');
+    $remindersQuery = $this->applyReminderFilters(
+      Reminder::query()
+        ->where('facility_id', $this->facility_id)
+        ->with('patient:id,first_name,last_name,din,phone,email')
+    );
 
-    if ($this->dateFrom) {
-      $remindersQuery->whereDate('reminder_date', '>=', $this->dateFrom);
-    }
-
-    if ($this->dateTo) {
-      $remindersQuery->whereDate('reminder_date', '<=', $this->dateTo);
-    }
-
-    if ($this->statusFilter !== 'all') {
-      $remindersQuery->where('status', $this->statusFilter);
-    }
-
-    if ($this->channelFilter !== 'all') {
-      $remindersQuery->whereJsonContains('channels', $this->channelFilter);
-    }
-
-    if ($this->search !== '') {
-      $search = trim($this->search);
-      $remindersQuery->where(function ($q) use ($search) {
-        $q->where('title', 'like', '%' . $search . '%')
-          ->orWhere('message', 'like', '%' . $search . '%')
-          ->orWhere('source_module', 'like', '%' . $search . '%')
-          ->orWhereHas('patient', function ($patientQuery) use ($search) {
-            $patientQuery->where('din', 'like', '%' . $search . '%')
-              ->orWhere('first_name', 'like', '%' . $search . '%')
-              ->orWhere('last_name', 'like', '%' . $search . '%')
-              ->orWhere('phone', 'like', '%' . $search . '%')
-              ->orWhere('email', 'like', '%' . $search . '%');
-          });
-      });
-    }
-
-    $summary = [
-      'total' => (clone $remindersQuery)->count(),
-      'pending' => (clone $remindersQuery)->where('status', 'pending')->count(),
-      'sent' => (clone $remindersQuery)->where('status', 'sent')->count(),
-      'failed' => (clone $remindersQuery)->where('status', 'failed')->count(),
-      'canceled' => (clone $remindersQuery)->where('status', 'canceled')->count(),
-    ];
+    $summary = $this->buildReminderSummary();
 
     $reminders = (clone $remindersQuery)
       ->latest('reminder_date')

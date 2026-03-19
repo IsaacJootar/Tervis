@@ -872,7 +872,7 @@
                     <div class="col-md-6">
                         <p class="mb-2"><strong>Data Sources:</strong> Antenatal records, Deliveries, Postnatal care,
                             Immunization, Clinical notes</p>
-                        <p class="mb-2"><strong>System:</strong> MaternalRecordPro v1.0</p>
+                        <p class="mb-2"><strong>System:</strong> Cureva v1.0</p>
                         <p class="mb-2"><strong>Format:</strong> NHMIS </p>
                     </div>
                 </div>

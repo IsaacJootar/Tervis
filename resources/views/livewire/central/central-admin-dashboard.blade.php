@@ -1,5 +1,7 @@
 @php
+    use App\Services\Security\RolePermissionService;
     use Carbon\Carbon;
+    $authUser = auth()->user();
 @endphp
 
 @section('title', 'Central Admin Dashboard')
@@ -15,15 +17,21 @@
                 <div class="text-muted small mt-1">Cross-facility visibility, module governance, and dispatch monitoring.</div>
             </div>
             <div class="ms-auto d-flex flex-wrap gap-2">
-                <a href="{{ url('/central/create-administrators') }}" class="btn btn-outline-primary">
-                    <i class="bx bx-user-plus me-1"></i>Manage Administrators
-                </a>
-                <a href="{{ url('/central/create-facility') }}" class="btn btn-outline-primary">
-                    <i class="bx bx-buildings me-1"></i>Manage Facilities
-                </a>
-                <a href="{{ url('/central/facility-module-management') }}" class="btn btn-primary">
-                    <i class="bx bx-slider-alt me-1"></i>Facility Module Access
-                </a>
+                @if (RolePermissionService::can($authUser, 'central.admins.manage'))
+                    <a href="{{ url('/central/create-administrators') }}" class="btn btn-outline-primary">
+                        <i class="bx bx-user-plus me-1"></i>Manage Administrators
+                    </a>
+                @endif
+                @if (RolePermissionService::can($authUser, 'central.facilities.manage'))
+                    <a href="{{ url('/central/create-facility') }}" class="btn btn-outline-primary">
+                        <i class="bx bx-buildings me-1"></i>Manage Facilities
+                    </a>
+                @endif
+                @if (RolePermissionService::can($authUser, 'central.module_access.manage'))
+                    <a href="{{ url('/central/facility-module-management') }}" class="btn btn-primary">
+                        <i class="bx bx-slider-alt me-1"></i>Facility Module Access
+                    </a>
+                @endif
             </div>
         </div>
     </div>
@@ -126,10 +134,18 @@
             <div class="card h-100">
                 <div class="card-header"><h5 class="mb-0">Quick Access</h5></div>
                 <div class="card-body d-flex flex-column gap-2">
-                    <a href="{{ url('/core/reports-hub') }}" class="btn btn-outline-dark text-start"><i class="bx bx-bar-chart me-1"></i>Open Reports Hub</a>
-                    <a href="{{ url('/core/reminders-notifications-hub') }}" class="btn btn-outline-dark text-start"><i class="bx bx-bell me-1"></i>Open Reminders & Notifications Hub</a>
-                    <a href="{{ url('/core/facility-administration') }}" class="btn btn-outline-dark text-start"><i class="bx bx-cog me-1"></i>Open Facility Administration</a>
-                    <a href="{{ url('/core/staff-management') }}" class="btn btn-outline-dark text-start"><i class="bx bx-group me-1"></i>Open Staff Management</a>
+                    @if (RolePermissionService::can($authUser, 'central.admins.manage'))
+                        <a href="{{ url('/central/create-administrators') }}" class="btn btn-outline-dark text-start"><i class="bx bx-user-plus me-1"></i>Open Administrators</a>
+                    @endif
+                    @if (RolePermissionService::can($authUser, 'central.facilities.manage'))
+                        <a href="{{ url('/central/create-facility') }}" class="btn btn-outline-dark text-start"><i class="bx bx-buildings me-1"></i>Open Facilities</a>
+                    @endif
+                    @if (RolePermissionService::can($authUser, 'central.module_access.manage'))
+                        <a href="{{ url('/central/facility-module-management') }}" class="btn btn-outline-dark text-start"><i class="bx bx-slider-alt me-1"></i>Open Module Access</a>
+                    @endif
+                    @if (RolePermissionService::can($authUser, 'central.roles_permissions.manage'))
+                        <a href="{{ url('/central/roles-permissions') }}" class="btn btn-outline-dark text-start"><i class="bx bx-lock me-1"></i>Open Roles & Permissions</a>
+                    @endif
                 </div>
             </div>
         </div>

@@ -2,6 +2,7 @@
 
 use App\Http\Middleware\UserRoleMiddleware;
 use App\Http\Middleware\ModuleEnabledMiddleware;
+use App\Http\Middleware\RolePermissionMiddleware;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -17,6 +18,7 @@ return Application::configure(basePath: dirname(__DIR__))
     $middleware->alias([
       'role.redirect' => UserRoleMiddleware::class,
       'module.enabled' => ModuleEnabledMiddleware::class,
+      'permission.check' => RolePermissionMiddleware::class,
     ]);
   })
   ->withExceptions(function (Exceptions $exceptions) {

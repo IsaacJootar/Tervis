@@ -1,4 +1,4 @@
-{{-- resources/views/layouts/sections/navbar/centralAdminNavbar_partial.blade.php --}}
+﻿{{-- resources/views/layouts/sections/navbar/centralAdminNavbar_partial.blade.php --}}
 @php
     use Illuminate\Support\Facades\Auth;
     use Illuminate\Support\Facades\Route;
@@ -8,9 +8,9 @@
     <div class="navbar-brand app-brand demo d-none d-xl-flex py-0 me-4 ms-0">
         <a href="{{ url('/patient-dashboard') }}" class="app-brand-link">
             <span class="app-brand-logo demo">
-                <img src="{{ asset('assets/img/logo.png') }}" alt="Logo" height="32">
+                <img src="{{ asset('assets/cureva-logo.svg') }}" alt="Cureva" height="38">
             </span>
-            <span class="app-brand-text demo menu-text fw-bold small">{{ config('variables.templateName') }}</span>
+            
             <small>Patient</small>
         </a>
         @if (isset($menuHorizontal))
@@ -187,3 +187,5 @@
         <!-- /User -->
     </ul>
 </div>
+
+

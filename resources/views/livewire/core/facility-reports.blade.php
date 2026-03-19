@@ -1,5 +1,7 @@
 @php
+    use App\Services\Security\RolePermissionService;
     use Carbon\Carbon;
+    $authUser = auth()->user();
 @endphp
 
 @section('title', 'Reports Hub')
@@ -22,7 +24,7 @@
                     <span class="badge bg-label-secondary">Now: {{ Carbon::now('Africa/Lagos')->format('M d, Y h:i A') }}</span>
                 </div>
             </div>
-            @if ($source_route_url)
+            @if ($source_route_url && RolePermissionService::canAccessMenuUrl($authUser, $source_route_url))
                 <a href="{{ $source_route_url }}" class="btn btn-outline-primary">
                     <i class="bx bx-link-external me-1"></i>Open Source Dashboard
                 </a>
@@ -107,7 +109,7 @@
         </div>
     </div>
 
-    <div class="row g-3 mb-4">
+    <div class="row g-3 mb-4" wire:init="loadStatsCards">
         <div class="col-6 col-lg-3">
             <div class="metric-card metric-card-slate h-100">
                 <div class="d-flex align-items-center justify-content-between">
@@ -121,7 +123,13 @@
                         </svg>
                     </span>
                 </div>
-                <div class="metric-value">{{ count($this->visibleReports) }}</div>
+                <div class="metric-value">
+                    @if ($cards_ready)
+                        {{ $card_reports_in_view }}
+                    @else
+                        <span class="text-muted">...</span>
+                    @endif
+                </div>
             </div>
         </div>
         <div class="col-6 col-lg-3">
@@ -136,7 +144,13 @@
                         </svg>
                     </span>
                 </div>
-                <div class="metric-value">{{ $result_count }}</div>
+                <div class="metric-value">
+                    @if ($cards_ready)
+                        {{ $card_generated_records }}
+                    @else
+                        <span class="text-muted">...</span>
+                    @endif
+                </div>
             </div>
         </div>
         <div class="col-6 col-lg-3">
@@ -151,7 +165,13 @@
                         </svg>
                     </span>
                 </div>
-                <div class="metric-value">{{ count($scopeInfo['facility_ids'] ?? []) }}</div>
+                <div class="metric-value">
+                    @if ($cards_ready)
+                        {{ $card_facilities_in_scope }}
+                    @else
+                        <span class="text-muted">...</span>
+                    @endif
+                </div>
             </div>
         </div>
         <div class="col-6 col-lg-3">
@@ -166,9 +186,11 @@
                     </span>
                 </div>
                 <div class="metric-value metric-value-date">
-                    {{ $date_from ? Carbon::parse($date_from)->format('d M Y') : '-' }}
-                    -
-                    {{ $date_to ? Carbon::parse($date_to)->format('d M Y') : '-' }}
+                    @if ($cards_ready)
+                        {{ $card_date_window }}
+                    @else
+                        <span class="text-muted">Loading...</span>
+                    @endif
                 </div>
             </div>
         </div>

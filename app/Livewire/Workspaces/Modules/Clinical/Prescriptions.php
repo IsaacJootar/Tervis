@@ -10,6 +10,7 @@ use App\Models\Invoice;
 use App\Models\Patient;
 use App\Models\Prescription;
 use App\Models\Registrations\DinActivation;
+use App\Services\AI\WorkspaceAiAssistantService;
 use App\Services\Billing\BillingService;
 use App\Services\Pharmacy\DrugInventoryService;
 use Carbon\Carbon;
@@ -57,6 +58,11 @@ class Prescriptions extends Component
   public $receipt_date;
 
   public $charge_amount;
+  public bool $showAiAssistant = false;
+  public string $aiAssistantSummary = '';
+  public string $aiAssistantRiskLevel = 'low';
+  public ?string $aiAssistantGeneratedAt = null;
+  public array $aiAssistantItems = [];
 
   protected $rules = [
     'dispensed_date' => 'required|date',
@@ -218,6 +224,7 @@ class Prescriptions extends Component
     $this->selected_catalog_id = (int) $item->id;
     $this->selected_catalog_name = trim($item->drug_name . ' (' . ($item->formulation ?: 'N/A') . ', ' . ($item->strength ?: 'N/A') . ')');
     $this->resetErrorBag(['selected_catalog_id']);
+    $this->refreshAiAssistantIfOpen();
   }
 
   public function clearCatalogSelection(): void
@@ -225,6 +232,7 @@ class Prescriptions extends Component
     $this->selected_catalog_id = null;
     $this->selected_catalog_name = null;
     $this->drug_search = '';
+    $this->refreshAiAssistantIfOpen();
   }
 
   public function addToCart(): void
@@ -258,6 +266,7 @@ class Prescriptions extends Component
     $this->persistCartToSession();
     // Keep current filter and selected item after add for faster repeated entry.
     $this->entry_quantity = 1;
+    $this->refreshAiAssistantIfOpen();
     toastr()->success($item->drug_name . ' added to cart.');
   }
 
@@ -274,6 +283,7 @@ class Prescriptions extends Component
     } else {
       $this->persistCartToSession();
     }
+    $this->refreshAiAssistantIfOpen();
   }
 
   public function updateCartQuantity(string $cartItemId, $quantity): void
@@ -292,6 +302,7 @@ class Prescriptions extends Component
     unset($item);
 
     $this->persistCartToSession();
+    $this->refreshAiAssistantIfOpen();
   }
 
   public function clearCart(): void
@@ -299,6 +310,58 @@ class Prescriptions extends Component
     $this->cart = [];
     $this->dispense_code = '';
     $this->resetCartSession();
+    $this->refreshAiAssistantIfOpen();
+  }
+
+  public function useAiAssistant(): void
+  {
+    $this->showAiAssistant = true;
+    $this->refreshAiAssistant();
+  }
+
+  public function hideAiAssistant(): void
+  {
+    $this->showAiAssistant = false;
+  }
+
+  public function refreshAiAssistant(): void
+  {
+    $pendingRecords = Prescription::query()
+      ->where('patient_id', $this->patientId)
+      ->where('facility_id', $this->facility_id)
+      ->where('status', 'pending')
+      ->get(['id', 'drug_name', 'quantity_prescribed', 'prescribed_date'])
+      ->map(function ($record) {
+        return [
+          'id' => (int) $record->id,
+          'drug_name' => (string) ($record->drug_name ?? ''),
+          'quantity_prescribed' => $record->quantity_prescribed !== null ? (float) $record->quantity_prescribed : null,
+          'prescribed_date' => $record->prescribed_date?->format('Y-m-d'),
+        ];
+      })
+      ->values()
+      ->all();
+
+    $analysis = app(WorkspaceAiAssistantService::class)->analyzePrescriptions([
+      'pending_records' => $pendingRecords,
+      'selected_pending_ids' => $this->getSelectedPendingPrescriptionIds()->all(),
+      'cart' => $this->cart,
+      'charge_amount' => $this->charge_amount,
+    ]);
+
+    $this->aiAssistantSummary = (string) ($analysis['summary'] ?? '');
+    $this->aiAssistantRiskLevel = (string) ($analysis['risk_level'] ?? 'low');
+    $this->aiAssistantItems = (array) ($analysis['items'] ?? []);
+    $this->aiAssistantGeneratedAt = (string) ($analysis['generated_at'] ?? now()->format('M d, Y h:i A'));
+  }
+
+  private function refreshAiAssistantIfOpen(): void
+  {
+    if (!$this->showAiAssistant) {
+      return;
+    }
+
+    $this->refreshAiAssistant();
   }
 
   private function getPendingPrescriptionIds()
@@ -511,6 +574,7 @@ class Prescriptions extends Component
       if ($billingNotice) {
         toastr()->warning($billingNotice);
       }
+      $this->refreshAiAssistantIfOpen();
     } catch (ValidationException $e) {
       DB::rollBack();
       $this->setErrorBag($e->validator->errors());
@@ -567,7 +631,18 @@ class Prescriptions extends Component
     unset($this->selected_prescription_map[$record->id]);
 
     $this->logActivity('cancel', 'Cancelled pending prescription: ' . $record->drug_name);
+    $this->refreshAiAssistantIfOpen();
     toastr()->success('Pending prescription cancelled.');
+  }
+
+  public function updatedSelectedPrescriptionMap(): void
+  {
+    $this->refreshAiAssistantIfOpen();
+  }
+
+  public function updatedChargeAmount(): void
+  {
+    $this->refreshAiAssistantIfOpen();
   }
 
   private function logActivity(string $action, string $description): void

@@ -8,6 +8,7 @@ use App\Models\Facility;
 use App\Models\LinkedChild;
 use App\Models\Patient;
 use App\Models\Registrations\DinActivation;
+use App\Services\AI\WorkspaceAiAssistantService;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Database\QueryException;
@@ -115,6 +116,11 @@ class ActivityRegister extends Component
   public $weight_entry_date, $weight_entry_age_months, $weight_entry_kg, $weight_entry_notes;
 
   public $comments;
+  public bool $showAiAssistant = false;
+  public string $aiAssistantSummary = '';
+  public string $aiAssistantRiskLevel = 'low';
+  public ?string $aiAssistantGeneratedAt = null;
+  public array $aiAssistantItems = [];
 
   protected $rules = [
     'patientId' => 'required',
@@ -242,12 +248,26 @@ class ActivityRegister extends Component
   public function updatedVisitDate(): void
   {
     $this->autoFillMonthYear();
+    $this->refreshAiAssistantIfOpen();
+  }
+
+  public function updated($name): void
+  {
+    if (
+      str_starts_with((string) $name, 'vaccination_dates.')
+      || str_starts_with((string) $name, 'breastfeeding_entries.')
+      || str_starts_with((string) $name, 'aefi_cases.')
+      || in_array((string) $name, ['aefi_period', 'aefi_type', 'aefi_sia_campaign'], true)
+    ) {
+      $this->refreshAiAssistantIfOpen();
+    }
   }
 
   public function updatedLinkedChildId(): void
   {
     $this->loadLatestRecordForSelectedChild();
     $this->dispatchWeightDataUpdated();
+    $this->refreshAiAssistantIfOpen();
   }
 
   private function autoFillMonthYear(): void
@@ -257,7 +277,7 @@ class ActivityRegister extends Component
     }
   }
 
-    public function setActiveTab(string $tab): void
+  public function setActiveTab(string $tab): void
   {
     if (!in_array($tab, ['child', 'vaccination', 'weight', 'breastfeeding', 'aefi'], true)) {
       return;
@@ -269,6 +289,8 @@ class ActivityRegister extends Component
       $this->dispatchWeightDataUpdated();
       $this->dispatch('activity-weight-tab-opened');
     }
+
+    $this->refreshAiAssistantIfOpen();
   }
 
   public function openCreateModal(): void
@@ -277,11 +299,55 @@ class ActivityRegister extends Component
     $this->modal_flag = false;
     $this->active_tab = 'child';
     $this->dispatchWeightDataUpdated();
+    $this->refreshAiAssistantIfOpen();
+  }
+
+  public function useAiAssistant(): void
+  {
+    $this->showAiAssistant = true;
+    $this->refreshAiAssistant();
+  }
+
+  public function hideAiAssistant(): void
+  {
+    $this->showAiAssistant = false;
+  }
+
+  public function refreshAiAssistant(): void
+  {
+    $childDob = null;
+    $child = $this->currentChild();
+    if ($child?->date_of_birth) {
+      $childDob = $child->date_of_birth->format('Y-m-d');
+    }
+
+    $analysis = app(WorkspaceAiAssistantService::class)->analyzeChildActivity([
+      'child_dob' => $childDob,
+      'vaccination_dates' => $this->vaccination_dates,
+      'weight_entries' => $this->weight_entries,
+      'breastfeeding_entries' => $this->breastfeeding_entries,
+      'aefi_cases' => $this->aefi_cases,
+    ]);
+
+    $this->aiAssistantSummary = (string) ($analysis['summary'] ?? '');
+    $this->aiAssistantRiskLevel = (string) ($analysis['risk_level'] ?? 'low');
+    $this->aiAssistantItems = (array) ($analysis['items'] ?? []);
+    $this->aiAssistantGeneratedAt = (string) ($analysis['generated_at'] ?? now()->format('M d, Y h:i A'));
+  }
+
+  private function refreshAiAssistantIfOpen(): void
+  {
+    if (!$this->showAiAssistant) {
+      return;
+    }
+
+    $this->refreshAiAssistant();
   }
 
   public function addWeightEntry(): void
   {
     $this->appendWeightEntryFromInputs();
+    $this->refreshAiAssistantIfOpen();
     toastr()->info('Weight entry added. Click Save Record to persist all changes.');
   }
 
@@ -294,6 +360,7 @@ class ActivityRegister extends Component
     unset($this->weight_entries[$index]);
     $this->weight_entries = array_values($this->weight_entries);
     $this->dispatchWeightDataUpdated();
+    $this->refreshAiAssistantIfOpen();
   }
   private function initializeFormCollections(): void
   {
@@ -574,6 +641,7 @@ class ActivityRegister extends Component
       DB::commit();
       $this->logActivity('create', 'Recorded child health activity register');
       $this->edit($record->id, $activeTab);
+      $this->refreshAiAssistantIfOpen();
       toastr()->success('Child health activity record saved.');
     } catch (ValidationException $e) {
       DB::rollBack();
@@ -619,6 +687,7 @@ class ActivityRegister extends Component
     $this->modal_flag = true;
     $this->active_tab = $preferredTab ?: 'child';
     $this->dispatchWeightDataUpdated();
+    $this->refreshAiAssistantIfOpen();
   }
 
   public function update(): void
@@ -642,6 +711,7 @@ class ActivityRegister extends Component
       DB::commit();
       $this->logActivity('update', 'Updated child health activity register');
       $this->edit($record->id, $activeTab);
+      $this->refreshAiAssistantIfOpen();
       toastr()->success('Child health activity record updated.');
     } catch (ValidationException $e) {
       DB::rollBack();
@@ -667,6 +737,7 @@ class ActivityRegister extends Component
       DB::commit();
 
       $this->logActivity('delete', 'Deleted child health activity register');
+      $this->refreshAiAssistantIfOpen();
       toastr()->success('Child health activity record deleted.');
     } catch (Exception $e) {
       DB::rollBack();
@@ -729,6 +800,7 @@ class ActivityRegister extends Component
     $this->active_tab = 'child';
     $this->initializeFormCollections();
     $this->dispatchWeightDataUpdated();
+    $this->refreshAiAssistantIfOpen();
   }
 
   private function chartWeightEntriesFromDatabase(): array
@@ -777,6 +849,7 @@ class ActivityRegister extends Component
       $this->aefi_cases = [];
       $this->comments = null;
       $this->initializeFormCollections();
+      $this->refreshAiAssistantIfOpen();
       return;
     }
 
@@ -794,6 +867,7 @@ class ActivityRegister extends Component
     $this->comments = $record->comments;
     $this->weight_entry_date = $this->visit_date;
     $this->initializeFormCollections();
+    $this->refreshAiAssistantIfOpen();
   }
 
   private function dispatchWeightDataUpdated(): void

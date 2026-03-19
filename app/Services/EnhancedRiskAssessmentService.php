@@ -12,6 +12,34 @@ use Illuminate\Support\Facades\Log;
 
 class EnhancedRiskAssessmentService
 {
+  private const AI_RISK_SCORE_CRITICAL_MIN = 80;
+  private const AI_RISK_SCORE_HIGH_MIN = 50;
+  private const AI_RISK_SCORE_MODERATE_MIN = 25;
+  private const AI_ENHANCEMENT_HIGH_THRESHOLD = 20;
+  private const AI_ENHANCEMENT_CRITICAL_THRESHOLD = 30;
+  private const AI_ENHANCEMENT_LOW_THRESHOLD = 5;
+  private const CLINICAL_SCORE_MODERATE_THRESHOLD = 30;
+  private const GESTATIONAL_LOW_BOUND_WEEKS = 12;
+  private const GESTATIONAL_MEDIUM_BOUND_WEEKS = 28;
+  private const GESTATIONAL_HIGH_BOUND_WEEKS = 36;
+  private const GESTATIONAL_TERM_WEEKS = 37;
+  private const VISIT_ADHERENCE_MIN_RATIO = 0.7;
+  private const SERVICE_VISIT_DELAY_EARLY_DAYS = 42;
+  private const SERVICE_VISIT_DELAY_MID_DAYS = 28;
+  private const SERVICE_VISIT_DELAY_LATE_DAYS = 14;
+  private const MULTI_RISK_INTERACTION_THRESHOLD = 3;
+  private const DELIVERY_PATTERN_RISK_THRESHOLD = 2;
+  private const NEONATAL_COMPLICATIONS_THRESHOLD = 2;
+  private const INTERVENTION_ESCALATION_THRESHOLD = 3;
+  private const MATERNAL_COMPLICATIONS_THRESHOLD = 2;
+  private const LOW_BIRTH_WEIGHT_THRESHOLD = 2.5;
+  private const VERY_LOW_BIRTH_WEIGHT_THRESHOLD = 1.5;
+  private const HIGH_BIRTH_WEIGHT_THRESHOLD = 3.0;
+  private const NEONATAL_TEMP_LOW = 36.0;
+  private const NEONATAL_TEMP_HIGH = 37.5;
+  private const FACTOR_SEVERITY_CRITICAL_WEIGHT = 20;
+  private const FACTOR_SEVERITY_HIGH_WEIGHT = 15;
+
   private $originalRiskService;
   protected $scopeService;
 
@@ -65,21 +93,21 @@ class EnhancedRiskAssessmentService
   private function determineAIRiskLevel($finalScore, $clinicalScore, $aiEnhancement)
   {
     $baseLevel = match (true) {
-      $finalScore >= 80 => 'critical',
-      $finalScore >= 50 => 'high',
-      $finalScore >= 25 => 'moderate',
+      $finalScore >= self::AI_RISK_SCORE_CRITICAL_MIN => 'critical',
+      $finalScore >= self::AI_RISK_SCORE_HIGH_MIN => 'high',
+      $finalScore >= self::AI_RISK_SCORE_MODERATE_MIN => 'moderate',
       default => 'low'
     };
 
-    if ($aiEnhancement > 20 && $baseLevel === 'moderate') {
+    if ($aiEnhancement > self::AI_ENHANCEMENT_HIGH_THRESHOLD && $baseLevel === 'moderate') {
       return 'high';
     }
 
-    if ($aiEnhancement > 30 && $baseLevel === 'high') {
+    if ($aiEnhancement > self::AI_ENHANCEMENT_CRITICAL_THRESHOLD && $baseLevel === 'high') {
       return 'critical';
     }
 
-    if ($aiEnhancement < 5 && $clinicalScore < 30 && $baseLevel === 'high') {
+    if ($aiEnhancement < self::AI_ENHANCEMENT_LOW_THRESHOLD && $clinicalScore < self::CLINICAL_SCORE_MODERATE_THRESHOLD && $baseLevel === 'high') {
       return 'moderate';
     }
 
@@ -254,14 +282,14 @@ class EnhancedRiskAssessmentService
     $visitCount = $data['antenatal_visits_count'] ?? 0;
 
     $expectedVisits = match (true) {
-      $gestationalWeeks < 12 => 1,
+      $gestationalWeeks < self::GESTATIONAL_LOW_BOUND_WEEKS => 1,
       $gestationalWeeks < 20 => 2,
-      $gestationalWeeks < 28 => 3,
-      $gestationalWeeks < 36 => 5,
+      $gestationalWeeks < self::GESTATIONAL_MEDIUM_BOUND_WEEKS => 3,
+      $gestationalWeeks < self::GESTATIONAL_HIGH_BOUND_WEEKS => 5,
       default => 7
     };
 
-    return $visitCount < ($expectedVisits * 0.7);
+    return $visitCount < ($expectedVisits * self::VISIT_ADHERENCE_MIN_RATIO);
   }
 
   private function detectServiceUtilizationRisk($data)
@@ -269,16 +297,16 @@ class EnhancedRiskAssessmentService
     $gestationalWeeks = $data['gestational_age_weeks'] ?? 0;
     $lastVisit = $data['last_antenatal_visit'];
 
-    if (!$lastVisit || $gestationalWeeks < 12) {
+    if (!$lastVisit || $gestationalWeeks < self::GESTATIONAL_LOW_BOUND_WEEKS) {
       return false;
     }
 
     $daysSinceLastVisit = Carbon::parse($lastVisit)->diffInDays(Carbon::now());
 
     $riskThreshold = match (true) {
-      $gestationalWeeks < 28 => 42,
-      $gestationalWeeks < 36 => 28,
-      default => 14
+      $gestationalWeeks < self::GESTATIONAL_MEDIUM_BOUND_WEEKS => self::SERVICE_VISIT_DELAY_EARLY_DAYS,
+      $gestationalWeeks < self::GESTATIONAL_HIGH_BOUND_WEEKS => self::SERVICE_VISIT_DELAY_MID_DAYS,
+      default => self::SERVICE_VISIT_DELAY_LATE_DAYS
     };
 
     return $daysSinceLastVisit > $riskThreshold;
@@ -296,7 +324,7 @@ class EnhancedRiskAssessmentService
     if ($data['kidney_disease']) $riskCount++;
     if ($data['bleeding']) $riskCount++;
 
-    return $riskCount >= 3;
+    return $riskCount >= self::MULTI_RISK_INTERACTION_THRESHOLD;
   }
 
   private function detectHighRiskDeliveryPattern($data)
@@ -309,13 +337,13 @@ class EnhancedRiskAssessmentService
     $riskFactors = 0;
 
     if ($delivery['mod'] === 'CS') $riskFactors++;
-    if (isset($delivery['weight']) && $delivery['weight'] < 2.5) $riskFactors++;
+    if (isset($delivery['weight']) && $delivery['weight'] < self::LOW_BIRTH_WEIGHT_THRESHOLD) $riskFactors++;
     if (!empty($delivery['still_birth'])) $riskFactors++;
     if ($delivery['breathing'] === 'yes') $riskFactors++;
     if ($delivery['pre_term'] === 'yes') $riskFactors++;
     if ($delivery['toc'] === 'Unbooked') $riskFactors++;
 
-    return $riskFactors >= 2;
+    return $riskFactors >= self::DELIVERY_PATTERN_RISK_THRESHOLD;
   }
 
   private function detectEmergencyDeliveryPattern($data)
@@ -341,12 +369,12 @@ class EnhancedRiskAssessmentService
     $complications = 0;
 
     if ($delivery['breathing'] === 'yes') $complications++;
-    if (isset($delivery['temperature']) && ($delivery['temperature'] < 36.0 || $delivery['temperature'] > 37.5)) $complications++;
-    if (isset($delivery['weight']) && $delivery['weight'] < 1.5) $complications++;
+    if (isset($delivery['temperature']) && ($delivery['temperature'] < self::NEONATAL_TEMP_LOW || $delivery['temperature'] > self::NEONATAL_TEMP_HIGH)) $complications++;
+    if (isset($delivery['weight']) && $delivery['weight'] < self::VERY_LOW_BIRTH_WEIGHT_THRESHOLD) $complications++;
     if ($delivery['newborn_care'] === 'no') $complications++;
     if ($delivery['baby_dead'] === 'yes') $complications++;
 
-    return $complications >= 2;
+    return $complications >= self::NEONATAL_COMPLICATIONS_THRESHOLD;
   }
 
   private function detectBirthWeightConcernPattern($data)
@@ -358,15 +386,15 @@ class EnhancedRiskAssessmentService
     $weight = $data['latest_delivery']['weight'];
     $gestationalWeeks = $data['gestational_age_weeks'] ?? 0;
 
-    if ($weight < 1.5) {
+    if ($weight < self::VERY_LOW_BIRTH_WEIGHT_THRESHOLD) {
       return true;
     }
 
-    if ($gestationalWeeks >= 37 && $weight < 2.5) {
+    if ($gestationalWeeks >= self::GESTATIONAL_TERM_WEEKS && $weight < self::LOW_BIRTH_WEIGHT_THRESHOLD) {
       return true;
     }
 
-    if ($gestationalWeeks < 32 && $weight > 3.0) {
+    if ($gestationalWeeks < 32 && $weight > self::HIGH_BIRTH_WEIGHT_THRESHOLD) {
       return true;
     }
 
@@ -387,7 +415,7 @@ class EnhancedRiskAssessmentService
     if ($delivery['partograph'] === 'yes') $interventions++;
     if ($delivery['mod'] === 'CS' || $delivery['mod'] === 'AD') $interventions++;
 
-    return $interventions >= 3;
+    return $interventions >= self::INTERVENTION_ESCALATION_THRESHOLD;
   }
 
   private function detectMaternalOutcomeComplicationsPattern($data)
@@ -405,7 +433,7 @@ class EnhancedRiskAssessmentService
     if ($delivery['pac'] === 'yes') $complications++;
     if ($delivery['abortion'] === 'yes') $complications++;
 
-    return $complications >= 2;
+    return $complications >= self::MATERNAL_COMPLICATIONS_THRESHOLD;
   }
 
   private function createVirtualFactor($code, $name, $weight)
@@ -414,7 +442,7 @@ class EnhancedRiskAssessmentService
       'factor_code' => $code,
       'factor_name' => $name,
       'base_weight' => $weight,
-      'severity_impact' => $weight >= 20 ? 'critical' : ($weight >= 15 ? 'high' : 'moderate'),
+      'severity_impact' => $weight >= self::FACTOR_SEVERITY_CRITICAL_WEIGHT ? 'critical' : ($weight >= self::FACTOR_SEVERITY_HIGH_WEIGHT ? 'high' : 'moderate'),
       'category' => 'ai_detected'
     ];
   }
@@ -433,9 +461,9 @@ class EnhancedRiskAssessmentService
   private function determineRiskLevel($score)
   {
     return match (true) {
-      $score >= 80 => 'critical',
-      $score >= 50 => 'high',
-      $score >= 25 => 'moderate',
+      $score >= self::AI_RISK_SCORE_CRITICAL_MIN => 'critical',
+      $score >= self::AI_RISK_SCORE_HIGH_MIN => 'high',
+      $score >= self::AI_RISK_SCORE_MODERATE_MIN => 'moderate',
       default => 'low'
     };
   }
@@ -462,12 +490,12 @@ class EnhancedRiskAssessmentService
     $recommendations = [];
     $enhancementScore = $aiAnalysis['ai_enhancement_score'];
 
-    if ($enhancementScore > 20) {
+    if ($enhancementScore > self::AI_ENHANCEMENT_HIGH_THRESHOLD) {
       $recommendations[] = 'AI detected additional risk patterns - enhanced monitoring recommended';
       $recommendations[] = 'Consider multidisciplinary team consultation based on AI analysis';
     }
 
-    if ($enhancementScore > 30) {
+    if ($enhancementScore > self::AI_ENHANCEMENT_CRITICAL_THRESHOLD) {
       $recommendations[] = 'AI analysis indicates high-complexity case - specialist referral advised';
       $recommendations[] = 'Implement intensive monitoring protocol based on AI risk assessment';
     }

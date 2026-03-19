@@ -1,7 +1,9 @@
-{{-- resources/views/layouts/sections/menu/dataOfficerMenu.blade.php --}}
+﻿{{-- resources/views/layouts/sections/menu/dataOfficerMenu.blade.php --}}
 @php
+    use App\Services\Security\RolePermissionService;
     use Illuminate\Support\Facades\Route;
     $configData = Helper::appClasses();
+    $authUser = auth()->user();
 
     // Load data officer menu data
     $menuDataPath = resource_path('menu/dataOfficerMenu.json');
@@ -17,7 +19,7 @@
         <div class="app-brand demo">
             <a href="{{ url('/workspaces/patient-workspace') }}" class="app-brand-link single-logo-role">
                 <span class="app-brand-text demo menu-text fw-bold ms-0 d-flex flex-column lh-sm">
-                    <span class="brand-name d-inline-flex align-items-center"><img src="{{ asset('assets/cureva-c19-blue-2.png') }}" alt="Cureva" class="brand-wordmark"></span>
+                    <span class="brand-name d-inline-flex align-items-center"><img src="{{ asset('assets/cureva-logo.svg') }}" alt="Cureva" class="brand-wordmark"></span>
                     @php
                         $roleLabel = auth()->user()->role ?? null;
                         $roleBadgeClass = match ($roleLabel) {
@@ -57,6 +59,9 @@
                     <span class="menu-header-text">{{ __($menu->menuHeader) }}</span>
                 </li>
             @else
+                @if (!RolePermissionService::canRenderMenuNode($authUser, $menu))
+                    @continue
+                @endif
                 {{-- active menu method --}}
                 @php
                     $activeClass = null;
@@ -106,6 +111,7 @@
     </ul>
 
 </aside>
+
 
 
 

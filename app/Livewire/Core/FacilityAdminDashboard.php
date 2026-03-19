@@ -21,6 +21,7 @@ class facilityAdminDashboard extends Component
   public $facility_id, $facility_name, $state_name, $lga_name, $ward_name, $user;
   public $selectedTimeframe = '30'; // a month for now
   public $selectedRegister = 'all'; // default to all registers
+  public $deferredMetricsReady = false;
 
   // Dashboard data properties
   public $totalPatients = 0;
@@ -31,11 +32,11 @@ class facilityAdminDashboard extends Component
   public $todaysAttendance = 0;
 
   // Register statistics
-  public $antenatalStats = [];
-  public $deliveryStats = [];
-  public $postnatalStats = [];
-  public $tetanusStats = [];
-  public $attendanceStats = [];
+  public $antenatalStats = ['total' => 0, 'this_period' => 0, 'trend' => 0];
+  public $deliveryStats = ['total' => 0, 'this_period' => 0, 'trend' => 0];
+  public $postnatalStats = ['total' => 0, 'this_period' => 0, 'trend' => 0];
+  public $tetanusStats = ['total' => 0, 'this_period' => 0, 'trend' => 0];
+  public $attendanceStats = ['total' => 0, 'this_period' => 0, 'trend' => 0];
 
   // Charts data
   public $trendChartData = [];
@@ -58,17 +59,30 @@ class facilityAdminDashboard extends Component
     $this->lga_name = $facility->lga;
     $this->ward_name = $facility->ward;
 
-    // Load initial dashboard data
-    $this->loadDashboardData();
+    // Keep first paint fast: load only lightweight overview counts, then defer heavy blocks.
+    $this->resetDashboardData();
+    $this->loadImmediateOverview();
+    $this->deferredMetricsReady = false;
   }
 
   public function updatedSelectedTimeframe()
   {
+    $this->loadImmediateOverview();
     $this->loadDashboardData();
   }
 
   public function updatedSelectedRegister()
   {
+    $this->loadImmediateOverview();
+    $this->loadDashboardData();
+  }
+
+  public function loadDeferredDashboardData()
+  {
+    if ($this->deferredMetricsReady) {
+      return;
+    }
+
     $this->loadDashboardData();
   }
 
@@ -103,6 +117,7 @@ class facilityAdminDashboard extends Component
       $this->ageGroupChartData = $data['demographics']['age_groups'];
       $this->performanceMetrics = $data['performance'];
       $this->riskAlerts = $data['risks'];
+      $this->deferredMetricsReady = true;
 
       $this->dispatch('loaded'); // Trigger loaded state
     } catch (\Exception $e) {
@@ -112,7 +127,37 @@ class facilityAdminDashboard extends Component
       ]);
       toastr()->error('Error loading dashboard data.');
       $this->resetDashboardData();
+      $this->deferredMetricsReady = true;
       $this->dispatch('loaded');
+    }
+  }
+
+  private function loadImmediateOverview()
+  {
+    try {
+      $startDate = Carbon::now()->subDays($this->selectedTimeframe);
+      $this->totalPatients = (int) Antenatal::where('registration_facility_id', $this->facility_id)
+        ->distinct('user_id')
+        ->count('user_id');
+      $this->newRegistrations = (int) Antenatal::where('registration_facility_id', $this->facility_id)
+        ->where('created_at', '>=', $startDate)
+        ->count();
+      $this->totalDeliveries = (int) Delivery::where('facility_id', $this->facility_id)->count();
+      $this->activePregnancies = (int) Antenatal::where('registration_facility_id', $this->facility_id)
+        ->whereDate('edd', '>', Carbon::now())
+        ->count();
+      $this->todaysAttendance = (int) DailyAttendance::where('facility_id', $this->facility_id)
+        ->whereDate('visit_date', Carbon::today())
+        ->count();
+      // High-risk rule set is heavier (BP parsing + multiple conditions), so defer this card.
+      $this->highRiskCases = 0;
+    } catch (\Throwable $e) {
+      $this->totalPatients = 0;
+      $this->newRegistrations = 0;
+      $this->totalDeliveries = 0;
+      $this->activePregnancies = 0;
+      $this->highRiskCases = 0;
+      $this->todaysAttendance = 0;
     }
   }
 

@@ -34,8 +34,14 @@ Primary UI reference for design decisions:
    - Core routes that represent facility module operations (for example laboratory/pharmacy operations, reminders hub, appointments, reports hub) must also include `module.enabled:{module_key}` middleware where a module key exists.
    - Missing `facility_module_accesses` rows default to allowed; explicit disabled rows must return `403`.
    - Enable/disable control must be performed in Central Admin only (`/central/facility-module-management`); facility-side pages may display status but must not own toggle actions.
-7. Central menu/link hygiene hard rule:
+7. Role-permission hard rule:
+   - All central/core/workspace/register/analytics/verification routes must include `permission.check:{permission_key}` middleware.
+   - Permission definitions and defaults are centralized in `RolePermissionService`.
+   - Central can override defaults from `/central/roles-permissions`; overrides persist in `role_permissions`.
+8. Central menu/link hygiene hard rule:
    - Central sidebar entries must point only to real, routable URLs.
+   - Central sidebar must not contain `/core/*` operational links; central navigation should stay central-owned.
+   - Central roles (`Central Admin`, `Central Administrator`) are restricted to `/central/*` access paths in `UserRoleMiddleware`; platform actions should operate through central orchestration, not direct facility-core execution.
    - When replacing or removing central legacy URLs, add compatibility redirects for old bookmarks under `/central-admin/*`.
    - No dead placeholder links should remain in `resources/menu/centralAdminMenu.json`.
 
@@ -92,6 +98,11 @@ Primary UI reference for design decisions:
    - save actions inside modals must not auto-close the modal.
    - success and error toasts must always be shown for save attempts.
    - page refresh should occur only after the user manually closes the modal (when refresh is needed).
+8. AI Assistant interaction rule:
+   - Use exact CTA labels: `Use AI Assistant` (open) and `Hide AI Assistant` (close).
+   - AI Assistant is advisory-only (no auto-save, no auto-complete, no forced workflow actions).
+   - No AI gating in App1 workspace/core UX for this rollout; module access/permissions are handled by existing middleware, not AI entitlement flags.
+   - Preferred UX is Flowdesk-style side panel (or modal/offcanvas on small screens), with refresh and clearly ranked risk/suggestion items.
 
 ## 5) Validation Rules
 

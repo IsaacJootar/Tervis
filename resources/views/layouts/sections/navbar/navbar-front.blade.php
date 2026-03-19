@@ -1,4 +1,4 @@
-@php
+﻿@php
 use Illuminate\Support\Facades\Route;
 $currentRouteName = Route::currentRouteName();
 $activeRoutes = ['front-pages-pricing', 'front-pages-payment', 'front-pages-checkout', 'front-pages-help-center'];
@@ -17,7 +17,7 @@ $activeClass = in_array($currentRouteName, $activeRoutes) ? 'active' : '';
         <!-- Mobile menu toggle: End-->
         <a href="javascript:;" class="app-brand-link">
           <span class="app-brand-logo demo">@include('_partials.macros')</span>
-          <span class="app-brand-text demo menu-text fw-bold ms-2 ps-1">{{ config('variables.templateName') }}</span>
+          
         </a>
       </div>
       <!-- Menu logo wrapper: End -->
@@ -77,3 +77,4 @@ data-icon="device-desktop-analytics"></i>System</span>
   </div>
 </nav>
 <!-- Navbar: End -->
+

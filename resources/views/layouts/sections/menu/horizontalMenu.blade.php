@@ -1,6 +1,8 @@
 @php
+  use App\Services\Security\RolePermissionService;
   use Illuminate\Support\Facades\Route;
   $configData = Helper::appClasses();
+  $authUser = auth()->user();
 @endphp
 <!-- Horizontal Menu -->
 <aside id="layout-menu" class="layout-menu-horizontal menu-horizontal  menu bg-menu-theme flex-grow-0"
@@ -9,6 +11,9 @@
   <div class="{{ $containerNav }} d-flex h-100">
     <ul class="menu-inner">
       @foreach ($menuData[1]->menu as $menu)
+        @if (!RolePermissionService::canRenderMenuNode($authUser, $menu))
+          @continue
+        @endif
         {{-- active menu method --}}
         @php
           $activeClass = null;
