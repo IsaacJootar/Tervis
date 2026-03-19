@@ -1,4 +1,5 @@
-<div>
+<div class="analytics-page">
+    @include('livewire.analytics._template-style')
     @php
         use Illuminate\Support\Facades\Auth;
         use Carbon\Carbon;
@@ -6,24 +7,16 @@
 
     @section('title', 'Monthly NHMIS Report')
 
-    <!-- Hero Card Header -->
-    <div class="row mb-5">
+    <div class="row mb-4">
         <div class="col-12">
-            <div class="hero-card">
-                <div class="hero-content">
-                    <div class="hero-text">
-                        <h4 class="hero-title" style="color: white; font-size: 28px;">
-                            <i class='bx bx-file-blank me-2'></i>
-                            National HMIS Monthly Summary Report
-                        </h4>
-                        <p class="hero-subtitle mb-2" style="color: rgba(255,255,255,0.9);">
-                            Generate official monthly reports - NHMIS VERSION 2019
-                        </p>
+            <div class="card">
+                <div class="card-body d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3">
+                    <div>
+                        <h4 class="mb-1"><i class='bx bx-file-blank me-2'></i>National HMIS Monthly Summary Report</h4>
+                        <p class="mb-0 text-muted">Generate official monthly reports (NHMIS Version 2019).</p>
                     </div>
-                    <div class="hero-decoration">
-                        <div class="floating-shape shape-1"></div>
-                        <div class="floating-shape shape-2"></div>
-                        <div class="floating-shape shape-3"></div>
+                    <div>
+                        <span class="badge bg-label-secondary">{{ Carbon::now('Africa/Lagos')->format('M d, Y') }}</span>
                     </div>
                 </div>
             </div>
@@ -91,10 +84,52 @@
         </div>
     </div>
     @if ($reportGenerated)
+        <div class="row mb-4">
+            <div class="col-md-6 col-lg-3 mb-3">
+                <div class="metric-card metric-card-violet h-100">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div class="metric-label">Attendance</div>
+                        <span class="metric-icon"><i class="bx bx-group"></i></span>
+                    </div>
+                    <div class="metric-value">{{ $summaryStats['total_attendance'] ?? 0 }}</div>
+                    <div class="small">Total monthly encounters</div>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3 mb-3">
+                <div class="metric-card metric-card-sky h-100">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div class="metric-label">Deliveries</div>
+                        <span class="metric-icon"><i class="bx bx-home-heart"></i></span>
+                    </div>
+                    <div class="metric-value">{{ $summaryStats['total_deliveries'] ?? 0 }}</div>
+                    <div class="small">C/S rate: {{ $summaryStats['cesarean_rate'] ?? 0 }}%</div>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3 mb-3">
+                <div class="metric-card metric-card-rose h-100">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div class="metric-label">Maternal Deaths</div>
+                        <span class="metric-icon"><i class="bx bx-heart-circle"></i></span>
+                    </div>
+                    <div class="metric-value">{{ $summaryStats['maternal_deaths'] ?? 0 }}</div>
+                    <div class="small">Stillbirth rate: {{ $summaryStats['stillbirth_rate'] ?? 0 }} / 1,000</div>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3 mb-3">
+                <div class="metric-card metric-card-amber h-100">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div class="metric-label">Vaccinations</div>
+                        <span class="metric-icon"><i class="bx bx-injection"></i></span>
+                    </div>
+                    <div class="metric-value">{{ $summaryStats['total_vaccinations'] ?? 0 }}</div>
+                    <div class="small">Total doses reported</div>
+                </div>
+            </div>
+        </div>
         <!-- Facility Information Card -->
         <div class="card mb-4">
-            <div class="card-header bg-dark text-white">
-                <h6 class="mb-0">FACILITY INFORMATION</h6>
+            <div class="card-header">
+                <h6 class="mb-0"><i class="bx bx-buildings me-2"></i>FACILITY INFORMATION</h6>
             </div>
             <div class="card-body">
                 <div class="table-responsive">
@@ -911,77 +946,6 @@
 @endif
 
 <style>
-    .hero-card {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        border-radius: 20px;
-        overflow: hidden;
-        position: relative;
-        min-height: 180px;
-    }
-
-    .hero-content {
-        position: relative;
-        z-index: 2;
-        padding: 2rem;
-    }
-
-    .hero-decoration {
-        position: absolute;
-        top: 0;
-        right: 0;
-        width: 100%;
-        height: 100%;
-        overflow: hidden;
-        z-index: 1;
-    }
-
-    .floating-shape {
-        position: absolute;
-        border-radius: 50%;
-        background: rgba(255, 255, 255, 0.1);
-        animation: float 6s ease-in-out infinite;
-    }
-
-    .floating-shape.shape-1 {
-        width: 80px;
-        height: 80px;
-        top: 20%;
-        right: 10%;
-    }
-
-    .floating-shape.shape-2 {
-        width: 60px;
-        height: 60px;
-        top: 60%;
-        right: 20%;
-        animation-delay: 2s;
-    }
-
-    .floating-shape.shape-3 {
-        width: 40px;
-        height: 40px;
-        top: 40%;
-        right: 5%;
-        animation-delay: 4s;
-    }
-
-    @keyframes float {
-
-        0%,
-        100% {
-            transform: translateY(0px) rotate(0deg);
-        }
-
-        50% {
-            transform: translateY(-20px) rotate(180deg);
-        }
-    }
-
-    .card {
-        box-shadow: 0 2px 6px 0 rgba(67, 89, 113, 0.12);
-        border: 1px solid rgba(67, 89, 113, 0.1);
-    }
-
     .table-sm td,
     .table-sm th {
         padding: 0.4rem;
@@ -991,7 +955,6 @@
     /* Print Styles */
     @media print {
 
-        .hero-card,
         .no-print,
         nav,
         footer,
@@ -1040,4 +1003,5 @@
     }
 </style>
 </div>
+
 

@@ -4,55 +4,30 @@
 @section('title', 'Patient Dashboard')
 
 <div>
-    <!-- Hero Card Header -->
-    <div class="row mb-5">
-        <div class="col-12">
-            <div class="hero-card">
-                <div class="hero-content">
-                    <div class="hero-text">
-                        <h4 class="hero-title" style="color: white; font-size: 32px;">
-                            <i class='bx bx-user-circle me-2'></i>
-                            Welcome, {{ $user->first_name }} {{ $user->last_name }}
-                        </h4>
-                        <div class="hero-info mb-2">
-                            <p class="hero-subtitle">{{ Carbon::today()->format('l, F j, Y') }}</p>
-                            <div class="hero-stats">
-                                <span class="hero-stat">
-                                    <i class="bx bx-id-card"></i>
-                                    DIN: {{ $user->DIN }}
-                                </span>
-                                <span class="hero-stat">
-                                    <i class="bx bx-calendar-check"></i>
-                                    {{ $next_appointments }} Total Visits
-                                </span>
-                            </div>
-                        </div>
-                        <div class="d-flex flex-wrap gap-3 text-white mb-1">
-                            <span>
-                                <i class="bx bx-building me-1"></i>
-                                <strong>Registration Facility:</strong> {{ $registration_facility_name }}
-                            </span>
-                        </div>
-                        <div class="mt-3">
-                            <a href="{{ route('patient-antenatal') }}"
-                                class="btn btn-light btn-lg rounded-pill shadow-sm d-inline-flex align-items-center me-2"
-                                style="border: 1px solid #ddd; padding: 12px 24px;">
-                                <i class="bx bx-plus-medical me-2" style="font-size: 20px;"></i>
-                                View Antenatal Records
-                            </a>
-                            <a href="{{ route('patient-deliveries') }}"
-                                class="btn btn-light btn-lg rounded-pill shadow-sm d-inline-flex align-items-center"
-                                style="border: 1px solid #ddd; padding: 12px 24px;">
-                                <i class="bx bx-baby-carriage me-2" style="font-size: 20px;"></i>
-                                View Deliveries
-                            </a>
-                        </div>
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="d-flex flex-column flex-lg-row justify-content-between align-items-start gap-3">
+                <div>
+                    <h5 class="mb-1 d-flex align-items-center gap-2">
+                        <i class='bx bx-user-circle text-primary'></i>
+                        Welcome, {{ $user->first_name }} {{ $user->last_name }}
+                    </h5>
+                    <div class="small text-muted">{{ Carbon::today()->format('l, F j, Y') }}</div>
+                    <div class="d-flex flex-wrap gap-2 mt-2">
+                        <span class="badge bg-label-primary"><i class="bx bx-id-card me-1"></i>DIN:
+                            {{ $user->DIN }}</span>
+                        <span class="badge bg-label-success"><i class="bx bx-calendar-check me-1"></i>{{ $next_appointments }}
+                            Total Visits</span>
+                        <span class="badge bg-label-info"><i class="bx bx-building me-1"></i>{{ $registration_facility_name }}</span>
                     </div>
-                    <div class="hero-decoration">
-                        <div class="floating-shape shape-1"></div>
-                        <div class="floating-shape shape-2"></div>
-                        <div class="floating-shape shape-3"></div>
-                    </div>
+                </div>
+                <div class="d-flex flex-wrap gap-2">
+                    <a href="{{ route('patient-antenatal') }}" class="btn btn-outline-primary">
+                        <i class="bx bx-plus-medical me-1"></i>Antenatal
+                    </a>
+                    <a href="{{ route('patient-deliveries') }}" class="btn btn-outline-success">
+                        <i class="bx bx-baby-carriage me-1"></i>Deliveries
+                    </a>
                 </div>
             </div>
         </div>

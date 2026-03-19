@@ -15,13 +15,11 @@ class RealTimeDashboard extends Component
 {
   public $metrics = [];
   public $selectedTimeframe = 'today';
-  public $autoRefresh = true;
   public $showRiskModal = false;
   public $showServiceModal = false;
   public $selectedRiskPatient = null;
   public $selectedService = null;
   public $lastRefresh;
-  public $alertFilter = 'all';
   public $selectedFacilityId = null;
   public $facilities = [];
 
@@ -60,21 +58,11 @@ class RealTimeDashboard extends Component
     $this->loadMetrics();
     $this->lastRefresh = now()->format('g:i A');
 
-    // Load auto-refresh preference from session
-    $this->autoRefresh = session('dashboard_auto_refresh', false);
-
     Log::info('Real-Time Dashboard Initialized', [
       'user_id' => $user->id,
       'role' => $user->role,
       'facility_count' => $this->facilities->count()
     ]);
-  }
-  public function toggleAutoRefresh()
-  {
-    $this->autoRefresh = !$this->autoRefresh;
-    // Save preference
-    session(['dashboard_auto_refresh' => $this->autoRefresh]);
-    toastr()->info('Auto-refresh ' . ($this->autoRefresh ? 'enabled' : 'disabled'));
   }
 
   public function loadMetrics()
@@ -102,8 +90,16 @@ class RealTimeDashboard extends Component
 
   public function refreshData()
   {
-    // Clear cache
-    Cache::flush();
+    // Clear only this dashboard key (avoid global cache flush side effects)
+    if ($this->selectedFacilityId) {
+      Cache::forget("dashboard_metrics_facility_{$this->selectedFacilityId}_" . now()->format('Y-m-d-H'));
+    } else {
+      $scope = app(DataScopeService::class)->getUserScope();
+      $identifier = implode('_', $scope['facility_ids'] ?? []);
+      $type = $scope['scope_type'] ?? 'facility';
+      Cache::forget("dashboard_metrics_{$type}_{$identifier}_" . now()->format('Y-m-d-H'));
+    }
+
     $this->loadMetrics();
     $this->dispatch('metrics-updated');
     toastr()->info('Data refreshed successfully at ' . $this->lastRefresh);
@@ -141,11 +137,6 @@ class RealTimeDashboard extends Component
     $this->selectedService = null;
   }
 
-  public function filterAlerts($type)
-  {
-    $this->alertFilter = $type;
-  }
-
   private function getServiceDetails($serviceName)
   {
     switch ($serviceName) {
@@ -180,19 +171,6 @@ class RealTimeDashboard extends Component
     }
   }
 
-  public function getFilteredAlerts()
-  {
-    $alerts = $this->metrics['risk_alerts'] ?? collect([]);
-
-    if ($this->alertFilter === 'all') {
-      return $alerts;
-    }
-
-    return $alerts->filter(function ($alert) {
-      return $alert['type'] === $this->alertFilter;
-    });
-  }
-
   public function render()
   {
     $user = Auth::user();
@@ -207,7 +185,6 @@ class RealTimeDashboard extends Component
 
     return view('livewire.analytics.real-time-dashboard', [
       'user' => $user,
-      'filteredAlerts' => $this->getFilteredAlerts()
     ])->layout($layout);
   }
 }

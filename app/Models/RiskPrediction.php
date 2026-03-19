@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Carbon\Carbon;
+use App\Models\Patient;
 
 class RiskPrediction extends Model
 {
@@ -49,7 +50,7 @@ class RiskPrediction extends Model
   // Relationships
   public function user(): BelongsTo
   {
-    return $this->belongsTo(User::class);
+    return $this->belongsTo(Patient::class, 'user_id');
   }
 
   public function facility(): BelongsTo
@@ -306,7 +307,7 @@ class RiskPrediction extends Model
         $daysOverdue = Carbon::parse($prediction->next_assessment_due)->diffInDays(Carbon::today());
         return [
           'patient_name' => $prediction->user->first_name . ' ' . $prediction->user->last_name,
-          'din' => $prediction->user->DIN,
+          'din' => (string) ($prediction->user->din ?? $prediction->user->DIN ?? 'N/A'),
           'risk_level' => $prediction->risk_level,
           'due_date' => $prediction->next_assessment_due,
           'days_overdue' => $daysOverdue,

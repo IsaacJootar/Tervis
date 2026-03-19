@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use App\Models\User;
+use App\Models\Patient;
 use App\Models\RiskPrediction;
 use App\Models\RiskFactor;
 use App\Models\HealthTrend;
@@ -52,9 +52,9 @@ class EnhancedRiskAssessmentService
   /**
    * Perform comprehensive AI-powered risk assessment
    */
-  public function performAIRiskAssessment($userId, $options = []): RiskPrediction
+  public function performAIRiskAssessment($patientId, $options = []): RiskPrediction
   {
-    $user = User::with(['antenatal', 'deliveries', 'postnatalRecords', 'clinicalNotes'])->find($userId);
+    $user = Patient::with(['antenatal', 'dailyAttendances', 'deliveries', 'postnatalRecords', 'clinicalNotes'])->find($patientId);
 
     if (!$user) {
       throw new \Exception("User not found");
@@ -62,7 +62,7 @@ class EnhancedRiskAssessmentService
     $officer = Auth::user();
 
     // 1. Get standard clinical assessment as baseline
-    $standardAssessment = $this->originalRiskService->assessRisk($userId);
+    $standardAssessment = $this->originalRiskService->assessRisk($patientId);
 
     if (!$standardAssessment) {
       throw new \Exception("Cannot perform AI assessment without clinical baseline data");
@@ -913,12 +913,14 @@ class EnhancedRiskAssessmentService
 
   private function sendCriticalRiskAlert($riskPrediction)
   {
-    Log::info("Critical risk alert for patient {$riskPrediction->user->DIN} at facility {$riskPrediction->facility_id}");
+    $din = (string) ($riskPrediction->user->din ?? $riskPrediction->user->DIN ?? 'N/A');
+    Log::info("Critical risk alert for patient {$din} at facility {$riskPrediction->facility_id}");
   }
 
   private function sendHighRiskLatePregnancyAlert($riskPrediction)
   {
-    Log::info("High risk late pregnancy alert for patient {$riskPrediction->user->DIN}");
+    $din = (string) ($riskPrediction->user->din ?? $riskPrediction->user->DIN ?? 'N/A');
+    Log::info("High risk late pregnancy alert for patient {$din}");
   }
 
   /**

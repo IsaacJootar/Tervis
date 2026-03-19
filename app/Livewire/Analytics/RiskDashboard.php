@@ -3,7 +3,7 @@
 namespace App\Livewire\Analytics;
 
 use Carbon\Carbon;
-use App\Models\User;
+use App\Models\Patient;
 use Livewire\Component;
 use App\Models\Facility;
 use App\Models\RiskPrediction;
@@ -14,7 +14,6 @@ use App\Jobs\ProcessMaternalDataJob;
 use Illuminate\Support\Facades\Auth;
 use App\Services\RiskAssessmentService;
 use App\Services\DashboardMetricsService;
-use App\Services\DiagnosticAssistantService;
 use App\Services\EnhancedRiskAssessmentService;
 
 class RiskDashboard extends Component
@@ -24,8 +23,6 @@ class RiskDashboard extends Component
   public $showAssessmentModal = false;
   public $facilityRiskSummary = [];
   public $highRiskPatients = [];
-  public $showDiagnosticModal = false;
-  public $diagnosticSummary = null;
 
   // New scope-related properties
   public $scopeInfo = [];
@@ -134,7 +131,7 @@ class RiskDashboard extends Component
   public function performAIAssessment($patientId)
   {
     try {
-      $user = User::with(['antenatal', 'deliveries', 'postnatalRecords', 'clinicalNotes'])
+      $user = Patient::with(['antenatal', 'dailyAttendances', 'deliveries', 'postnatalRecords', 'clinicalNotes'])
         ->find($patientId);
 
       if (!$user) {
@@ -192,7 +189,7 @@ class RiskDashboard extends Component
 
     $this->riskAssessment = [
       'patient_name' => $user->first_name . ' ' . $user->last_name,
-      'din' => $user->DIN,
+      'din' => (string) ($user->din ?? $user->DIN ?? 'N/A'),
       'gestational_age' => $gestationalAge,
       'edd' => $antenatal->edd ?? 'N/A',
       'bmi' => $bmi,
@@ -252,28 +249,6 @@ class RiskDashboard extends Component
     ];
   }
 
-  public function viewDiagnosticSummary($patientId)
-  {
-    try {
-      $diagnosticService = app(DiagnosticAssistantService::class);
-      $this->diagnosticSummary = $diagnosticService->generateDiagnosticSummary($patientId);
-      $this->selectedPatientId = $patientId;
-      $this->showDiagnosticModal = true;
-
-      toastr()->info('Diagnostic summary generated successfully');
-    } catch (\Exception $e) {
-      Log::error('Diagnostic summary failed: ' . $e->getMessage());
-      toastr()->error('Failed to generate diagnostic summary: ' . $e->getMessage());
-    }
-  }
-
-  public function closeDiagnosticModal()
-  {
-    $this->showDiagnosticModal = false;
-    $this->diagnosticSummary = null;
-    $this->selectedPatientId = null;
-  }
-
   public function closeModal()
   {
     $this->showAssessmentModal = false;
@@ -294,7 +269,7 @@ class RiskDashboard extends Component
       in_array($user->role, ['State Data Administrator']) => 'layouts.stateOfficerLayout',
       in_array($user->role, ['LGA Officer']) => 'layouts.lgaOfficerLayout',
       in_array($user->role, ['Facility Administrator']) => 'layouts.facilityAdminLayout',
-      default => 'lgaOfficerLayout'
+      default => 'layouts.lgaOfficerLayout'
     };
     return view('livewire.analytics.risk-dashboard', [
       'user' => $user

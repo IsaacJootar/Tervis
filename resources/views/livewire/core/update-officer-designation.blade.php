@@ -3,46 +3,26 @@
     @section('title', 'Update Officer Designations')
     <div x-data="{ modal_flag: @entangle('modal_flag').live }">
 
-        <!-- Hero Card Header -->
-        <div class="row mb-5">
-            <div class="col-12">
-                <div class="hero-card">
-                    <div class="hero-content">
-                        <div class="hero-text">
-                            <h4 class="hero-title" style="color: white; font-size: 28px;">
-                                <i class='bx bx-id-card me-2'></i>
-                                Update Data Officer Designations
-                            </h4>
-
-                            <div class="hero-stats">
-                                <span class="hero-stat">
-                                    <i class="bx bx-group"></i>
-                                    {{ count($dataOfficers) }} Total Data Officers
-                                </span>
-                                <span class="hero-stat">
-                                    <i class="bx bx-user-check"></i>
-                                    {{ $dataOfficers->where('designation', 'Doctor')->count() }} Doctors
-                                </span>
-                                <span class="hero-stat">
-                                    <i class="bx bx-plus-medical"></i>
-                                    {{ $dataOfficers->where('designation', 'Nurse')->count() }} Nurses
-                                </span>
-                                <span class="hero-stat">
-                                    <i class="bx bx-heart-circle"></i>
-                                    {{ $dataOfficers->where('designation', 'Midwife')->count() }} Midwives
-                                </span>
-                                <span class="hero-stat">
-                                    <i class="bx bx-test-tube"></i>
-                                    {{ $dataOfficers->where('designation', 'Lab Attendant')->count() }} Lab Attendants
-                                </span>
-                                {{ Carbon::now('Africa/Lagos')->format('l, F j, Y, h:i A') }}
-                            </div>
-
-                        </div>
-                        <div class="hero-decoration">
-                            <div class="floating-shape shape-1"></div>
-                            <div class="floating-shape shape-2"></div>
-                            <div class="floating-shape shape-3"></div>
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="d-flex flex-column flex-lg-row justify-content-between align-items-start gap-3">
+                    <div>
+                        <h5 class="mb-1 d-flex align-items-center gap-2">
+                            <i class="bx bx-id-card text-primary"></i>
+                            Update Data Officer Designations
+                        </h5>
+                        <div class="small text-muted">{{ Carbon::now('Africa/Lagos')->format('l, F j, Y, h:i A') }}</div>
+                        <div class="d-flex flex-wrap gap-2 mt-2">
+                            <span class="badge bg-label-dark"><i class="bx bx-group me-1"></i>{{ count($dataOfficers) }}
+                                Total</span>
+                            <span class="badge bg-label-success"><i class="bx bx-user-check me-1"></i>{{ $dataOfficers->where('designation', 'Doctor')->count() }}
+                                Doctors</span>
+                            <span class="badge bg-label-primary"><i class="bx bx-plus-medical me-1"></i>{{ $dataOfficers->where('designation', 'Nurse')->count() }}
+                                Nurses</span>
+                            <span class="badge bg-label-info"><i class="bx bx-heart-circle me-1"></i>{{ $dataOfficers->where('designation', 'Midwife')->count() }}
+                                Midwives</span>
+                            <span class="badge bg-label-warning"><i class="bx bx-test-tube me-1"></i>{{ $dataOfficers->where('designation', 'Lab Attendant')->count() }}
+                                Lab</span>
                         </div>
                     </div>
                 </div>

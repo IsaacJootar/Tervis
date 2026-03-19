@@ -132,7 +132,7 @@ class BatchPredictiveDashboard extends Component
     $layout = match (true) {
       in_array($user->role, ['State Data Administrator']) => 'layouts.stateOfficerLayout',
       in_array($user->role, ['LGA Officer']) => 'layouts.lgaOfficerLayout',
-      default => 'lgaOfficerLayout'
+      default => 'layouts.lgaOfficerLayout'
     };
     return view('livewire.analytics.batch-predictive-dashboard')
       ->layout($layout);

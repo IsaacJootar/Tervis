@@ -148,7 +148,7 @@ class BatchDiagnosticDashboard extends Component
       in_array($user->role, ['State Data Administrator']) => 'layouts.stateOfficerLayout',
       in_array($user->role, ['LGA Officer']) => 'layouts.lgaOfficerLayout',
       in_array($user->role, ['Facility Administrator']) => 'layouts.facilityAdminLayout',
-      default => 'lgaOfficerLayout'
+      default => 'layouts.lgaOfficerLayout'
     };
 
     return view('livewire.analytics.batch-diagnostic-dashboard')

@@ -3,7 +3,6 @@
 namespace App\Livewire\Analytics;
 
 use Carbon\Carbon;
-use App\Models\User;
 use Livewire\Component;
 use App\Models\Facility;
 use App\Models\Delivery;
@@ -152,11 +151,12 @@ class MpdsrReportDashboard extends Component
       ->orderBy('dodel', 'desc')
       ->get()
       ->map(function ($delivery) {
+        $patient = $delivery->user;
         return [
           'id' => $delivery->id,
-          'patient_name' => $delivery->user->first_name . ' ' . $delivery->user->last_name,
-          'patient_din' => $delivery->user->DIN,
-          'age' => $delivery->cl_sex ?? 'Unknown',
+          'patient_name' => trim((string) (($patient->first_name ?? '') . ' ' . ($patient->last_name ?? ''))),
+          'patient_din' => (string) ($patient->din ?? $patient->DIN ?? 'N/A'),
+          'age' => $patient?->age ?? 'Unknown',
           'facility_name' => $delivery->facility->name ?? 'N/A',
           'lga' => $delivery->facility->lga ?? 'N/A',
           'state' => $delivery->facility->state ?? 'N/A',
@@ -186,20 +186,24 @@ class MpdsrReportDashboard extends Component
       ->whereIn('facility_id', $facilityIds)
       ->whereBetween('dodel', [$this->dateFrom, $this->dateTo])
       ->where(function ($query) {
-        $query->whereNotNull('still_birth')
+        $query->where(function ($stillBirthQuery) {
+          $stillBirthQuery->whereNotNull('still_birth')
+            ->where('still_birth', '!=', '');
+        })
           ->orWhere('baby_dead', 'yes');
       })
       ->orderBy('dodel', 'desc')
       ->get()
       ->map(function ($delivery) {
-        $isStillbirth = !empty($delivery->still_birth);
+        $patient = $delivery->user;
+        $isStillbirth = !empty(trim((string) $delivery->still_birth));
         $isNeonatalDeath = $delivery->baby_dead === 'yes' && empty($delivery->still_birth);
 
         return [
           'id' => $delivery->id,
-          'mother_name' => $delivery->user->first_name . ' ' . $delivery->user->last_name,
-          'mother_din' => $delivery->user->DIN,
-          'mother_age' => $delivery->cl_sex ?? 'Unknown',
+          'mother_name' => trim((string) (($patient->first_name ?? '') . ' ' . ($patient->last_name ?? ''))),
+          'mother_din' => (string) ($patient->din ?? $patient->DIN ?? 'N/A'),
+          'mother_age' => $patient?->age ?? 'Unknown',
           'facility_name' => $delivery->facility->name ?? 'N/A',
           'lga' => $delivery->facility->lga ?? 'N/A',
           'death_date' => Carbon::parse($delivery->dodel)->format('M d, Y'),
@@ -231,7 +235,8 @@ class MpdsrReportDashboard extends Component
       ->whereBetween('dodel', [$this->dateFrom, $this->dateTo])
       ->where(function ($query) {
         $query->where('alive', 'yes')
-          ->orWhereNull('still_birth');
+          ->orWhereNull('still_birth')
+          ->orWhere('still_birth', '');
       })
       ->count();
 
@@ -264,7 +269,10 @@ class MpdsrReportDashboard extends Component
       ->whereIn('facility_id', $facilityIds)
       ->whereBetween('dodel', [$this->dateFrom, $this->dateTo])
       ->where(function ($query) {
-        $query->whereNotNull('still_birth')
+        $query->where(function ($stillBirthQuery) {
+          $stillBirthQuery->whereNotNull('still_birth')
+            ->where('still_birth', '!=', '');
+        })
           ->orWhere('baby_dead', 'yes');
       })
       ->groupBy('facility_id')
@@ -351,7 +359,10 @@ class MpdsrReportDashboard extends Component
       ->whereIn('facility_id', $facilityIds)
       ->whereBetween('dodel', [$this->dateFrom, $this->dateTo])
       ->where(function ($query) {
-        $query->whereNotNull('still_birth')
+        $query->where(function ($stillBirthQuery) {
+          $stillBirthQuery->whereNotNull('still_birth')
+            ->where('still_birth', '!=', '');
+        })
           ->orWhere('baby_dead', 'yes');
       })
       ->groupBy('period')

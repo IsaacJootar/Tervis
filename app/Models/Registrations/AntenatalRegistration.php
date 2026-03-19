@@ -4,6 +4,7 @@ namespace App\Models\Registrations;
 
 use App\Models\Facility;
 use App\Models\Patient;
+use App\Models\AntenatalFollowUpAssessment;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -163,11 +164,27 @@ class AntenatalRegistration extends Model
   }
 
   /**
+   * Legacy alias kept for analytics compatibility.
+   */
+  public function user(): BelongsTo
+  {
+    return $this->belongsTo(Patient::class, 'patient_id');
+  }
+
+  /**
    * Get the facility where this registration occurred
    */
   public function facility(): BelongsTo
   {
     return $this->belongsTo(Facility::class);
+  }
+
+  /**
+   * Legacy alias kept for analytics compatibility.
+   */
+  public function registrationFacility(): BelongsTo
+  {
+    return $this->belongsTo(Facility::class, 'facility_id');
   }
 
   /**
@@ -258,6 +275,35 @@ class AntenatalRegistration extends Model
   public function getPatientFullNameAttribute(): string
   {
     return $this->patient ? $this->patient->full_name : '';
+  }
+
+  /**
+   * Legacy compatibility: derive next follow-up date from ANC follow-up records.
+   */
+  public function getFollowUpNextVisitAttribute()
+  {
+    return AntenatalFollowUpAssessment::query()
+      ->where('patient_id', $this->patient_id)
+      ->where('facility_id', $this->facility_id)
+      ->whereNotNull('next_return_date')
+      ->latest('visit_date')
+      ->value('next_return_date');
+  }
+
+  /**
+   * Legacy compatibility: expose user_id field mapped to patient_id.
+   */
+  public function getUserIdAttribute()
+  {
+    return $this->patient_id;
+  }
+
+  /**
+   * Legacy compatibility: derive maternal age from linked patient.
+   */
+  public function getAgeAttribute()
+  {
+    return $this->patient?->age;
   }
 
   /**

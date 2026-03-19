@@ -9,44 +9,25 @@
     @section('title', 'Patient Appointments')
     <div>
 
-        <!-- Hero Card Header -->
-        <div class="row mb-5">
-            <div class="col-12">
-                <div class="hero-card">
-                    <div class="hero-content">
-                        <div class="hero-text">
-                            <h4 class="hero-title" style="color: white; font-size: 28px;">
-                                <i class='bx bx-calendar-heart me-2'></i>
-                                Patient Appointments Tracking <small class="text-muted">Appointments and
-                                    fulfillment status</small>
-                            </h4>
-
-                            <div class="hero-stats">
-                                <span class="hero-stat">
-                                    <i class="bx bx-group"></i>
-                                    {{ count($patients) }} Patients with Appointments
-                                </span>
-                                <span class="hero-stat">
-                                    <i class="bx bx-calendar-check"></i>
-                                    {{ $patients->sum('upcoming_appointments') }} Upcoming
-                                </span>
-                                <span class="hero-stat">
-                                    <i class="bx bx-calendar-x"></i>
-                                    {{ $patients->sum('missed_appointments') }} Missed
-                                </span>
-                                <span class="hero-stat">
-                                    <i class="bx bx-check-circle"></i>
-                                    {{ $patients->sum(function ($p) {return $p->appointments->where('status', 'Fulfilled')->count();}) }}
-                                    Fulfilled
-                                </span>
-                                {{ Carbon::now('Africa/Lagos')->format('l, F j, Y, h:i A') }}
-                            </div>
-
-                        </div>
-                        <div class="hero-decoration">
-                            <div class="floating-shape shape-1"></div>
-                            <div class="floating-shape shape-2"></div>
-                            <div class="floating-shape shape-3"></div>
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="d-flex flex-column flex-lg-row justify-content-between align-items-start gap-3">
+                    <div>
+                        <h5 class="mb-1 d-flex align-items-center gap-2">
+                            <i class="bx bx-calendar-heart text-primary"></i>
+                            Patient Appointments Tracking
+                        </h5>
+                        <div class="small text-muted">Appointments and fulfillment status</div>
+                        <div class="small text-muted">{{ Carbon::now('Africa/Lagos')->format('l, F j, Y, h:i A') }}</div>
+                        <div class="d-flex flex-wrap gap-2 mt-2">
+                            <span class="badge bg-label-dark"><i class="bx bx-group me-1"></i>{{ count($patients) }}
+                                Patients</span>
+                            <span class="badge bg-label-info"><i class="bx bx-calendar-check me-1"></i>{{ $patients->sum('upcoming_appointments') }}
+                                Upcoming</span>
+                            <span class="badge bg-label-danger"><i class="bx bx-calendar-x me-1"></i>{{ $patients->sum('missed_appointments') }}
+                                Missed</span>
+                            <span class="badge bg-label-success"><i class="bx bx-check-circle me-1"></i>{{ $patients->sum(function ($p) {return $p->appointments->where('status', 'Fulfilled')->count();}) }}
+                                Fulfilled</span>
                         </div>
                     </div>
                 </div>

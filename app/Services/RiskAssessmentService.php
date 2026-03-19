@@ -3,7 +3,7 @@
 namespace App\Services;
 
 use Carbon\Carbon;
-use App\Models\User;
+use App\Models\Patient;
 use App\Models\Delivery;
 use App\Models\Antenatal;
 use App\Models\ClinicalNote;
@@ -119,19 +119,19 @@ class RiskAssessmentService
 
   public function assessRisk($userId)
   {
-    $antenatal = Antenatal::where('user_id', $userId)->latest()->first();
+    $antenatal = Antenatal::where('patient_id', $userId)->latest()->first();
     if (!$antenatal) return null;
 
-    return $this->assessComprehensiveRisk($antenatal->user_id);
+    return $this->assessComprehensiveRisk($antenatal->patient_id);
   }
 
   public function assessComprehensiveRisk($userId): array|null
   {
-    $antenatal = Antenatal::where('user_id', $userId)->latest()->first();
+    $antenatal = Antenatal::where('patient_id', $userId)->latest()->first();
     $deliveries = Delivery::where('patient_id', $userId)->get();
     $postnatalRecords = PostnatalRecord::where('patient_id', $userId)->get();
     $clinicalNotes = ClinicalNote::where('user_id', $userId)->get();
-    $user = User::find($userId);
+    $user = Patient::find($userId);
 
     if (!$antenatal || !$user) return null;
 
@@ -171,9 +171,9 @@ class RiskAssessmentService
     $nextVisitRecommendation = $this->getNextVisitRecommendation($riskLevel, $antenatal->edd);
 
     return [
-      'patient_id' => $antenatal->id,
+      'patient_id' => $antenatal->patient_id,
       'patient_name' => $user->first_name . ' ' . $user->last_name,
-      'din' => $user->DIN,
+      'din' => (string) ($user->din ?? $user->DIN ?? 'N/A'),
       'total_risk_score' => $riskScore,
       'risk_level' => $riskLevel,
       'risk_percentage' => min(100, ($riskScore / 300) * 100),
@@ -326,9 +326,9 @@ class RiskAssessmentService
 
   private function getTotalPatientsCount($facilityIds)
   {
-    return Antenatal::whereIn('registration_facility_id', $facilityIds)
-      ->distinct('user_id')
-      ->count('user_id');
+    return Antenatal::whereIn('facility_id', $facilityIds)
+      ->distinct('patient_id')
+      ->count('patient_id');
   }
 
   private function calculateAverageConfidence($predictions)
@@ -347,22 +347,22 @@ class RiskAssessmentService
 
   private function getServiceUtilizationSummary($facilityIds)
   {
-    $totalPatients = User::where('role', 'Patient')
+    $totalPatients = Patient::query()
       ->whereHas('antenatal', function ($q) use ($facilityIds) {
-        $q->whereIn('registration_facility_id', $facilityIds);
+        $q->whereIn('facility_id', $facilityIds);
       })->count();
 
     return [
       'total_patients' => $totalPatients,
-      'with_deliveries' => User::where('role', 'Patient')
+      'with_deliveries' => Patient::query()
         ->whereHas('deliveries', function ($q) use ($facilityIds) {
           $q->whereIn('facility_id', $facilityIds);
         })->count(),
-      'with_postnatal' => User::where('role', 'Patient')
+      'with_postnatal' => Patient::query()
         ->whereHas('postnatalRecords', function ($q) use ($facilityIds) {
           $q->whereIn('facility_id', $facilityIds);
         })->count(),
-      'with_tetanus' => User::where('role', 'Patient')
+      'with_tetanus' => Patient::query()
         ->whereHas('tetanusVaccinations', function ($q) use ($facilityIds) {
           $q->whereIn('facility_id', $facilityIds);
         })->count()
@@ -480,7 +480,7 @@ class RiskAssessmentService
     }
 
     // Genotype assessment
-    if (strpos($antenatal->genotype, 'S') !== false) {
+    if (strpos((string) $antenatal->genotype, 'S') !== false) {
       $riskScore += $this->riskFactors['sickle_cell']['weight'];
       $identifiedRisks[] = [
         'factor' => 'sickle_cell',

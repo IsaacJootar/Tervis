@@ -3,7 +3,7 @@
 namespace App\Services;
 
 use Carbon\Carbon;
-use App\Models\User;
+use App\Models\Patient;
 use App\Models\Facility;
 use App\Models\RiskPrediction;
 use Illuminate\Support\Facades\Log;
@@ -58,29 +58,30 @@ class DiagnosticAssistantService
   /**
    * Generate comprehensive diagnostic summary for a patient
    */
-  public function generateDiagnosticSummary($userId)
+  public function generateDiagnosticSummary($patientId)
   {
     try {
-      $user = User::with([
+      $user = Patient::with([
         'antenatal',
+        'dailyAttendances',
         'deliveries',
         'postnatalRecords',
         'clinicalNotes',
         'tetanusVaccinations'
-      ])->find($userId);
+      ])->find($patientId);
 
       if (!$user || !$user->antenatal) {
         throw new \Exception('Patient data not found or incomplete');
       }
 
       // Get latest AI risk assessment or create new one
-      $latestPrediction = RiskPrediction::where('user_id', $userId)
+      $latestPrediction = RiskPrediction::where('user_id', $patientId)
         ->latest('assessment_date')
         ->first();
 
       if (!$latestPrediction || $latestPrediction->assessment_date < Carbon::now()->subDays(self::STALE_PREDICTION_DAYS)) {
         // Generate fresh assessment if older than 7 days
-        $latestPrediction = $this->enhancedRiskService->performAIRiskAssessment($userId);
+        $latestPrediction = $this->enhancedRiskService->performAIRiskAssessment($patientId);
       }
 
       return [
@@ -88,7 +89,7 @@ class DiagnosticAssistantService
         'clinical_snapshot' => $this->buildClinicalSnapshot($user, $latestPrediction),
         'primary_concerns' => $this->identifyPrimaryConcerns($latestPrediction),
         'clinical_reasoning' => $this->generateClinicalReasoning($latestPrediction, $user),
-        'risk_trajectory' => $this->analyzeRiskTrajectory($userId),
+        'risk_trajectory' => $this->analyzeRiskTrajectory($patientId),
         'immediate_actions' => $this->prioritizeImmediateActions($latestPrediction),
         'monitoring_plan' => $this->createMonitoringSchedule($latestPrediction, $user),
         'consultation_triggers' => $this->identifyEscalationCriteria($latestPrediction),
@@ -115,7 +116,7 @@ class DiagnosticAssistantService
 
     return [
       'name' => $user->first_name . ' ' . $user->last_name,
-      'din' => $user->DIN,
+      'din' => (string) ($user->din ?? $user->DIN ?? 'N/A'),
       'age' => $antenatal->age ?? 'N/A',
       'phone' => $user->phone,
       'registration_date' => $antenatal->date_of_booking ?? null,
@@ -170,7 +171,7 @@ class DiagnosticAssistantService
       'blood_work' => [
         'blood_group' => $antenatal->blood_group_rhesus,
         'genotype' => $antenatal->genotype,
-        'genotype_risk' => strpos($antenatal->genotype, 'S') !== false ? 'Sickle cell trait/disease' : 'Normal'
+        'genotype_risk' => strpos((string) $antenatal->genotype, 'S') !== false ? 'Sickle cell trait/disease' : 'Normal'
       ],
       'overall_risk' => [
         'level' => $prediction->risk_level,

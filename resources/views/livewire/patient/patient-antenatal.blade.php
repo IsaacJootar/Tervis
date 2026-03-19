@@ -4,54 +4,28 @@
 @section('title', 'My Antenatal Records')
 
 <div>
-    <!-- Hero Card Header -->
-    <div class="row mb-5">
-        <div class="col-12">
-            <div class="hero-card">
-                <div class="hero-content">
-                    <div class="hero-text">
-                        <h4 class="hero-title" style="color: white; font-size: 32px;">
-                            <i class='bx bx-plus-medical me-2'></i>
-                            My Antenatal Records
-                        </h4>
-                        <div class="hero-info mb-2">
-                            <p class="hero-subtitle">{{ Carbon::today()->format('l, F j, Y') }}</p>
-                            <div class="hero-stats">
-                                <span class="hero-stat">
-                                    <i class="bx bx-folder"></i>
-                                    {{ $antenatal_records->count() }} Total Records
-                                </span>
-                                <span class="hero-stat">
-                                    <i class="bx bx-calendar"></i>
-                                    Latest:
-                                    {{ $antenatal_records->first() ? Carbon::parse($antenatal_records->first()->date_of_booking)->format('M d, Y') : 'N/A' }}
-                                </span>
-                            </div>
-                        </div>
-                        <div class="d-flex flex-wrap gap-3 text-white mb-1">
-                            <span>
-                                <i class="bx bx-building me-1"></i>
-                                <strong>Registration Facility:</strong> {{ $registration_facility_name }}
-                            </span>
-                            <span>
-                                <i class="bx bx-id-card me-1"></i>
-                                <strong>DIN:</strong> {{ $user->DIN }}
-                            </span>
-                        </div>
-                        <div class="mt-3">
-                            <a href="{{ route('patient-dashboard') }}"
-                                class="btn btn-light btn-lg rounded-pill shadow-sm d-inline-flex align-items-center"
-                                style="border: 1px solid #ddd; padding: 12px 24px;">
-                                <i class="bx bx-arrow-left me-2" style="font-size: 20px;"></i>
-                                Back to Dashboard
-                            </a>
-                        </div>
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="d-flex flex-column flex-lg-row justify-content-between align-items-start gap-3">
+                <div>
+                    <h5 class="mb-1 d-flex align-items-center gap-2">
+                        <i class='bx bx-plus-medical text-primary'></i>
+                        My Antenatal Records
+                    </h5>
+                    <div class="small text-muted">{{ Carbon::today()->format('l, F j, Y') }}</div>
+                    <div class="d-flex flex-wrap gap-2 mt-2">
+                        <span class="badge bg-label-dark"><i class="bx bx-folder me-1"></i>{{ $antenatal_records->count() }}
+                            Total</span>
+                        <span class="badge bg-label-success"><i class="bx bx-calendar me-1"></i>Latest:
+                            {{ $antenatal_records->first() ? Carbon::parse($antenatal_records->first()->date_of_booking)->format('M d, Y') : 'N/A' }}</span>
+                        <span class="badge bg-label-info"><i class="bx bx-building me-1"></i>{{ $registration_facility_name }}</span>
+                        <span class="badge bg-label-primary"><i class="bx bx-id-card me-1"></i>{{ $user->DIN }}</span>
                     </div>
-                    <div class="hero-decoration">
-                        <div class="floating-shape shape-1"></div>
-                        <div class="floating-shape shape-2"></div>
-                        <div class="floating-shape shape-3"></div>
-                    </div>
+                </div>
+                <div>
+                    <a href="{{ route('patient-dashboard') }}" class="btn btn-outline-dark">
+                        <i class="bx bx-arrow-left me-1"></i>Back to Dashboard
+                    </a>
                 </div>
             </div>
         </div>

@@ -83,6 +83,14 @@ class TetanusVaccination extends Model
   }
 
   /**
+   * Legacy alias kept for analytics compatibility.
+   */
+  public function user(): BelongsTo
+  {
+    return $this->belongsTo(Patient::class, 'patient_id');
+  }
+
+  /**
    * Get the antenatal registration (pregnancy) this vaccination belongs to
    */
   public function antenatalRegistration(): BelongsTo

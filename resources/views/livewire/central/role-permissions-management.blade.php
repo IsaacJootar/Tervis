@@ -172,5 +172,6 @@
         'orders' => [
             'centralRolePermissionsTable' => [0, 'asc'],
         ],
+        'stateSaveTables' => ['centralRolePermissionsTable'],
     ])
 </div>

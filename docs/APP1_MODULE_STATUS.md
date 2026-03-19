@@ -91,6 +91,12 @@ Note: Vision text mentions both "7 modules" and "8 management modules" in differ
 | No AI Gate Policy (Current Rollout) | Implemented | AI assistant visibility is not controlled by separate AI entitlement flags in App1; normal module permission/middleware still applies. |
 | Initial Coverage | Implemented | Doctor Assessments, Laboratory, Prescriptions, Child Vaccination Schedule, and Facility Reminders Hub. |
 
+## 3f) Core UI Modernization
+
+| Area | Status | Current Implementation |
+| --- | --- | --- |
+| Legacy Hero Header Removal (Core + Active Role Pages) | Implemented | Legacy hero/floating-shape headers were removed from core operations and active role pages, including data-officer management pages, facility patients, patient appointments, LGA/State dashboards, AVO DIN activations, and legacy patient portal pages; shared dead hero/floating CSS was also removed from role layouts and `layouts/sections/styles.blade.php`. |
+
 ## 4) Testing & Quality Snapshot
 
 - `php artisan route:list` passes (routes compile and load).

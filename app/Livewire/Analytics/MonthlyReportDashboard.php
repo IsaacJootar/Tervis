@@ -3,7 +3,6 @@
 namespace App\Livewire\Analytics;
 
 use Carbon\Carbon;
-use App\Models\User;
 use Livewire\Component;
 use App\Models\Bed;
 use App\Models\Facility;
@@ -962,4 +961,3 @@ class MonthlyReportDashboard extends Component
     ])->layout($layout);
   }
 }
-

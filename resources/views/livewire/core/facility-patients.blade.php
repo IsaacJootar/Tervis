@@ -3,39 +3,23 @@
     @section('title', 'Facility Patients')
     <div>
 
-        <!-- Hero Card Header -->
-        <div class="row mb-5">
-            <div class="col-12">
-                <div class="hero-card">
-                    <div class="hero-content">
-                        <div class="hero-text">
-                            <h4 class="hero-title" style="color: white; font-size: 28px;">
-                                <i class='bx bx-user-heart me-2'></i>
-                                Facility Patients Registry <small class="text-muted">Patients Medical Records
-                                    Summary</small>
-                            </h4>
-
-                            <div class="hero-stats">
-                                <span class="hero-stat">
-                                    <i class="bx bx-group"></i>
-                                    {{ count($patients) }} Total Patients
-                                </span>
-                                <span class="hero-stat">
-                                    <i class="bx bx-calendar-check"></i>
-                                    {{ $patients->where('last_visit_date', '!=', null)->count() }} Active Patients
-                                </span>
-                                <span class="hero-stat">
-                                    <i class="bx bx-stats"></i>
-                                    {{ $patients->sum('total_visits') }} Total Visits
-                                </span>
-                                {{ Carbon::now('Africa/Lagos')->format('l, F j, Y, h:i A') }}
-                            </div>
-
-                        </div>
-                        <div class="hero-decoration">
-                            <div class="floating-shape shape-1"></div>
-                            <div class="floating-shape shape-2"></div>
-                            <div class="floating-shape shape-3"></div>
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="d-flex flex-column flex-lg-row justify-content-between align-items-start gap-3">
+                    <div>
+                        <h5 class="mb-1 d-flex align-items-center gap-2">
+                            <i class="bx bx-user-heart text-primary"></i>
+                            Facility Patients Registry
+                        </h5>
+                        <div class="small text-muted">Patients medical records summary</div>
+                        <div class="small text-muted">{{ Carbon::now('Africa/Lagos')->format('l, F j, Y, h:i A') }}</div>
+                        <div class="d-flex flex-wrap gap-2 mt-2">
+                            <span class="badge bg-label-dark"><i class="bx bx-group me-1"></i>{{ count($patients) }}
+                                Total Patients</span>
+                            <span class="badge bg-label-success"><i class="bx bx-calendar-check me-1"></i>{{ $patients->where('last_visit_date', '!=', null)->count() }}
+                                Active</span>
+                            <span class="badge bg-label-primary"><i class="bx bx-stats me-1"></i>{{ $patients->sum('total_visits') }}
+                                Total Visits</span>
                         </div>
                     </div>
                 </div>

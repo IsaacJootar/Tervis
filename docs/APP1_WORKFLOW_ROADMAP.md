@@ -1,6 +1,6 @@
 # APP1 Workflow and Roadmap
 
-Last updated: 2026-03-17  
+Last updated: 2026-03-19  
 Aligned to: HMS Vision Architecture v2.0 (Nov 2025)
 
 ## 1) Current End-to-End Workflow (Implemented)
@@ -107,6 +107,9 @@ Done criteria:
 6. Facility Administration hardening (completed: profile settings, service catalog, fee schedules, module access status view, audit trail; module toggle control centralized in Central Admin)
 7. Central Admin hardening (completed: live central dashboard metrics, route-valid sidebar cleanup, legacy `/central-admin/*` compatibility redirects)
 8. RBAC hardening (completed: central roles-permissions matrix, route-level `permission.check` enforcement, central-to-facility access propagation model)
+9. Legacy core UI modernization (completed: old hero/floating headers removed from remaining core operations pages and replaced with simple section-card headers)
+10. Role-menu route hygiene (completed: role sidebar JSON targets validated against route list; duplicate facility admin menu entry removed)
+11. Shared layout dead-style cleanup (completed: obsolete hero/floating CSS removed from role layouts and shared styles partial)
 
 Done criteria:
 - Facility modules can operate independently of single-patient pages.

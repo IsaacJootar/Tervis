@@ -85,23 +85,6 @@
       "slug": "laboratory-operations"
     },
     {
-      "name": "Facility Finances",
-      "icon": "menu-icon icon-base ti tabler-currency-dollar",
-      "slug": "facility-admin-finance",
-      "submenu": [
-        {
-          "url": "#",
-          "name": "Payments Records",
-          "slug": "#"
-        },
-        {
-          "url": "#",
-          "name": "Audit Trail",
-          "slug": "#"
-        }
-      ]
-    },
-    {
       "url": "/analytics/real-time-dashboard",
       "name": "Real-time Dashboard",
       "icon": "menu-icon icon-base ti tabler-chart-line",
@@ -114,16 +97,16 @@
       "slug": "risk-assessment"
     },
     {
-      "url": "/analytics/risk-dashboard",
+      "url": "/analytics/diagnostic-assistant",
       "name": "Diagnostic Assistant",
       "icon": "menu-icon icon-base ti tabler-stethoscope",
-      "slug": "risk-dashboard"
+      "slug": "diagnostic-assistant"
     },
     {
       "url": "/analytics/health-trends-dashboard",
-      "name": "health & Predictive trends",
+      "name": "Health Trends",
       "icon": "menu-icon icon-base ti tabler-chart-histogram",
-      "slug": "health & Predictive trends"
+      "slug": "health-trends-dashboard"
     },
     {
       "name": "Reports & Analytics",
@@ -141,12 +124,6 @@
           "slug": "monthly-report-dashboard"
         }
       ]
-    },
-    {
-      "url": "/core/facility-administration",
-      "name": "Facility Settings",
-      "icon": "menu-icon icon-base ti tabler-settings",
-      "slug": "facility-admin-settings"
     }
   ]
 }

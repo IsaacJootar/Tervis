@@ -16,6 +16,7 @@ use App\Livewire\Central\CreateFacility;
 
 //
 use App\Livewire\Analytics\RiskDashboard;
+use App\Livewire\Analytics\DiagnosticAssistantDashboard;
 use App\Livewire\Core\StaffManagement;
 use App\Livewire\Core\FacilityAdministration;
 
@@ -63,10 +64,11 @@ use App\Livewire\Workspaces\Modules\FamilyPlanning\ClientFollowUp;
 use App\Livewire\Analytics\MpdsrReportDashboard;
 use App\Livewire\Analytics\HealthTrendsDashboard;
 use App\Livewire\Analytics\MonthlyReportDashboard;
-use App\Livewire\Registers\FamilyPlanningRegister;
-use App\Livewire\Registers\GeneralPatientsRegister;
 use App\Livewire\Analytics\BatchDiagnosticDashboard;
 use App\Livewire\Analytics\BatchPredictiveDashboard;
+use App\Livewire\Registers\FamilyPlanningRegister;
+use App\Livewire\Registers\GeneralPatientsRegister;
+use App\Livewire\Patient\Portal as PatientPortal;
 use App\Http\Controllers\language\LanguageController;
 use App\Livewire\Workspaces\Modules\ANC\TetanusVaccinations;
 
@@ -285,7 +287,7 @@ Route::middleware(['auth', 'role.redirect', 'permission.check:analytics.view'])-
   Route::get('/real-time-dashboard', RealTimeDashboard::class)->name('real-time-dashboard');
   Route::get('/risk-dashboard', RiskDashboard::class)->name('risk-dashboard');
   Route::get('/health-trends-dashboard', HealthTrendsDashboard::class)->name('health-trends-dashboard');
-  Route::get('/diagnostic-assistant', HealthTrendsDashboard::class)->name('diagnostic-assistant');
+  Route::get('/diagnostic-assistant', DiagnosticAssistantDashboard::class)->name('diagnostic-assistant');
   Route::get('/batch-diagnostics-dashboard', BatchDiagnosticDashboard::class)->name('batch-diagnostics-dashboard');
   Route::get('/batch-predictive-dashboard', BatchPredictiveDashboard::class)->name('batch-predictive-dashboard');
   Route::get('/mpdsr-report-dashboard', MpdsrReportDashboard::class)->name('mpdsr-report-dashboard');
@@ -408,6 +410,33 @@ Route::middleware(['auth', 'role.redirect'])->prefix('workspaces')->group(functi
 
 
 
+
+// Patient self-service routes (minimal portal stubs)
+Route::middleware(['auth', 'role.redirect'])->prefix('patient')->group(function () {
+  Route::get('/patient-dashboard', PatientPortal::class)
+    ->defaults('section', 'dashboard')
+    ->name('patient-dashboard');
+
+  Route::get('/patient-profile', PatientPortal::class)
+    ->defaults('section', 'profile')
+    ->name('patient-profile');
+
+  Route::get('/patient-antenatal', PatientPortal::class)
+    ->defaults('section', 'antenatal')
+    ->name('patient-antenatal');
+
+  Route::get('/patient-deliveries', PatientPortal::class)
+    ->defaults('section', 'deliveries')
+    ->name('patient-deliveries');
+
+  Route::get('/patient-postnatal', PatientPortal::class)
+    ->defaults('section', 'postnatal')
+    ->name('patient-postnatal');
+
+  Route::get('/patient-tetanus', PatientPortal::class)
+    ->defaults('section', 'tetanus')
+    ->name('patient-tetanus');
+});
 
 // Registers routes with middleware
 Route::middleware(['auth', 'role.redirect'])->prefix('registers')->group(function () {

@@ -3,38 +3,22 @@
     @section('title', 'Disable Officer Accounts')
     <div x-data="{ modal_flag: @entangle('modal_flag').live }">
 
-        <!-- Hero Card Header -->
-        <div class="row mb-5">
-            <div class="col-12">
-                <div class="hero-card">
-                    <div class="hero-content">
-                        <div class="hero-text">
-                            <h4 class="hero-title" style="color: white; font-size: 28px;">
-                                <i class='bx bx-lock-alt me-2'></i>
-                                Manage Data Officer Accounts
-                            </h4>
-
-                            <div class="hero-stats">
-                                <span class="hero-stat">
-                                    <i class="bx bx-group"></i>
-                                    {{ count($dataOfficers) }} Total Data Officers
-                                </span>
-                                <span class="hero-stat">
-                                    <i class="bx bx-check-circle"></i>
-                                    {{ $dataOfficers->where('account_status', 'active')->count() }} Active
-                                </span>
-                                <span class="hero-stat">
-                                    <i class="bx bx-x-circle"></i>
-                                    {{ $dataOfficers->where('account_status', 'disabled')->count() }} Disabled
-                                </span>
-                                {{ Carbon::now('Africa/Lagos')->format('l, F j, Y, h:i A') }}
-                            </div>
-
-                        </div>
-                        <div class="hero-decoration">
-                            <div class="floating-shape shape-1"></div>
-                            <div class="floating-shape shape-2"></div>
-                            <div class="floating-shape shape-3"></div>
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="d-flex flex-column flex-lg-row justify-content-between align-items-start gap-3">
+                    <div>
+                        <h5 class="mb-1 d-flex align-items-center gap-2">
+                            <i class="bx bx-lock-alt text-primary"></i>
+                            Manage Data Officer Accounts
+                        </h5>
+                        <div class="small text-muted">{{ Carbon::now('Africa/Lagos')->format('l, F j, Y, h:i A') }}</div>
+                        <div class="d-flex flex-wrap gap-2 mt-2">
+                            <span class="badge bg-label-dark"><i class="bx bx-group me-1"></i>{{ count($dataOfficers) }}
+                                Total</span>
+                            <span class="badge bg-label-success"><i class="bx bx-check-circle me-1"></i>{{ $dataOfficers->where('account_status', 'active')->count() }}
+                                Active</span>
+                            <span class="badge bg-label-danger"><i class="bx bx-x-circle me-1"></i>{{ $dataOfficers->where('account_status', 'disabled')->count() }}
+                                Disabled</span>
                         </div>
                     </div>
                 </div>

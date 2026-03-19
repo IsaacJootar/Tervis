@@ -1,75 +1,21 @@
 @section('title', 'AI Health Trends & Predictive Analytics')
 @php use Illuminate\Support\Facades\Auth; @endphp
 
-<div>
-    <!-- Hero Section -->
-    <div class="row mb-5">
+<div class="analytics-page">
+    @include('livewire.analytics._template-style')
+    <div class="row mb-4">
         <div class="col-12">
-            <div class="hero-card">
-                <div class="hero-content">
-                    <div class="hero-text">
-                        <h4 class="hero-title" style="color: white; font-size: 28px;">
-                            <i class='bx bx-trending-up me-2'></i>
-                            AI Health Trends & Predictive Analytics
-                        </h4>
-                        <p class="hero-subtitle mb-2" style="color: rgba(255,255,255,0.9);">
-                            {{ \Carbon\Carbon::now('Africa/Lagos')->format('l, F j, Y, h:i A') }}
-                        </p>
-                        <div class="hero-stats">
-                            <span class="hero-stat">
-                                <i class="bx bx-line-chart"></i>
-                                {{ $trendSummary['total_trends'] ?? 0 }} Active Trends
-                            </span>
-                            <span class="hero-stat">
-                                <i class="bx bx-error-circle"></i>
-                                {{ $trendSummary['urgent_alerts'] ?? 0 }} Urgent Alerts
-                            </span>
-                            <span class="hero-stat">
-                                <i class="bx bx-trending-up"></i>
-                                {{ $trendSummary['trending_up'] ?? 0 }} Increasing
-                            </span>
-                            <span class="hero-stat">
-                                <i class="bx bx-shield-alt-2"></i>
-                                {{ $trendSummary['interventions_needed'] ?? 0 }} Need Action
-                            </span>
-                        </div>
-
-                        @if (isset($trendSummary['facility_info']))
-                            <div class="d-flex flex-wrap gap-3 text-white mb-3 mt-2" style="font-size: 14px;">
-                                <span>
-                                    <i class="bx bx-building me-1"></i>
-                                    <strong>Facility:</strong>
-                                    {{ $trendSummary['facility_info']['name'] ?? (Auth::user()->facility->name ?? 'N/A') }}
-                                </span>
-                                <span>
-                                    <i class="bx bx-calendar me-1"></i>
-                                    <strong>Period:</strong> Last {{ $selectedTimeRange }} days
-                                </span>
-                            </div>
-                        @endif
-
-                        <div class="mt-3">
-                            <button wire:click="refreshTrends"
-                                class="btn btn-light rounded-pill shadow-sm d-inline-flex align-items-center me-2"
-                                style="border: 1px solid rgba(66, 64, 64, 0.3); padding: 8px 20px;">
-                                <i class="bx bx-refresh me-2" style="font-size: 18px;"></i>
-                                Refresh Trends
-                            </button>
-
-                            <select wire:model.live="selectedTimeRange"
-                                class="btn btn-outline-light rounded-pill shadow-sm"
-                                style="border: 1px solid rgba(255,255,255,0.3); padding: 8px 20px; background: rgba(255,255,255,0.1);">
-                                <option value="7">Last 7 days</option>
-                                <option value="30">Last 30 days</option>
-                                <option value="90">Last 90 days</option>
-                                <option value="180">Last 6 months</option>
-                            </select>
-                        </div>
+            <div class="card">
+                <div class="card-body d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3">
+                    <div>
+                        <h4 class="mb-1"><i class='bx bx-trending-up me-2'></i>AI Health Trends & Predictive Analytics</h4>
+                        <p class="mb-0 text-muted">{{ \Carbon\Carbon::now('Africa/Lagos')->format('l, F j, Y, h:i A') }}</p>
                     </div>
-                    <div class="hero-decoration">
-                        <div class="floating-shape shape-1"></div>
-                        <div class="floating-shape shape-2"></div>
-                        <div class="floating-shape shape-3"></div>
+                    <div class="d-flex flex-wrap gap-2">
+                        <span class="badge bg-label-primary">{{ $trendSummary['total_trends'] ?? 0 }} Active Trends</span>
+                        <span class="badge bg-label-danger">{{ $trendSummary['urgent_alerts'] ?? 0 }} Urgent Alerts</span>
+                        <span class="badge bg-label-info">{{ $trendSummary['trending_up'] ?? 0 }} Increasing</span>
+                        <span class="badge bg-label-warning">{{ $trendSummary['interventions_needed'] ?? 0 }} Need Action</span>
                     </div>
                 </div>
             </div>
@@ -95,99 +41,88 @@
                     @endforeach
                 </select>
             </div>
-            <div class="col-md-4 d-flex align-items-end">
+            <div class="col-md-4 d-flex align-items-end justify-content-md-end gap-2">
                 @if ($selectedFacilityId)
                     <button wire:click="resetToScope" class="btn btn-outline-secondary btn-lg">
                         <i class="bx bx-reset me-1"></i>
                         View All Facilities
                     </button>
                 @endif
+                <button wire:click="refreshTrends" class="btn btn-primary btn-lg" wire:loading.attr="disabled"
+                    wire:target="refreshTrends">
+                    <span wire:loading.remove wire:target="refreshTrends">
+                        <i class="bx bx-refresh me-1"></i>Refresh Data
+                    </span>
+                    <span wire:loading wire:target="refreshTrends">
+                        <span class="spinner-border spinner-border-sm me-1"></span>Refreshing...
+                    </span>
+                </button>
             </div>
         </div>
     @endif
     <!-- Trend Summary Cards -->
     <div class="row mb-4">
         <div class="col-md-3 mb-3">
-            <div class="card h-100">
-                <div class="card-body">
-                    <div class="d-flex align-items-center">
-                        <div class="avatar flex-shrink-0 me-3">
-                            <span class="avatar-initial rounded bg-info">
-                                <i class="bx bx-trending-up bx-sm text-white"></i>
-                            </span>
-                        </div>
-                        <div>
-                            <h5 class="mb-0">{{ $trendSummary['trending_up'] ?? 0 }}</h5>
-                            <small class="text-muted">Trending Up</small>
-                            <div class="mt-1">
-                                <small class="text-info">Positive trends</small>
-                            </div>
-                        </div>
-                    </div>
+            <div class="metric-card metric-card-sky h-100">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div class="metric-label">Trending Up</div>
+                    <span class="metric-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none">
+                            <path d="M5 15l5-5 3.5 3.5L19 8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+                            <path d="M14 8h5v5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                    </span>
                 </div>
+                <div class="metric-value">{{ $trendSummary['trending_up'] ?? 0 }}</div>
+                <div class="small">Positive trend signals</div>
             </div>
         </div>
 
         <div class="col-md-3 mb-3">
-            <div class="card h-100">
-                <div class="card-body">
-                    <div class="d-flex align-items-center">
-                        <div class="avatar flex-shrink-0 me-3">
-                            <span class="avatar-initial rounded bg-warning">
-                                <i class="bx bx-trending-down bx-sm text-white"></i>
-                            </span>
-                        </div>
-                        <div>
-                            <h5 class="mb-0">{{ $trendSummary['trending_down'] ?? 0 }}</h5>
-                            <small class="text-muted">Trending Down</small>
-                            <div class="mt-1">
-                                <small class="text-warning">Declining trends</small>
-                            </div>
-                        </div>
-                    </div>
+            <div class="metric-card metric-card-amber h-100">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div class="metric-label">Trending Down</div>
+                    <span class="metric-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none">
+                            <path d="M5 9l5 5 3.5-3.5L19 16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+                            <path d="M14 16h5v-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                    </span>
                 </div>
+                <div class="metric-value">{{ $trendSummary['trending_down'] ?? 0 }}</div>
+                <div class="small">Declining trend signals</div>
             </div>
         </div>
 
         <div class="col-md-3 mb-3">
-            <div class="card h-100">
-                <div class="card-body">
-                    <div class="d-flex align-items-center">
-                        <div class="avatar flex-shrink-0 me-3">
-                            <span class="avatar-initial rounded bg-danger">
-                                <i class="bx bx-error-circle bx-sm text-white"></i>
-                            </span>
-                        </div>
-                        <div>
-                            <h5 class="mb-0">{{ $trendSummary['critical_trends'] ?? 0 }}</h5>
-                            <small class="text-muted">Critical Trends</small>
-                            <div class="mt-1">
-                                <small class="text-danger">Immediate attention</small>
-                            </div>
-                        </div>
-                    </div>
+            <div class="metric-card metric-card-rose h-100">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div class="metric-label">Critical Trends</div>
+                    <span class="metric-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none">
+                            <path d="M12 4.5l8 14H4l8-14z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" />
+                            <path d="M12 9v4M12 15.5h.01" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+                        </svg>
+                    </span>
                 </div>
+                <div class="metric-value">{{ $trendSummary['critical_trends'] ?? 0 }}</div>
+                <div class="small">Immediate attention needed</div>
             </div>
         </div>
 
         <div class="col-md-3 mb-3">
-            <div class="card h-100">
-                <div class="card-body">
-                    <div class="d-flex align-items-center">
-                        <div class="avatar flex-shrink-0 me-3">
-                            <span class="avatar-initial rounded bg-success">
-                                <i class="bx bx-check-circle bx-sm text-white"></i>
-                            </span>
-                        </div>
-                        <div>
-                            <h5 class="mb-0">{{ $trendSummary['stable_trends'] ?? 0 }}</h5>
-                            <small class="text-muted">Stable</small>
-                            <div class="mt-1">
-                                <small class="text-success">Stable patterns</small>
-                            </div>
-                        </div>
-                    </div>
+            <div class="metric-card metric-card-emerald h-100">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div class="metric-label">Stable Trends</div>
+                    <span class="metric-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none">
+                            <circle cx="12" cy="12" r="8.5" stroke="currentColor" stroke-width="1.7" />
+                            <path d="M8.5 12.5l2.5 2.5 4.5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                    </span>
                 </div>
+                <div class="metric-value">{{ $trendSummary['stable_trends'] ?? 0 }}</div>
+                <div class="small">Stable health patterns</div>
             </div>
         </div>
     </div>
@@ -401,8 +336,8 @@
 
     <!-- Trend Details Modal -->
     @if ($showTrendModal && $selectedTrend)
-        <div class="modal fade show" style="display: block;" tabindex="-1">
-            <div class="modal-dialog modal-lg">
+        <div class="modal fade show" style="display: block;" tabindex="-1" aria-modal="true" role="dialog">
+            <div class="modal-dialog modal-lg modal-dialog-scrollable modal-dialog-centered">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h5 class="modal-title">
@@ -481,8 +416,6 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" wire:click="closeTrendModal">Close</button>
-                        <button type="button" class="btn btn-primary">Mark as Reviewed</button>
-                        <button type="button" class="btn btn-warning">Schedule Follow-up</button>
                     </div>
                 </div>
             </div>
@@ -627,141 +560,43 @@
             }
         }
 
-        document.addEventListener('DOMContentLoaded', function() {
-            initializeCharts();
-        });
+        function scheduleHealthTrendsChartsInit() {
+            setTimeout(() => {
+                initializeCharts();
+            }, 100);
+        }
 
-        document.addEventListener('livewire:initialized', () => {
-            Livewire.on('trends-updated', () => {
-                setTimeout(() => {
-                    initializeCharts();
-                }, 100);
+        if (!window.__healthTrendsChartsBound) {
+            window.__healthTrendsChartsBound = true;
+
+            document.addEventListener('DOMContentLoaded', scheduleHealthTrendsChartsInit);
+            document.addEventListener('livewire:navigated', scheduleHealthTrendsChartsInit);
+
+            document.addEventListener('livewire:initialized', () => {
+                Livewire.on('trends-updated', scheduleHealthTrendsChartsInit);
             });
-        });
+        }
+
+        scheduleHealthTrendsChartsInit();
     </script>
 
     <style>
-        .hero-card {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-radius: 20px;
-            overflow: hidden;
-            position: relative;
-            min-height: 220px;
-        }
-
-        .hero-content {
-            position: relative;
-            z-index: 2;
-            padding: 2rem;
-        }
-
-        .hero-decoration {
-            position: absolute;
-            top: 0;
-            right: 0;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            z-index: 1;
-        }
-
-        .floating-shape {
-            position: absolute;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.1);
-            animation: float 6s ease-in-out infinite;
-        }
-
-        .floating-shape.shape-1 {
-            width: 80px;
-            height: 80px;
-            top: 20%;
-            right: 10%;
-            animation-delay: 0s;
-        }
-
-        .floating-shape.shape-2 {
-            width: 60px;
-            height: 60px;
-            top: 60%;
-            right: 20%;
-            animation-delay: 2s;
-        }
-
-        .floating-shape.shape-3 {
-            width: 40px;
-            height: 40px;
-            top: 40%;
-            right: 5%;
-            animation-delay: 4s;
-        }
-
-        @keyframes float {
-
-            0%,
-            100% {
-                transform: translateY(0px) rotate(0deg);
-            }
-
-            50% {
-                transform: translateY(-20px) rotate(180deg);
-            }
-        }
-
-        .hero-stats {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 2rem;
-            margin-top: 1rem;
-        }
-
-        .hero-stat {
-            display: flex;
-            align-items: center;
-            color: rgba(255, 255, 255, 0.95);
-            font-weight: 500;
-            font-size: 14px;
-        }
-
-        .hero-stat i {
-            margin-right: 0.5rem;
-            font-size: 18px;
-        }
-
-        .card {
-            box-shadow: 0 2px 6px 0 rgba(67, 89, 113, 0.12);
-            border: 1px solid rgba(67, 89, 113, 0.1);
-            transition: all 0.3s ease;
-        }
-
-        .card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px 0 rgba(67, 89, 113, 0.16);
-        }
-
-        .avatar {
-            position: relative;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 40px;
-            height: 40px;
-        }
-
-        .avatar-initial {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 40px;
-            height: 40px;
-        }
-
-        .text-muted {
-            color: #a7acb2 !important;
-        }
-
         .modal.show {
             background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-content {
+            border: 1px solid rgba(148, 163, 184, 0.22);
+            border-radius: 18px;
+            box-shadow: 0 22px 45px -32px rgba(15, 23, 42, 0.55);
+        }
+
+        .modal-header {
+            border-bottom: 1px solid rgba(148, 163, 184, 0.22);
+        }
+
+        .modal-footer {
+            border-top: 1px solid rgba(148, 163, 184, 0.22);
         }
 
         .alert-trends-container {
@@ -817,17 +652,10 @@
         }
 
         @media (max-width: 768px) {
-            .hero-stats {
-                gap: 1rem;
-            }
-
-            .hero-stat {
-                font-size: 12px;
-            }
-
             .card-body {
                 padding: 1rem;
             }
         }
     </style>
 </div>
+

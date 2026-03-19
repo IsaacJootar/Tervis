@@ -1,102 +1,25 @@
-<div>
-    @section('title', 'Risk Assessment Dashboard')
+<div class="analytics-page">
+    @include('livewire.analytics._template-style')
+    @section('title', 'AI Risk Assessment Dashboard')
     @php
         use Illuminate\Support\Facades\Auth;
         use Carbon\Carbon;
 
     @endphp
 
-    <!-- Hero Section -->
-    <div class="row mb-5">
+    <div class="row mb-4">
         <div class="col-12">
-            <div class="hero-card">
-                <div class="hero-content">
-                    <div class="hero-text">
-                        <h4 class="hero-title" style="color: white; font-size: 28px;">
-                            <i class='bx bx-shield-alt-2 me-2'></i>
-                            AI-Powered Risk Assessment & Diagnostics Assistant Dashboard
-                        </h4>
-                        <p class="hero-subtitle mb-2" style="color: rgba(255,255,255,0.9);">
-                            {{ Carbon::now('Africa/Lagos')->format('l, F j, Y, h:i A') }}
-                        </p>
-                        <div class="hero-stats">
-                            <span class="hero-stat">
-                                <i class="bx bx-group"></i>
-                                {{ $facilityRiskSummary['total_patients'] ?? 0 }} Total Patients
-                            </span>
-                            <span class="hero-stat">
-                                <i class="bx bx-error-circle"></i>
-                                {{ ($facilityRiskSummary['high_risk'] ?? 0) + ($facilityRiskSummary['critical_risk'] ?? 0) }}
-                                High Risk
-                            </span>
-                            <span class="hero-stat">
-                                <i class="bx bx-shield-plus"></i>
-                                {{ $facilityRiskSummary['service_utilization']['with_deliveries'] ?? 0 }} Deliveries
-                            </span>
-                            <span class="hero-stat">
-                                <i class="bx bx-female"></i>
-                                {{ $facilityRiskSummary['service_utilization']['with_postnatal'] ?? 0 }} Postnatal
-                            </span>
-                        </div>
-
-                        @if (isset($facilityRiskSummary['facility_info']))
-                            <div class="d-flex flex-wrap gap-3 text-white mb-3 mt-2" style="font-size: 14px;">
-                                <span>
-                                    <i class="bx bx-building me-1"></i>
-                                    <strong>
-                                        @if ($selectedFacilityId)
-                                            Facility:
-                                        @else
-                                            Scope:
-                                        @endif
-                                    </strong>
-                                    @if ($selectedFacilityId)
-                                        {{ $facilityRiskSummary['facility_info']['name'] ?? 'N/A' }}
-                                    @else
-                                        {{ $scopeInfo['scope_type'] === 'state' ? 'State-wide' : ($scopeInfo['scope_type'] === 'lga' ? 'LGA-wide' : 'Single Facility') }}
-                                        ({{ count($scopeInfo['facility_ids']) }} facilities)
-                                    @endif
-                                </span>
-
-                                @if (!$selectedFacilityId && isset($facilityRiskSummary['facility_info']['state']))
-                                    <span>
-                                        <i class="bx bx-map me-1"></i>
-                                        <strong>State:</strong>
-                                        {{ $facilityRiskSummary['facility_info']['state'] }}
-                                    </span>
-                                @endif
-
-                                @if ($selectedFacilityId || $scopeInfo['scope_type'] === 'lga')
-                                    <span>
-                                        <i class="bx bx-map-alt me-1"></i>
-                                        <strong>LGA:</strong>
-                                        {{ $facilityRiskSummary['facility_info']['lga'] ?? (Auth::user()->lga->name ?? 'N/A') }}
-                                    </span>
-                                @endif
-
-                                @if ($selectedFacilityId)
-                                    <span>
-                                        <i class="bx bx-map-pin me-1"></i>
-                                        <strong>Ward:</strong>
-                                        {{ $facilityRiskSummary['facility_info']['ward'] ?? 'N/A' }}
-                                    </span>
-                                @endif
-                            </div>
-                        @endif
-
-                        <div class="mt-3">
-                            <button wire:click="refreshData"
-                                class="btn btn-light rounded-pill shadow-sm d-inline-flex align-items-center"
-                                style="border: 1px solid rgba(255,255,255,0.3); padding: 8px 20px;">
-                                <i class="bx bx-refresh me-2" style="font-size: 18px;"></i>
-                                Refresh Risk Data
-                            </button>
-                        </div>
+            <div class="card">
+                <div class="card-body d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3">
+                    <div>
+                        <h4 class="mb-1"><i class='bx bx-shield-alt-2 me-2'></i>AI Risk Assessment & Diagnostic Assistant</h4>
+                        <p class="mb-0 text-muted">{{ Carbon::now('Africa/Lagos')->format('l, F j, Y, h:i A') }}</p>
                     </div>
-                    <div class="hero-decoration">
-                        <div class="floating-shape shape-1"></div>
-                        <div class="floating-shape shape-2"></div>
-                        <div class="floating-shape shape-3"></div>
+                    <div class="d-flex flex-wrap gap-2">
+                        <span class="badge bg-label-primary">{{ $facilityRiskSummary['total_patients'] ?? 0 }} Patients</span>
+                        <span class="badge bg-label-danger">{{ ($facilityRiskSummary['high_risk'] ?? 0) + ($facilityRiskSummary['critical_risk'] ?? 0) }} High Risk</span>
+                        <span class="badge bg-label-info">{{ $facilityRiskSummary['service_utilization']['with_deliveries'] ?? 0 }} Deliveries</span>
+                        <span class="badge bg-label-warning">{{ $facilityRiskSummary['service_utilization']['with_postnatal'] ?? 0 }} Postnatal</span>
                     </div>
                 </div>
             </div>
@@ -127,102 +50,98 @@
                     @endif
                 </small>
             </div>
-            <div class="col-md-4 d-flex align-items-end">
+            <div class="col-md-4 d-flex align-items-end justify-content-md-end gap-2">
                 @if ($selectedFacilityId)
                     <button wire:click="resetToScope" class="btn btn-outline-secondary btn-lg">
                         <i class="bx bx-reset me-1"></i>
                         View All Facilities
                     </button>
                 @endif
+                <button wire:click="refreshData" class="btn btn-primary btn-lg" wire:loading.attr="disabled"
+                    wire:target="refreshData">
+                    <span wire:loading.remove wire:target="refreshData">
+                        <i class="bx bx-refresh me-1"></i>Refresh Data
+                    </span>
+                    <span wire:loading wire:target="refreshData">
+                        <span class="spinner-border spinner-border-sm me-1"></span>Refreshing...
+                    </span>
+                </button>
             </div>
         </div>
     @endif
 
 
     <!-- Risk Distribution Cards -->
+    @if (!empty($facilityRiskSummary['note'] ?? null))
+        <div class="row mb-3">
+            <div class="col-12">
+                <div class="alert alert-info mb-0">
+                    <i class="bx bx-info-circle me-1"></i>{{ $facilityRiskSummary['note'] }}
+                </div>
+            </div>
+        </div>
+    @endif
+
     <div class="row mb-4">
         <div class="col-md-6 col-lg-3 mb-3">
-            <div class="card h-100">
-                <div class="card-body">
-                    <div class="d-flex align-items-center">
-                        <div class="avatar flex-shrink-0 me-3">
-                            <span class="avatar-initial rounded bg-success">
-                                <i class="bx bx-check-circle bx-sm text-white"></i>
-                            </span>
-                        </div>
-                        <div>
-                            <h5 class="mb-0">{{ $facilityRiskSummary['low_risk'] ?? 0 }}</h5>
-                            <small class="text-muted">Low Risk</small>
-                            <div class="mt-1">
-                                <small
-                                    class="text-success">{{ $facilityRiskSummary['risk_distribution']['low'] ?? 0 }}%</small>
-                            </div>
-                        </div>
-                    </div>
+            <div class="metric-card metric-card-emerald h-100">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div class="metric-label">Low Risk</div>
+                    <span class="metric-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none">
+                            <circle cx="12" cy="12" r="8.5" stroke="currentColor" stroke-width="1.7" />
+                            <path d="M8.5 12.5l2.5 2.5 4.5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+                                stroke-linejoin="round" />
+                        </svg>
+                    </span>
                 </div>
+                <div class="metric-value">{{ $facilityRiskSummary['low_risk'] ?? 0 }}</div>
+                <div class="small">{{ $facilityRiskSummary['risk_distribution']['low'] ?? 0 }}%</div>
             </div>
         </div>
         <div class="col-md-6 col-lg-3 mb-3">
-            <div class="card h-100">
-                <div class="card-body">
-                    <div class="d-flex align-items-center">
-                        <div class="avatar flex-shrink-0 me-3">
-                            <span class="avatar-initial rounded bg-info">
-                                <i class="bx bx-info-circle bx-sm text-white"></i>
-                            </span>
-                        </div>
-                        <div>
-                            <h5 class="mb-0">{{ $facilityRiskSummary['moderate_risk'] ?? 0 }}</h5>
-                            <small class="text-muted">Moderate Risk</small>
-                            <div class="mt-1">
-                                <small
-                                    class="text-info">{{ $facilityRiskSummary['risk_distribution']['moderate'] ?? 0 }}%</small>
-                            </div>
-                        </div>
-                    </div>
+            <div class="metric-card metric-card-sky h-100">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div class="metric-label">Moderate Risk</div>
+                    <span class="metric-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none">
+                            <circle cx="12" cy="12" r="8.5" stroke="currentColor" stroke-width="1.7" />
+                            <path d="M12 8v5M12 16.4h.01" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+                        </svg>
+                    </span>
                 </div>
+                <div class="metric-value">{{ $facilityRiskSummary['moderate_risk'] ?? 0 }}</div>
+                <div class="small">{{ $facilityRiskSummary['risk_distribution']['moderate'] ?? 0 }}%</div>
             </div>
         </div>
         <div class="col-md-6 col-lg-3 mb-3">
-            <div class="card h-100">
-                <div class="card-body">
-                    <div class="d-flex align-items-center">
-                        <div class="avatar flex-shrink-0 me-3">
-                            <span class="avatar-initial rounded bg-warning">
-                                <i class="bx bx-error bx-sm text-white"></i>
-                            </span>
-                        </div>
-                        <div>
-                            <h5 class="mb-0">{{ $facilityRiskSummary['high_risk'] ?? 0 }}</h5>
-                            <small class="text-muted">High Risk</small>
-                            <div class="mt-1">
-                                <small
-                                    class="text-warning">{{ $facilityRiskSummary['risk_distribution']['high'] ?? 0 }}%</small>
-                            </div>
-                        </div>
-                    </div>
+            <div class="metric-card metric-card-amber h-100">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div class="metric-label">High Risk</div>
+                    <span class="metric-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none">
+                            <path d="M12 4.5l8 14H4l8-14z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" />
+                            <path d="M12 9v4M12 15.5h.01" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+                        </svg>
+                    </span>
                 </div>
+                <div class="metric-value">{{ $facilityRiskSummary['high_risk'] ?? 0 }}</div>
+                <div class="small">{{ $facilityRiskSummary['risk_distribution']['high'] ?? 0 }}%</div>
             </div>
         </div>
         <div class="col-md-6 col-lg-3 mb-3">
-            <div class="card h-100">
-                <div class="card-body">
-                    <div class="d-flex align-items-center">
-                        <div class="avatar flex-shrink-0 me-3">
-                            <span class="avatar-initial rounded bg-danger">
-                                <i class="bx bx-error-circle bx-sm text-white"></i>
-                            </span>
-                        </div>
-                        <div>
-                            <h5 class="mb-0">{{ $facilityRiskSummary['critical_risk'] ?? 0 }}</h5>
-                            <small class="text-muted">Critical Risk</small>
-                            <div class="mt-1">
-                                <small
-                                    class="text-danger">{{ $facilityRiskSummary['risk_distribution']['critical'] ?? 0 }}%</small>
-                            </div>
-                        </div>
-                    </div>
+            <div class="metric-card metric-card-rose h-100">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div class="metric-label">Critical Risk</div>
+                    <span class="metric-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none">
+                            <circle cx="12" cy="12" r="8.5" stroke="currentColor" stroke-width="1.7" />
+                            <path d="M9 9l6 6M15 9l-6 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+                        </svg>
+                    </span>
                 </div>
+                <div class="metric-value">{{ $facilityRiskSummary['critical_risk'] ?? 0 }}</div>
+                <div class="small">{{ $facilityRiskSummary['risk_distribution']['critical'] ?? 0 }}%</div>
             </div>
         </div>
     </div>
@@ -232,86 +151,70 @@
         @php $aiMetrics = $this->getAIMetrics(); @endphp
 
         <div class="col-md-3 mb-3">
-            <div class="card h-100">
-                <div class="card-body">
-                    <div class="d-flex align-items-center">
-                        <div class="avatar flex-shrink-0 me-3">
-                            <span class="avatar-initial rounded bg-primary">
-                                <i class="bx bx-brain bx-sm text-white"></i>
-                            </span>
-                        </div>
-                        <div>
-                            <h5 class="mb-0">{{ $aiMetrics['total_assessments'] }}</h5>
-                            <small class="text-muted">AI Assessments</small>
-                            <div class="mt-1">
-                                <small class="text-primary">Total completed</small>
-                            </div>
-                        </div>
-                    </div>
+            <div class="metric-card metric-card-violet h-100">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div class="metric-label">AI Assessments</div>
+                    <span class="metric-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none">
+                            <rect x="7" y="7" width="10" height="10" rx="3" stroke="currentColor" stroke-width="1.7" />
+                            <path d="M12 3.5v2M12 18.5v2M3.5 12h2M18.5 12h2" stroke="currentColor" stroke-width="1.7"
+                                stroke-linecap="round" />
+                        </svg>
+                    </span>
                 </div>
+                <div class="metric-value">{{ $aiMetrics['total_assessments'] }}</div>
+                <div class="small">Total completed</div>
             </div>
         </div>
 
         <div class="col-md-3 mb-3">
-            <div class="card h-100">
-                <div class="card-body">
-                    <div class="d-flex align-items-center">
-                        <div class="avatar flex-shrink-0 me-3">
-                            <span class="avatar-initial rounded bg-info">
-                                <i class="bx bx-calendar-week bx-sm text-white"></i>
-                            </span>
-                        </div>
-                        <div>
-                            <h5 class="mb-0">{{ $aiMetrics['this_week'] }}</h5>
-                            <small class="text-muted">This Week</small>
-                            <div class="mt-1">
-                                <small class="text-info">Recent assessments</small>
-                            </div>
-                        </div>
-                    </div>
+            <div class="metric-card metric-card-sky h-100">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div class="metric-label">This Week</div>
+                    <span class="metric-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none">
+                            <rect x="4.5" y="5.5" width="15" height="14" rx="2" stroke="currentColor"
+                                stroke-width="1.6" />
+                            <path d="M8 3.8v3M16 3.8v3M8 11h8M8 14h5" stroke="currentColor" stroke-width="1.6"
+                                stroke-linecap="round" />
+                        </svg>
+                    </span>
                 </div>
+                <div class="metric-value">{{ $aiMetrics['this_week'] }}</div>
+                <div class="small">Recent assessments</div>
             </div>
         </div>
 
         <div class="col-md-3 mb-3">
-            <div class="card h-100">
-                <div class="card-body">
-                    <div class="d-flex align-items-center">
-                        <div class="avatar flex-shrink-0 me-3">
-                            <span class="avatar-initial rounded bg-warning">
-                                <i class="bx bx-shield-quarter bx-sm text-white"></i>
-                            </span>
-                        </div>
-                        <div>
-                            <h5 class="mb-0">{{ $aiMetrics['high_risk_detected'] }}</h5>
-                            <small class="text-muted">High Risk</small>
-                            <div class="mt-1">
-                                <small class="text-warning">AI detected</small>
-                            </div>
-                        </div>
-                    </div>
+            <div class="metric-card metric-card-amber h-100">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div class="metric-label">High Risk</div>
+                    <span class="metric-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none">
+                            <path d="M12 4l7 3v5c0 4.4-2.8 6.9-7 8-4.2-1.1-7-3.6-7-8V7l7-3z"
+                                stroke="currentColor" stroke-width="1.7" />
+                        </svg>
+                    </span>
                 </div>
+                <div class="metric-value">{{ $aiMetrics['high_risk_detected'] }}</div>
+                <div class="small">AI detected</div>
             </div>
         </div>
 
         <div class="col-md-3 mb-3">
-            <div class="card h-100">
-                <div class="card-body">
-                    <div class="d-flex align-items-center">
-                        <div class="avatar flex-shrink-0 me-3">
-                            <span class="avatar-initial rounded bg-success">
-                                <i class="bx bx-badge-check bx-sm text-white"></i>
-                            </span>
-                        </div>
-                        <div>
-                            <h5 class="mb-0">{{ $aiMetrics['average_confidence'] }}%</h5>
-                            <small class="text-muted">AI Confidence</small>
-                            <div class="mt-1">
-                                <small class="text-success">Average accuracy</small>
-                            </div>
-                        </div>
-                    </div>
+            <div class="metric-card metric-card-emerald h-100">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div class="metric-label">AI Confidence</div>
+                    <span class="metric-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none">
+                            <circle cx="12" cy="12" r="8.5" stroke="currentColor" stroke-width="1.7" />
+                            <path d="M8.5 12.5l2.5 2.5 4.5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+                                stroke-linejoin="round" />
+                        </svg>
+                    </span>
                 </div>
+                <div class="metric-value">{{ $aiMetrics['average_confidence'] }}%</div>
+                <div class="small">Average accuracy</div>
             </div>
         </div>
     </div>
@@ -409,59 +312,35 @@
                 <div class="card-body">
                     @if (isset($facilityRiskSummary['service_utilization']))
                         @php $utilization = $facilityRiskSummary['service_utilization']; @endphp
-                        <div class="row">
-                            <div class="col-6 mb-3">
-                                <div class="d-flex align-items-center">
-                                    <div class="avatar me-3">
-                                        <span class="avatar-initial rounded bg-success">
-                                            <i class="bx bx-baby-carriage text-white"></i>
-                                        </span>
-                                    </div>
-                                    <div>
-                                        <h6 class="mb-0">{{ $utilization['with_deliveries'] ?? 0 }}</h6>
-                                        <small class="text-muted">With Deliveries</small>
-                                    </div>
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <div class="metric-card metric-card-emerald h-100">
+                                    <div class="metric-label">Deliveries</div>
+                                    <div class="metric-value">{{ $utilization['with_deliveries'] ?? 0 }}</div>
                                 </div>
                             </div>
-                            <div class="col-6 mb-3">
-                                <div class="d-flex align-items-center">
-                                    <div class="avatar me-3">
-                                        <span class="avatar-initial rounded bg-info">
-                                            <i class="bx bx-female text-white"></i>
-                                        </span>
-                                    </div>
-                                    <div>
-                                        <h6 class="mb-0">{{ $utilization['with_postnatal'] ?? 0 }}</h6>
-                                        <small class="text-muted">With Postnatal</small>
-                                    </div>
+                            <div class="col-6">
+                                <div class="metric-card metric-card-sky h-100">
+                                    <div class="metric-label">Postnatal</div>
+                                    <div class="metric-value">{{ $utilization['with_postnatal'] ?? 0 }}</div>
                                 </div>
                             </div>
-                            <div class="col-6 mb-3">
-                                <div class="d-flex align-items-center">
-                                    <div class="avatar me-3">
-                                        <span class="avatar-initial rounded bg-warning">
-                                            <i class="bx bx-injection text-white"></i>
-                                        </span>
-                                    </div>
-                                    <div>
-                                        <h6 class="mb-0">{{ $utilization['with_tetanus'] ?? 0 }}</h6>
-                                        <small class="text-muted">With Tetanus</small>
-                                    </div>
+                            <div class="col-6">
+                                <div class="metric-card metric-card-amber h-100">
+                                    <div class="metric-label">Tetanus</div>
+                                    <div class="metric-value">{{ $utilization['with_tetanus'] ?? 0 }}</div>
                                 </div>
                             </div>
-                            <div class="col-6 mb-3">
-                                <div class="d-flex align-items-center">
-                                    <div class="avatar me-3">
-                                        <span class="avatar-initial rounded bg-primary">
-                                            <i class="bx bx-group text-white"></i>
-                                        </span>
-                                    </div>
-                                    <div>
-                                        <h6 class="mb-0">{{ $utilization['total_patients'] ?? 0 }}</h6>
-                                        <small class="text-muted">Total Patients</small>
-                                    </div>
+                            <div class="col-6">
+                                <div class="metric-card metric-card-violet h-100">
+                                    <div class="metric-label">Total Patients</div>
+                                    <div class="metric-value">{{ $utilization['total_patients'] ?? 0 }}</div>
                                 </div>
                             </div>
+                        </div>
+                    @else
+                        <div class="text-center py-4 text-muted">
+                            Service utilization data is not available for this scope yet.
                         </div>
                     @endif
                 </div>
@@ -476,7 +355,18 @@
                     <small class="text-muted">Visual breakdown</small>
                 </div>
                 <div class="card-body">
-                    <canvas id="riskChart" style="max-height: 200px;"></canvas>
+                    @php
+                        $rd = $facilityRiskSummary['risk_distribution'] ?? ['low' => 0, 'moderate' => 0, 'high' => 0, 'critical' => 0];
+                        $distributionTotal = ($rd['low'] ?? 0) + ($rd['moderate'] ?? 0) + ($rd['high'] ?? 0) + ($rd['critical'] ?? 0);
+                    @endphp
+                    @if ($distributionTotal > 0)
+                        <canvas id="riskChart" style="max-height: 200px;"></canvas>
+                    @else
+                        <div class="text-center py-4">
+                            <i class="bx bx-pie-chart-alt-2 bx-lg text-muted mb-2"></i>
+                            <p class="text-muted mb-0">No risk distribution data available yet</p>
+                        </div>
+                    @endif
                 </div>
             </div>
         </div>
@@ -509,38 +399,24 @@
                             <tbody>
                                 @foreach ($highRiskPatients as $patient)
                                     <tr>
-                                        <td>{{ $patient->user->first_name }} {{ $patient->user->last_name }}</td>
-                                        <td><span class="badge bg-label-info">{{ $patient->user->DIN }}</span></td>
-                                        <td>{{ $patient->age }} years</td>
-                                        <td>
-                                            @php
-                                                $lmp = Carbon::parse($patient->lmp);
-                                                $now = Carbon::now();
-                                                $weeks = $lmp->diffInWeeks($now);
-                                                $days = $lmp->diffInDays($now) % 7;
-                                            @endphp
-                                            {{ $weeks }}w {{ $days }}d
-                                        </td>
-                                        <td>{{ Carbon::parse($patient->edd)->format('M d, Y') }}</td>
+                                        <td>{{ $patient->patient_name ?? trim(($patient->patient->first_name ?? '') . ' ' . ($patient->patient->last_name ?? '')) }}</td>
+                                        <td><span class="badge bg-label-info">{{ $patient->patient_din ?? ($patient->patient->DIN ?? 'N/A') }}</span></td>
+                                        <td>{{ $patient->patient_age ?? $patient->age ?? 'N/A' }}{{ isset($patient->patient_age) || isset($patient->age) ? ' years' : '' }}</td>
+                                        <td>{{ $patient->gestational_age_label ?? 'N/A' }}</td>
+                                        <td>{{ $patient->edd ? Carbon::parse($patient->edd)->format('M d, Y') : 'N/A' }}</td>
                                         <td>
                                             <div class="d-flex flex-wrap gap-1">
-                                                <button wire:click="assessPatientRisk({{ $patient->user_id }})"
+                                                <button wire:click="assessPatientRisk({{ $patient->patient_id }})"
                                                     class="btn btn-sm btn-info">
                                                     <i class="bx bx-search-alt me-1"></i>
                                                     View Details
                                                 </button>
 
-                                                <button wire:click="performAIAssessment({{ $patient->user_id }})"
+                                                <button wire:click="performAIAssessment({{ $patient->patient_id }})"
                                                     class="btn btn-sm btn-secondary">
                                                     <i class="bx bx-brain me-1"></i>
                                                     Analyse with AI
                                                 </button>
-                                                <button wire:click="viewDiagnosticSummary({{ $patient->user_id }})"
-                                                    class="btn btn-sm btn-warning">
-                                                    <i class="bx bx-analyse me-1"></i>
-                                                    Diagnostic Assistant
-                                                </button>
-
                                             </div>
                                         </td>
                                     </tr>
@@ -553,475 +429,10 @@
         </div>
     @endif
 
-    {{-- Clinical Diagnostic Summary Modal --}}
-    @if ($showDiagnosticModal && $diagnosticSummary)
-        <div class="modal fade show" style="display: block;" tabindex="-1">
-            <div class="modal-dialog modal-xl">
-                <div class="modal-content">
-                    <div class="modal-header  text-white">
-                        <h5 class="modal-title">
-                            <i class="bx bx-analyse me-2"></i>
-                            Clinical Diagnostic Summary - {{ $diagnosticSummary['patient_info']['name'] }}
-                        </h5>
-                        <button type="button" class="btn-close btn-close-white"
-                            wire:click="closeDiagnosticModal"></button>
-                    </div>
-
-                    <div class="modal-body">
-                        {{-- Patient Info --}}
-                        <div class="card mb-3">
-                            <div class="card-body">
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <h6 class="text-primary mb-3">Patient Information</h6>
-                                        <p class="mb-1"><strong>Name:</strong>
-                                            {{ $diagnosticSummary['patient_info']['name'] }}</p>
-                                        <p class="mb-1"><strong>DIN:</strong>
-                                            {{ $diagnosticSummary['patient_info']['din'] }}</p>
-                                        <p class="mb-1"><strong>Age:</strong>
-                                            {{ $diagnosticSummary['patient_info']['age'] }} years</p>
-                                        <p class="mb-0"><strong>Phone:</strong>
-                                            {{ $diagnosticSummary['patient_info']['phone'] ?? 'N/A' }}</p>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <h6 class="text-primary mb-3">Current Pregnancy Status</h6>
-                                        <p class="mb-1"><strong>Gestational Age:</strong>
-                                            {{ $diagnosticSummary['clinical_snapshot']['gestational_age'] }}</p>
-                                        <p class="mb-1"><strong>Trimester:</strong>
-                                            {{ $diagnosticSummary['clinical_snapshot']['trimester'] }}</p>
-                                        <p class="mb-1"><strong>EDD:</strong>
-                                            {{ Carbon::parse($diagnosticSummary['clinical_snapshot']['edd'])->format('M d, Y') }}
-                                        </p>
-                                        <p class="mb-0"><strong>Days Until EDD:</strong>
-                                            {{ $diagnosticSummary['clinical_snapshot']['days_until_edd'] ?? 'N/A' }}
-                                            days</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        {{-- Risk Overview --}}
-                        <div
-                            class="card mb-3 border-{{ $diagnosticSummary['clinical_snapshot']['overall_risk']['level'] === 'critical' ? 'danger' : ($diagnosticSummary['clinical_snapshot']['overall_risk']['level'] === 'high' ? 'warning' : 'info') }}">
-                            <div
-                                class="card-header bg-{{ $diagnosticSummary['clinical_snapshot']['overall_risk']['level'] === 'critical' ? 'danger' : ($diagnosticSummary['clinical_snapshot']['overall_risk']['level'] === 'high' ? 'warning' : 'info') }} text-white">
-                                <h6 class="mb-0"><i class="bx bx-error-circle me-2"></i>Overall Risk Assessment</h6>
-                            </div>
-                            <div class="card-body">
-                                <div class="row align-items-center">
-                                    <div class="col-md-4">
-                                        <h3 class="mb-0">
-                                            {{ ucfirst($diagnosticSummary['clinical_snapshot']['overall_risk']['level']) }}
-                                            Risk</h3>
-                                        <small class="text-muted">Risk Score:
-                                            {{ $diagnosticSummary['clinical_snapshot']['overall_risk']['score'] }}/200</small>
-                                    </div>
-                                    <div class="col-md-8">
-                                        <div class="progress" style="height: 30px;">
-                                            <div class="progress-bar bg-{{ $diagnosticSummary['clinical_snapshot']['overall_risk']['level'] === 'critical' ? 'danger' : ($diagnosticSummary['clinical_snapshot']['overall_risk']['level'] === 'high' ? 'warning' : 'info') }}"
-                                                role="progressbar"
-                                                style="width: {{ $diagnosticSummary['clinical_snapshot']['overall_risk']['percentage'] }}%"
-                                                aria-valuenow="{{ $diagnosticSummary['clinical_snapshot']['overall_risk']['percentage'] }}"
-                                                aria-valuemin="0" aria-valuemax="100">
-                                                {{ round($diagnosticSummary['clinical_snapshot']['overall_risk']['percentage']) }}%
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        {{-- Primary Concerns --}}
-                        @if (!empty($diagnosticSummary['primary_concerns']))
-                            <div class="card mb-3">
-                                <div class="card-header bg-label-warning">
-                                    <h6 class="mb-0"><i class="bx bx-error-circle me-2"></i>Primary Clinical
-                                        Concerns</h6>
-                                </div>
-                                <div class="card-body">
-                                    @foreach ($diagnosticSummary['primary_concerns'] as $concern)
-                                        <div
-                                            class="alert alert-{{ $concern['severity'] === 'Critical' ? 'danger' : 'warning' }} mb-2">
-                                            <div class="d-flex justify-content-between align-items-start">
-                                                <div>
-                                                    <h6 class="alert-heading mb-1">{{ $concern['concern'] }}</h6>
-                                                    <p class="mb-1"><strong>Severity:</strong> <span
-                                                            class="badge bg-{{ $concern['severity'] === 'Critical' ? 'danger' : 'warning' }}">{{ $concern['severity'] }}</span>
-                                                    </p>
-                                                    <p class="mb-1"><strong>Category:</strong>
-                                                        {{ ucfirst(str_replace('_', ' ', $concern['category'])) }}</p>
-                                                    <p class="mb-0"><strong>Clinical Impact:</strong>
-                                                        {{ $concern['clinical_impact'] }}</p>
-                                                </div>
-                                                <span
-                                                    class="badge bg-light text-dark">{{ round($concern['confidence'] * 100) }}%
-                                                    confidence</span>
-                                            </div>
-                                        </div>
-                                    @endforeach
-                                </div>
-                            </div>
-                        @endif
-
-                        {{-- Clinical Reasoning --}}
-                        <div class="card mb-3">
-                            <div class="card-header bg-label-info">
-                                <h6 class="mb-0"><i class="bx bx-brain me-2"></i>Clinical Reasoning & Analysis</h6>
-                            </div>
-                            <div class="card-body">
-                                @foreach ($diagnosticSummary['clinical_reasoning'] as $index => $reasoning)
-                                    <div
-                                        class="border-start border-primary border-3 ps-3 mb-3 pb-3 {{ $index < count($diagnosticSummary['clinical_reasoning']) - 1 ? 'border-bottom' : '' }}">
-                                        <h6 class="text-primary mb-2">{{ $reasoning['description'] }}</h6>
-
-                                        <div class="mb-2">
-                                            <strong class="text-muted">Why This Was Flagged:</strong>
-                                            <p class="mb-0">{{ $reasoning['why_flagged'] }}</p>
-                                        </div>
-
-                                        <div class="mb-2">
-                                            <strong class="text-muted">Clinical Significance:</strong>
-                                            <p class="mb-0">{{ $reasoning['clinical_significance'] }}</p>
-                                        </div>
-
-                                        <div class="mb-0">
-                                            <strong class="text-muted">Potential Complications:</strong>
-                                            <ul class="mb-0 mt-1">
-                                                @foreach ($reasoning['potential_complications'] as $complication)
-                                                    <li>{{ $complication }}</li>
-                                                @endforeach
-                                            </ul>
-                                        </div>
-                                    </div>
-                                @endforeach
-                            </div>
-                        </div>
-
-                        {{-- Vital Signs Summary --}}
-                        <div class="card mb-3">
-                            <div class="card-header">
-                                <h6 class="mb-0"><i class="bx bx-heart me-2"></i>Current Vital Signs & Clinical Data
-                                </h6>
-                            </div>
-                            <div class="card-body">
-                                <div class="row">
-                                    <div class="col-md-4 mb-3">
-                                        <div class="border rounded p-3">
-                                            <h6 class="mb-2">Blood Pressure</h6>
-                                            <p class="mb-1">
-                                                <strong>{{ $diagnosticSummary['clinical_snapshot']['vitals']['blood_pressure'] ?? 'Not recorded' }}</strong>
-                                            </p>
-                                            <span
-                                                class="badge bg-{{ $diagnosticSummary['clinical_snapshot']['vitals']['bp_status'] === 'Normal' ? 'success' : 'warning' }}">
-                                                {{ $diagnosticSummary['clinical_snapshot']['vitals']['bp_status'] }}
-                                            </span>
-                                        </div>
-                                    </div>
-
-                                    <div class="col-md-4 mb-3">
-                                        <div class="border rounded p-3">
-                                            <h6 class="mb-2">Hemoglobin</h6>
-                                            <p class="mb-1">
-                                                <strong>{{ $diagnosticSummary['clinical_snapshot']['vitals']['hemoglobin'] ?? 'Not recorded' }}
-                                                    g/dL</strong>
-                                            </p>
-                                            <span
-                                                class="badge bg-{{ $diagnosticSummary['clinical_snapshot']['vitals']['hb_status'] === 'Normal' ? 'success' : 'warning' }}">
-                                                {{ $diagnosticSummary['clinical_snapshot']['vitals']['hb_status'] }}
-                                            </span>
-                                        </div>
-                                    </div>
-
-                                    <div class="col-md-4 mb-3">
-                                        <div class="border rounded p-3">
-                                            <h6 class="mb-2">BMI</h6>
-                                            <p class="mb-1">
-                                                <strong>{{ $diagnosticSummary['clinical_snapshot']['vitals']['bmi'] ?? 'Not calculated' }}</strong>
-                                            </p>
-                                            <span
-                                                class="badge bg-{{ $diagnosticSummary['clinical_snapshot']['vitals']['bmi_category'] === 'Normal' ? 'success' : 'info' }}">
-                                                {{ $diagnosticSummary['clinical_snapshot']['vitals']['bmi_category'] }}
-                                            </span>
-                                        </div>
-                                    </div>
-
-                                    <div class="col-md-6">
-                                        <p class="mb-1"><strong>Blood Group:</strong>
-                                            {{ $diagnosticSummary['clinical_snapshot']['blood_work']['blood_group'] ?? 'Unknown' }}
-                                        </p>
-                                        <p class="mb-0"><strong>Genotype:</strong>
-                                            {{ $diagnosticSummary['clinical_snapshot']['blood_work']['genotype'] ?? 'Unknown' }}
-                                            <small
-                                                class="text-muted">({{ $diagnosticSummary['clinical_snapshot']['blood_work']['genotype_risk'] }})</small>
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        {{-- Immediate Actions --}}
-                        @if (!empty($diagnosticSummary['immediate_actions']))
-                            <div class="card mb-3">
-                                <div class="card-header bg-label-danger">
-                                    <h6 class="mb-0"><i class="bx bx-list-check me-2"></i>Recommended Immediate
-                                        Actions</h6>
-                                </div>
-                                <div class="card-body">
-                                    <div class="table-responsive">
-                                        <table class="table table-sm table-hover">
-                                            <thead class="table-light">
-                                                <tr>
-                                                    <th width="15%">Priority</th>
-                                                    <th width="35%">Action Required</th>
-                                                    <th width="20%">Timeframe</th>
-                                                    <th width="30%">Reason</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                @foreach ($diagnosticSummary['immediate_actions'] as $action)
-                                                    <tr>
-                                                        <td>
-                                                            <span
-                                                                class="badge bg-{{ $action['priority'] === 'urgent' ? 'danger' : ($action['priority'] === 'high' ? 'warning' : ($action['priority'] === 'medium' ? 'info' : 'secondary')) }}">
-                                                                {{ ucfirst($action['priority']) }}
-                                                            </span>
-                                                        </td>
-                                                        <td><strong>{{ $action['action'] }}</strong></td>
-                                                        <td>{{ $action['timeframe'] }}</td>
-                                                        <td><small>{{ $action['reason'] }}</small></td>
-                                                    </tr>
-                                                @endforeach
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-                            </div>
-                        @endif
-
-                        {{-- Monitoring Plan --}}
-                        <div class="card mb-3">
-                            <div class="card-header bg-label-success">
-                                <h6 class="mb-0"><i class="bx bx-calendar-check me-2"></i>Monitoring & Follow-up
-                                    Plan</h6>
-                            </div>
-                            <div class="card-body">
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <h6 class="text-success">Visit Schedule</h6>
-                                        <p class="mb-1"><strong>Recommended Frequency:</strong>
-                                            {{ $diagnosticSummary['monitoring_plan']['visit_frequency'] }}</p>
-                                        <p class="mb-3"><strong>Next Visit Due:</strong>
-                                            {{ Carbon::parse($diagnosticSummary['monitoring_plan']['next_visit_due'])->format('M d, Y') }}
-                                        </p>
-
-                                        <h6 class="text-success">Parameters to Monitor</h6>
-                                        <ul class="list-unstyled">
-                                            @foreach ($diagnosticSummary['monitoring_plan']['monitoring_parameters'] as $param)
-                                                <li class="mb-1"><i
-                                                        class="bx bx-check text-success me-2"></i>{{ $param }}
-                                                </li>
-                                            @endforeach
-                                        </ul>
-                                    </div>
-
-                                    <div class="col-md-6">
-                                        @if (!empty($diagnosticSummary['monitoring_plan']['specialist_referrals']))
-                                            <h6 class="text-success">Required Specialist Referrals</h6>
-                                            @foreach ($diagnosticSummary['monitoring_plan']['specialist_referrals'] as $referral)
-                                                <div class="alert alert-info mb-2 p-2">
-                                                    <strong>{{ $referral['specialist'] }}</strong>
-                                                    <span
-                                                        class="badge bg-{{ $referral['urgency'] === 'high' ? 'danger' : 'warning' }} float-end">
-                                                        {{ ucfirst($referral['urgency']) }} Priority
-                                                    </span>
-                                                    <br><small class="text-muted">{{ $referral['reason'] }}</small>
-                                                </div>
-                                            @endforeach
-                                        @endif
-
-                                        @if (!empty($diagnosticSummary['monitoring_plan']['lab_schedule']))
-                                            <h6 class="text-success mt-3">Laboratory Tests Schedule</h6>
-                                            <div class="table-responsive">
-                                                <table class="table table-sm">
-                                                    <thead>
-                                                        <tr>
-                                                            <th>Test</th>
-                                                            <th>Timing</th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                        @foreach ($diagnosticSummary['monitoring_plan']['lab_schedule'] as $lab)
-                                                            <tr>
-                                                                <td>{{ $lab['test'] }}</td>
-                                                                <td><small
-                                                                        class="text-muted">{{ $lab['timing'] }}</small>
-                                                                </td>
-                                                            </tr>
-                                                        @endforeach
-                                                    </tbody>
-                                                </table>
-                                            </div>
-                                        @endif
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        {{-- Risk Trajectory --}}
-                        @if ($diagnosticSummary['risk_trajectory']['trend'] !== 'insufficient_data')
-                            <div class="card mb-3">
-                                <div class="card-header">
-                                    <h6 class="mb-0">
-                                        <i
-                                            class="bx bx-trending-{{ $diagnosticSummary['risk_trajectory']['trend'] === 'increasing' ? 'up text-danger' : ($diagnosticSummary['risk_trajectory']['trend'] === 'decreasing' ? 'down text-success' : 'flat text-secondary') }} me-2"></i>
-                                        Risk Trajectory Analysis
-                                    </h6>
-                                </div>
-                                <div class="card-body">
-                                    <div class="row">
-                                        <div class="col-md-6">
-                                            <p class="mb-2">
-                                                <strong>Trend:</strong>
-                                                <span
-                                                    class="badge bg-{{ $diagnosticSummary['risk_trajectory']['trend'] === 'increasing' ? 'danger' : ($diagnosticSummary['risk_trajectory']['trend'] === 'decreasing' ? 'success' : 'secondary') }}">
-                                                    {{ ucfirst($diagnosticSummary['risk_trajectory']['trend']) }}
-                                                </span>
-                                            </p>
-                                            <p class="mb-2"><strong>Score Change:</strong>
-                                                {{ $diagnosticSummary['risk_trajectory']['score_change'] > 0 ? '+' : '' }}{{ $diagnosticSummary['risk_trajectory']['score_change'] }}
-                                                points</p>
-                                            <p class="mb-2"><strong>Current Score:</strong>
-                                                {{ $diagnosticSummary['risk_trajectory']['current_score'] }}</p>
-                                            <p class="mb-0"><strong>Previous Score:</strong>
-                                                {{ $diagnosticSummary['risk_trajectory']['previous_score'] }}</p>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <div
-                                                class="alert alert-{{ $diagnosticSummary['risk_trajectory']['trend'] === 'increasing' ? 'danger' : 'info' }}">
-                                                <strong>Clinical Interpretation:</strong><br>
-                                                {{ $diagnosticSummary['risk_trajectory']['interpretation'] }}
-                                            </div>
-                                            <small class="text-muted">
-                                                Based on
-                                                {{ $diagnosticSummary['risk_trajectory']['assessments_count'] }}
-                                                assessments
-                                                ({{ Carbon::parse($diagnosticSummary['risk_trajectory']['first_assessment'])->format('M d') }}
-                                                -
-                                                {{ Carbon::parse($diagnosticSummary['risk_trajectory']['latest_assessment'])->format('M d, Y') }})
-                                            </small>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        @endif
-
-                        {{-- Care Gaps --}}
-                        @if (!empty($diagnosticSummary['care_gaps']))
-                            <div class="card mb-3">
-                                <div class="card-header bg-label-warning">
-                                    <h6 class="mb-0"><i class="bx bx-error-alt me-2"></i>Identified Gaps in Care
-                                    </h6>
-                                </div>
-                                <div class="card-body">
-                                    @foreach ($diagnosticSummary['care_gaps'] as $gap)
-                                        <div class="border-start border-warning border-3 ps-3 mb-3">
-                                            <h6 class="text-warning mb-2">{{ $gap['gap'] }}</h6>
-                                            <div class="row">
-                                                <div class="col-md-6">
-                                                    <p class="mb-1"><strong>Category:</strong>
-                                                        {{ $gap['category'] }}</p>
-                                                    <p class="mb-1"><strong>Current Status:</strong>
-                                                        {{ $gap['current_status'] }}</p>
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <p class="mb-1"><strong>Required:</strong>
-                                                        {{ $gap['required'] ?? $gap['expected'] }}</p>
-                                                    <p class="mb-0"><strong>Recommended Action:</strong> <span
-                                                            class="text-primary">{{ $gap['action'] }}</span></p>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    @endforeach
-                                </div>
-                            </div>
-                        @endif
-
-                        {{-- Metadata --}}
-                        <div class="card mb-3 bg-light">
-                            <div class="card-body p-2">
-                                <small class="text-muted">
-                                    <strong>Report Generated:</strong>
-                                    {{ $diagnosticSummary['metadata']['generated_at']->format('M d, Y h:i A') }} |
-                                    <strong>Assessment Date:</strong>
-                                    {{ Carbon::parse($diagnosticSummary['metadata']['assessment_date'])->format('M d, Y') }}
-                                    |
-                                    <strong>Model Version:</strong>
-                                    {{ $diagnosticSummary['metadata']['model_version'] }} |
-                                    <strong>Overall Confidence:</strong>
-                                    {{ $diagnosticSummary['metadata']['confidence'] }}%
-                                </small>
-                            </div>
-                        </div>
-                    </div>
-
-                    {{-- Legal Disclaimer Footer --}}
-                    <div class="modal-footer bg-light border-top">
-                        <div class="w-100">
-                            <div class="alert alert-warning mb-3" role="alert">
-                                <h6 class="alert-heading mb-2">
-                                    <i class="bx bx-info-circle me-2"></i>
-                                    <strong>Clinical Decision Support Tool - Medical-Legal Notice</strong>
-                                </h6>
-                                <div class="small">
-                                    <p class="mb-2"><strong>This is a clinical decision support tool and NOT a
-                                            medical diagnosis or treatment plan.</strong></p>
-                                    <ul class="mb-2">
-                                        <li>All recommendations, assessments, and analyses require review,
-                                            interpretation, and approval by a qualified healthcare provider</li>
-                                        <li>This tool aids clinical decision-making but does not replace professional
-                                            medical judgment or examination</li>
-                                        <li>Healthcare providers must use their professional training, clinical
-                                            experience, and judgment when interpreting and acting on these results</li>
-                                        <li>Patient care decisions and treatment plans remain the sole responsibility of
-                                            the treating clinician</li>
-                                        <li>This system is designed to supplement, not substitute for, the knowledge,
-                                            skills, and judgment of healthcare professionals</li>
-                                    </ul>
-                                    <p class="mb-0"><strong>For all emergency situations, follow established
-                                            emergency protocols immediately. This tool should not delay emergency
-                                            care.</strong></p>
-                                </div>
-                            </div>
-
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div>
-                                    <small class="text-muted">
-                                        <i class="bx bx-shield-quarter me-1"></i>
-                                        Clinician must document review and decision
-                                    </small>
-                                </div>
-                                <div>
-                                    <button type="button" class="btn btn-secondary me-2"
-                                        wire:click="closeDiagnosticModal">
-                                        <i class="bx bx-x me-1"></i>Close
-                                    </button>
-                                    <button type="button" class="btn btn-primary" onclick="window.print()">
-                                        <i class="bx bx-printer me-1"></i>Print Summary
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="modal-backdrop fade show"></div>
-    @endif
-
     <!-- Risk Assessment Modal -->
     @if ($showAssessmentModal && $riskAssessment)
-        <div class="modal fade show" style="display: block;" tabindex="-1">
-            <div class="modal-dialog modal-xl">
+        <div class="modal fade show" style="display: block;" tabindex="-1" aria-modal="true" role="dialog">
+            <div class="modal-dialog modal-xl modal-dialog-scrollable modal-dialog-centered">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h5 class="modal-title">
@@ -1207,14 +618,6 @@
                             <i class="bx bx-x me-1"></i>
                             Close
                         </button>
-                        <button type="button" class="btn btn-primary">
-                            <i class="bx bx-calendar-plus me-1"></i>
-                            Schedule Follow-up
-                        </button>
-                        <button type="button" class="btn btn-info">
-                            <i class="bx bx-printer me-1"></i>
-                            Print Assessment
-                        </button>
                     </div>
                 </div>
             </div>
@@ -1305,152 +708,46 @@
             }
         }
 
-        document.addEventListener('DOMContentLoaded', function() {
-            initializeCharts();
-        });
+        function scheduleRiskChartsInit() {
+            setTimeout(() => {
+                initializeCharts();
+            }, 100);
+        }
 
-        document.addEventListener('livewire:initialized', () => {
-            Livewire.on('risk-data-updated', () => {
-                setTimeout(() => {
-                    initializeCharts();
-                }, 100);
+        if (!window.__riskAnalyticsChartsBound) {
+            window.__riskAnalyticsChartsBound = true;
+
+            document.addEventListener('DOMContentLoaded', scheduleRiskChartsInit);
+            document.addEventListener('livewire:navigated', scheduleRiskChartsInit);
+
+            document.addEventListener('livewire:initialized', () => {
+                Livewire.on('risk-data-updated', scheduleRiskChartsInit);
             });
-        });
+        }
+
+        scheduleRiskChartsInit();
     </script>
 
     <style>
-        .hero-card {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-radius: 20px;
-            overflow: hidden;
-            position: relative;
-            min-height: 220px;
-        }
-
-        .hero-content {
-            position: relative;
-            z-index: 2;
-            padding: 2rem;
-        }
-
-        .hero-decoration {
-            position: absolute;
-            top: 0;
-            right: 0;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            z-index: 1;
-        }
-
-        .floating-shape {
-            position: absolute;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.1);
-            animation: float 6s ease-in-out infinite;
-        }
-
-        .floating-shape.shape-1 {
-            width: 80px;
-            height: 80px;
-            top: 20%;
-            right: 10%;
-            animation-delay: 0s;
-        }
-
-        .floating-shape.shape-2 {
-            width: 60px;
-            height: 60px;
-            top: 60%;
-            right: 20%;
-            animation-delay: 2s;
-        }
-
-        .floating-shape.shape-3 {
-            width: 40px;
-            height: 40px;
-            top: 40%;
-            right: 5%;
-            animation-delay: 4s;
-        }
-
-        @keyframes float {
-
-            0%,
-            100% {
-                transform: translateY(0px) rotate(0deg);
-            }
-
-            50% {
-                transform: translateY(-20px) rotate(180deg);
-            }
-        }
-
-        .hero-stats {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 2rem;
-            margin-top: 1rem;
-        }
-
-        .hero-stat {
-            display: flex;
-            align-items: center;
-            color: rgba(255, 255, 255, 0.95);
-            font-weight: 500;
-            font-size: 14px;
-        }
-
-        .hero-stat i {
-            margin-right: 0.5rem;
-            font-size: 18px;
-        }
-
-        .card {
-            box-shadow: 0 2px 6px 0 rgba(67, 89, 113, 0.12);
-            border: 1px solid rgba(67, 89, 113, 0.1);
-            transition: all 0.3s ease;
-        }
-
-        .card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px 0 rgba(67, 89, 113, 0.16);
-        }
-
-        .avatar {
-            position: relative;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 40px;
-            height: 40px;
-        }
-
-        .avatar-initial {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 40px;
-            height: 40px;
-        }
-
-        .text-muted {
-            color: #a7acb2 !important;
-        }
-
         .modal.show {
             background-color: rgba(0, 0, 0, 0.5);
         }
 
+        .modal-content {
+            border: 1px solid rgba(148, 163, 184, 0.22);
+            border-radius: 18px;
+            box-shadow: 0 22px 45px -32px rgba(15, 23, 42, 0.55);
+        }
+
+        .modal-header {
+            border-bottom: 1px solid rgba(148, 163, 184, 0.22);
+        }
+
+        .modal-footer {
+            border-top: 1px solid rgba(148, 163, 184, 0.22);
+        }
+
         @media (max-width: 768px) {
-            .hero-stats {
-                gap: 1rem;
-            }
-
-            .hero-stat {
-                font-size: 12px;
-            }
-
             .card-body {
                 padding: 1rem;
             }
@@ -1467,3 +764,5 @@
 
     @include('_partials.datatables-init')
 </div>
+
+

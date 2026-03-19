@@ -1,50 +1,20 @@
 <div class="dashboard-container">
-    <!-- Hero Card Header -->
-    <div class="row mb-5">
-        <div class="col-12">
-            <div class="hero-card">
-                <div class="hero-content">
-                    <div class="hero-text">
-                        <h4 class="hero-title" style="color: white; font-size: 30px;">
-                            <i class='bx bx-user-circle me-2'></i>
-                            Welcome, {{ $user->first_name }} {{ $user->last_name }}
-                        </h4>
-
-                        <div class="d-flex flex-wrap gap-3 text-white mb-1">
-                            <span>
-                                <i class="bx bx-map me-1"></i>
-                                <strong>State Coverage:</strong> {{ $state_name ?? 'N/A' }}
-                            </span>
-                            <span>
-                                <i class="bx bx-building-house me-1"></i>
-                                <strong>Facilities Managed:</strong> {{ $facilityCount ?? 0 }}
-                            </span>
-                            <span>
-                                <i class="bx bx-time me-1"></i>
-                                <strong>Time:</strong>
-                                {{ \Carbon\Carbon::now('Africa/Lagos')->format('l, F j, Y, h:i A') }}
-                            </span>
-                        </div>
-
-                        <div class="hero-stats">
-                            <span class="hero-stat">
-                                <i class="bx bx-group"></i>
-                                Total Patients ({{ number_format($totalPatients) }})
-                            </span>
-                            <span class="hero-stat">
-                                <i class="bx bx-trending-up"></i>
-                                New This Period ({{ number_format($newRegistrations) }})
-                            </span>
-                            <span class="hero-stat">
-                                <i class="bx bx-calendar-check"></i>
-                                Today's Visits ({{ number_format($todaysAttendance) }})
-                            </span>
-                        </div>
-                    </div>
-                    <div class="hero-decoration">
-                        <div class="floating-shape shape-1"></div>
-                        <div class="floating-shape shape-2"></div>
-                        <div class="floating-shape shape-3"></div>
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="d-flex flex-column flex-lg-row justify-content-between align-items-start gap-3">
+                <div>
+                    <h5 class="mb-1 d-flex align-items-center gap-2">
+                        <i class='bx bx-map text-primary'></i>
+                        State Officer Dashboard
+                    </h5>
+                    <div class="small text-muted">Welcome, {{ $user->first_name }} {{ $user->last_name }}</div>
+                    <div class="small text-muted">{{ \Carbon\Carbon::now('Africa/Lagos')->format('l, F j, Y, h:i A') }}</div>
+                    <div class="d-flex flex-wrap gap-2 mt-2">
+                        <span class="badge bg-label-primary"><i class="bx bx-map me-1"></i>{{ $state_name ?? 'N/A' }}</span>
+                        <span class="badge bg-label-dark"><i class="bx bx-building-house me-1"></i>{{ $facilityCount ?? 0 }} Facilities</span>
+                        <span class="badge bg-label-info"><i class="bx bx-group me-1"></i>{{ number_format($totalPatients) }} Patients</span>
+                        <span class="badge bg-label-success"><i class="bx bx-trending-up me-1"></i>{{ number_format($newRegistrations) }} New</span>
+                        <span class="badge bg-label-warning"><i class="bx bx-calendar-check me-1"></i>{{ number_format($todaysAttendance) }} Today</span>
                     </div>
                 </div>
             </div>
@@ -680,92 +650,6 @@
     </div>
 
     <style>
-        .hero-card {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-radius: 20px;
-            overflow: hidden;
-            position: relative;
-            min-height: 200px;
-        }
-
-        .hero-content {
-            position: relative;
-            z-index: 2;
-            padding: 2rem;
-        }
-
-        .hero-decoration {
-            position: absolute;
-            top: 0;
-            right: 0;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            z-index: 1;
-        }
-
-        .floating-shape {
-            position: absolute;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.1);
-            animation: float 6s ease-in-out infinite;
-        }
-
-        .floating-shape.shape-1 {
-            width: 80px;
-            height: 80px;
-            top: 20%;
-            right: 10%;
-            animation-delay: 0s;
-        }
-
-        .floating-shape.shape-2 {
-            width: 60px;
-            height: 60px;
-            top: 60%;
-            right: 20%;
-            animation-delay: 2s;
-        }
-
-        .floating-shape.shape-3 {
-            width: 40px;
-            height: 40px;
-            top: 40%;
-            right: 5%;
-            animation-delay: 4s;
-        }
-
-        @keyframes float {
-
-            0%,
-            100% {
-                transform: translateY(0px) rotate(0deg);
-            }
-
-            50% {
-                transform: translateY(-20px) rotate(180deg);
-            }
-        }
-
-        .hero-stats {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 2rem;
-            margin-top: 1rem;
-        }
-
-        .hero-stat {
-            display: flex;
-            align-items: center;
-            color: rgba(255, 255, 255, 0.9);
-            font-weight: 500;
-        }
-
-        .hero-stat i {
-            margin-right: 0.5rem;
-            font-size: 1.2rem;
-        }
-
         .card {
             box-shadow: 0 2px 6px 0 rgba(67, 89, 113, 0.12);
             border: 1px solid rgba(67, 89, 113, 0.1);
@@ -837,14 +721,6 @@
         }
 
         @media (max-width: 768px) {
-            .hero-stats {
-                gap: 1rem;
-            }
-
-            .hero-stat {
-                font-size: 0.875rem;
-            }
-
             .card-body {
                 padding: 1rem;
             }

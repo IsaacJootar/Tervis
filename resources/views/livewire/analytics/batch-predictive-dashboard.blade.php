@@ -1,41 +1,76 @@
-<div>
+<div class="analytics-page">
+    @include('livewire.analytics._template-style')
+    @section('title', 'AI Predictive Analytics Dashboard')
     <div class="predictive-analytics-container">
-        <!-- Hero Card Header -->
-        <div class="row mb-5">
+        <div class="row mb-4">
             <div class="col-12">
-                <div class="hero-card">
-                    <div class="hero-content">
-                        <div class="hero-text">
-                            <h4 class="hero-title" style="color: white; font-size: 30px;">
-                                <i class='bx bx-trending-up me-2'></i>
-                                Predictive Analytics Dashboard
-                            </h4>
-
-                            <div class="d-flex flex-wrap gap-3 text-white mb-1">
-                                <span>
-                                    <i class="bx bx-user-circle me-1"></i>
-                                    <strong>{{ $user->first_name }} {{ $user->last_name }}</strong>
-                                </span>
-                                <span>
-                                    <i class="bx bx-building-house me-1"></i>
-                                    <strong>Facilities:</strong> {{ $facilityCount }}
-                                </span>
-                                <span>
-                                    <i class="bx bx-time me-1"></i>
-                                    {{ \Carbon\Carbon::now('Africa/Lagos')->format('l, F j, Y, h:i A') }}
-                                </span>
-                            </div>
-
-                            <p class="text-white-50 mb-0">
-                                AI-powered predictions and insights for proactive healthcare planning
-                            </p>
+                <div class="card">
+                    <div class="card-body d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3">
+                        <div>
+                            <h4 class="mb-1"><i class='bx bx-trending-up me-2'></i>AI Predictive Analytics Dashboard</h4>
+                            <p class="mb-0 text-muted">AI-powered predictions and insights for proactive healthcare planning.</p>
                         </div>
-                        <div class="hero-decoration">
-                            <div class="floating-shape shape-1"></div>
-                            <div class="floating-shape shape-2"></div>
-                            <div class="floating-shape shape-3"></div>
+                        <div class="d-flex flex-wrap gap-2">
+                            <span class="badge bg-label-primary">{{ $user->first_name }} {{ $user->last_name }}</span>
+                            <span class="badge bg-label-info">{{ $facilityCount }} Facilities</span>
+                            <span class="badge bg-label-secondary">{{ \Carbon\Carbon::now('Africa/Lagos')->format('h:i A') }}</span>
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
+        @php
+            $activePanels =
+                ($showRiskPredictions ? 1 : 0) +
+                ($showServiceUtilization ? 1 : 0) +
+                ($showResourceNeeds ? 1 : 0) +
+                ($showOutcomes ? 1 : 0) +
+                ($showSeasonalPatterns ? 1 : 0) +
+                ($showInterventions ? 1 : 0);
+            $scopeLabel =
+                !empty($selectedFacilityId) && $facilities->firstWhere('id', $selectedFacilityId)
+                    ? $facilities->firstWhere('id', $selectedFacilityId)->name
+                    : 'All Facilities';
+        @endphp
+        <div class="row mb-4">
+            <div class="col-md-6 col-lg-3 mb-3">
+                <div class="metric-card metric-card-violet h-100">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div class="metric-label">Facilities</div>
+                        <span class="metric-icon"><i class="bx bx-buildings"></i></span>
+                    </div>
+                    <div class="metric-value">{{ $facilityCount }}</div>
+                    <div class="small">In your scope</div>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3 mb-3">
+                <div class="metric-card metric-card-sky h-100">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div class="metric-label">Horizon</div>
+                        <span class="metric-icon"><i class="bx bx-calendar"></i></span>
+                    </div>
+                    <div class="metric-value">{{ (int) $predictionHorizon }}</div>
+                    <div class="small">Days forecast window</div>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3 mb-3">
+                <div class="metric-card metric-card-amber h-100">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div class="metric-label">Scope</div>
+                        <span class="metric-icon"><i class="bx bx-map"></i></span>
+                    </div>
+                    <div class="metric-value">{{ !empty($selectedFacilityId) ? '1' : (int) $facilityCount }}</div>
+                    <div class="small">{{ $scopeLabel }}</div>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3 mb-3">
+                <div class="metric-card metric-card-emerald h-100">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div class="metric-label">Active Panels</div>
+                        <span class="metric-icon"><i class="bx bx-layout"></i></span>
+                    </div>
+                    <div class="metric-value">{{ $activePanels }}</div>
+                    <div class="small">Prediction sections enabled</div>
                 </div>
             </div>
         </div>
@@ -87,7 +122,7 @@
                 <div class="row mb-4">
                     <div class="col-12">
                         <div class="card">
-                            <div class="card-header bg-label-primary">
+                            <div class="card-header">
                                 <h5 class="card-title mb-0">
                                     <i class="bx bx-error-circle me-2"></i>
                                     Risk Level Predictions ({{ $predictionHorizon }} days)
@@ -153,7 +188,7 @@
                 <div class="row mb-4">
                     <div class="col-12">
                         <div class="card">
-                            <div class="card-header bg-label-success">
+                            <div class="card-header">
                                 <h5 class="card-title mb-0">
                                     <i class="bx bx-health me-2"></i>
                                     Service Utilization Forecast
@@ -213,7 +248,7 @@
                 <div class="row mb-4">
                     <div class="col-12">
                         <div class="card">
-                            <div class="card-header bg-label-warning">
+                            <div class="card-header">
                                 <h5 class="card-title mb-0">
                                     <i class="bx bx-package me-2"></i>
                                     Resource Requirements Forecast
@@ -310,7 +345,7 @@
                 <div class="row mb-4">
                     <div class="col-12">
                         <div class="card">
-                            <div class="card-header bg-label-info">
+                            <div class="card-header">
                                 <h5 class="card-title mb-0">
                                     <i class="bx bx-heart me-2"></i>
                                     Health Outcomes Forecast
@@ -369,7 +404,7 @@
                 <div class="row mb-4">
                     <div class="col-12">
                         <div class="card">
-                            <div class="card-header bg-label-secondary">
+                            <div class="card-header">
                                 <h5 class="card-title mb-0">
                                     <i class="bx bx-calendar me-2"></i>
                                     Seasonal Patterns Analysis
@@ -421,7 +456,7 @@
                 <div class="row mb-4">
                     <div class="col-12">
                         <div class="card border-warning">
-                            <div class="card-header bg-label-warning">
+                            <div class="card-header">
                                 <h5 class="card-title mb-0">
                                     <i class="bx bx-bulb me-2"></i>
                                     Intervention Opportunities
@@ -475,91 +510,16 @@
         @else
             <div class="row">
                 <div class="col-12">
-                    <div class="alert alert-info text-center">
-                        <i class="bx bx-info-circle me-2"></i>
-                        Select a prediction horizon and click "Generate Predictions" to see AI-powered forecasts
+                    <div class="card">
+                        <div class="card-body text-center py-5">
+                            <i class="bx bx-trending-up bx-lg text-muted mb-3"></i>
+                            <h6 class="text-muted mb-2">No Predictions Yet</h6>
+                            <p class="text-muted mb-0">Select horizon and scope, then click "Generate Predictions".</p>
+                        </div>
                     </div>
                 </div>
             </div>
         @endif
-
-        <style>
-            .hero-card {
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                border-radius: 20px;
-                overflow: hidden;
-                position: relative;
-                min-height: 180px;
-            }
-
-            .hero-content {
-                position: relative;
-                z-index: 2;
-                padding: 2rem;
-            }
-
-            .hero-decoration {
-                position: absolute;
-                top: 0;
-                right: 0;
-                width: 100%;
-                height: 100%;
-                overflow: hidden;
-                z-index: 1;
-            }
-
-            .floating-shape {
-                position: absolute;
-                border-radius: 50%;
-                background: rgba(255, 255, 255, 0.1);
-                animation: float 6s ease-in-out infinite;
-            }
-
-            .floating-shape.shape-1 {
-                width: 80px;
-                height: 80px;
-                top: 20%;
-                right: 10%;
-                animation-delay: 0s;
-            }
-
-            .floating-shape.shape-2 {
-                width: 60px;
-                height: 60px;
-                top: 60%;
-                right: 20%;
-                animation-delay: 2s;
-            }
-
-            .floating-shape.shape-3 {
-                width: 40px;
-                height: 40px;
-                top: 40%;
-                right: 5%;
-                animation-delay: 4s;
-            }
-
-            @keyframes float {
-
-                0%,
-                100% {
-                    transform: translateY(0px) rotate(0deg);
-                }
-
-                50% {
-                    transform: translateY(-20px) rotate(180deg);
-                }
-            }
-
-            .card {
-                box-shadow: 0 2px 6px 0 rgba(67, 89, 113, 0.12);
-                transition: all 0.3s ease;
-            }
-
-            .card:hover {
-                transform: translateY(-2px);
-                box-shadow: 0 4px 12px 0 rgba(67, 89, 113, 0.16);
-            }
-        </style>
     </div>
 </div>
+

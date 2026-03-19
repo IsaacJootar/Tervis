@@ -1,42 +1,67 @@
-<div>
+<div class="analytics-page">
+    @include('livewire.analytics._template-style')
+    @section('title', 'AI Batch Diagnostic Assistant')
     <div class="batch-diagnostic-container">
-        <!-- Hero Card Header -->
-        <div class="row mb-5">
+        <div class="row mb-4">
             <div class="col-12">
-                <div class="hero-card">
-                    <div class="hero-content">
-                        <div class="hero-text">
-                            <h4 class="hero-title" style="color: white; font-size: 30px;">
-                                <i class='bx bx-analyse me-2'></i>
-                                Batch Diagnostic Assistant
-                            </h4>
-
-                            <div class="d-flex flex-wrap gap-3 text-white mb-1">
-                                <span>
-                                    <i class="bx bx-user-circle me-1"></i>
-                                    <strong>{{ $user->first_name }} {{ $user->last_name }}</strong>
-                                </span>
-                                <span>
-                                    <i class="bx bx-building-house me-1"></i>
-                                    <strong>Facilities:</strong> {{ $facilityCount }}
-                                </span>
-                                <span>
-                                    <i class="bx bx-time me-1"></i>
-                                    {{ \Carbon\Carbon::now('Africa/Lagos')->format('l, F j, Y, h:i A') }}
-                                </span>
-                            </div>
-
-                            <p class="text-white-50 mb-0">
-                                Generate comprehensive diagnostic summaries for high-risk patients across your
-                                facilities
-                            </p>
+                <div class="card">
+                    <div class="card-body d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3">
+                        <div>
+                            <h4 class="mb-1"><i class='bx bx-analyse me-2'></i>AI Batch Diagnostic Assistant</h4>
+                            <p class="mb-0 text-muted">Generate diagnostic summaries for high-risk patients across facilities.</p>
                         </div>
-                        <div class="hero-decoration">
-                            <div class="floating-shape shape-1"></div>
-                            <div class="floating-shape shape-2"></div>
-                            <div class="floating-shape shape-3"></div>
+                        <div class="d-flex flex-wrap gap-2">
+                            <span class="badge bg-label-primary">{{ $user->first_name }} {{ $user->last_name }}</span>
+                            <span class="badge bg-label-info">{{ $facilityCount }} Facilities</span>
+                            <span class="badge bg-label-secondary">{{ \Carbon\Carbon::now('Africa/Lagos')->format('h:i A') }}</span>
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
+        @php
+            $attentionFacilities = collect($facilityStats)->where('needs_attention', true)->count();
+            $highRiskTotal = collect($facilityStats)->sum('high_risk_patients');
+        @endphp
+        <div class="row mb-4">
+            <div class="col-md-6 col-lg-3 mb-3">
+                <div class="metric-card metric-card-violet h-100">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div class="metric-label">Facilities</div>
+                        <span class="metric-icon"><i class="bx bx-buildings"></i></span>
+                    </div>
+                    <div class="metric-value">{{ $facilityCount }}</div>
+                    <div class="small">Within your scope</div>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3 mb-3">
+                <div class="metric-card metric-card-rose h-100">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div class="metric-label">Need Attention</div>
+                        <span class="metric-icon"><i class="bx bx-error-circle"></i></span>
+                    </div>
+                    <div class="metric-value">{{ $attentionFacilities }}</div>
+                    <div class="small">Facilities with high-risk queue</div>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3 mb-3">
+                <div class="metric-card metric-card-amber h-100">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div class="metric-label">High-Risk Patients</div>
+                        <span class="metric-icon"><i class="bx bx-user-voice"></i></span>
+                    </div>
+                    <div class="metric-value">{{ $highRiskTotal }}</div>
+                    <div class="small">Current batch queue</div>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3 mb-3">
+                <div class="metric-card metric-card-sky h-100">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div class="metric-label">Lookback Window</div>
+                        <span class="metric-icon"><i class="bx bx-calendar"></i></span>
+                    </div>
+                    <div class="metric-value">{{ (int) $daysBack }}</div>
+                    <div class="small">Days analyzed</div>
                 </div>
             </div>
         </div>
@@ -153,7 +178,7 @@
             <div class="row mb-4">
                 <div class="col-12">
                     <div class="card border-success">
-                        <div class="card-header bg-label-success d-flex justify-content-between align-items-center">
+                        <div class="card-header d-flex justify-content-between align-items-center">
                             <h5 class="card-title mb-0">
                                 <i class="bx bx-check-circle me-2"></i>
                                 Batch Diagnostic Results
@@ -166,27 +191,31 @@
                             <!-- Summary Stats -->
                             <div class="row mb-4">
                                 <div class="col-md-3">
-                                    <div class="text-center p-3 border rounded">
-                                        <h3 class="mb-0 text-primary">{{ $batchResults['total_patients'] }}</h3>
-                                        <small class="text-muted">Total Patients</small>
+                                    <div class="metric-card metric-card-violet h-100">
+                                        <div class="metric-label">Total Patients</div>
+                                        <div class="metric-value">{{ $batchResults['total_patients'] }}</div>
+                                        <div class="small">Processed in this run</div>
                                     </div>
                                 </div>
                                 <div class="col-md-3">
-                                    <div class="text-center p-3 border rounded">
-                                        <h3 class="mb-0 text-success">{{ $batchResults['success_count'] }}</h3>
-                                        <small class="text-muted">Successful</small>
+                                    <div class="metric-card metric-card-emerald h-100">
+                                        <div class="metric-label">Successful</div>
+                                        <div class="metric-value">{{ $batchResults['success_count'] }}</div>
+                                        <div class="small">Generated summaries</div>
                                     </div>
                                 </div>
                                 <div class="col-md-3">
-                                    <div class="text-center p-3 border rounded">
-                                        <h3 class="mb-0 text-warning">{{ $batchResults['failure_count'] }}</h3>
-                                        <small class="text-muted">Failed</small>
+                                    <div class="metric-card metric-card-amber h-100">
+                                        <div class="metric-label">Failed</div>
+                                        <div class="metric-value">{{ $batchResults['failure_count'] }}</div>
+                                        <div class="small">Generation failures</div>
                                     </div>
                                 </div>
                                 <div class="col-md-3">
-                                    <div class="text-center p-3 border rounded">
-                                        <h3 class="mb-0 text-info">{{ $batchResults['facility_count'] }}</h3>
-                                        <small class="text-muted">Facilities</small>
+                                    <div class="metric-card metric-card-sky h-100">
+                                        <div class="metric-label">Facilities</div>
+                                        <div class="metric-value">{{ $batchResults['facility_count'] }}</div>
+                                        <div class="small">Covered by this run</div>
                                     </div>
                                 </div>
                             </div>
@@ -279,7 +308,7 @@
         <!-- Summary Modal -->
         @if ($viewingSummary && $currentSummary)
             <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
-                <div class="modal-dialog modal-xl modal-dialog-scrollable">
+                <div class="modal-dialog modal-xl modal-dialog-scrollable modal-dialog-centered">
                     <div class="modal-content">
                         <div class="modal-header">
                             <h5 class="modal-title">
@@ -290,7 +319,7 @@
                         <div class="modal-body">
                             <!-- Patient Info -->
                             <div class="card mb-3">
-                                <div class="card-header bg-label-primary">
+                                <div class="card-header bg-white">
                                     <h6 class="mb-0">Patient Information</h6>
                                 </div>
                                 <div class="card-body">
@@ -312,7 +341,7 @@
 
                             <!-- Vitals -->
                             <div class="card mb-3">
-                                <div class="card-header bg-label-info">
+                                <div class="card-header bg-white">
                                     <h6 class="mb-0">Clinical Snapshot</h6>
                                 </div>
                                 <div class="card-body">
@@ -345,7 +374,7 @@
                             <!-- Primary Concerns -->
                             @if (!empty($currentSummary['primary_concerns']))
                                 <div class="card mb-3">
-                                    <div class="card-header bg-label-warning">
+                                    <div class="card-header bg-white">
                                         <h6 class="mb-0">Primary Concerns</h6>
                                     </div>
                                     <div class="card-body">
@@ -363,7 +392,7 @@
                             <!-- Immediate Actions -->
                             @if (!empty($currentSummary['immediate_actions']))
                                 <div class="card">
-                                    <div class="card-header bg-label-danger">
+                                    <div class="card-header bg-white">
                                         <h6 class="mb-0">Immediate Actions Required</h6>
                                     </div>
                                     <div class="card-body">
@@ -394,82 +423,18 @@
         @endif
 
         <style>
-            .hero-card {
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                border-radius: 20px;
-                overflow: hidden;
-                position: relative;
-                min-height: 180px;
+            .modal-content {
+                border: 1px solid rgba(148, 163, 184, 0.22);
+                border-radius: 18px;
+                box-shadow: 0 22px 45px -32px rgba(15, 23, 42, 0.55);
             }
 
-            .hero-content {
-                position: relative;
-                z-index: 2;
-                padding: 2rem;
+            .modal-header {
+                border-bottom: 1px solid rgba(148, 163, 184, 0.22);
             }
 
-            .hero-decoration {
-                position: absolute;
-                top: 0;
-                right: 0;
-                width: 100%;
-                height: 100%;
-                overflow: hidden;
-                z-index: 1;
-            }
-
-            .floating-shape {
-                position: absolute;
-                border-radius: 50%;
-                background: rgba(255, 255, 255, 0.1);
-                animation: float 6s ease-in-out infinite;
-            }
-
-            .floating-shape.shape-1 {
-                width: 80px;
-                height: 80px;
-                top: 20%;
-                right: 10%;
-                animation-delay: 0s;
-            }
-
-            .floating-shape.shape-2 {
-                width: 60px;
-                height: 60px;
-                top: 60%;
-                right: 20%;
-                animation-delay: 2s;
-            }
-
-            .floating-shape.shape-3 {
-                width: 40px;
-                height: 40px;
-                top: 40%;
-                right: 5%;
-                animation-delay: 4s;
-            }
-
-            @keyframes float {
-
-                0%,
-                100% {
-                    transform: translateY(0px) rotate(0deg);
-                }
-
-                50% {
-                    transform: translateY(-20px) rotate(180deg);
-                }
-            }
-
-            .card {
-                box-shadow: 0 2px 6px 0 rgba(67, 89, 113, 0.12);
-                border: 1px solid rgba(67, 89, 113, 0.1);
-                transition: all 0.3s ease;
-            }
-
-            .card:hover {
-                transform: translateY(-2px);
-                box-shadow: 0 4px 12px 0 rgba(67, 89, 113, 0.16);
+            .modal-footer {
+                border-top: 1px solid rgba(148, 163, 184, 0.22);
             }
 
             .list-group-item-action:hover {
@@ -478,3 +443,4 @@
         </style>
     </div>
 </div>
+

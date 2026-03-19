@@ -21,7 +21,9 @@ class RolePermissionsManagement extends Component
     }
 
     $this->tables_ready = Schema::hasTable('role_permissions');
-    $this->selected_role = RolePermissionService::roles()[0] ?? '';
+    $roles = RolePermissionService::roles();
+    $sessionRole = trim((string) session('central.role_permissions.selected_role', ''));
+    $this->selected_role = in_array($sessionRole, $roles, true) ? $sessionRole : ($roles[0] ?? '');
 
     if ($this->tables_ready) {
       foreach (RolePermissionService::roles() as $role) {
@@ -33,6 +35,8 @@ class RolePermissionsManagement extends Component
   public function updatedSelectedRole($value): void
   {
     $roleName = trim((string) $value);
+    session(['central.role_permissions.selected_role' => $roleName]);
+
     if ($roleName === '' || !$this->tables_ready) {
       return;
     }
@@ -49,7 +53,6 @@ class RolePermissionsManagement extends Component
 
     RolePermissionService::ensureRoleRows((string) $this->selected_role, (int) Auth::id());
     toastr()->success('Permission defaults ensured for selected role.');
-    $this->js('setTimeout(() => window.location.reload(), 250)');
   }
 
   public function togglePermission(int $id): void
@@ -70,7 +73,6 @@ class RolePermissionsManagement extends Component
       ]);
 
       toastr()->success("Permission '{$row->permission_key}' updated.");
-      $this->js('setTimeout(() => window.location.reload(), 200)');
     } catch (\Throwable $e) {
       report($e);
       toastr()->error('Unable to update permission.');

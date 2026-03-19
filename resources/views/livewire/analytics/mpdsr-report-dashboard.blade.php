@@ -1,60 +1,24 @@
-<div>
+<div class="analytics-page">
+    @include('livewire.analytics._template-style')
     <div>
         @php
             use Carbon\Carbon;
         @endphp
         @section('title', 'MPDSR Report Dashboard')
 
-        <!-- Hero Card Header -->
-        <div class="row mb-5">
+        <div class="row mb-4">
             <div class="col-12">
-                <div class="hero-card">
-                    <div class="hero-content">
-                        <div class="hero-text">
-                            <h4 class="hero-title" style="color: white; font-size: 28px;">
-                                <i class='bx bx-health me-2'></i>
-                                Maternal and Perinatal Death Surveillance and Response (MPDSR)
-                            </h4>
-                            <span>
-                                <i class="bx bx-time me-1"></i>
-                                <strong>Time:</strong>
-                                {{ Carbon::now('Africa/Lagos')->format('l, F j, Y, h:i A') }}
-                            </span>
-                            <div class="hero-stats">
-                                <span class="hero-stat">
-                                    <i class="bx bx-female"></i>
-                                    {{ $totalMaternalDeaths }} Maternal Deaths
-                                </span>
-                                <span class="hero-stat">
-                                    <i class="bx bx-baby-carriage"></i>
-                                    {{ $totalPerinatalDeaths }} Perinatal Deaths
-                                </span>
-                                <span class="hero-stat">
-                                    <i class="bx bx-heart-circle"></i>
-                                    {{ $totalStillbirths }} Stillbirths
-                                </span>
-                                <span class="hero-stat">
-                                    <i class="bx bx-child"></i>
-                                    {{ $totalNeonatalDeaths }} Neonatal Deaths
-                                </span>
-                                <span class="hero-stat">
-                                    <i class="bx bx-building"></i>
-                                    @if ($selectedFacilityId)
-                                        Single Facility
-                                    @else
-                                        {{ $scopeInfo['scope_type'] === 'state' ? 'State-wide' : ($scopeInfo['scope_type'] === 'lga' ? 'LGA-wide' : 'Single Facility') }}
-                                        ({{ count($scopeInfo['facility_ids']) }}
-                                        {{ count($scopeInfo['facility_ids']) == 1 ? 'facility' : 'facilities' }})
-                                    @endif
-                                </span>
-
-                            </div>
-
+                <div class="card">
+                    <div class="card-body d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3">
+                        <div>
+                            <h4 class="mb-1"><i class='bx bx-health me-2'></i>Maternal and Perinatal Death Surveillance and Response (MPDSR)</h4>
+                            <p class="mb-0 text-muted">{{ Carbon::now('Africa/Lagos')->format('l, F j, Y, h:i A') }}</p>
                         </div>
-                        <div class="hero-decoration">
-                            <div class="floating-shape shape-1"></div>
-                            <div class="floating-shape shape-2"></div>
-                            <div class="floating-shape shape-3"></div>
+                        <div class="d-flex flex-wrap gap-2">
+                            <span class="badge bg-label-danger">{{ $totalMaternalDeaths }} Maternal Deaths</span>
+                            <span class="badge bg-label-warning">{{ $totalPerinatalDeaths }} Perinatal Deaths</span>
+                            <span class="badge bg-label-info">{{ $totalStillbirths }} Stillbirths</span>
+                            <span class="badge bg-label-secondary">{{ $totalNeonatalDeaths }} Neonatal Deaths</span>
                         </div>
                     </div>
                 </div>
@@ -140,92 +104,46 @@
         <!-- Key Indicators Row -->
         <div class="row mb-4">
             <div class="col-md-3 mb-3">
-                <div class="card h-100">
-                    <div class="card-body">
-                        <div class="d-flex align-items-center">
-                            <div class="avatar flex-shrink-0 me-3">
-                                <span class="avatar-initial rounded bg-danger">
-                                    <i class="bx bx-female bx-sm text-white"></i>
-                                </span>
-                            </div>
-                            <div>
-                                <h5 class="mb-0">{{ $totalMaternalDeaths }}</h5>
-                                <small class="text-muted">Maternal Deaths</small>
-                                <div class="mt-1">
-                                    <small class="text-danger fw-bold">MMR: {{ $maternalMortalityRatio }}</small>
-                                    <small class="text-muted d-block">per 100,000 live births</small>
-                                </div>
-                            </div>
-                        </div>
+                <div class="metric-card metric-card-rose h-100">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div class="metric-label">Maternal Deaths</div>
+                        <span class="metric-icon"><i class="bx bx-female"></i></span>
                     </div>
+                    <div class="metric-value">{{ $totalMaternalDeaths }}</div>
+                    <div class="small">MMR: {{ $maternalMortalityRatio }} per 100,000 live births</div>
                 </div>
             </div>
 
             <div class="col-md-3 mb-3">
-                <div class="card h-100">
-                    <div class="card-body">
-                        <div class="d-flex align-items-center">
-                            <div class="avatar flex-shrink-0 me-3">
-                                <span class="avatar-initial rounded bg-warning">
-                                    <i class="bx bx-baby-carriage bx-sm text-white"></i>
-                                </span>
-                            </div>
-                            <div>
-                                <h5 class="mb-0">{{ $totalPerinatalDeaths }}</h5>
-                                <small class="text-muted">Total Perinatal Deaths</small>
-                                <div class="mt-1">
-                                    <small class="text-warning fw-bold">PMR: {{ $perinatalMortalityRate }}</small>
-                                    <small class="text-muted d-block">per 1,000 births</small>
-                                </div>
-                            </div>
-                        </div>
+                <div class="metric-card metric-card-amber h-100">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div class="metric-label">Perinatal Deaths</div>
+                        <span class="metric-icon"><i class="bx bx-baby-carriage"></i></span>
                     </div>
+                    <div class="metric-value">{{ $totalPerinatalDeaths }}</div>
+                    <div class="small">PMR: {{ $perinatalMortalityRate }} per 1,000 births</div>
                 </div>
             </div>
 
             <div class="col-md-3 mb-3">
-                <div class="card h-100">
-                    <div class="card-body">
-                        <div class="d-flex align-items-center">
-                            <div class="avatar flex-shrink-0 me-3">
-                                <span class="avatar-initial rounded bg-secondary">
-                                    <i class="bx bx-heart-circle bx-sm text-white"></i>
-                                </span>
-                            </div>
-                            <div>
-                                <h5 class="mb-0">{{ $totalStillbirths }}</h5>
-                                <small class="text-muted">Stillbirths</small>
-                                <div class="mt-1">
-                                    <small
-                                        class="text-secondary">{{ $totalPerinatalDeaths > 0 ? round(($totalStillbirths / $totalPerinatalDeaths) * 100, 1) : 0 }}%
-                                        of perinatal</small>
-                                </div>
-                            </div>
-                        </div>
+                <div class="metric-card metric-card-slate h-100">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div class="metric-label">Stillbirths</div>
+                        <span class="metric-icon"><i class="bx bx-heart-circle"></i></span>
                     </div>
+                    <div class="metric-value">{{ $totalStillbirths }}</div>
+                    <div class="small">{{ $totalPerinatalDeaths > 0 ? round(($totalStillbirths / $totalPerinatalDeaths) * 100, 1) : 0 }}% of perinatal deaths</div>
                 </div>
             </div>
 
             <div class="col-md-3 mb-3">
-                <div class="card h-100">
-                    <div class="card-body">
-                        <div class="d-flex align-items-center">
-                            <div class="avatar flex-shrink-0 me-3">
-                                <span class="avatar-initial rounded bg-info">
-                                    <i class="bx bx-child bx-sm text-white"></i>
-                                </span>
-                            </div>
-                            <div>
-                                <h5 class="mb-0">{{ $totalNeonatalDeaths }}</h5>
-                                <small class="text-muted">Early Neonatal Deaths</small>
-                                <div class="mt-1">
-                                    <small
-                                        class="text-info">{{ $totalPerinatalDeaths > 0 ? round(($totalNeonatalDeaths / $totalPerinatalDeaths) * 100, 1) : 0 }}%
-                                        of perinatal</small>
-                                </div>
-                            </div>
-                        </div>
+                <div class="metric-card metric-card-sky h-100">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div class="metric-label">Neonatal Deaths</div>
+                        <span class="metric-icon"><i class="bx bx-child"></i></span>
                     </div>
+                    <div class="metric-value">{{ $totalNeonatalDeaths }}</div>
+                    <div class="small">{{ $totalPerinatalDeaths > 0 ? round(($totalNeonatalDeaths / $totalPerinatalDeaths) * 100, 1) : 0 }}% of perinatal deaths</div>
                 </div>
             </div>
         </div>
@@ -240,7 +158,14 @@
                         <small class="text-muted">Trend analysis by period</small>
                     </div>
                     <div class="card-body">
-                        <canvas id="deathsTrendChart" style="max-height: 300px;"></canvas>
+                        @if (count($deathsByTimePeriod) > 0)
+                            <canvas id="deathsTrendChart" style="max-height: 300px;"></canvas>
+                        @else
+                            <div class="text-center py-5">
+                                <i class="bx bx-line-chart bx-lg text-muted mb-2"></i>
+                                <p class="text-muted mb-0">No deaths trend data available for this period.</p>
+                            </div>
+                        @endif
                     </div>
                 </div>
             </div>
@@ -253,7 +178,14 @@
                         <small class="text-muted">Top causes identified</small>
                     </div>
                     <div class="card-body">
-                        <canvas id="deathsByCauseChart" style="max-height: 300px;"></canvas>
+                        @if (count($deathsByCause) > 0)
+                            <canvas id="deathsByCauseChart" style="max-height: 300px;"></canvas>
+                        @else
+                            <div class="text-center py-5">
+                                <i class="bx bx-bar-chart-alt-2 bx-lg text-muted mb-2"></i>
+                                <p class="text-muted mb-0">No cause data available for this period.</p>
+                            </div>
+                        @endif
                     </div>
                 </div>
             </div>
@@ -640,151 +572,28 @@
                 }
             }
 
-            document.addEventListener('DOMContentLoaded', function() {
-                initializeCharts();
-            });
-
-            document.addEventListener('livewire:initialized', () => {
-                Livewire.on('refresh-charts', () => {
-                    setTimeout(() => {
-                        initializeCharts();
-                    }, 100);
-                });
-            });
-
-            // Reinitialize charts when Livewire updates
-            document.addEventListener('livewire:update', () => {
+            function scheduleMpdsrChartsInit() {
                 setTimeout(() => {
                     initializeCharts();
                 }, 100);
-            });
+            }
+
+            if (!window.__mpdsrChartsBound) {
+                window.__mpdsrChartsBound = true;
+
+                document.addEventListener('DOMContentLoaded', scheduleMpdsrChartsInit);
+                document.addEventListener('livewire:navigated', scheduleMpdsrChartsInit);
+
+                document.addEventListener('livewire:initialized', () => {
+                    Livewire.on('refresh-charts', scheduleMpdsrChartsInit);
+                });
+            }
+
+            scheduleMpdsrChartsInit();
         </script>
 
         <style>
-            .hero-card {
-                background: linear-gradient(135deg, #ea5455 0%, #ff6b6b 100%);
-                border-radius: 20px;
-                overflow: hidden;
-                position: relative;
-                min-height: 220px;
-            }
-
-            .hero-content {
-                position: relative;
-                z-index: 2;
-                padding: 2rem;
-            }
-
-            .hero-decoration {
-                position: absolute;
-                top: 0;
-                right: 0;
-                width: 100%;
-                height: 100%;
-                overflow: hidden;
-                z-index: 1;
-            }
-
-            .floating-shape {
-                position: absolute;
-                border-radius: 50%;
-                background: rgba(255, 255, 255, 0.1);
-                animation: float 6s ease-in-out infinite;
-            }
-
-            .floating-shape.shape-1 {
-                width: 80px;
-                height: 80px;
-                top: 20%;
-                right: 10%;
-                animation-delay: 0s;
-            }
-
-            .floating-shape.shape-2 {
-                width: 60px;
-                height: 60px;
-                top: 60%;
-                right: 20%;
-                animation-delay: 2s;
-            }
-
-            .floating-shape.shape-3 {
-                width: 40px;
-                height: 40px;
-                top: 40%;
-                right: 5%;
-                animation-delay: 4s;
-            }
-
-            @keyframes float {
-
-                0%,
-                100% {
-                    transform: translateY(0px) rotate(0deg);
-                }
-
-                50% {
-                    transform: translateY(-20px) rotate(180deg);
-                }
-            }
-
-            .hero-stats {
-                display: flex;
-                flex-wrap: wrap;
-                gap: 2rem;
-                margin-top: 1rem;
-            }
-
-            .hero-stat {
-                display: flex;
-                align-items: center;
-                color: rgba(255, 255, 255, 0.95);
-                font-weight: 500;
-                font-size: 14px;
-            }
-
-            .hero-stat i {
-                margin-right: 0.5rem;
-                font-size: 18px;
-            }
-
-            .card {
-                box-shadow: 0 2px 6px 0 rgba(67, 89, 113, 0.12);
-                border: 1px solid rgba(67, 89, 113, 0.1);
-                transition: all 0.3s ease;
-            }
-
-            .card:hover {
-                transform: translateY </div> (-2px);
-                box-shadow: 0 4px 12px 0 rgba(67, 89, 113, 0.16);
-            }
-
-            .avatar {
-                position: relative;
-                display: inline-flex;
-                align-items: center;
-                justify-content: center;
-                width: 40px;
-                height: 40px;
-            }
-
-            .avatar-initial {
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                width: 40px;
-                height: 40px;
-            }
-
             @media (max-width: 768px) {
-                .hero-stats {
-                    gap: 1rem;
-                }
-
-                .hero-stat {
-                    font-size: 12px;
-                }
-
                 .card-body {
                     padding: 1rem;
                 }
@@ -793,3 +602,4 @@
 
         @include('_partials.datatables-init')
     </div>
+</div>

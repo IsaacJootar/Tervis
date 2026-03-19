@@ -2,14 +2,15 @@
 
 namespace App\Services;
 
-use App\Models\Antenatal;
+use App\Models\Registrations\AntenatalRegistration as Antenatal;
+use App\Models\AntenatalFollowUpAssessment;
 use App\Models\Delivery;
 use App\Models\PostnatalRecord;
 use App\Models\TetanusVaccination;
 use App\Models\DailyAttendance;
 use App\Models\ClinicalNote;
 use App\Models\Facility;
-use App\Models\User;
+use App\Models\Patient;
 use Carbon\Carbon;
 use App\Models\RiskPrediction;
 
@@ -161,27 +162,23 @@ class DashboardMetricsService
     $facilityIds = $this->scopeService->normalizeFacilityIds($facilityIds);
 
     try {
-      $antenatalPatients = Antenatal::whereIn('registration_facility_id', $facilityIds)
-        ->pluck('user_id')->toArray();
+      $antenatalPatients = Antenatal::whereIn('facility_id', $facilityIds)
+        ->pluck('patient_id')->toArray();
 
       $deliveryPatients = Delivery::whereIn('facility_id', $facilityIds)
-        ->pluck('user_id')->toArray();
+        ->pluck('patient_id')->toArray();
 
       $postnatalPatients = PostnatalRecord::whereIn('facility_id', $facilityIds)
-        ->pluck('user_id')->toArray();
+        ->pluck('patient_id')->toArray();
 
       $tetanusPatients = TetanusVaccination::whereIn('facility_id', $facilityIds)
-        ->pluck('user_id')->toArray();
-
-      $attendancePatients = DailyAttendance::whereIn('facility_id', $facilityIds)
-        ->pluck('user_id')->toArray();
+        ->pluck('patient_id')->toArray();
 
       $allPatients = array_unique(array_merge(
         $antenatalPatients,
         $deliveryPatients,
         $postnatalPatients,
-        $tetanusPatients,
-        $attendancePatients
+        $tetanusPatients
       ));
 
       return count($allPatients);
@@ -199,7 +196,7 @@ class DashboardMetricsService
       $today = Carbon::today();
 
       return [
-        'antenatal' => Antenatal::whereIn('registration_facility_id', $facilityIds)
+        'antenatal' => Antenatal::whereIn('facility_id', $facilityIds)
           ->whereDate('date_of_booking', $today)->count(),
         'postnatal' => PostnatalRecord::whereIn('facility_id', $facilityIds)
           ->whereDate('visit_date', $today)->count(),
@@ -229,10 +226,14 @@ class DashboardMetricsService
   {
     $facilityIds = $this->scopeService->normalizeFacilityIds($facilityIds);
 
-    return Antenatal::whereIn('registration_facility_id', $facilityIds)
+    return Antenatal::whereIn('facility_id', $facilityIds)
       ->where(function ($query) {
-        $query->where('age', '<', 18)
-          ->orWhere('age', '>', 35)
+        $query->whereHas('patient', function ($patientQuery) {
+          $patientQuery->where(function ($ageQuery) {
+            $ageQuery->whereDate('date_of_birth', '>', Carbon::today()->subYears(18))
+              ->orWhereDate('date_of_birth', '<', Carbon::today()->subYears(35));
+          });
+        })
           ->orWhere('heart_disease', 1)
           ->orWhere('kidney_disease', 1)
           ->orWhere('family_hypertension', 1)
@@ -244,8 +245,33 @@ class DashboardMetricsService
           })
           ->orWhere('genotype', 'LIKE', '%S%');
       })
-      ->with(['user', 'registrationFacility'])
-      ->get();
+      ->with(['patient', 'facility'])
+      ->get()
+      ->map(function ($antenatal) {
+        $patient = $antenatal->patient;
+        $delivery = Delivery::query()
+          ->where('patient_id', (int) $antenatal->patient_id)
+          ->where('facility_id', (int) $antenatal->facility_id)
+          ->latest()
+          ->first();
+
+        $postnatal = PostnatalRecord::query()
+          ->where('patient_id', (int) $antenatal->patient_id)
+          ->where('facility_id', (int) $antenatal->facility_id)
+          ->latest()
+          ->first();
+
+        $riskFactors = $this->identifyComprehensiveRiskFactors($antenatal, $patient, $delivery, $postnatal);
+
+        $antenatal->setAttribute('patient_name', $this->resolvePatientName($patient));
+        $antenatal->setAttribute('patient_din', $this->resolveDin($patient));
+        $antenatal->setAttribute('patient_age', $patient?->age);
+        $antenatal->setAttribute('gestational_age_label', $this->calculateGestationalAge($antenatal->lmp));
+        $antenatal->setAttribute('risk_factors', $riskFactors);
+        $antenatal->setAttribute('risk_factor_count', count($riskFactors));
+
+        return $antenatal;
+      });
   }
 
   private function getUpcomingDeliveries($facilityIds)
@@ -253,16 +279,16 @@ class DashboardMetricsService
     $facilityIds = $this->scopeService->normalizeFacilityIds($facilityIds);
     $nextWeek = Carbon::now()->addWeek();
 
-    return Antenatal::whereIn('registration_facility_id', $facilityIds)
+    return Antenatal::whereIn('facility_id', $facilityIds)
       ->whereDate('edd', '<=', $nextWeek)
       ->whereDate('edd', '>=', Carbon::today())
-      ->with(['user', 'registrationFacility'])
+      ->with(['patient', 'facility'])
       ->get()
       ->map(function ($antenatal) {
         return [
-          'patient_name' => $antenatal->user->first_name . ' ' . $antenatal->user->last_name,
-          'din' => $antenatal->user->DIN,
-          'facility_name' => $antenatal->registrationFacility->name ?? 'Unknown',
+          'patient_name' => $this->resolvePatientName($antenatal->patient),
+          'din' => $this->resolveDin($antenatal->patient),
+          'facility_name' => $antenatal->facility->name ?? 'Unknown',
           'edd' => $antenatal->edd,
           'days_until_edd' => Carbon::parse($antenatal->edd)->diffInDays(Carbon::today()),
           'gestational_age' => $this->calculateGestationalAge($antenatal->lmp)
@@ -279,7 +305,7 @@ class DashboardMetricsService
       $date = Carbon::now()->subMonths($i);
       $months->push([
         'month' => $date->format('M Y'),
-        'antenatal_registrations' => Antenatal::whereIn('registration_facility_id', $facilityIds)
+        'antenatal_registrations' => Antenatal::whereIn('facility_id', $facilityIds)
           ->whereYear('date_of_booking', $date->year)
           ->whereMonth('date_of_booking', $date->month)
           ->count(),
@@ -314,20 +340,23 @@ class DashboardMetricsService
     $alerts = collect();
 
     // Overdue antenatal visits
-    $overdueAntenatal = Antenatal::whereIn('registration_facility_id', $facilityIds)
-      ->where('follow_up_next_visit', '<', Carbon::today())
-      ->whereNotNull('follow_up_next_visit')
-      ->with(['user', 'registrationFacility'])
-      ->get();
+    $overdueAntenatal = Antenatal::whereIn('facility_id', $facilityIds)
+      ->with(['patient', 'facility'])
+      ->get()
+      ->filter(function ($antenatal) {
+        $nextVisit = $this->getNextAntenatalVisitDate($antenatal);
+        return $nextVisit && Carbon::parse($nextVisit)->lt(Carbon::today());
+      });
 
     foreach ($overdueAntenatal as $antenatal) {
+      $nextVisit = $this->getNextAntenatalVisitDate($antenatal);
       $alerts->push([
         'type' => 'overdue_antenatal',
         'priority' => 'high',
-        'message' => "Overdue antenatal visit for {$antenatal->user->first_name} {$antenatal->user->last_name}",
-        'patient_din' => $antenatal->user->DIN,
-        'facility_name' => $antenatal->registrationFacility->name ?? 'Unknown',
-        'due_date' => $antenatal->follow_up_next_visit,
+        'message' => "Overdue antenatal visit for {$this->resolvePatientName($antenatal->patient)}",
+        'patient_din' => $this->resolveDin($antenatal->patient),
+        'facility_name' => $antenatal->facility->name ?? 'Unknown',
+        'due_date' => $nextVisit,
         'service' => 'Antenatal Care'
       ]);
     }
@@ -336,15 +365,15 @@ class DashboardMetricsService
     $overdueTetanus = TetanusVaccination::whereIn('facility_id', $facilityIds)
       ->where('next_appointment_date', '<', Carbon::today())
       ->whereNotNull('next_appointment_date')
-      ->with(['user', 'facility'])
+      ->with(['patient', 'facility'])
       ->get();
 
     foreach ($overdueTetanus as $tetanus) {
       $alerts->push([
         'type' => 'overdue_tetanus',
         'priority' => 'medium',
-        'message' => "Overdue tetanus vaccination for {$tetanus->user->first_name} {$tetanus->user->last_name}",
-        'patient_din' => $tetanus->user->DIN,
+        'message' => "Overdue tetanus vaccination for {$this->resolvePatientName($tetanus->patient)}",
+        'patient_din' => $this->resolveDin($tetanus->patient),
         'facility_name' => $tetanus->facility->name ?? 'Unknown',
         'due_date' => $tetanus->next_appointment_date,
         'service' => 'Tetanus Vaccination'
@@ -352,19 +381,19 @@ class DashboardMetricsService
     }
 
     // Critical delivery dates (within 3 days)
-    $criticalDeliveries = Antenatal::whereIn('registration_facility_id', $facilityIds)
+    $criticalDeliveries = Antenatal::whereIn('facility_id', $facilityIds)
       ->whereDate('edd', '<=', Carbon::now()->addDays(3))
       ->whereDate('edd', '>=', Carbon::today())
-      ->with(['user', 'registrationFacility'])
+      ->with(['patient', 'facility'])
       ->get();
 
     foreach ($criticalDeliveries as $antenatal) {
       $alerts->push([
         'type' => 'critical_delivery',
         'priority' => 'critical',
-        'message' => "Expected delivery within 3 days for {$antenatal->user->first_name} {$antenatal->user->last_name}",
-        'patient_din' => $antenatal->user->DIN,
-        'facility_name' => $antenatal->registrationFacility->name ?? 'Unknown',
+        'message' => "Expected delivery within 3 days for {$this->resolvePatientName($antenatal->patient)}",
+        'patient_din' => $this->resolveDin($antenatal->patient),
+        'facility_name' => $antenatal->facility->name ?? 'Unknown',
         'due_date' => $antenatal->edd,
         'service' => 'Delivery'
       ]);
@@ -397,7 +426,7 @@ class DashboardMetricsService
   {
     $facilityIds = $this->scopeService->normalizeFacilityIds($facilityIds);
 
-    $antenatal = Antenatal::whereIn('registration_facility_id', $facilityIds)
+    $antenatal = Antenatal::whereIn('facility_id', $facilityIds)
       ->whereYear('date_of_booking', $date->year)
       ->whereMonth('date_of_booking', $date->month)
       ->count();
@@ -426,7 +455,7 @@ class DashboardMetricsService
     $totalPatients = $this->getTotalUniquePatients($facilityIds);
 
     return [
-      'antenatal_coverage' => Antenatal::whereIn('registration_facility_id', $facilityIds)->count(),
+      'antenatal_coverage' => Antenatal::whereIn('facility_id', $facilityIds)->count(),
       'delivery_coverage' => Delivery::whereIn('facility_id', $facilityIds)->count(),
       'postnatal_coverage' => PostnatalRecord::whereIn('facility_id', $facilityIds)->count(),
       'tetanus_coverage' => TetanusVaccination::whereIn('facility_id', $facilityIds)->count(),
@@ -440,9 +469,9 @@ class DashboardMetricsService
   {
     $facilityIds = $this->scopeService->normalizeFacilityIds($facilityIds);
 
-    $patients = User::where('role', 'Patient')
+    $patients = Patient::query()
       ->whereHas('antenatal', function ($q) use ($facilityIds) {
-        $q->whereIn('registration_facility_id', $facilityIds);
+        $q->whereIn('facility_id', $facilityIds);
       })->get();
 
     $journeyStats = [
@@ -456,7 +485,7 @@ class DashboardMetricsService
     ];
 
     foreach ($patients as $patient) {
-      $hasAntenatal = $patient->antenatal()->whereIn('registration_facility_id', $facilityIds)->exists();
+      $hasAntenatal = $patient->antenatal()->whereIn('facility_id', $facilityIds)->exists();
       $hasDelivery = $patient->deliveries()->whereIn('facility_id', $facilityIds)->exists();
       $hasPostnatal = $patient->postnatalRecords()->whereIn('facility_id', $facilityIds)->exists();
 
@@ -508,9 +537,9 @@ class DashboardMetricsService
   {
     $facilityIds = $this->scopeService->normalizeFacilityIds($facilityIds);
 
-    $totalPatients = User::where('role', 'Patient')
+    $totalPatients = Patient::query()
       ->whereHas('antenatal', function ($q) use ($facilityIds) {
-        $q->whereIn('registration_facility_id', $facilityIds);
+        $q->whereIn('facility_id', $facilityIds);
       })->count();
 
     $tt1Count = TetanusVaccination::whereIn('facility_id', $facilityIds)->where('current_tt_dose', 'TT1')->count();
@@ -537,9 +566,9 @@ class DashboardMetricsService
   {
     $facilityIds = $this->scopeService->normalizeFacilityIds($facilityIds);
 
-    return User::where('role', 'Patient')
+    return Patient::query()
       ->whereHas('antenatal', function ($q) use ($facilityIds) {
-        $q->whereIn('registration_facility_id', $facilityIds);
+        $q->whereIn('facility_id', $facilityIds);
       })
       ->whereHas('deliveries', function ($q) use ($facilityIds) {
         $q->whereIn('facility_id', $facilityIds);
@@ -550,29 +579,34 @@ class DashboardMetricsService
       ->count();
   }
 
-  public function getHighRiskDetails($userId)
+  public function getHighRiskDetails($antenatalId)
   {
-    $antenatal = Antenatal::with('user')->find($userId);
+    $antenatal = Antenatal::with(['patient'])->find($antenatalId);
     if (!$antenatal) return null;
 
-    $delivery = Delivery::where('patient_id', $antenatal->user_id)->latest()->first();
-    $postnatal = PostnatalRecord::where('patient_id', $antenatal->user_id)->latest()->first();
-    $clinicalNotes = ClinicalNote::where('user_id', $antenatal->user_id)->latest()->get();
+    $patientId = (int) $antenatal->patient_id;
+    $patient = $antenatal->patient;
+
+    $delivery = Delivery::where('patient_id', $patientId)->latest()->first();
+    $postnatal = PostnatalRecord::where('patient_id', $patientId)->latest()->first();
+    $clinicalNotes = ClinicalNote::where('user_id', $patientId)->latest()->get();
+    $nextVisit = $this->getNextAntenatalVisitDate($antenatal);
 
     return [
-      'patient_name' => $antenatal->user->first_name . ' ' . $antenatal->user->last_name,
-      'din' => $antenatal->user->DIN,
-      'age' => $antenatal->age,
-      'phone' => $antenatal->user->phone,
-      'address' => $antenatal->address,
+      'patient_name' => $this->resolvePatientName($patient),
+      'din' => $this->resolveDin($patient),
+      'age' => $patient?->age ?? null,
+      'phone' => $patient?->phone,
+      'address' => 'N/A',
       'edd' => $antenatal->edd,
       'lmp' => $antenatal->lmp,
       'gestational_age' => $this->calculateGestationalAge($antenatal->lmp),
-      'risk_factors' => $this->identifyComprehensiveRiskFactors($antenatal, $delivery, $postnatal),
+      'risk_factors' => $this->identifyComprehensiveRiskFactors($antenatal, $patient, $delivery, $postnatal),
       'medical_history' => [
         'heart_disease' => $antenatal->heart_disease,
         'chest_disease' => $antenatal->chest_disease,
         'kidney_disease' => $antenatal->kidney_disease,
+        'family_hypertension' => $antenatal->family_hypertension,
         'blood_transfusion' => $antenatal->blood_transfusion,
         'other_medical_history' => $antenatal->other_medical_history
       ],
@@ -604,17 +638,21 @@ class DashboardMetricsService
         'family_planning' => $postnatal->family_planning
       ] : null,
       'recent_clinical_notes' => $clinicalNotes->take(3),
-      'last_visit' => $antenatal->follow_up_date,
-      'next_visit' => $antenatal->follow_up_next_visit
+      'last_visit' => AntenatalFollowUpAssessment::query()
+        ->where('patient_id', $patientId)
+        ->where('facility_id', $antenatal->facility_id)
+        ->latest('visit_date')
+        ->value('visit_date'),
+      'next_visit' => $nextVisit
     ];
   }
 
-  private function identifyComprehensiveRiskFactors($antenatal, $delivery = null, $postnatal = null)
+  private function identifyComprehensiveRiskFactors($antenatal, $patient = null, $delivery = null, $postnatal = null)
   {
     $factors = [];
 
-    if ($antenatal->age < 18) $factors[] = 'Teen pregnancy';
-    if ($antenatal->age > 35) $factors[] = 'Advanced maternal age';
+    if (($patient?->age ?? 0) > 0 && $patient->age < 18) $factors[] = 'Teen pregnancy';
+    if (($patient?->age ?? 0) > 35) $factors[] = 'Advanced maternal age';
     if ($antenatal->heart_disease) $factors[] = 'Heart disease';
     if ($antenatal->kidney_disease) $factors[] = 'Kidney disease';
     if ($antenatal->family_hypertension) $factors[] = 'Family history of hypertension';
@@ -646,8 +684,46 @@ class DashboardMetricsService
     return $factors;
   }
 
+  private function resolveDin($patient): string
+  {
+    if (!$patient) {
+      return 'N/A';
+    }
+
+    $din = (string) ($patient->din ?? $patient->DIN ?? '');
+    return $din !== '' ? $din : 'N/A';
+  }
+
+  private function resolvePatientName($patient): string
+  {
+    if (!$patient) {
+      return 'Unknown Patient';
+    }
+
+    $fullName = trim((string) ($patient->full_name ?? ''));
+    if ($fullName !== '') {
+      return $fullName;
+    }
+
+    return trim((string) (($patient->first_name ?? '') . ' ' . ($patient->last_name ?? ''))) ?: 'Unknown Patient';
+  }
+
+  private function getNextAntenatalVisitDate($antenatal)
+  {
+    return AntenatalFollowUpAssessment::query()
+      ->where('patient_id', (int) $antenatal->patient_id)
+      ->where('facility_id', (int) $antenatal->facility_id)
+      ->whereNotNull('next_return_date')
+      ->latest('visit_date')
+      ->value('next_return_date');
+  }
+
   private function parseBloodPressure($bpString)
   {
+    if (!is_string($bpString) || trim($bpString) === '') {
+      return null;
+    }
+
     if (preg_match('/(\d+)\/(\d+)/', $bpString, $matches)) {
       return [
         'systolic' => (int)$matches[1],

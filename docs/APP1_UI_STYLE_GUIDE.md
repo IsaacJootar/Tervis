@@ -1,6 +1,6 @@
 # APP1 UI Style Guide (Mobile-First, Flowdesk-Inspired)
 
-Last updated: 2026-03-12  
+Last updated: 2026-03-19  
 Reference baseline: `FLOWDESK_UI_GUIDE.md` adapted for healthcare workflow in `app1`.
 
 ## 1) UI Principles (Non-Negotiable)
@@ -11,6 +11,7 @@ Reference baseline: `FLOWDESK_UI_GUIDE.md` adapted for healthcare workflow in `a
 4. Immediate feedback: users must always know when data is saving, saved, or failed.
 5. Consistency across modules: tabs, section headers, buttons, tables, and toasts should feel uniform.
 6. Visual language should follow Flowdesk clean style where appropriate, with App1 default blue as the primary accent.
+7. Legacy gradient hero banners and floating-shape headers are not allowed in core/workspace operational pages.
 
 ## 2) Responsive Breakpoint Rules
 
@@ -27,6 +28,10 @@ Use this order unless module-specific reasons require otherwise:
 3. Tabs (with icon labels) at top.
 4. Active tab content sections.
 5. Activity records table/history lower on page.
+
+Core and operational pages should follow this same header intent:
+- plain card/section header with title, short context, and action controls
+- no hero banners, decorative floating objects, or oversized animated headers
 
 Notes:
 - Do not place long record tables above primary clinical entry tabs.
@@ -50,7 +55,7 @@ Notes:
 6. Scope rule: apply this tinted style to stat/metric/dashboard summary cards only (counts/KPI cards), not all content/form cards.
 7. Stat cards in the same row should use a consistent minimum height for visual alignment.
 8. Every stat card must include a visible icon beside the label/value.
-9. Icon implementation standard for stat cards: use inline SVG in `.metric-icon` to avoid missing icon-font rendering issues.
+9. Hard rule: icon implementation for stat cards must be inline SVG in `.metric-icon` (no icon-font-only stat cards).
 
 ## 5b) Form and Modal Composition (Flowdesk Pattern)
 

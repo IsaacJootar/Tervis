@@ -3,8 +3,6 @@
 namespace App\Livewire\Core;
 
 use Carbon\Carbon;
-use App\Models\User;
-use App\Models\State;
 use App\Models\Facility;
 use App\Models\Antenatal;
 use App\Models\Delivery;
@@ -16,7 +14,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 
-class facilityAdminDashboard extends Component
+class FacilityAdminDashboard extends Component
 {
   public $facility_id, $facility_name, $state_name, $lga_name, $ward_name, $user;
   public $selectedTimeframe = '30'; // a month for now
@@ -119,6 +117,7 @@ class facilityAdminDashboard extends Component
       $this->riskAlerts = $data['risks'];
       $this->deferredMetricsReady = true;
 
+      $this->dispatch('dashboard-data-updated', trendData: $this->trendChartData, ageGroupData: $this->ageGroupChartData);
       $this->dispatch('loaded'); // Trigger loaded state
     } catch (\Exception $e) {
       Log::error('Dashboard data loading failed: ' . $e->getMessage(), [
@@ -128,6 +127,7 @@ class facilityAdminDashboard extends Component
       toastr()->error('Error loading dashboard data.');
       $this->resetDashboardData();
       $this->deferredMetricsReady = true;
+      $this->dispatch('dashboard-data-updated', trendData: $this->trendChartData, ageGroupData: $this->ageGroupChartData);
       $this->dispatch('loaded');
     }
   }
@@ -695,9 +695,8 @@ class facilityAdminDashboard extends Component
   // Method to reload the page, I may remove the other one later
   public function forceRefresh()
   {
-    $cacheKey = "dashboard_data_{$this->facility_id}_{$this->selectedTimeframe}_{$this->selectedRegister}_*";
-    Cache::forget($cacheKey);
-    $this->js('window.location.reload()');
+    $this->refreshData();
+    toastr()->info('Dashboard cache cleared and refreshed.');
   }
 
   public function refreshData()

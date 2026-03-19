@@ -157,7 +157,7 @@ class PredictiveAnalyticsService
 
     foreach ($services as $serviceName => $model) {
       $dateField = $serviceName === 'antenatal' ? 'date_of_booking' : ($serviceName === 'delivery' ? 'dodel' : 'visit_date');
-      $facilityField = $serviceName === 'antenatal' ? 'registration_facility_id' : 'facility_id';
+      $facilityField = 'facility_id';
 
       $historicalData = $model::whereIn($facilityField, $facilityIds)
         ->where($dateField, '>=', Carbon::now()->subDays(self::SERVICE_HISTORY_DAYS))
@@ -502,8 +502,8 @@ class PredictiveAnalyticsService
     $facilityIds = $this->scopeService->normalizeFacilityIds($facilityIds);
 
 
-    $totalPatients = Antenatal::whereIn('registration_facility_id', $facilityIds)->count();
-    $postnatalPatients = PostnatalRecord::whereIn('facility_id', $facilityIds)->distinct('user_id')->count();
+    $totalPatients = Antenatal::whereIn('facility_id', $facilityIds)->count();
+    $postnatalPatients = PostnatalRecord::whereIn('facility_id', $facilityIds)->distinct('patient_id')->count('patient_id');
 
     return [
       'postnatal_coverage' => $totalPatients > 0 ? ($postnatalPatients / $totalPatients) * 100 : 0

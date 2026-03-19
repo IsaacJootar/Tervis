@@ -65,6 +65,14 @@ class PostnatalRecord extends Model
     return $this->belongsTo(Patient::class);
   }
 
+  /**
+   * Legacy alias kept for analytics compatibility.
+   */
+  public function user(): BelongsTo
+  {
+    return $this->belongsTo(Patient::class, 'patient_id');
+  }
+
   public function facility(): BelongsTo
   {
     return $this->belongsTo(Facility::class);

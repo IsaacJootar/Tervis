@@ -713,3 +713,71 @@
   - `php artisan route:list` (routes compile)
   - `php artisan view:cache` (blade compiles)
   - `php artisan test` (suite passes)
+
+## Update (2026-03-19, Core Legacy UI Cleanup Pass)
+- Removed remaining legacy hero/floating header pattern from core operations pages and aligned to simple section-card header layout:
+  - `resources/views/livewire/core/create-data-officers.blade.php`
+  - `resources/views/livewire/core/disable-data-officer-account.blade.php`
+  - `resources/views/livewire/core/update-officer-designation.blade.php`
+  - `resources/views/livewire/core/facility-patients.blade.php`
+  - `resources/views/livewire/core/patient-appointments.blade.php`
+  - `resources/views/livewire/core/state-officer-dashboard.blade.php`
+  - `resources/views/livewire/core/lga-officer-dashboard.blade.php`
+- Also completed facility admin dashboard cleanup in this same hardening pass:
+  - `app/Livewire/Core/FacilityAdminDashboard.php`
+  - `resources/views/livewire/core/facility-admin-dashboard.blade.php`
+- Core consistency checks:
+  - verified no `hero-card` / `floating-shape` legacy markers remain in `resources/views/livewire/core`.
+  - verified table pagination/export includes remain present on operational tables (`datatables-init` / `datatables-init-multi` usage scan).
+- Docs updated:
+  - `docs/APP1_UI_STYLE_GUIDE.md` (explicit no-hero rule for operational pages)
+  - `docs/APP1_WORKFLOW_ROADMAP.md` (Phase C legacy core UI modernization marked completed)
+  - `docs/APP1_MODULE_STATUS.md` (new Core UI modernization status block)
+- Validation run:
+  - `php artisan route:list`
+  - `php artisan view:cache`
+  - `php artisan test tests/Feature/RolePermissionMiddlewareTest.php tests/Feature/ModuleEnabledMiddlewareTest.php`
+
+## Update (2026-03-19, Non-Core Legacy UI + Role Menu Smoke)
+- Extended legacy header cleanup beyond core pages:
+  - `resources/views/livewire/avo/din-activations.blade.php`
+  - `resources/views/livewire/patient/patient-dashboard.blade.php`
+  - `resources/views/livewire/patient/patient-profile.blade.php`
+  - `resources/views/livewire/patient/patient-antenatal.blade.php`
+  - `resources/views/livewire/patient/patient-deliveries.blade.php`
+  - `resources/views/livewire/patient/patient-postnatal.blade.php`
+  - `resources/views/livewire/patient/patient-tetanus.blade.php`
+- Sidebar/menu hygiene:
+  - Removed duplicate facility admin menu entry pointing to the same route:
+    - `resources/menu/facilityAdminMenu.json` (`Facility Settings` duplicate removed)
+- Role-by-role route smoke verification:
+  - Validated all URL targets in role menu files resolve against `php artisan route:list`:
+    - `centralAdminMenu.json`
+    - `facilityAdminMenu.json`
+    - `dataOfficerMenu.json`
+    - `stateOfficerMenu.json`
+    - `lgaOfficerMenu.json`
+    - `avoOfficerMenu.json`
+    - `patientMenu.json`
+  - Result: all menu URLs resolvable (no broken route targets).
+- Docs updated:
+  - `docs/APP1_CODING_RULES.md` (role-menu smoke rule added)
+  - `docs/APP1_MODULE_STATUS.md` (legacy UI cleanup scope expanded)
+
+## Update (2026-03-19, Shared Layout Dead Hero CSS Cleanup)
+- Removed obsolete hero/floating CSS blocks from shared role layouts to prevent legacy style drift:
+  - `resources/views/layouts/facilityAdminLayout.blade.php`
+  - `resources/views/layouts/centralAdminLayout.blade.php`
+  - `resources/views/layouts/dataOfficerLayout.blade.php`
+  - `resources/views/layouts/avoOfficerLayout.blade.php`
+- Removed unused global hero/floating selectors from shared styles partial:
+  - `resources/views/layouts/sections/styles.blade.php`
+- Kept active card/avatar/label utility styling in place; only dead hero/floating styles were removed.
+- Validation run:
+  - `php artisan view:cache`
+  - `php artisan route:list`
+  - `rg` scan confirmed no `hero-card` / `floating-shape` / `floatPremium` markers remain in `resources/views`.
+- Docs updated:
+  - `docs/APP1_WORKFLOW_ROADMAP.md`
+  - `docs/APP1_MODULE_STATUS.md`
+  - `docs/handoff.md`

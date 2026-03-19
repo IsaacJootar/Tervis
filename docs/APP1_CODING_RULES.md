@@ -44,6 +44,16 @@ Primary UI reference for design decisions:
    - Central roles (`Central Admin`, `Central Administrator`) are restricted to `/central/*` access paths in `UserRoleMiddleware`; platform actions should operate through central orchestration, not direct facility-core execution.
    - When replacing or removing central legacy URLs, add compatibility redirects for old bookmarks under `/central-admin/*`.
    - No dead placeholder links should remain in `resources/menu/centralAdminMenu.json`.
+9. Role-menu smoke rule:
+   - After any sidebar/menu update, validate role menu URL targets against `php artisan route:list` for:
+     - Central Admin
+     - Facility Admin
+     - State Officer
+     - L.G.A Officer
+     - Data Officer
+     - Verification Officer (if menu file exists)
+     - Patient (if menu file exists)
+   - Fix/remove duplicate menu entries that point to the same workflow route.
 
 ## 3) UI Rules (Project Standard)
 
@@ -71,7 +81,7 @@ Primary UI reference for design decisions:
    - Use multi-color tinted styling for stat/metric summary cards only.
    - Do not apply tinted stat-card styling across all form/content cards.
    - Stat cards must include a visible icon for each metric.
-   - Preferred implementation is inline SVG inside `.metric-icon` (avoid icon-font-only dependency for critical card icons).
+   - Hard rule: stat/metric card icons must be inline SVG inside `.metric-icon` (no icon-font-only implementation).
 9. Every workspace query must respect tenancy scope by default:
    - always filter by `facility_id`
    - for patient workspace modules, also filter by `patient_id`
@@ -82,9 +92,10 @@ Primary UI reference for design decisions:
 11. Legacy UI refactor rule (hard rule):
    - When touching any legacy module/page, do not keep legacy hero-banner layouts.
    - Refactor to the current simple template header pattern used in new modules (badge + title/time + right-aligned primary action).
+   - Do not keep unused hero/floating CSS selectors in shared layouts/partials; remove dead style blocks during refactor.
    - Primary create/open actions must have loading states.
    - Every stat/metric card must include a visible icon; no icon-less placeholders or empty icon circles.
-   - Use inline SVG in `.metric-icon` for stat cards where possible to avoid icon-font rendering failures.
+   - Hard rule: use inline SVG in `.metric-icon` for stat cards to avoid icon-font rendering failures.
 
 ## 4) Interaction Rules
 

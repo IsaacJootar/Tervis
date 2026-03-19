@@ -2,57 +2,33 @@
 @section('title', 'Create Data Officer')
 <div>
 
-    <!-- Hero Card Header -->
-    <div class="row mb-5">
-        <div class="col-12">
-            <div class="hero-card">
-                <div class="hero-content">
-                    <div class="hero-text">
-                        <h4 class="hero-title" style="color: white; font-size: 28px;">
-                            <i class='bx bx-user me-2'></i>
-                            Manage Data Officers
-                        </h4>
-
-                        <div class="hero-stats">
-
-                            <span class="hero-stat">
-                                <i class="bx bx-group"></i>
-                                {{ count($dataOfficers) }} Total Data Officers
-                            </span>
-                            <span class="hero-stat">
-                                <i class="bx bx-user-check"></i>
-                                {{ $dataOfficers->where('designation', 'Doctor')->count() }} Doctors
-                            </span>
-                            <span class="hero-stat">
-                                <i class="bx bx-plus-medical"></i>
-                                {{ $dataOfficers->where('designation', 'Nurse')->count() }} Nurses
-                            </span>
-                            <span class="hero-stat">
-                                <i class="bx bx-test-tube"></i>
-                                {{ $dataOfficers->where('designation', 'Lab Attendant')->count() }} Lab Attendants
-                            </span>
-                            <span class="hero-stat">
-                                <i class="bx bx-test-tube"></i>
-                                {{ $dataOfficers->where('designation', 'Volunteer')->count() }} Volunteers
-                            </span>
-                            {{ Carbon::now('Africa/Lagos')->format('l, F j, Y, h:i A') }}
-                        </div>
-
-                        <div class="mt-3">
-                            <button class="btn btn-light btn-lg rounded-pill shadow-sm d-inline-flex align-items-center"
-                                style="border: 1px solid #ddd; padding: 10px 20px;" data-bs-toggle="modal"
-                                data-bs-target="#dataOfficerModal" type="button" title="Create New Data Officer">
-                                <i class="bx bx-user-plus me-2" style="font-size: 15px;"> </i>
-                                + Create New Data Officer
-                            </button>
-                        </div>
-
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="d-flex flex-column flex-lg-row justify-content-between align-items-start gap-3">
+                <div>
+                    <h5 class="mb-1 d-flex align-items-center gap-2">
+                        <i class="bx bx-user text-primary"></i>
+                        Manage Data Officers
+                    </h5>
+                    <div class="small text-muted">{{ Carbon::now('Africa/Lagos')->format('l, F j, Y, h:i A') }}</div>
+                    <div class="d-flex flex-wrap gap-2 mt-2">
+                        <span class="badge bg-label-dark"><i class="bx bx-group me-1"></i>{{ count($dataOfficers) }}
+                            Total</span>
+                        <span class="badge bg-label-success"><i class="bx bx-user-check me-1"></i>{{ $dataOfficers->where('designation', 'Doctor')->count() }}
+                            Doctors</span>
+                        <span class="badge bg-label-primary"><i class="bx bx-plus-medical me-1"></i>{{ $dataOfficers->where('designation', 'Nurse')->count() }}
+                            Nurses</span>
+                        <span class="badge bg-label-warning"><i class="bx bx-test-tube me-1"></i>{{ $dataOfficers->where('designation', 'Lab Attendant')->count() }}
+                            Lab</span>
+                        <span class="badge bg-label-info"><i class="bx bx-heart me-1"></i>{{ $dataOfficers->where('designation', 'Volunteer')->count() }}
+                            Volunteers</span>
                     </div>
-                    <div class="hero-decoration">
-                        <div class="floating-shape shape-1"></div>
-                        <div class="floating-shape shape-2"></div>
-                        <div class="floating-shape shape-3"></div>
-                    </div>
+                </div>
+                <div>
+                    <button class="btn btn-dark" data-bs-toggle="modal" data-bs-target="#dataOfficerModal"
+                        type="button" title="Create New Data Officer">
+                        <i class="bx bx-user-plus me-1"></i>Create New Data Officer
+                    </button>
                 </div>
             </div>
         </div>

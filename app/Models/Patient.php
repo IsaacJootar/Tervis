@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Models\Registrations\AntenatalRegistration;
 use App\Models\Registrations\FamilyPlanningRegistration;
 use App\Models\Registrations\GeneralPatientsRegistration;
+use App\Models\AntenatalFollowUpAssessment;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -185,6 +186,54 @@ class Patient extends Model
     return $this->hasOne(AntenatalRegistration::class)
       ->where('is_active', true)
       ->latest('registration_date');
+  }
+
+  /**
+   * Legacy alias kept for analytics compatibility.
+   */
+  public function antenatal(): HasOne
+  {
+    return $this->activeAntenatalRegistration();
+  }
+
+  /**
+   * Legacy analytics relation.
+   */
+  public function deliveries(): HasMany
+  {
+    return $this->hasMany(Delivery::class, 'patient_id');
+  }
+
+  /**
+   * Legacy analytics relation.
+   */
+  public function postnatalRecords(): HasMany
+  {
+    return $this->hasMany(PostnatalRecord::class, 'patient_id');
+  }
+
+  /**
+   * Legacy analytics relation.
+   */
+  public function tetanusVaccinations(): HasMany
+  {
+    return $this->hasMany(TetanusVaccination::class, 'patient_id');
+  }
+
+  /**
+   * Legacy analytics relation (records use user_id as patient reference).
+   */
+  public function dailyAttendances(): HasMany
+  {
+    return $this->hasMany(DailyAttendance::class, 'user_id');
+  }
+
+  /**
+   * Legacy analytics relation (records use user_id as patient reference).
+   */
+  public function clinicalNotes(): HasMany
+  {
+    return $this->hasMany(ClinicalNote::class, 'user_id');
   }
 
   public function familyPlanningRegistration(): HasOne
@@ -639,6 +688,94 @@ class Patient extends Model
       'mam_cases' => 0, // TODO: Calculate from nutrition_records
       'sam_cases' => 0, // TODO: Calculate from nutrition_records
       'last_screening_date' => null, // TODO: Get from nutrition_records
+    ];
+  }
+
+  /**
+   * Legacy analytics payload for AI risk and diagnostic services.
+   */
+  public function getPatientDataForAI(): array
+  {
+    $antenatal = $this->antenatal()->first();
+    $latestDelivery = $this->deliveries()->latest('dodel')->first();
+
+    $followUpQuery = AntenatalFollowUpAssessment::query()->where('patient_id', $this->id);
+    if (!empty($this->facility_id)) {
+      $followUpQuery->where('facility_id', $this->facility_id);
+    }
+
+    $latestFollowUp = $followUpQuery->latest('visit_date')->first();
+    $latestAttendance = $this->dailyAttendances()->latest('visit_date')->first();
+
+    $antenatalVisitCount = max(
+      (int) $this->dailyAttendances()->count(),
+      (int) $followUpQuery->count()
+    );
+
+    $bp = $this->parseBloodPressure((string) ($antenatal?->blood_pressure ?? ''));
+    $hemoglobin = is_numeric($antenatal?->hemoglobin) ? (float) $antenatal->hemoglobin : null;
+
+    return [
+      'patient_id' => $this->id,
+      'facility_id' => $this->facility_id,
+      'din' => (string) ($this->din ?? 'N/A'),
+      'full_name' => $this->full_name,
+      'phone' => $this->phone,
+      'age' => (int) $this->age,
+      'is_high_risk_age' => $this->age < 18 || $this->age > 35,
+      'antenatal_visits_count' => $antenatalVisitCount,
+      'last_antenatal_visit' => $latestFollowUp?->visit_date
+        ?? $latestAttendance?->visit_date
+        ?? $antenatal?->registration_date,
+      'gestational_age_weeks' => (int) ($antenatal?->gestational_age_weeks ?? 0),
+      'lmp' => $antenatal?->lmp,
+      'edd' => $antenatal?->edd,
+      'has_hypertension' => isset($bp['systolic'], $bp['diastolic'])
+        ? ($bp['systolic'] >= 140 || $bp['diastolic'] >= 90)
+        : false,
+      'is_anemic' => $hemoglobin !== null ? $hemoglobin < 11.0 : false,
+      'has_sickle_cell' => str_contains(strtoupper((string) ($antenatal?->genotype ?? '')), 'S'),
+      'heart_disease' => (bool) ($antenatal?->heart_disease ?? false),
+      'kidney_disease' => (bool) ($antenatal?->kidney_disease ?? false),
+      'bleeding' => (bool) ($antenatal?->bleeding ?? false),
+      'latest_delivery' => $latestDelivery ? [
+        'mod' => (string) ($latestDelivery->mod ?? ''),
+        'weight' => is_numeric($latestDelivery->weight) ? (float) $latestDelivery->weight : null,
+        'still_birth' => (string) ($latestDelivery->still_birth ?? ''),
+        'breathing' => (string) ($latestDelivery->breathing ?? ''),
+        'pre_term' => (string) ($latestDelivery->pre_term ?? ''),
+        'toc' => (string) ($latestDelivery->toc ?? ''),
+        'seeking_care' => (string) ($latestDelivery->seeking_care ?? ''),
+        'transportation' => (string) ($latestDelivery->transportation ?? ''),
+        'mother_transportation' => (string) ($latestDelivery->mother_transportation ?? ''),
+        'newborn_care' => (string) ($latestDelivery->newborn_care ?? ''),
+        'baby_dead' => (string) ($latestDelivery->baby_dead ?? ''),
+        'oxytocin' => (string) ($latestDelivery->oxytocin ?? ''),
+        'misoprostol' => (string) ($latestDelivery->misoprostol ?? ''),
+        'partograph' => (string) ($latestDelivery->partograph ?? ''),
+        'dead' => (string) ($latestDelivery->dead ?? ''),
+        'admitted' => (string) ($latestDelivery->admitted ?? ''),
+        'referred_out' => (string) ($latestDelivery->referred_out ?? ''),
+        'pac' => (string) ($latestDelivery->pac ?? ''),
+        'abortion' => (string) ($latestDelivery->abortion ?? ''),
+        'temperature' => is_numeric($latestDelivery->temperature) ? (float) $latestDelivery->temperature : null,
+      ] : null,
+    ];
+  }
+
+  private function parseBloodPressure(string $bpString): array
+  {
+    if ($bpString === '') {
+      return [];
+    }
+
+    if (!preg_match('/(\d{2,3})\s*[\/\-]\s*(\d{2,3})/', $bpString, $matches)) {
+      return [];
+    }
+
+    return [
+      'systolic' => (int) $matches[1],
+      'diastolic' => (int) $matches[2],
     ];
   }
 }

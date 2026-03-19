@@ -9,8 +9,11 @@
 @endphp
 
 @if ($show ?? false)
-    <aside class="ai-assistant-panel" aria-label="AI Assistant Panel">
-        <div class="ai-assistant-head">
+    <div class="ai-assistant-shell">
+        <button type="button" class="ai-assistant-backdrop d-lg-none" aria-label="Close AI Assistant"
+            wire:click="{{ $hideActionName }}"></button>
+        <aside class="ai-assistant-panel" aria-label="AI Assistant Panel">
+            <div class="ai-assistant-head">
             <div>
                 <h6 class="mb-1">{{ $panelTitle }}</h6>
                 <div class="d-flex align-items-center gap-2">
@@ -38,52 +41,73 @@
                     Hide AI Assistant
                 </button>
             </div>
-        </div>
+            </div>
 
-        <p class="ai-assistant-note">
-            Advisory only: suggestions never auto-save, auto-complete, or override user actions.
-        </p>
+            <div class="ai-assistant-content">
+                <p class="ai-assistant-note">
+                    Advisory only: suggestions never auto-save, auto-complete, or override user actions.
+                </p>
 
-        @if ($summaryText)
-            <div class="ai-assistant-summary">{{ $summaryText }}</div>
-        @endif
+                @if ($summaryText)
+                    <div class="ai-assistant-summary">{{ $summaryText }}</div>
+                @endif
 
-        <div class="ai-assistant-items">
-            @forelse ($assistantItems as $item)
-                @php
-                    $severity = $item['severity'] ?? 'ok';
-                    $itemClass = match ($severity) {
-                        'action' => 'ai-item-action',
-                        'watch' => 'ai-item-watch',
-                        default => 'ai-item-ok',
-                    };
-                @endphp
-                <article class="ai-assistant-item {{ $itemClass }}">
-                    <div class="d-flex align-items-center justify-content-between gap-2">
-                        <h6 class="mb-0">{{ $item['title'] ?? 'Suggestion' }}</h6>
-                        @if (!empty($item['confidence']))
-                            <span class="badge bg-white text-dark border">Confidence: {{ ucfirst($item['confidence']) }}</span>
-                        @endif
-                    </div>
-                    <p class="mb-0 mt-1">{{ $item['message'] ?? '' }}</p>
-                </article>
-            @empty
-                <p class="small text-muted mb-0">No AI Assistant suggestions available yet.</p>
-            @endforelse
-        </div>
-    </aside>
+                <div class="ai-assistant-items">
+                    @forelse ($assistantItems as $item)
+                        @php
+                            $severity = $item['severity'] ?? 'ok';
+                            $itemClass = match ($severity) {
+                                'action' => 'ai-item-action',
+                                'watch' => 'ai-item-watch',
+                                default => 'ai-item-ok',
+                            };
+                        @endphp
+                        <article class="ai-assistant-item {{ $itemClass }}">
+                            <div class="d-flex align-items-center justify-content-between gap-2">
+                                <h6 class="mb-0">{{ $item['title'] ?? 'Suggestion' }}</h6>
+                                @if (!empty($item['confidence']))
+                                    <span class="badge bg-white text-dark border">Confidence: {{ ucfirst($item['confidence']) }}</span>
+                                @endif
+                            </div>
+                            <p class="mb-0 mt-1">{{ $item['message'] ?? '' }}</p>
+                        </article>
+                    @empty
+                        <p class="small text-muted mb-0">No AI Assistant suggestions available yet.</p>
+                    @endforelse
+                </div>
+            </div>
+        </aside>
+    </div>
 @endif
 
 @once
     <style>
-        .ai-assistant-panel {
+        .ai-assistant-shell {
             position: fixed;
+            inset: 0;
+            z-index: 1090;
+            pointer-events: none;
+        }
+
+        .ai-assistant-backdrop {
+            position: absolute;
+            inset: 0;
+            border: 0;
+            background: rgba(15, 23, 42, 0.42);
+            pointer-events: auto;
+        }
+
+        .ai-assistant-panel {
+            position: absolute;
             right: 1rem;
             top: 5.5rem;
-            z-index: 1090;
+            bottom: 1rem;
+            z-index: 1091;
             width: min(430px, calc(100vw - 2rem));
-            max-height: calc(100vh - 7rem);
-            overflow: auto;
+            height: auto;
+            display: flex;
+            flex-direction: column;
+            pointer-events: auto;
             background: #ffffff;
             border: 1px solid #d1d5db;
             border-radius: 12px;
@@ -99,6 +123,16 @@
             border-bottom: 1px solid #e5e7eb;
             padding-bottom: 0.65rem;
             margin-bottom: 0.65rem;
+            flex-shrink: 0;
+        }
+
+        .ai-assistant-content {
+            flex: 1 1 auto;
+            min-height: 0;
+            overflow-y: auto;
+            overscroll-behavior: contain;
+            -webkit-overflow-scrolling: touch;
+            padding-right: 0.2rem;
         }
 
         .ai-assistant-note {
@@ -153,14 +187,26 @@
 
         @media (max-width: 991.98px) {
             .ai-assistant-panel {
-                top: auto;
+                top: max(0.5rem, env(safe-area-inset-top));
                 bottom: 0.5rem;
                 right: 0.5rem;
                 left: 0.5rem;
                 width: auto;
-                max-height: 72vh;
+                border-radius: 10px;
+            }
+
+            .ai-assistant-head {
+                position: sticky;
+                top: 0;
+                background: #ffffff;
+                z-index: 2;
+            }
+        }
+
+        @media (min-width: 992px) {
+            .ai-assistant-backdrop {
+                display: none;
             }
         }
     </style>
 @endonce
-

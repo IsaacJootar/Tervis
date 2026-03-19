@@ -35,71 +35,30 @@
         }
     }
 }" x-on:keydown.enter.window="submitOnEnter($event)">
-    {{-- Hero Card Header --}}
-    <div class="row mb-5">
-        <div class="col-12">
-            <div class="hero-card">
-
-                {{-- Floating Decorations --}}
-                <div class="hero-decoration">
-                    <span class="floating-shape shape-1"></span>
-                    <span class="floating-shape shape-2"></span>
-                    <span class="floating-shape shape-3"></span>
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="d-flex flex-column flex-lg-row justify-content-between align-items-start gap-3">
+                <div>
+                    <h5 class="mb-1 d-flex align-items-center gap-2">
+                        <i class='bx bx-check-shield text-primary'></i>
+                        DIN Activation - Patient Attendance
+                    </h5>
+                    <div class="small text-muted">{{ Carbon::now('Africa/Lagos')->format('l, F j, Y, h:i A') }}</div>
+                    <div class="d-flex flex-wrap gap-2 mt-2">
+                        <span class="badge bg-label-dark"><i class="bx bx-building me-1"></i>{{ $facility_name ?? 'N/A' }}</span>
+                        <span class="badge bg-label-primary"><i class="bx bx-map-pin me-1"></i>{{ $facility_state ?? 'N/A' }}</span>
+                        <span class="badge bg-label-info"><i class="bx bx-map me-1"></i>{{ $facility_lga ?? 'N/A' }}</span>
+                        <span class="badge bg-label-warning"><i class="bx bx-current-location me-1"></i>Ward:
+                            {{ $facility_ward ?? 'N/A' }}</span>
+                        <span class="badge bg-label-success"><i class="bx bx-user-check me-1"></i>{{ $todayCount ?? 0 }}
+                            Check-Ins Today</span>
+                    </div>
                 </div>
-
-                {{-- Hero Content --}}
-                <div class="hero-content">
-
-                    <div class="hero-text">
-                        <h4 class="hero-title mb-1" style="color: white; font-size: 22px;">
-                            <i class='bx bx-check-shield me-2'></i>
-                            DIN Activation - Patient Attendance
-                        </h4>
-
-                        <p class="mb-2" style="color: rgba(255, 255, 255, 0.85); font-size: 0.875rem;">
-                            <i class="bx bx-time me-1"></i>
-                            {{ Carbon::now('Africa/Lagos')->format('l, F j, Y, h:i A') }}
-                        </p>
-
-                        <div class="hero-stats">
-                            <span class="hero-stat">
-                                <i class="bx bx-building"></i>
-                                {{ $facility_name ?? 'N/A' }}
-                            </span>
-
-                            <span class="hero-stat">
-                                <i class="bx bx-map-pin"></i>
-                                {{ $facility_state ?? 'N/A' }}
-                            </span>
-
-                            <span class="hero-stat">
-                                <i class="bx bx-map"></i>
-                                {{ $facility_lga ?? 'N/A' }}
-                            </span>
-
-                            <span class="hero-stat">
-                                <i class="bx bx-current-location"></i>
-                                Ward: {{ $facility_ward ?? 'N/A' }}
-                            </span>
-
-                            <span class="hero-stat">
-                                <i class="bx bx-user-check"></i>
-                                {{ $todayCount ?? 0 }} Check-Ins Today
-                            </span>
-                        </div>
-                    </div>
-
-                    {{-- CTA Button --}}
-                    <div class="demo-inline-spacing mt-3">
-                        <button type="button"
-                            class="btn btn-lg btn-dark px-5 py-3 d-inline-flex align-items-center shadow"
-                            style="border-radius: 8px;" data-bs-toggle="modal" data-bs-target="#dinVerificationModal"
-                            wire:click="openDinModal">
-                            <span class="icon-base ti tabler-scan icon-24px me-2 text-white"></span>
-                            <span class="fw-bold">Activate DIN / Check-In Patient</span>
-                        </button>
-                    </div>
-
+                <div>
+                    <button type="button" class="btn btn-dark" data-bs-toggle="modal"
+                        data-bs-target="#dinVerificationModal" wire:click="openDinModal">
+                        <span class="icon-base ti tabler-scan me-1"></span>Activate DIN / Check-In Patient
+                    </button>
                 </div>
             </div>
         </div>

@@ -2,6 +2,7 @@
     $tableIds = $tableIds ?? ['dataTable'];
     $orders = $orders ?? [];
     $nonOrderable = $nonOrderable ?? [];
+    $stateSaveTables = $stateSaveTables ?? [];
     $defaultOrder = $defaultOrder ?? [0, 'desc'];
 @endphp
 
@@ -10,6 +11,7 @@
         const tableIds = @json(array_values($tableIds));
         const orders = @json($orders);
         const nonOrderable = @json(array_values($nonOrderable));
+        const stateSaveTables = @json(array_values($stateSaveTables));
         const defaultOrder = @json($defaultOrder);
 
         window.__app1MultiDataTables = window.__app1MultiDataTables || {
@@ -27,6 +29,7 @@
             nextRegistry[tableId] = {
                 order: orders[tableId] || defaultOrder,
                 nonOrderable: nonOrderable.includes(tableId),
+                stateSave: stateSaveTables.includes(tableId),
             };
         });
 
@@ -81,6 +84,11 @@
             if (meta.nonOrderable) {
                 config.ordering = false;
                 delete config.order;
+            }
+
+            if (meta.stateSave) {
+                config.stateSave = true;
+                config.stateDuration = -1;
             }
 
             return config;
