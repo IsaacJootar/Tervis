@@ -14,12 +14,12 @@
       name="viewport"
       content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
 
-    <title>Demo: Dashboard - Analytics | Vuexy - Bootstrap Dashboard PRO</title>
+    <title>Cureve: Timely, Smart & Accurate data that save lives</title>
 
     <meta name="description" content="" />
 
     <!-- Favicon -->
-    <link rel="icon" type="image/x-icon" href="../../assets/cureva-c19-green-2.png" />
+    <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}" />
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />

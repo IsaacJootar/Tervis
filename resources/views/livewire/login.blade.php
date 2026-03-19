@@ -2,13 +2,14 @@
     <x-input-error-messages />
     <!-- Content -->
     <div class="container-xxl">
-        <div class="authentication-wrapper authentication-basic py-3" style="align-items:flex-start; padding-top:1rem;">
-            <div class="authentication-inner py-2">
+        <div class="authentication-wrapper authentication-basic py-0"
+            style="align-items:flex-start; min-height:100vh; padding-top:0;">
+            <div class="authentication-inner py-0" style="margin-top:-.9rem;">
                 <!-- Login -->
                 <div class="card">
-                    <div class="card-body p-4">
+                    <div class="card-body p-3">
                         <!-- Logo -->
-                        <div class="app-brand justify-content-center mb-4">
+                        <div class="app-brand justify-content-center mb-2">
                             <a href="{{ url('/') }}" class="app-brand-link">
                                 <span class="app-brand-logo demo">@include('_partials.macros')</span>
                             </a>

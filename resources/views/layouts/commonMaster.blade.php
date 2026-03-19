@@ -45,10 +45,8 @@
     <meta name="viewport"
         content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
 
-    <title>
-        @yield('title') | {{ config('variables.templateName') ? config('variables.templateName') : 'TemplateName' }}
-        - {{ config('variables.templateSuffix') ? config('variables.templateSuffix') : 'TemplateSuffix' }}
-    </title>
+    <title>{{ config('variables.templateName') ? config('variables.templateName') : 'TemplateName' }}:
+        {{ config('variables.templateSuffix') ? config('variables.templateSuffix') : 'TemplateSuffix' }}</title>
     <meta name="description"
         content="{{ config('variables.templateDescription') ? config('variables.templateDescription') : '' }}" />
     <meta name="keywords"
@@ -69,6 +67,7 @@
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}" />
     <link rel="shortcut icon" href="{{ asset('favicon.ico') }}" />
+    <link rel="stylesheet" href="{{ asset('vendor/flasher/toastr.min.css') }}" />
 
     <!-- Include Styles -->
     <!-- $isFront is used to append the front layout styles only on the front layout otherwise the variable will be blank -->

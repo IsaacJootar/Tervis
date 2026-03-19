@@ -115,13 +115,7 @@ class ModuleEnabledMiddlewareTest extends TestCase
   public function test_other_facility_disabled_row_does_not_block_current_facility_user(): void
   {
     $facilityId = $this->firstFacilityIdOrSkip();
-    $otherFacilityId = (int) DB::table('facilities')
-      ->where('id', '!=', $facilityId)
-      ->value('id');
-
-    if ($otherFacilityId <= 0) {
-      $this->markTestSkipped('Second facility not available for scope isolation assertion.');
-    }
+    $otherFacilityId = $this->ensureSecondFacilityId($facilityId);
 
     $user = $this->createDataOfficer($facilityId);
 
@@ -169,6 +163,39 @@ class ModuleEnabledMiddlewareTest extends TestCase
       'role' => 'Data Officer',
       'facility_id' => $facilityId,
       'is_active' => true,
+    ]);
+  }
+
+  private function ensureSecondFacilityId(int $primaryFacilityId): int
+  {
+    $existingId = (int) DB::table('facilities')
+      ->where('id', '!=', $primaryFacilityId)
+      ->value('id');
+
+    if ($existingId > 0) {
+      return $existingId;
+    }
+
+    $primary = DB::table('facilities')->where('id', $primaryFacilityId)->first();
+    if (!$primary) {
+      $this->markTestSkipped('Unable to create a second facility for scope isolation assertion.');
+    }
+
+    $token = Str::upper(Str::random(5));
+    $now = now();
+
+    return (int) DB::table('facilities')->insertGetId([
+      'name' => 'Module Scope Facility ' . $token,
+      'state_id' => $primary->state_id,
+      'lga_id' => $primary->lga_id,
+      'ward_id' => $primary->ward_id,
+      'address' => 'No. 3 Test Street',
+      'phone' => '08000000001',
+      'email' => 'module_scope_' . strtolower($token) . '@example.com',
+      'type' => $primary->type ?? 'Primary',
+      'is_active' => 1,
+      'created_at' => $now,
+      'updated_at' => $now,
     ]);
   }
 }

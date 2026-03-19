@@ -1,0 +1,779 @@
+?<!DOCTYPE html>
+
+<html lang="en"
+    class=" layout-compact layout-menu-fixed   "
+    dir="ltr" data-skin="default"
+    data-assets-path="http://localhost:8000/assets/" data-base-url="http://localhost:8000" data-framework="laravel"
+    data-template="access-auth-menu-template" data-bs-theme="light"
+    >
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
+
+    <title>Cureve:
+        Timely, Smart &amp; Accurate data that save lives</title>
+    <meta name="description"
+        content="Cureve: Timely, Smart &amp; Accurate data that save lives." />
+    <meta name="keywords"
+        content="Cureve, timely data, smart data, accurate data, health outcomes, save lives" />
+    <meta property="og:title" content="Innovating Digital Health for a Safer &amp; Stronger Nigeria" />
+    <meta property="og:type" content="Software Solution" />
+    <meta property="og:url" content="" />
+    <meta property="og:image" content="https://pixinvent.com/wp-content/uploads/2023/06/vuexy-hero-image.png" />
+    <meta property="og:description"
+        content="Cureve: Timely, Smart &amp; Accurate data that save lives." />
+    <meta property="og:site_name"
+        content="PrimeSafepath solutions." />
+    <meta name="robots" content="noindex, nofollow" />
+    <!-- laravel CRUD token -->
+    <meta name="csrf-token" content="LJR6SzUJDeMK56Ei1JnzA3pRu5FSx3ZqdzrNZOVk" />
+    <!-- Canonical SEO -->
+    <link rel="canonical" href="" />
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="http://localhost:8000/favicon.ico" />
+    <link rel="shortcut icon" href="http://localhost:8000/favicon.ico" />
+    <link rel="stylesheet" href="http://localhost:8000/vendor/flasher/toastr.min.css" />
+
+    <!-- Include Styles -->
+    <!-- $isFront is used to append the front layout styles only on the front layout otherwise the variable will be blank -->
+    ?<!-- BEGIN: Theme CSS-->
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link
+    href="https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&ampdisplay=swap"
+    rel="stylesheet" />
+
+<!-- Fonts Icons -->
+<script type="module" src="http://[::1]:5175/@vite/client" data-navigate-track="reload"></script><link rel="stylesheet" href="http://[::1]:5175/resources/assets/vendor/fonts/iconify/iconify.css" data-navigate-track="reload" class="" />
+<!-- BEGIN: Vendor CSS-->
+<script type="module" src="http://[::1]:5175/@vite/client" data-navigate-track="reload"></script><link rel="stylesheet" href="http://[::1]:5175/resources/assets/vendor/libs/node-waves/node-waves.scss" data-navigate-track="reload" class="" />
+    <script type="module" src="http://[::1]:5175/@vite/client" data-navigate-track="reload"></script><link rel="stylesheet" href="http://[::1]:5175/resources/assets/vendor/libs/pickr/pickr-themes.scss" data-navigate-track="reload" class="" />
+<!-- Core CSS -->
+<script type="module" src="http://[::1]:5175/@vite/client" data-navigate-track="reload"></script><link rel="stylesheet" href="http://[::1]:5175/resources/assets/vendor/scss/core.scss" data-navigate-track="reload" class="template-customizer-core-css" /><link rel="stylesheet" href="http://[::1]:5175/resources/assets/css/demo.css" data-navigate-track="reload" class="" /><link rel="stylesheet" href="http://[::1]:5175/resources/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.scss" data-navigate-track="reload" class="" />
+<!-- Vendor Styles -->
+<script type="module" src="http://[::1]:5175/@vite/client" data-navigate-track="reload"></script><link rel="stylesheet" href="http://[::1]:5175/resources/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.scss" data-navigate-track="reload" class="" /><link rel="stylesheet" href="http://[::1]:5175/resources/assets/vendor/libs/typeahead-js/typeahead.scss" data-navigate-track="reload" class="" />    <script type="module" src="http://[::1]:5175/@vite/client" data-navigate-track="reload"></script><link rel="stylesheet" href="http://[::1]:5175/resources/assets/vendor/libs/@form-validation/form-validation.scss" data-navigate-track="reload" class="" />
+<!-- Page Styles -->
+    <script type="module" src="http://[::1]:5175/@vite/client" data-navigate-track="reload"></script><link rel="stylesheet" href="http://[::1]:5175/resources/assets/vendor/scss/pages/page-auth.scss" data-navigate-track="reload" class="" />
+<!-- app CSS -->
+<script type="module" src="http://[::1]:5175/@vite/client" data-navigate-track="reload"></script><link rel="stylesheet" href="http://[::1]:5175/resources/css/app.css" data-navigate-track="reload" class="" /><!-- END: app CSS-->
+
+<!-- Hero Card Styles -->
+<style>
+    :root {
+        --primary: #16a34a;
+        --primary-light: rgba(22, 163, 74, 0.1);
+        --success: #2ecc71;
+        --success-light: rgba(46, 204, 113, 0.1);
+        --info: #00b4d8;
+        --info-light: rgba(0, 255, 216, 0.1);
+        --danger: #e63946;
+        --danger-light: rgba(230, 57, 70, 0.1);
+        --warning: #ff9f1c;
+        --warning-light: rgba(255, 159, 28, 0.1);
+        --purple: #7209b7;
+        --purple-light: rgba(114, 9, 183, 0.1);
+        --teal: #1abc9c;
+        --teal-light: rgba(26, 188, 156, 0.1);
+        --indigo: #3a0ca3;
+        --indigo-light: rgba(58, 12, 163, 0.1);
+        --orange: #f77f00;
+        --orange-light: rgba(247, 127, 0, 0.1);
+        --cyan: #00bbf9;
+        --cyan-light: rgba(0, 187, 249, 0.1);
+        --pink: #ff70a6;
+        --pink-light: rgba(255, 112, 166, 0.1);
+        --red: #d00000;
+        --red-light: rgba(208, 0, 0, 0.1);
+        --softgreen: #a7f3d0;
+        --softgreen-light: rgba(167, 243, 208, 0.1);
+        --lavender: #e9d5ff;
+        --lavender-light: rgba(233, 213, 255, 0.1);
+        --mutedgreen: #4b5563;
+        --mutedgreen-light: rgba(75, 85, 99, 0.1);
+        --black: #1f2937;
+        --black-light: rgba(31, 41, 55, 0.1);
+        --laundry: #4b5e7d;
+        --laundry-light: rgba(75, 94, 125, 0.1);
+        --others: #6d28d9;
+        --others-light: rgba(109, 40, 217, 0.1);
+        --body-bg: #f5f5f9;
+        --card-bg: #ffffff;
+        --card-border: #e9ecef;
+        --body-color: #697a8d;
+        --heading-color: #566a7f;
+        --primary-gradient: linear-gradient(135deg, #16a34a 0%, #22c55e 100%);
+        --success-gradient: linear-gradient(135deg, #2ecc71 0%, #4ade80 100%);
+        --softgreen-gradient: linear-gradient(135deg, #a7f3d0 0%, #6ee7b7 100%);
+        --lavender-gradient: linear-gradient(135deg, #e9d5ff 0%, #d8b4fe 100%);
+        --teal-gradient: linear-gradient(135deg, #20c997 0%, #34d399 100%);
+        --orange-gradient: linear-gradient(135deg, #f77f00 0%, #fb923c 100%);
+        --cyan-gradient: linear-gradient(135deg, #00bbf9 0%, #22d3ee 100%);
+        --mutedgreen-gradient: linear-gradient(135deg, #4b5563 0%, #6b7280 100%);
+        --black-gradient: linear-gradient(135deg, #1f2937 0%, #374151 100%);
+        --laundry-gradient: linear-gradient(135deg, #4b5e7d 0%, #6b7280 100%);
+        --others-gradient: linear-gradient(135deg, #6d28d9 0%, #8b5cf6 100%);
+    }
+
+    .hero-card {
+        background: var(--primary-gradient);
+        border: none;
+        border-radius: 0.625rem;
+        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+        transition: all 0.2s ease-in-out;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .hero-card:hover {
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+        transform: translateY(-2px);
+    }
+
+    .hero-content {
+        padding: 1.5rem;
+        position: relative;
+        z-index: 1;
+    }
+
+    .hero-text {
+        color: #fff;
+    }
+
+    .hero-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        color: #fff;
+    }
+
+    .hero-subtitle {
+        font-size: 1rem;
+        opacity: 0.75;
+        margin-bottom: 1rem;
+        color: #fff;
+    }
+
+    .hero-stats {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1.5rem;
+    }
+
+    .hero-stat {
+        display: flex;
+        align-items: center;
+        font-size: 0.9rem;
+        font-weight: 500;
+        color: #fff;
+        opacity: 0.9;
+    }
+
+    .hero-stat i {
+        margin-right: 0.5rem;
+        font-size: 1.2rem;
+    }
+
+    .hero-decoration {
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+    }
+
+    .floating-shape {
+        position: absolute;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+    }
+
+    .shape-1 {
+        width: 100px;
+        height: 100px;
+        top: -20px;
+        right: -20px;
+        animation: float 6s ease-in-out infinite;
+    }
+
+    .shape-2 {
+        width: 60px;
+        height: 60px;
+        top: 50%;
+        right: 20px;
+        animation: float 8s ease-in-out infinite;
+    }
+
+    .shape-3 {
+        width: 80px;
+        height: 80px;
+        bottom: -10px;
+        right: 50px;
+        animation: float 7s ease-in-out infinite;
+    }
+
+    @keyframes float {
+        0% {
+            transform: translateY(0);
+        }
+
+        50% {
+            transform: translateY(-20px);
+        }
+
+        100% {
+            transform: translateY(0);
+        }
+    }
+
+    @media (max-width: 768px) {
+        .hero-title {
+            font-size: 1.25rem;
+        }
+
+        .hero-content {
+            padding: 1rem;
+        }
+
+        .hero-stats {
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .hero-stat {
+            font-size: 0.85rem;
+        }
+
+        .hero-stat i {
+            font-size: 1rem;
+        }
+
+        .shape-1 {
+            width: 80px;
+            height: 80px;
+        }
+
+        .shape-2 {
+            width: 50px;
+            height: 50px;
+        }
+
+        .shape-3 {
+            width: 60px;
+            height: 60px;
+        }
+    }
+
+    /* DataTables Button Styling - Vuexy Style */
+    /* DataTables Button Styling - Vuexy Style */
+    .dt-buttons .btn {
+        background-color: #696cff !important;
+        border-color: #696cff !important;
+        color: white !important;
+        margin-right: 0.5rem;
+        border-radius: 0.375rem !important;
+        font-weight: 500 !important;
+        padding: 0.4375rem 1.25rem !important;
+    }
+
+    .dt-buttons .btn:hover {
+        background-color: #5f61e6 !important;
+        border-color: #5f61e6 !important;
+        color: white !important;
+    }
+
+    .dt-buttons .btn:focus,
+    .dt-buttons .btn:active {
+        background-color: #5f61e6 !important;
+        border-color: #5f61e6 !important;
+        color: white !important;
+        box-shadow: 0 0 0 0.2rem rgba(105, 108, 255, 0.25) !important;
+    }
+
+    /* Hide individual buttons and create dropdown */
+    .dt-buttons {
+        position: relative;
+    }
+
+    .dt-buttons .btn:not(:first-child) {
+        display: none !important;
+    }
+
+    .dt-buttons .btn:first-child::after {
+        margin-left: 0.5rem;
+    }
+
+    .dt-buttons:hover .btn:not(:first-child) {
+        display: inline-block !important;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        z-index: 1000;
+        background: white !important;
+        color: #696cff !important;
+        border: 1px solid #dee2e6 !important;
+        margin-top: 0.25rem;
+        min-width: 120px;
+    }
+
+    .dt-buttons:hover .btn:not(:first-child):hover {
+        background-color: #f8f9fa !important;
+        color: #696cff !important;
+    }
+
+    /* Sidebar brand + scroll support for long tenant menus */
+    #layout-menu .app-brand-logo.cureva-logo {
+        width: 34px;
+        height: 34px;
+        border-radius: 8px;
+        object-fit: contain;
+    }
+
+    #layout-menu .app-brand-text .brand-name {
+        font-weight: 700;
+        letter-spacing: 0.01em;
+    }
+
+    #layout-menu .app-brand-text .brand-name .brand-icon {
+        width: 20px;
+        height: 20px;
+        object-fit: contain;
+        border-radius: 4px;
+    }
+
+    #layout-menu .app-brand-text .brand-name .brand-wordmark {
+        height: 48px;
+        max-width: 186px;
+        width: auto;
+        object-fit: contain;
+        display: block;
+    }
+
+    #layout-menu .app-brand-link.single-logo-role {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        justify-content: center;
+        gap: 0.35rem;
+    }
+
+    #layout-menu .app-brand-link.single-logo-role .app-brand-text {
+        margin-left: 0 !important;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.2rem;
+        line-height: 1;
+    }
+
+    #layout-menu .app-brand-link.single-logo-role .badge {
+        margin-top: 0 !important;
+        display: inline-flex;
+        white-space: nowrap;
+        position: relative;
+        z-index: 2;
+    }
+
+    #layout-menu .app-brand {
+        height: auto !important;
+        min-height: 92px;
+        overflow: visible;
+        padding-top: 0.5rem;
+        padding-bottom: 0.5rem;
+    }
+
+    #layout-menu {
+        height: 100vh;
+        overflow: hidden;
+    }
+
+    #layout-menu .menu-inner {
+        max-height: calc(100vh - 124px);
+        overflow-y: auto;
+        overflow-x: hidden;
+        scrollbar-width: thin;
+    }
+
+    #layout-menu .menu-inner::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    #layout-menu .menu-inner::-webkit-scrollbar-thumb {
+        background: rgba(15, 23, 42, 0.35);
+        border-radius: 999px;
+    }
+
+    /* Shared Cureva wordmark sizing across navbar/auth/footer/sidebar */
+    .app-brand-logo .brand-wordmark {
+        height: 38px;
+        width: auto;
+        max-width: 200px;
+        object-fit: contain;
+        display: block;
+    }
+
+    .navbar .app-brand-logo .brand-wordmark {
+        height: 36px;
+        max-width: 190px;
+    }
+
+    .authentication-wrapper .app-brand-logo .brand-wordmark {
+        height: 42px;
+        max-width: 220px;
+        margin-inline: auto;
+    }
+
+    /* Keep Toastr notifications visually themed even if vendor order changes */
+    #toast-container > div {
+        opacity: 0.96 !important;
+        border-radius: 0.55rem !important;
+        box-shadow: 0 10px 24px rgba(15, 23, 42, 0.22) !important;
+        color: #fff !important;
+    }
+
+    #toast-container > .toast-success {
+        background-color: #16a34a !important;
+    }
+
+    #toast-container > .toast-error {
+        background-color: #b91c1c !important;
+    }
+
+    #toast-container > .toast-warning {
+        background-color: #d97706 !important;
+    }
+
+    #toast-container > .toast-info {
+        background-color: #0284c7 !important;
+    }
+</style>
+<!-- DataTables CSS -->
+
+<!-- app CSS -->
+<script type="module" src="http://[::1]:5175/@vite/client" data-navigate-track="reload"></script><link rel="stylesheet" href="http://[::1]:5175/resources/css/app.css" data-navigate-track="reload" class="" /><!-- END: app CSS-->
+
+
+            <!-- Primary Color Style -->
+        <style id="primary-color-style">
+            :root, [data-bs-theme=light], [data-bs-theme=dark] {
+  --bs-primary: #16A34A;
+  --bs-primary-rgb: 22, 163, 74;
+  --bs-primary-bg-subtle: rgba(22, 163, 74, 0.1);
+  --bs-primary-border-subtle: rgba(22, 163, 74, 0.3);
+  --bs-primary-contrast: #fff;
+}
+        </style>
+    
+    <!-- Include Scripts for customizer, helper, analytics, config -->
+    <!-- $isFront is used to append the front layout scriptsIncludes only on the front layout otherwise the variable will be blank -->
+    <!-- laravel style -->
+<script type="module" src="http://[::1]:5175/@vite/client" data-navigate-track="reload"></script><script type="module" src="http://[::1]:5175/resources/assets/vendor/js/helpers.js" data-navigate-track="reload"></script><!-- beautify ignore:start -->
+<!--! Template customizer & Theme config files MUST be included after core stylesheets and helpers.js in the <head> section -->
+  <!--? Template customizer: To hide customizer set displayCustomizer value false in config.js.  -->
+  <script type="module" src="http://[::1]:5175/@vite/client" data-navigate-track="reload"></script><script type="module" src="http://[::1]:5175/resources/assets/vendor/js/template-customizer.js" data-navigate-track="reload"></script>
+  <!--? Config:  Mandatory theme config file contain global vars & default theme options, Set your preferred theme option in this file.  -->
+  <script type="module" src="http://[::1]:5175/@vite/client" data-navigate-track="reload"></script><script type="module" src="http://[::1]:5175/resources/assets/js/config.js" data-navigate-track="reload"></script>
+<script type="module">
+  document.addEventListener('DOMContentLoaded', function() {
+    // Initialize template customizer after DOM is loaded
+    if (window.TemplateCustomizer) {
+      try {
+        // Get the skin currently applied to the document
+        const appliedSkin = document.documentElement.getAttribute('data-skin') || "default";
+
+        window.templateCustomizer = new TemplateCustomizer({
+          defaultTextDir: "ltr",
+                      defaultPrimaryColor: "#16A34A",
+                    defaultTheme: "light",
+          defaultSkin: appliedSkin,
+          defaultSemiDark: false,
+          defaultShowDropdownOnHover: "1",
+          displayCustomizer: "1",
+          lang: 'en',
+          'controls': ["color","theme","skins","semiDark","layoutCollapsed","layoutNavbarOptions","headerType","contentLayout","rtl"],
+        });
+
+        // Ensure color is applied on page load
+                  if (window.Helpers && typeof window.Helpers.setColor === 'function') {
+            window.Helpers.setColor("#16A34A", true);
+          }
+              } catch (error) {
+        console.warn('Template customizer initialization error:', error);
+      }
+    }
+  });
+</script>
+
+
+    <!-- Essential DataTables CSS (includes buttons, pagination, responsive) -->
+    <link
+        href="https://cdn.datatables.net/v/bs5/jszip-3.10.1/dt-2.2.2/b-3.2.2/b-html5-3.2.2/b-print-3.2.2/r-3.0.4/datatables.min.css"
+        rel="stylesheet" integrity="sha384-Lyca+jsk9Q+XLYmuTBriITsVJpOxGXNqWAWFFT5SdYRiDsUSGoaekwOTIO9kgfem"
+        crossorigin="anonymous">
+    <!-- FILES FOR DATA TABLES-->
+    <!-- jQuery (required for DataTables) -->
+    <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+    <!-- PDFMake for PDF export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"
+        integrity="sha384-VFQrHzqBh5qiJIU0uGU5CIW3+OWpdGGJM9LBnGbuIH2mkICcFZ7lPd/AAtI7SNf7" crossorigin="anonymous">
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"
+        integrity="sha384-/RlQG9uf0M2vcTw3CX7fbqgbj/h8wKxw7C3zu9/GxcBPRKOEcESxaxufwRXqzq6n" crossorigin="anonymous">
+    </script>
+
+    <!-- Essential DataTables JS (includes all buttons, pagination, responsive) -->
+
+
+    <script
+        src="https://cdn.datatables.net/v/bs5/jszip-3.10.1/dt-2.2.2/b-3.2.2/b-html5-3.2.2/b-print-3.2.2/r-3.0.4/datatables.min.js"
+        integrity="sha384-/wsDbsz8pRfwq3zQ5D36rGcm7HGUCCg0WxzK0y3yxeRsF7+PKBoPEorAVw441sbW" crossorigin="anonymous">
+    </script>
+    <script type="text/javascript" class="flasher-js" nonce='600e3e78abc2e80683921db7e84c7de0'>
+        (function(window, document) {
+            const merge = (first, second) => {
+                if (Array.isArray(first) && Array.isArray(second)) {
+                    return [...first, ...second.filter(item => !first.includes(item))];
+                }
+
+                if (typeof first === 'object' && typeof second === 'object') {
+                    for (const [key, value] of Object.entries(second)) {
+                        first[key] = key in first ? { ...first[key], ...value } : value;
+                    }
+                    return first;
+                }
+
+                return undefined;
+            };
+
+            const mergeOptions = (...options) => {
+                const result = {};
+
+                options.forEach(option => {
+                    Object.entries(option).forEach(([key, value]) => {
+                        result[key] = key in result ? merge(result[key], value) : value;
+                    });
+                });
+
+                return result;
+            };
+
+            const renderCallback = (options) => {
+                if(!window.flasher) {
+                    throw new Error('Flasher is not loaded');
+                }
+
+                window.flasher.render(options);
+            };
+
+            const render = (options) => {
+                if (options instanceof Event) {
+                    options = options.detail;
+                }
+
+                if (['interactive', 'complete'].includes(document.readyState)) {
+                    renderCallback(options);
+                } else {
+                    document.addEventListener('DOMContentLoaded', () => renderCallback(options));
+                }
+            };
+
+            const addScriptAndRender = (options) => {
+                const mainScript = '/vendor/flasher/flasher.min.js?id=9a255a6680873c0d5fc3d394a2ba3195';
+
+                if (window.flasher || !mainScript || document.querySelector('script[src="' + mainScript + '"]')) {
+                    render(options);
+                } else {
+                    const tag = document.createElement('script');
+                    tag.src = mainScript;
+                    tag.type = 'text/javascript';
+                    tag.setAttribute('nonce', '600e3e78abc2e80683921db7e84c7de0');
+                    tag.onload = () => render(options);
+
+                    document.head.appendChild(tag);
+                }
+            };
+
+            const addRenderListener = () => {
+                if (1 === document.querySelectorAll('script.flasher-js').length) {
+                    document.addEventListener('flasher:render', render);
+                }
+
+                    document.addEventListener('livewire:navigating', () => {
+      document.querySelectorAll('.fl-no-cache').forEach(el => el.remove());
+    });
+            };
+
+            const options = [];
+            options.push({"envelopes":[],"scripts":[],"styles":[],"options":[],"context":{"envelopes_only":false,"csp_script_nonce":"600e3e78abc2e80683921db7e84c7de0","csp_style_nonce":"42ae15280279baffce0d8d662bbd52ea"}});
+            /** {--FLASHER_REPLACE_ME--} **/
+            addScriptAndRender(mergeOptions(...options));
+            addRenderListener();
+        })(window, document);
+    </script>
+<!-- Livewire Styles --><style >[wire\:loading][wire\:loading], [wire\:loading\.delay][wire\:loading\.delay], [wire\:loading\.inline-block][wire\:loading\.inline-block], [wire\:loading\.inline][wire\:loading\.inline], [wire\:loading\.block][wire\:loading\.block], [wire\:loading\.flex][wire\:loading\.flex], [wire\:loading\.table][wire\:loading\.table], [wire\:loading\.grid][wire\:loading\.grid], [wire\:loading\.inline-flex][wire\:loading\.inline-flex] {display: none;}[wire\:loading\.delay\.none][wire\:loading\.delay\.none], [wire\:loading\.delay\.shortest][wire\:loading\.delay\.shortest], [wire\:loading\.delay\.shorter][wire\:loading\.delay\.shorter], [wire\:loading\.delay\.short][wire\:loading\.delay\.short], [wire\:loading\.delay\.default][wire\:loading\.delay\.default], [wire\:loading\.delay\.long][wire\:loading\.delay\.long], [wire\:loading\.delay\.longer][wire\:loading\.delay\.longer], [wire\:loading\.delay\.longest][wire\:loading\.delay\.longest] {display: none;}[wire\:offline][wire\:offline] {display: none;}[wire\:dirty]:not(textarea):not(input):not(select) {display: none;}:root {--livewire-progress-bar-color: #2299dd;}[x-cloak] {display: none !important;}[wire\:cloak] {display: none !important;}</style>
+</head>
+
+<body>
+    <!-- Layout Content -->
+        <div class="layout-wrapper layout-content-navbar layout-without-menu central-admin-layout">
+        <div class="layout-container">
+
+
+
+            <!-- Layout page -->
+            <div class="layout-page">
+
+                
+                
+
+                <!-- BEGIN: Navbar-->
+
+                <!-- END: Navbar-->
+
+                <!-- Content wrapper -->
+                <div class="content-wrapper">
+
+                    <!-- Content -->
+                                            <div class="container-xxl flex-grow-1 container-p-y">
+                            ?<div>
+    <!-- Errors Message from session. e.g  'message' => 'this Exception messages too will be passed to the toastr' -->
+<!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->
+    <!-- Content -->
+    <div wire:snapshot="{&quot;data&quot;:{&quot;username&quot;:null,&quot;password&quot;:null,&quot;remember&quot;:false},&quot;memo&quot;:{&quot;id&quot;:&quot;8gTb0vpRXPJxrlj1JjFw&quot;,&quot;name&quot;:&quot;login&quot;,&quot;path&quot;:&quot;login&quot;,&quot;method&quot;:&quot;GET&quot;,&quot;children&quot;:[],&quot;scripts&quot;:[],&quot;assets&quot;:[],&quot;errors&quot;:[],&quot;locale&quot;:&quot;en&quot;},&quot;checksum&quot;:&quot;27df54af5a5bdcc4cb3d30b3d5eebdac6f17a1d291305cff1f2e8b06e97442c3&quot;}" wire:effects="[]" wire:id="8gTb0vpRXPJxrlj1JjFw" class="container-xxl">
+        <div class="authentication-wrapper authentication-basic py-0"
+            style="align-items:flex-start; min-height:100vh; padding-top:0;">
+            <div class="authentication-inner py-0" style="margin-top:-.9rem;">
+                <!-- Login -->
+                <div class="card">
+                    <div class="card-body p-3">
+                        <!-- Logo -->
+                        <div class="app-brand justify-content-center mb-2">
+                            <a href="http://localhost:8000" class="app-brand-link">
+                                <span class="app-brand-logo demo">?<img src="http://localhost:8000/assets/cureva-logo.svg" alt="Cureva" class="brand-wordmark" style="height: 32px; width: auto; max-width: 190px; object-fit: contain;">
+</span>
+                            </a>
+                        </div>
+                        <!-- /Logo -->
+
+                        <form wire:submit.prevent="login">
+                            <input type="hidden" name="_token" value="LJR6SzUJDeMK56Ei1JnzA3pRu5FSx3ZqdzrNZOVk" autocomplete="off">
+                            <div class="mb-4">
+                                <label for="username" class="form-label">Username<strong style="color: red">*</strong></label>
+                                <input wire:model='username' type="text" class="form-control" id="email"
+                                    placeholder="Enter your username" autofocus>
+                            </div>
+
+                            <div class="mb-4 form-password-toggle form-control-validation">
+                                <label class="form-label" for="password">Password <strong class="text-danger">*</strong></label>
+                                <div class="input-group input-group-merge">
+                                    <input wire:model="password" id="password" type="password" class="form-control"
+                                        name="password" placeholder="••••••••••••" aria-describedby="password" />
+                                    <span class="input-group-text cursor-pointer" id="togglePassword">
+                                        <i class="icon-base ti tabler-eye-off" id="toggleIcon"></i>
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div class="my-4">
+                                <div class="d-flex justify-content-between">
+                                    <div class="form-check mb-0 ms-2">
+                                        <input type="checkbox" class="form-check-input" id="remember-me" />
+                                        <label class="form-check-label" for="remember-me"> Remember Me </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mb-2">
+                                <button type="submit" class="btn btn-primary d-grid w-100" wire:loading.attr="disabled"
+    wire:loading.class="disabled"  wire:target="login" >
+    <span wire:loading.remove.delay  wire:target="login" >
+        <!--[if BLOCK]><![endif]-->            <i class="bx bx-log-in me-1"></i>
+        <!--[if ENDBLOCK]><![endif]-->
+        Login In
+    </span>
+    <span wire:loading.delay  wire:target="login"         style="display: none;">
+        <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+        Logging in...
+    </span>
+</button>
+                            </div>
+                        </form>
+
+                        <div class="divider my-3">
+                            <div class="divider-text" style="font-size:.72rem; letter-spacing:.04em;">follow us</div>
+                        </div>
+
+                        <div class="d-flex justify-content-center">
+                            <a href="javascript:;" class="btn btn-icon rounded-circle btn-text-facebook me-1_5">
+                                <i class="icon-base ti tabler-brand-facebook-filled icon-20px"></i>
+                            </a>
+                            <a href="javascript:;" class="btn btn-icon rounded-circle btn-text-twitter me-1_5">
+                                <i class="icon-base ti tabler-brand-twitter-filled icon-20px"></i>
+                            </a>
+                            <a href="javascript:;" class="btn btn-icon rounded-circle btn-text-github me-1_5">
+                                <i class="icon-base ti tabler-brand-github-filled icon-20px"></i>
+                            </a>
+                            <a href="javascript:;" class="btn btn-icon rounded-circle btn-text-google-plus">
+                                <i class="icon-base ti tabler-brand-google-filled icon-20px"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <!-- /Login -->
+            </div>
+        </div>
+    </div>
+</div>
+                        </div>
+                                        <!-- / Content -->
+
+                    <!-- Footer -->
+
+                    <!-- / Footer -->
+                    <div class="content-backdrop fade"></div>
+                </div>
+                <!--/ Content wrapper -->
+            </div>
+            <!-- / Layout page -->
+        </div>
+
+                <!-- Drag Target Area To SlideIn Menu On Small Screens -->
+        <div class="drag-target"></div>
+    </div>
+    <!-- / Layout wrapper -->
+    <!--/ Layout Content -->
+
+    
+    
+
+    <!-- Include Scripts -->
+    <!-- $isFront is used to append the front layout scripts only on the front layout otherwise the variable will be blank -->
+    <!-- BEGIN: Vendor JS-->
+
+<script type="module" src="http://[::1]:5175/@vite/client" data-navigate-track="reload"></script><script type="module" src="http://[::1]:5175/resources/assets/vendor/libs/jquery/jquery.js" data-navigate-track="reload"></script><script type="module" src="http://[::1]:5175/resources/assets/vendor/libs/popper/popper.js" data-navigate-track="reload"></script><script type="module" src="http://[::1]:5175/resources/assets/vendor/js/bootstrap.js" data-navigate-track="reload"></script><script type="module" src="http://[::1]:5175/resources/assets/vendor/libs/node-waves/node-waves.js" data-navigate-track="reload"></script><script type="module" src="http://[::1]:5175/resources/assets/vendor/libs/@algolia/autocomplete-js.js" data-navigate-track="reload"></script>
+    <script type="module" src="http://[::1]:5175/@vite/client" data-navigate-track="reload"></script><script type="module" src="http://[::1]:5175/resources/assets/vendor/libs/pickr/pickr.js" data-navigate-track="reload"></script>
+<script type="module" src="http://[::1]:5175/@vite/client" data-navigate-track="reload"></script><script type="module" src="http://[::1]:5175/resources/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js" data-navigate-track="reload"></script><script type="module" src="http://[::1]:5175/resources/assets/vendor/libs/hammer/hammer.js" data-navigate-track="reload"></script><script type="module" src="http://[::1]:5175/resources/assets/vendor/js/menu.js" data-navigate-track="reload"></script>
+    <script type="module" src="http://[::1]:5175/@vite/client" data-navigate-track="reload"></script><script type="module" src="http://[::1]:5175/resources/assets/vendor/libs/@form-validation/popular.js" data-navigate-track="reload"></script><script type="module" src="http://[::1]:5175/resources/assets/vendor/libs/@form-validation/bootstrap5.js" data-navigate-track="reload"></script><script type="module" src="http://[::1]:5175/resources/assets/vendor/libs/@form-validation/auto-focus.js" data-navigate-track="reload"></script><!-- END: Page Vendor JS-->
+
+<!-- BEGIN: Theme JS-->
+<script type="module" src="http://[::1]:5175/@vite/client" data-navigate-track="reload"></script><script type="module" src="http://[::1]:5175/resources/assets/js/main.js" data-navigate-track="reload"></script><!-- END: Theme JS-->
+
+<!-- Pricing Modal JS-->
+<!-- END: Pricing Modal JS-->
+
+<!-- BEGIN: Page JS-->
+    <script type="module" src="http://[::1]:5175/@vite/client" data-navigate-track="reload"></script><script type="module" src="http://[::1]:5175/resources/assets/js/pages-auth.js" data-navigate-track="reload"></script><!-- END: Page JS-->
+
+<!-- app JS -->
+<script type="module" src="http://[::1]:5175/@vite/client" data-navigate-track="reload"></script><script type="module" src="http://[::1]:5175/resources/js/app.js" data-navigate-track="reload"></script><!-- END: app JS-->
+
+<!-- Livewire Scripts -->
+<script src="/livewire/livewire.js?id=df3a17f2"   data-csrf="LJR6SzUJDeMK56Ei1JnzA3pRu5FSx3ZqdzrNZOVk" data-update-uri="/livewire/update" data-navigate-once="true"></script>
+</body>
+
+</html>
+
+

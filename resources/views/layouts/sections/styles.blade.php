@@ -33,8 +33,8 @@
 <!-- Hero Card Styles -->
 <style>
     :root {
-        --primary: #4361ee;
-        --primary-light: rgba(67, 97, 238, 0.1);
+        --primary: #16a34a;
+        --primary-light: rgba(22, 163, 74, 0.1);
         --success: #2ecc71;
         --success-light: rgba(46, 204, 113, 0.1);
         --info: #00b4d8;
@@ -74,7 +74,7 @@
         --card-border: #e9ecef;
         --body-color: #697a8d;
         --heading-color: #566a7f;
-        --primary-gradient: linear-gradient(135deg, #5a4bff 0%, #7b6eff 100%);
+        --primary-gradient: linear-gradient(135deg, #16a34a 0%, #22c55e 100%);
         --success-gradient: linear-gradient(135deg, #2ecc71 0%, #4ade80 100%);
         --softgreen-gradient: linear-gradient(135deg, #a7f3d0 0%, #6ee7b7 100%);
         --lavender-gradient: linear-gradient(135deg, #e9d5ff 0%, #d8b4fe 100%);
@@ -394,6 +394,30 @@
         height: 42px;
         max-width: 220px;
         margin-inline: auto;
+    }
+
+    /* Keep Toastr notifications visually themed even if vendor order changes */
+    #toast-container > div {
+        opacity: 0.96 !important;
+        border-radius: 0.55rem !important;
+        box-shadow: 0 10px 24px rgba(15, 23, 42, 0.22) !important;
+        color: #fff !important;
+    }
+
+    #toast-container > .toast-success {
+        background-color: #16a34a !important;
+    }
+
+    #toast-container > .toast-error {
+        background-color: #b91c1c !important;
+    }
+
+    #toast-container > .toast-warning {
+        background-color: #d97706 !important;
+    }
+
+    #toast-container > .toast-info {
+        background-color: #0284c7 !important;
     }
 </style>
 <!-- DataTables CSS -->

@@ -8,7 +8,7 @@
 return [
   'custom' => [
     'myLayout' => 'vertical', // Layout type: 'vertical' (default), 'horizontal'
-    // 'primaryColor' => '#FF4646', // Set the primary color
+    'primaryColor' => '#16A34A', // Default primary color (green)
     'myTheme' => 'light', // Theme options: 'light' (default), 'dark', 'system'
     'mySkins' => 'default', // Skin options: 'default', 'bordered'
     'hasSemiDark' => false, // Semi-dark mode: true/false (false by default)

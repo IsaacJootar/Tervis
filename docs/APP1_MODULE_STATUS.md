@@ -105,11 +105,23 @@ Note: Vision text mentions both "7 modules" and "8 management modules" in differ
   - strict-scope cross-facility checks in workspace flows (`tests/Feature/WorkspaceAggregationChainTest.php`):
     - one-time Family Planning registration gate recognized across facilities during patient verification
     - appointments and activity totals remain facility-scoped for the same patient
+  - strict-scope registration gate checks (`tests/Feature/RegistrationStrictScopeGateTest.php`):
+    - General Patients register blocks duplicate foundational registration across facilities at DIN verification
+    - ANC register blocks duplicate ANC baseline registration across facilities at DIN verification
+  - monthly NHMIS drift regression checks (`tests/Feature/MonthlyNhmisSummaryDriftTest.php`):
+    - Jan-only, Feb-only, and combined Jan-Feb windows validated against generated `summary_key_values`
+    - multi-quarter stability checks (Q1, Q2, and half-year windows) with repeat-run assertions for drift safety
+    - high-volume monthly dataset check (120 prescriptions + 120 dispense lines) with deterministic totals validation
+    - full-year high-volume mixed-module check (96 child-health + 96 pharmacy bundles) with deterministic year/Q4 totals and no carry-over drift
+    - de-duplication of same-subject/same-date dose entries across Immunization + Vaccination Schedule sources
+    - facility-scope isolation validated against cross-facility noise records
+    - repeat generation of a narrower window after wider window run verifies no carry-over drift
+  - module access middleware isolation now runs without skip for second-facility setup (`tests/Feature/ModuleEnabledMiddlewareTest.php`).
   - child health + health insurance workflow transitions and validations (`tests/Feature/ChildHealthInsuranceWorkflowTest.php`).
-- Remaining gap: extend long-range monthly aggregation drift/regression scenarios.
+- Remaining gap: optional mega-scale load benchmarking and SQL profiling (>10k seeded records/window) for capacity planning.
 
 ## 5) Immediate Priority Recommendation
 
-1. Add long-range monthly NHMIS drift tests with seeded multi-month datasets.
+1. Add optional mega-scale (>10k rows/window) performance benchmark profile for Reports Hub monthly generation.
 2. Maintain mapping coverage as new template keys or module fields are introduced.
-3. Expand strict-scope tests to include additional one-time registration gates beyond Family Planning.
+3. Keep strict-scope gate tests updated when new one-time registers are introduced.

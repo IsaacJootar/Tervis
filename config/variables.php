@@ -3,15 +3,12 @@
 return [
   "creatorName" => "PrimeSafepath solutions.",
   "creatorUrl" => "https://primesafepathsolutions.com/",
-  "templateName" => "Cureva",
-  "templateSuffix" => "v 1.0",
+  "templateName" => "Cureve",
+  "templateSuffix" => "Timely, Smart & Accurate data that save lives",
   "templateVersion" => "3.0.0",
   "templateFree" => false,
-  "templateDescription" => "We build digital platforms that empower public health interventions
-                            starting with maternal care.",
-  "templateKeyword" => "We build digital platforms that
-                        empower public health interventions
-starting with maternal care.",
+  "templateDescription" => "Cureve: Timely, Smart & Accurate data that save lives.",
+  "templateKeyword" => "Cureve, timely data, smart data, accurate data, health outcomes, save lives",
   "licenseUrl" => "https://themeforest.net/licenses/standard",
   "livePreview" => "https://primesafepathsolutions.com/",
   "ogTitle" => "Innovating Digital Health for a Safer & Stronger Nigeria",
