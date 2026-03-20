@@ -12,28 +12,11 @@
             @endif
             {{-- active menu method --}}
             @php
-                $activeClass = null;
                 $active = $configData['layout'] === 'vertical' ? 'active open' : 'active';
                 $currentRouteName = Route::currentRouteName();
-
-                if ($currentRouteName === $submenu->slug) {
-                    $activeClass = 'active';
-                } elseif (isset($submenu->submenu)) {
-                    if (gettype($submenu->slug) === 'array') {
-                        foreach ($submenu->slug as $slug) {
-                            if (str_contains($currentRouteName, $slug) and strpos($currentRouteName, $slug) === 0) {
-                                $activeClass = $active;
-                            }
-                        }
-                    } else {
-                        if (
-                            str_contains($currentRouteName, $submenu->slug) and
-                            strpos($currentRouteName, $submenu->slug) === 0
-                        ) {
-                            $activeClass = $active;
-                        }
-                    }
-                }
+                $currentPath = request()->path();
+                $isActive = RolePermissionService::isMenuNodeActive($submenu, $currentRouteName, $currentPath);
+                $activeClass = $isActive ? (isset($submenu->submenu) ? $active : 'active') : null;
             @endphp
 
             <li class="menu-item {{ $activeClass }}">

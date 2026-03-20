@@ -29,6 +29,12 @@
       "name": "Family Planning Register",
       "icon": "menu-icon icon-base ti tabler-clipboard-list",
       "slug": "family-planning-register"
+    },
+    {
+      "url": "/account/settings",
+      "name": "Account Settings",
+      "icon": "menu-icon icon-base ti tabler-user-cog",
+      "slug": "account-settings"
     }
   ]
 }

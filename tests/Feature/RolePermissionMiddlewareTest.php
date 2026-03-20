@@ -30,6 +30,9 @@ class RolePermissionMiddlewareTest extends TestCase
 
     Route::middleware(['web', 'auth', 'permission.check:central.admins.manage'])
       ->get('/__test/permission/central-admins', fn() => response('ok', 200));
+
+    Route::middleware(['web', 'auth', 'permission.check:account.settings.manage'])
+      ->get('/__test/permission/account-settings', fn() => response('ok', 200));
   }
 
   public function test_facility_admin_has_default_core_staff_permission(): void
@@ -98,6 +101,41 @@ class RolePermissionMiddlewareTest extends TestCase
       ->get('/__test/permission/central-admins')
       ->assertOk()
       ->assertSeeText('ok');
+  }
+
+  public function test_patient_has_default_account_settings_permission(): void
+  {
+    $user = $this->createUser('Patient');
+
+    $this->actingAs($user)
+      ->get('/__test/permission/account-settings')
+      ->assertOk()
+      ->assertSeeText('ok');
+  }
+
+  public function test_explicit_account_permission_override_blocks_access(): void
+  {
+    if (!Schema::hasTable('role_permissions')) {
+      $this->markTestSkipped('role_permissions table is not available for override assertion.');
+    }
+
+    $user = $this->createUser('Patient');
+
+    DB::table('role_permissions')->updateOrInsert(
+      ['role_name' => 'Patient', 'permission_key' => 'account.settings.manage'],
+      [
+        'permission_label' => 'Manage Account Settings',
+        'permission_group' => 'account',
+        'is_allowed' => false,
+        'last_changed_by_user_id' => $user->id,
+        'updated_at' => now(),
+        'created_at' => now(),
+      ]
+    );
+
+    $this->actingAs($user)
+      ->get('/__test/permission/account-settings')
+      ->assertForbidden();
   }
 
   private function createUser(string $role): User

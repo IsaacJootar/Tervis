@@ -39,32 +39,47 @@ class UserRoleMiddleware
       ],
 
       'State Data Administrator' => [
-        'prefixes' => ['core', 'analytics'],
+        'prefixes' => ['core', 'analytics', 'account'],
+        'index'     => 'state-officer-dashboard',
+      ],
+
+      'State Administrator' => [
+        'prefixes' => ['core', 'analytics', 'account'],
         'index'     => 'state-officer-dashboard',
       ],
 
       'LGA Officer' => [
-        'prefixes' => ['core', 'analytics'],
+        'prefixes' => ['core', 'analytics', 'account'],
+        'index'     => 'lga-officer-dashboard',
+      ],
+
+      'LGA Data Administrator' => [
+        'prefixes' => ['core', 'analytics', 'account'],
+        'index'     => 'lga-officer-dashboard',
+      ],
+
+      'LGA Administrator' => [
+        'prefixes' => ['core', 'analytics', 'account'],
         'index'     => 'lga-officer-dashboard',
       ],
 
       'Facility Administrator' => [
-        'prefixes' => ['core', 'analytics'],
+        'prefixes' => ['core', 'analytics', 'account'],
         'index'     => 'facility-admin-dashboard',
       ],
 
       'Data Officer' => [
-        'prefixes' => ['registers', 'workspaces'],
+        'prefixes' => ['registers', 'workspaces', 'account'],
         'index'     => 'patient-workspace',
       ],
 
       'Verification Officer' => [
-        'prefixes' => ['avo'],
+        'prefixes' => ['avo', 'account'],
         'index'     => 'din-activations',
       ],
 
       'Patient' => [
-        'prefixes' => ['patient'],
+        'prefixes' => ['patient', 'account'],
         'index'     => 'patient-dashboard',
       ],
     ];

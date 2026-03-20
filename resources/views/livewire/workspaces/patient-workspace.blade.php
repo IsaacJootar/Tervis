@@ -72,6 +72,11 @@
                         <div class="metric-label">Facility</div>
                         <div class="metric-value metric-value-sm">{{ $facility_name ?? 'N/A' }}</div>
                     </div>
+                    <span class="metric-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none">
+                            <path d="M5 19V6.5A1.5 1.5 0 016.5 5h11A1.5 1.5 0 0119 6.5V19M9 9h2m2 0h2m-6 4h2m2 0h2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                        </svg>
+                    </span>
                 </div>
             </div>
         </div>
@@ -82,6 +87,11 @@
                         <div class="metric-label">State</div>
                         <div class="metric-value metric-value-sm">{{ $facility_state ?? 'N/A' }}</div>
                     </div>
+                    <span class="metric-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none">
+                            <path d="M12 3l7 4v5c0 4.5-3 7-7 9-4-2-7-4.5-7-9V7l7-4Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+                        </svg>
+                    </span>
                 </div>
             </div>
         </div>
@@ -92,6 +102,11 @@
                         <div class="metric-label">LGA</div>
                         <div class="metric-value metric-value-sm">{{ $facility_lga ?? 'N/A' }}</div>
                     </div>
+                    <span class="metric-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none">
+                            <path d="M7.5 9a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm9 0a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM3 20a4.5 4.5 0 0 1 9 0M12 20a4.5 4.5 0 0 1 9 0" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                        </svg>
+                    </span>
                 </div>
             </div>
         </div>
@@ -102,6 +117,12 @@
                         <div class="metric-label">Ward</div>
                         <div class="metric-value metric-value-sm">{{ $facility_ward ?? 'N/A' }}</div>
                     </div>
+                    <span class="metric-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none">
+                            <path d="M12 21s6-4.2 6-10a6 6 0 1 0-12 0c0 5.8 6 10 6 10Z" stroke="currentColor" stroke-width="1.8"/>
+                            <circle cx="12" cy="11" r="2" stroke="currentColor" stroke-width="1.8"/>
+                        </svg>
+                    </span>
                 </div>
             </div>
         </div>
@@ -363,6 +384,22 @@
             .metric-value-sm {
                 font-size: 1rem;
                 line-height: 1.2rem;
+            }
+
+            .metric-icon {
+                width: 32px;
+                height: 32px;
+                border-radius: 999px;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                background: rgba(15, 23, 42, 0.08);
+                flex-shrink: 0;
+            }
+
+            .metric-icon svg {
+                width: 18px;
+                height: 18px;
             }
 
             .workflow-card {

@@ -5,6 +5,12 @@
       "name": "DIN Activations",
       "icon": "menu-icon icon-base ti tabler-id",
       "slug": "din-activations"
+    },
+    {
+      "url": "/account/settings",
+      "name": "Account Settings",
+      "icon": "menu-icon icon-base ti tabler-user-cog",
+      "slug": "account-settings"
     }
   ]
 }

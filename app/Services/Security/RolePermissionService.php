@@ -17,6 +17,8 @@ class RolePermissionService
   public static function permissionDefinitions(): array
   {
     return [
+      ['key' => 'account.settings.manage', 'label' => 'Manage Account Settings', 'group' => 'account'],
+
       ['key' => 'central.dashboard.view', 'label' => 'View Central Dashboard', 'group' => 'central'],
       ['key' => 'central.admins.manage', 'label' => 'Manage Administrators', 'group' => 'central'],
       ['key' => 'central.facilities.manage', 'label' => 'Manage Facilities', 'group' => 'central'],
@@ -72,7 +74,10 @@ class RolePermissionService
       'Central Administrator',
       'Facility Administrator',
       'State Data Administrator',
+      'State Administrator',
       'LGA Officer',
+      'LGA Data Administrator',
+      'LGA Administrator',
       'Data Officer',
       'Verification Officer',
       'Patient',
@@ -156,6 +161,10 @@ class RolePermissionService
     $path = self::normalizePath($urlOrPath);
     if ($path === '') {
       return null;
+    }
+
+    if ($path === 'account/settings') {
+      return 'account.settings.manage';
     }
 
     if (str_starts_with($path, 'central/')) {
@@ -268,6 +277,53 @@ class RolePermissionService
     return null;
   }
 
+  /**
+   * @param  mixed  $node
+   */
+  public static function isMenuNodeActive($node, ?string $currentRouteName, ?string $currentPath): bool
+  {
+    $routeName = trim((string) ($currentRouteName ?? ''));
+    $path = self::normalizePath($currentPath);
+
+    $slug = self::nodeValue($node, 'slug');
+    foreach (self::extractSlugs($slug) as $candidateSlug) {
+      if ($candidateSlug === '') {
+        continue;
+      }
+
+      if ($routeName === $candidateSlug) {
+        return true;
+      }
+
+      if ($routeName !== '' && str_contains($routeName, $candidateSlug) && strpos($routeName, $candidateSlug) === 0) {
+        return true;
+      }
+    }
+
+    $url = trim((string) (self::nodeValue($node, 'url') ?? ''));
+    $urlPath = self::normalizePath($url);
+    if ($urlPath !== '' && $path !== '') {
+      if ($path === $urlPath) {
+        return true;
+      }
+
+      if (str_starts_with($path . '/', $urlPath . '/')) {
+        return true;
+      }
+    }
+
+    $submenu = self::nodeValue($node, 'submenu');
+    if (is_iterable($submenu)) {
+      foreach ($submenu as $child) {
+        if (self::isMenuNodeActive($child, $routeName, $path)) {
+          return true;
+        }
+      }
+    }
+
+    return false;
+  }
+
   public static function ensureRoleRows(string $roleName, ?int $changedByUserId = null): void
   {
     if (!self::tableExists()) {
@@ -313,6 +369,10 @@ class RolePermissionService
    */
   private static function defaultMatrix(): array
   {
+    $allAuthenticated = [
+      'account.settings.manage',
+    ];
+
     $allCentral = [
       'central.dashboard.view',
       'central.admins.manage',
@@ -356,14 +416,17 @@ class RolePermissionService
     ];
 
     return [
-      'Central Admin' => $allCentral,
-      'Central Administrator' => $allCentral,
-      'Facility Administrator' => array_merge($allCoreFacility, ['analytics.view']),
-      'State Data Administrator' => ['core.state_dashboard.view', 'core.reports.view', 'analytics.view'],
-      'LGA Officer' => ['core.lga_dashboard.view', 'core.reports.view', 'analytics.view'],
-      'Data Officer' => array_merge($allWorkspace, ['registers.manage']),
-      'Verification Officer' => ['avo.din_activation.manage'],
-      'Patient' => [],
+      'Central Admin' => array_merge($allAuthenticated, $allCentral),
+      'Central Administrator' => array_merge($allAuthenticated, $allCentral),
+      'Facility Administrator' => array_merge($allAuthenticated, $allCoreFacility, ['analytics.view']),
+      'State Data Administrator' => array_merge($allAuthenticated, ['core.state_dashboard.view', 'core.reports.view', 'analytics.view']),
+      'State Administrator' => array_merge($allAuthenticated, ['core.state_dashboard.view', 'core.reports.view', 'analytics.view']),
+      'LGA Officer' => array_merge($allAuthenticated, ['core.lga_dashboard.view', 'core.reports.view', 'analytics.view']),
+      'LGA Data Administrator' => array_merge($allAuthenticated, ['core.lga_dashboard.view', 'core.reports.view', 'analytics.view']),
+      'LGA Administrator' => array_merge($allAuthenticated, ['core.lga_dashboard.view', 'core.reports.view', 'analytics.view']),
+      'Data Officer' => array_merge($allAuthenticated, $allWorkspace, ['registers.manage']),
+      'Verification Officer' => array_merge($allAuthenticated, ['avo.din_activation.manage']),
+      'Patient' => $allAuthenticated,
     ];
   }
 
@@ -390,6 +453,35 @@ class RolePermissionService
     }
 
     return trim(ltrim($path, '/'));
+  }
+
+  /**
+   * @param mixed $slug
+   * @return array<int,string>
+   */
+  private static function extractSlugs($slug): array
+  {
+    if (is_string($slug)) {
+      return [trim($slug)];
+    }
+
+    if (is_array($slug)) {
+      return array_values(array_filter(array_map(static function ($item) {
+        return is_string($item) ? trim($item) : '';
+      }, $slug), static fn($item) => $item !== ''));
+    }
+
+    if ($slug instanceof \Traversable) {
+      $values = [];
+      foreach ($slug as $item) {
+        if (is_string($item) && trim($item) !== '') {
+          $values[] = trim($item);
+        }
+      }
+      return $values;
+    }
+
+    return [];
   }
 
   /**

@@ -266,8 +266,8 @@ class RiskDashboard extends Component
   {
     $user = Auth::user();
     $layout = match (true) {
-      in_array($user->role, ['State Data Administrator']) => 'layouts.stateOfficerLayout',
-      in_array($user->role, ['LGA Officer']) => 'layouts.lgaOfficerLayout',
+      in_array($user->role, ['State Data Administrator', 'State Administrator']) => 'layouts.stateOfficerLayout',
+      in_array($user->role, ['LGA Officer', 'LGA Data Administrator', 'LGA Administrator']) => 'layouts.lgaOfficerLayout',
       in_array($user->role, ['Facility Administrator']) => 'layouts.facilityAdminLayout',
       default => 'layouts.lgaOfficerLayout'
     };

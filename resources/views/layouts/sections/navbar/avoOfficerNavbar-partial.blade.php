@@ -155,8 +155,7 @@
             </a>
             <ul class="dropdown-menu dropdown-menu-end">
                 <li>
-                    <a class="dropdown-item mt-0"
-                        href="{{ Route::has('profile.show') ? route('profile.show') : '#' }}">
+                    <a class="dropdown-item mt-0" href="{{ route('account-settings') }}">
                         <div class="d-flex align-items-center">
                             <div class="flex-shrink-0 me-2">
                                 <div class="avatar avatar-online"></div>
@@ -175,7 +174,7 @@
                 <li>
                     <div class="dropdown-divider my-1"></div>
                 </li>
-                <li><a class="dropdown-item" href="#"><i class="icon-base ti tabler-user me-3 icon-md"></i>My
+                <li><a class="dropdown-item" href="{{ route('account-settings') }}"><i class="icon-base ti tabler-user me-3 icon-md"></i>My
                         Profile</a></li>
                 <li>
                     <div class="dropdown-divider my-1"></div>

@@ -66,6 +66,7 @@ use App\Livewire\Analytics\HealthTrendsDashboard;
 use App\Livewire\Analytics\MonthlyReportDashboard;
 use App\Livewire\Analytics\BatchDiagnosticDashboard;
 use App\Livewire\Analytics\BatchPredictiveDashboard;
+use App\Livewire\Account\Settings as AccountSettings;
 use App\Livewire\Registers\FamilyPlanningRegister;
 use App\Livewire\Registers\GeneralPatientsRegister;
 use App\Livewire\Patient\Portal as PatientPortal;
@@ -410,6 +411,10 @@ Route::middleware(['auth', 'role.redirect'])->prefix('workspaces')->group(functi
     return redirect()->route('workspaces-drug-catalog-management');
   })->name('workspaces-drug-catalog');
 
+});
+
+Route::middleware(['auth', 'role.redirect'])->prefix('account')->group(function () {
+  Route::get('/settings', AccountSettings::class)->middleware('permission.check:account.settings.manage')->name('account-settings');
 });
 
 

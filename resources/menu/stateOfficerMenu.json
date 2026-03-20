@@ -52,7 +52,7 @@
       "url": "/analytics/risk-dashboard",
       "name": "Risk Assessment",
       "icon": "menu-icon icon-base ti tabler-alert-circle",
-      "slug": "risk-assessment"
+      "slug": "risk-dashboard"
     },
     {
       "url": "/analytics/diagnostic-assistant",
@@ -87,6 +87,12 @@
           "slug": "monthly-report-dashboard"
         }
       ]
+    },
+    {
+      "url": "/account/settings",
+      "name": "Account Settings",
+      "icon": "menu-icon icon-base ti tabler-user-cog",
+      "slug": "account-settings"
     }
   ]
 }

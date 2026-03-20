@@ -1,6 +1,6 @@
 # APP1 Coding, UI, and Workflow Rules
 
-Last updated: 2026-03-12  
+Last updated: 2026-03-20  
 Scope: `app1` (patient workspace + analytics + facility-facing modules)
 
 These rules are mandatory for all new module work and refactors.
@@ -54,6 +54,17 @@ Primary UI reference for design decisions:
      - Verification Officer (if menu file exists)
      - Patient (if menu file exists)
    - Fix/remove duplicate menu entries that point to the same workflow route.
+10. Role-menu metadata hard rule:
+   - For role menus (`centralAdminMenu.json`, `facilityAdminMenu.json`, `dataOfficerMenu.json`, `stateOfficerMenu.json`, `lgaOfficerMenu.json`, `avoOfficerMenu.json`, `patientMenu.json`):
+     - every leaf `url` must map to a registered route URI,
+     - every leaf `slug` must match a registered route name.
+   - Enforce with regression tests (`RoleMenuConfigurationTest`).
+11. Sidebar active-state hard rule:
+   - Role sidebars must use shared resolver `RolePermissionService::isMenuNodeActive()` (route + URL path).
+   - Do not re-introduce ad-hoc slug-only active checks in menu blades.
+12. Account settings access rule:
+   - `/account/settings` must stay permission-guarded with `permission.check:account.settings.manage`.
+   - Default matrix should allow this permission for all authenticated operational roles.
 
 ## 3) UI Rules (Project Standard)
 

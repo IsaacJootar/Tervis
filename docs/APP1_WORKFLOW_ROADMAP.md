@@ -1,6 +1,6 @@
 # APP1 Workflow and Roadmap
 
-Last updated: 2026-03-19  
+Last updated: 2026-03-20  
 Aligned to: HMS Vision Architecture v2.0 (Nov 2025)
 
 ## 1) Current End-to-End Workflow (Implemented)
@@ -154,3 +154,30 @@ Done criteria:
      - queue/pending state table,
      - completion/issue action,
      - downstream side effects (inventory, billing, timeline).
+
+## 5) Phase 1 Completed: Role Sidebar and Account Settings
+
+1. Added shared account workflow route:
+   - `/account/settings` (`account-settings`)
+2. Added account settings menu action on all role sidebars.
+3. Added role alias runtime support:
+   - `State Administrator`
+   - `LGA Data Administrator`
+   - `LGA Administrator`
+4. Updated staff role navbar profile links to route to account settings.
+
+## 6) Phase 2 Completed: Role Access + Sidebar Hardening
+
+1. Sidebar active-state hardening:
+   - All role menu blades now use a shared resolver (`RolePermissionService::isMenuNodeActive`) based on route name + URL path.
+   - This prevents broken active/open menu highlighting when a slug drifts.
+2. Account settings permission hardening:
+   - Added explicit permission key `account.settings.manage`.
+   - `/account/settings` is now protected by `permission.check:account.settings.manage`.
+   - Default matrix allows this permission for all authenticated roles.
+3. Role-menu metadata cleanup:
+   - Corrected menu slug mismatches (`risk-dashboard`, `mpdsr-report-dashboard`, `patient-dashboard`) in role JSON menus.
+4. Regression safety:
+   - Added automated role-menu configuration tests:
+     - URL path must map to registered route URI.
+     - Leaf `slug` must map to registered route name.

@@ -1,6 +1,6 @@
 # APP1 Module Status (Vision-Aligned Ground Truth)
 
-Last updated: 2026-03-19  
+Last updated: 2026-03-20  
 Reference vision: `Health Management System - Complete Architecture (Patient + Facility Modules).pdf` (v2.0, Nov 2025)
 
 Status legend:
@@ -97,6 +97,24 @@ Note: Vision text mentions both "7 modules" and "8 management modules" in differ
 | --- | --- | --- |
 | Legacy Hero Header Removal (Core + Active Role Pages) | Implemented | Legacy hero/floating-shape headers were removed from core operations and active role pages, including data-officer management pages, facility patients, patient appointments, LGA/State dashboards, AVO DIN activations, and legacy patient portal pages; shared dead hero/floating CSS was also removed from role layouts and `layouts/sections/styles.blade.php`. |
 
+## 3g) Role Sidebar and Account Settings Hardening (Phase 1)
+
+| Area | Status | Current Implementation |
+| --- | --- | --- |
+| Shared Account Settings | Implemented | New route `GET /account/settings` (`account-settings`) with profile update + password change for all authenticated roles. |
+| Sidebar Coverage | Implemented | Added `Account Settings` menu entry to Central Admin, State Officer, LGA Officer, Facility Admin, Data Officer, Verification Officer, and Patient sidebars. |
+| Role Alias Coverage | Implemented | Added runtime support for `State Administrator`, `LGA Data Administrator`, and `LGA Administrator` in login redirect, role middleware, permissions default matrix, and analytics/report layout selection. |
+| Navbar My Profile Linking | Implemented (staff roles) | Staff role navbar profile links now target `account-settings` instead of placeholder/dead links. |
+
+## 3h) Role Access and Sidebar Hardening (Phase 2)
+
+| Area | Status | Current Implementation |
+| --- | --- | --- |
+| Sidebar Active-State Consistency | Implemented | Role sidebars now use shared active resolver `RolePermissionService::isMenuNodeActive()` (route + path), removing fragile slug-only matching. |
+| Account Settings Permission Enforcement | Implemented | Added `account.settings.manage` permission key and route middleware on `/account/settings` (`permission.check:account.settings.manage`) with default allow for authenticated roles. |
+| Role Menu Metadata Hygiene | Implemented | Corrected role-menu slug mismatches (`risk-dashboard`, `mpdsr-report-dashboard`, `patient-dashboard`) so route-name alignment remains clean. |
+| Menu Regression Guard | Implemented | Added `tests/Feature/RoleMenuConfigurationTest.php` to enforce role-menu URL/slug validity against route list. |
+
 ## 4) Testing & Quality Snapshot
 
 - `php artisan route:list` passes (routes compile and load).
@@ -105,6 +123,7 @@ Note: Vision text mentions both "7 modules" and "8 management modules" in differ
   - NHMIS registry/value resolver unit tests
   - module access middleware feature tests (`tests/Feature/ModuleEnabledMiddlewareTest.php`)
   - role permission middleware feature tests (`tests/Feature/RolePermissionMiddlewareTest.php`)
+  - role menu configuration regression checks (`tests/Feature/RoleMenuConfigurationTest.php`)
   - facility administration workflow transitions (`tests/Feature/FacilityAdministrationWorkflowTest.php`)
   - bed/sections/inpatient workflow transitions (`tests/Feature/CoreFacilityWorkflowTransitionsTest.php`)
   - workspace aggregation + clinical order bridge checks (`tests/Feature/WorkspaceAggregationChainTest.php`), including Doctor -> pending orders -> dispensing -> invoice creation path.

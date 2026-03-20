@@ -887,3 +887,69 @@
 - Verification:
   - command completed successfully with summary table output
   - `php artisan test` passed after command wiring and execution.
+## 2026-03-20 - Phase 1 Role Sidebar and Account Settings Hardening
+
+- Added new shared account settings module:
+  - `app/Livewire/Account/Settings.php`
+  - `resources/views/livewire/account/settings.blade.php`
+  - Route: `GET /account/settings` (`account-settings`) in `routes/web.php`.
+- Account settings provides:
+  - profile update (`first_name`, `last_name`, `email`, `phone`)
+  - password change with current password validation
+  - loading states and toast feedback.
+- Added `Account Settings` sidebar menu action in:
+  - `resources/menu/centralAdminMenu.json`
+  - `resources/menu/stateOfficerMenu.json`
+  - `resources/menu/lgaOfficerMenu.json`
+  - `resources/menu/facilityAdminMenu.json`
+  - `resources/menu/dataOfficerMenu.json`
+  - `resources/menu/avoOfficerMenu.json`
+  - `resources/menu/patientMenu.json`
+- Role alias support added for runtime consistency:
+  - `State Administrator`
+  - `LGA Data Administrator`
+  - `LGA Administrator`
+  Updated in:
+  - `app/Http/Middleware/UserRoleMiddleware.php`
+  - `app/Livewire/Login.php`
+  - `app/Services/Security/RolePermissionService.php`
+  - analytics/report layout selectors:
+    - `app/Livewire/Analytics/*` (Risk, RealTime, HealthTrends, Diagnostic, Monthly, MPDSR, Batch*)
+    - `app/Livewire/Core/FacilityReports.php`
+- Updated staff navbar profile links (`My Profile`) to point to `account-settings` in:
+  - `resources/views/layouts/sections/navbar/*OfficerNavbar-partial.blade.php`
+  - `resources/views/layouts/sections/navbar/centralAdminNavbar-partial.blade.php`
+  - `resources/views/layouts/sections/navbar/facilityAdminNavbar-partial.blade.php`
+- Validation:
+  - `php artisan route:list` confirms `account/settings` route.
+  - `php artisan test` passed: `54 passed`.
+
+## 2026-03-20 - Phase 2 Role Access and Sidebar Hardening
+
+- Added explicit account-settings permission governance:
+  - New permission key: `account.settings.manage` in `RolePermissionService`.
+  - Route hardening: `/account/settings` now uses `permission.check:account.settings.manage`.
+  - Default permission matrix updated to allow this permission for all authenticated roles.
+- Added shared sidebar active-state resolver:
+  - `RolePermissionService::isMenuNodeActive()` introduced (route-name + URL-path aware).
+  - Applied to role menu blades:
+    - `resources/views/layouts/sections/menu/centralAdminMenu.blade.php`
+    - `resources/views/layouts/sections/menu/facilityAdminMenu.blade.php`
+    - `resources/views/layouts/sections/menu/dataOfficerMenu.blade.php`
+    - `resources/views/layouts/sections/menu/stateOfficerMenu.blade.php`
+    - `resources/views/layouts/sections/menu/lgaOfficerMenu.blade.php`
+    - `resources/views/layouts/sections/menu/avoOfficerMenu.blade.php`
+    - `resources/views/layouts/sections/menu/patientMenu.blade.php`
+    - `resources/views/layouts/sections/menu/submenu.blade.php`
+- Role-menu JSON slug hygiene completed:
+  - `facilityAdminMenu.json`: `risk-assessment` -> `risk-dashboard`
+  - `stateOfficerMenu.json`: `risk-assessment` -> `risk-dashboard`
+  - `lgaOfficerMenu.json`: `risk-assessment` -> `risk-dashboard`; `mpdsr-dashboard` -> `mpdsr-report-dashboard`
+  - `patientMenu.json`: `patient/patient-dashboard` -> `patient-dashboard`
+- Added regression tests for role menu drift:
+  - New file: `tests/Feature/RoleMenuConfigurationTest.php`
+  - Validates role-menu leaf URLs map to route URIs.
+  - Validates role-menu leaf slugs map to route names.
+- Extended permission middleware tests:
+  - `tests/Feature/RolePermissionMiddlewareTest.php`
+  - Added assertions for `account.settings.manage` default allow and explicit override deny behavior.

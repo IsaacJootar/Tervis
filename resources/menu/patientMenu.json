@@ -4,7 +4,7 @@
       "url": "/patient/patient-dashboard",
       "name": "Dashboard",
       "icon": "menu-icon icon-base ti tabler-smart-home",
-      "slug": "patient/patient-dashboard"
+      "slug": "patient-dashboard"
     },
     {
       "url": "/patient/patient-profile",
@@ -35,6 +35,12 @@
       "name": "Tetanus Records",
       "icon": "menu-icon icon-base ti tabler-vaccine",
       "slug": "patient-tetanus"
+    },
+    {
+      "url": "/account/settings",
+      "name": "Account Settings",
+      "icon": "menu-icon icon-base ti tabler-user-cog",
+      "slug": "account-settings"
     }
   ]
 }

@@ -45,7 +45,10 @@ class BatchPredictiveDashboard extends Component
 
     if (!$this->user || !in_array($this->user->role, [
       'State Data Administrator',
+      'State Administrator',
       'LGA Officer',
+      'LGA Data Administrator',
+      'LGA Administrator',
     ])) {
       abort(403, 'Unauthorized: Only administrators can access predictive analytics.');
     }
@@ -130,8 +133,8 @@ class BatchPredictiveDashboard extends Component
   {
     $user = Auth::user();
     $layout = match (true) {
-      in_array($user->role, ['State Data Administrator']) => 'layouts.stateOfficerLayout',
-      in_array($user->role, ['LGA Officer']) => 'layouts.lgaOfficerLayout',
+      in_array($user->role, ['State Data Administrator', 'State Administrator']) => 'layouts.stateOfficerLayout',
+      in_array($user->role, ['LGA Officer', 'LGA Data Administrator', 'LGA Administrator']) => 'layouts.lgaOfficerLayout',
       default => 'layouts.lgaOfficerLayout'
     };
     return view('livewire.analytics.batch-predictive-dashboard')
