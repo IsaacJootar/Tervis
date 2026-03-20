@@ -115,6 +115,19 @@ Note: Vision text mentions both "7 modules" and "8 management modules" in differ
 | Role Menu Metadata Hygiene | Implemented | Corrected role-menu slug mismatches (`risk-dashboard`, `mpdsr-report-dashboard`, `patient-dashboard`) so route-name alignment remains clean. |
 | Menu Regression Guard | Implemented | Added `tests/Feature/RoleMenuConfigurationTest.php` to enforce role-menu URL/slug validity against route list. |
 
+## 3i) Role and Central Enhancements (Phase 3)
+
+| Area | Status | Current Implementation |
+| --- | --- | --- |
+| Central Governance Pages | Implemented | Added `Central Audit Trail` (`/central/audit-trail`) and `Platform Notifications` (`/central/platform-notifications`) with central permission middleware and menu wiring. |
+| State Officer Monitoring Additions | Implemented | State dashboard now includes facility performance table + activity-based report submission completeness monitor. |
+| LGA Officer Monitoring Additions | Implemented | LGA dashboard now includes facility comparison table + overdue report tracker by facility. |
+| Facility Admin Quick Workspace Access | Implemented | Facility admin role now has `Open Patient Workspace` shortcut and `workspace.dashboard.view` permission with guarded route access. |
+| Data Officer Pending Queue | Implemented | Added `Pending Queues` page (`/workspaces/pending-queues`) showing pending lab orders, pending prescriptions, and due reminders with direct module links. |
+| Verification Officer History + Export | Implemented | DIN Activations now includes CSV export for today and a 30-day activation history table; malformed action markup was removed. |
+| Patient Password/Account Path | Implemented | Patient portal now includes explicit CTA to `Account Settings` for profile/password updates. |
+| Navbar Core Template Preservation | Implemented | Role navbar core template structure was restored after enhancement pass; feature links are delivered through route/menu/module pages, not navbar framework replacement. |
+
 ## 4) Testing & Quality Snapshot
 
 - `php artisan route:list` passes (routes compile and load).

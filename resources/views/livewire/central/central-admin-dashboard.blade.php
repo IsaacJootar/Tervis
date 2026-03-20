@@ -32,6 +32,11 @@
                         <i class="bx bx-slider-alt me-1"></i>Facility Module Access
                     </a>
                 @endif
+                @if (RolePermissionService::can($authUser, 'central.audit_trail.view'))
+                    <a href="{{ url('/central/audit-trail') }}" class="btn btn-outline-dark">
+                        <i class="bx bx-history me-1"></i>Audit Trail
+                    </a>
+                @endif
             </div>
         </div>
     </div>
@@ -145,6 +150,12 @@
                     @endif
                     @if (RolePermissionService::can($authUser, 'central.roles_permissions.manage'))
                         <a href="{{ url('/central/roles-permissions') }}" class="btn btn-outline-dark text-start"><i class="bx bx-lock me-1"></i>Open Roles & Permissions</a>
+                    @endif
+                    @if (RolePermissionService::can($authUser, 'central.audit_trail.view'))
+                        <a href="{{ url('/central/audit-trail') }}" class="btn btn-outline-dark text-start"><i class="bx bx-history me-1"></i>Open Audit Trail</a>
+                    @endif
+                    @if (RolePermissionService::can($authUser, 'central.notifications.view'))
+                        <a href="{{ url('/central/platform-notifications') }}" class="btn btn-outline-dark text-start"><i class="bx bx-bell me-1"></i>Open Platform Notifications</a>
                     @endif
                 </div>
             </div>

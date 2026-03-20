@@ -64,6 +64,7 @@ class DinActivations extends Component
   // ACTIVATIONS LIST
   // ============================================
   public $activations = [];
+  public $activationHistory = [];
 
   // ============================================
   // MOUNT
@@ -86,6 +87,7 @@ class DinActivations extends Component
     }
 
     $this->loadActivations();
+    $this->loadActivationHistory();
   }
 
   // ============================================
@@ -260,6 +262,7 @@ class DinActivations extends Component
 
       // Reload the activations list
       $this->loadActivations();
+      $this->loadActivationHistory();
     } catch (ValidationException $e) {
       DB::rollBack();
       $errors = $e->validator->errors()->all();
@@ -291,10 +294,68 @@ class DinActivations extends Component
 
       toastr()->info('Activation record deleted successfully!');
       $this->loadActivations();
+      $this->loadActivationHistory();
     } catch (Exception $e) {
       DB::rollBack();
       toastr()->error('Delete failed: ' . $e->getMessage());
     }
+  }
+
+  public function exportTodayCsv()
+  {
+    $rows = DinActivation::query()
+      ->where('facility_id', $this->facility_id)
+      ->whereDate('visit_date', today())
+      ->orderByDesc('check_in_time')
+      ->get([
+        'patient_din',
+        'patient_first_name',
+        'patient_last_name',
+        'patient_gender',
+        'patient_age',
+        'patient_phone',
+        'visit_date',
+        'check_in_time',
+        'officer_name',
+      ]);
+
+    if ($rows->isEmpty()) {
+      toastr()->warning('No check-in records available for today.');
+      return;
+    }
+
+    $filename = 'din-activations-' . now()->format('Ymd_His') . '.csv';
+
+    return response()->streamDownload(function () use ($rows) {
+      $stream = fopen('php://output', 'w');
+      fputcsv($stream, [
+        'DIN',
+        'First Name',
+        'Last Name',
+        'Gender',
+        'Age',
+        'Phone',
+        'Visit Date',
+        'Check-In Time',
+        'Checked By',
+      ]);
+
+      foreach ($rows as $row) {
+        fputcsv($stream, [
+          $row->patient_din,
+          $row->patient_first_name,
+          $row->patient_last_name,
+          $row->patient_gender,
+          $row->patient_age,
+          $row->patient_phone,
+          $row->visit_date,
+          $row->check_in_time,
+          $row->officer_name,
+        ]);
+      }
+
+      fclose($stream);
+    }, $filename, ['Content-Type' => 'text/csv']);
   }
 
   // ============================================
@@ -354,6 +415,17 @@ class DinActivations extends Component
       ->get();
   }
 
+  private function loadActivationHistory()
+  {
+    $this->activationHistory = DinActivation::query()
+      ->where('facility_id', $this->facility_id)
+      ->whereDate('visit_date', '>=', now()->subDays(30)->toDateString())
+      ->orderByDesc('visit_date')
+      ->orderByDesc('check_in_time')
+      ->limit(250)
+      ->get();
+  }
+
   // ============================================
   // CLEAR CACHES
   // ============================================
@@ -408,6 +480,7 @@ class DinActivations extends Component
       'facility_lga' => $this->facility_lga,
       'facility_ward' => $this->facility_ward,
       'todayCount' => count($this->activations),
+      'activationHistory' => $this->activationHistory,
     ]);
   }
 }

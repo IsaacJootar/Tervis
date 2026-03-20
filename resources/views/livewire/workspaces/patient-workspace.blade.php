@@ -64,6 +64,25 @@
         </div>
     </div>
 
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="d-flex flex-wrap justify-content-between align-items-start gap-3">
+                <div>
+                    <h6 class="mb-1"><i class="bx bx-list-check me-1"></i>Today's Pending Queues</h6>
+                    <small class="text-muted">Open queue view to resolve pending lab tests, prescriptions, and reminders.</small>
+                </div>
+                <a href="{{ url('/workspaces/pending-queues') }}" class="btn btn-outline-dark btn-sm">
+                    <i class="bx bx-right-arrow-alt me-1"></i>Open Pending Queues
+                </a>
+            </div>
+            <div class="d-flex flex-wrap gap-2 mt-3">
+                <span class="badge bg-label-info">Pending Lab Orders: {{ number_format((int) $pending_lab_orders_count) }}</span>
+                <span class="badge bg-label-success">Pending Prescriptions: {{ number_format((int) $pending_prescriptions_count) }}</span>
+                <span class="badge bg-label-warning">Due Reminders: {{ number_format((int) $due_reminders_count) }}</span>
+            </div>
+        </div>
+    </div>
+
     <div class="row g-3 mb-4">
         <div class="col-6 col-lg-3">
             <div class="metric-card metric-card-primary h-100">

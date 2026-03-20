@@ -27,12 +27,17 @@
     {
       "name": "Patient Management",
       "icon": "menu-icon icon-base ti tabler-user-heart",
-      "slug": "facility-patients",
+      "slug": ["facility-patients", "patient-workspace"],
       "submenu": [
         {
           "url": "/core/facility-patients",
           "name": "All Patients",
           "slug": "facility-patients"
+        },
+        {
+          "url": "/workspaces/patient-workspace",
+          "name": "Open Patient Workspace",
+          "slug": "patient-workspace"
         }
       ]
     },
@@ -77,6 +82,12 @@
       "name": "Pharmacy Ops",
       "icon": "menu-icon icon-base ti tabler-pill",
       "slug": "pharmacy-operations"
+    },
+    {
+      "url": "/workspaces/drug-catalog",
+      "name": "Drug Catalog",
+      "icon": "menu-icon icon-base ti tabler-capsule",
+      "slug": "workspaces-drug-catalog-management"
     },
     {
       "url": "/core/laboratory-operations",

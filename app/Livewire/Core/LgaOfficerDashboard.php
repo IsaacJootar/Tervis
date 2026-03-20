@@ -3,14 +3,16 @@
 namespace App\Livewire\Core;
 
 use Carbon\Carbon;
-use App\Models\User;
 use App\Models\Lga;
 use App\Models\Facility;
 use App\Models\Antenatal;
+use App\Models\Patient;
 use App\Models\Delivery;
 use App\Models\DailyAttendance;
+use App\Models\Activity;
 use App\Models\PostnatalRecord;
 use App\Models\TetanusVaccination;
+use App\Models\Registrations\DinActivation;
 use App\Services\DataScopeService;
 use Livewire\Component;
 use Illuminate\Support\Facades\Auth;
@@ -19,6 +21,8 @@ use Illuminate\Support\Facades\Log;
 
 class LgaOfficerDashboard extends Component
 {
+  private const CACHE_VERSION = 'v2';
+
   protected $scopeService;
 
   // LGA-wide scope properties
@@ -58,6 +62,8 @@ class LgaOfficerDashboard extends Component
   public $wardBreakdown = [];
   public $topFacilities = [];
   public $bottomFacilities = [];
+  public $facilityComparisonRows = [];
+  public $overdueReportRows = [];
 
   public function boot(DataScopeService $scopeService)
   {
@@ -119,7 +125,7 @@ class LgaOfficerDashboard extends Component
     $this->dispatch('loading');
 
     try {
-      $cacheKey = "lga_dashboard_{$this->lga_id}_{$this->selectedTimeframe}_{$this->selectedRegister}_" . now()->format('YmdH');
+      $cacheKey = "lga_dashboard_" . self::CACHE_VERSION . "_{$this->lga_id}_{$this->selectedTimeframe}_{$this->selectedRegister}_" . now()->format('YmdH');
 
       $data = Cache::remember($cacheKey, 1800, function () {
         return $this->calculateDashboardMetrics();
@@ -148,6 +154,8 @@ class LgaOfficerDashboard extends Component
       $this->wardBreakdown = $data['ward_breakdown'];
       $this->topFacilities = $data['top_facilities'];
       $this->bottomFacilities = $data['bottom_facilities'];
+      $this->facilityComparisonRows = $data['facility_comparison_rows'];
+      $this->overdueReportRows = $data['overdue_report_rows'];
 
       $this->dispatch('loaded');
     } catch (\Exception $e) {
@@ -176,6 +184,8 @@ class LgaOfficerDashboard extends Component
         'ward_breakdown' => $this->getWardBreakdown($startDate),
         'top_facilities' => $this->getTopFacilities($startDate),
         'bottom_facilities' => $this->getBottomFacilities($startDate),
+        'facility_comparison_rows' => $this->getFacilityComparisonRows($startDate),
+        'overdue_report_rows' => $this->getOverdueReportRows($startDate),
       ];
     } catch (\Exception $e) {
       Log::error('LGA Dashboard metrics calculation failed: ' . $e->getMessage());
@@ -216,7 +226,7 @@ class LgaOfficerDashboard extends Component
         $days[] = $date->format('M d');
 
         if ($this->selectedRegister === 'all' || $this->selectedRegister === 'antenatal') {
-          $antenatalCount = Antenatal::whereIn('registration_facility_id', $this->facilityIds)
+          $antenatalCount = Antenatal::whereIn('facility_id', $this->facilityIds)
             ->whereDate('created_at', $date)
             ->count();
           $antenatalData[] = $antenatalCount;
@@ -268,17 +278,16 @@ class LgaOfficerDashboard extends Component
       }
 
       // Aggregate across all facilities in LGA
-      $totalPatients = Antenatal::whereIn('registration_facility_id', $this->facilityIds)
-        ->distinct('user_id')
-        ->count('user_id');
+      $totalPatients = $this->getUniquePatientCountForFacilities($this->facilityIds);
 
-      $newRegistrations = Antenatal::whereIn('registration_facility_id', $this->facilityIds)
+      $newRegistrations = Patient::whereIn('facility_id', $this->facilityIds)
         ->where('created_at', '>=', $startDate)
         ->count();
 
       $totalDeliveries = Delivery::whereIn('facility_id', $this->facilityIds)->count();
 
-      $activePregnancies = Antenatal::whereIn('registration_facility_id', $this->facilityIds)
+      $activePregnancies = Antenatal::whereIn('facility_id', $this->facilityIds)
+        ->where('is_active', true)
         ->whereDate('edd', '>', Carbon::now())
         ->count();
 
@@ -307,8 +316,8 @@ class LgaOfficerDashboard extends Component
     try {
       return [
         'antenatal' => [
-          'total' => Antenatal::whereIn('registration_facility_id', $this->facilityIds)->count(),
-          'this_period' => Antenatal::whereIn('registration_facility_id', $this->facilityIds)
+          'total' => Antenatal::whereIn('facility_id', $this->facilityIds)->count(),
+          'this_period' => Antenatal::whereIn('facility_id', $this->facilityIds)
             ->where('created_at', '>=', $startDate)->count(),
           'trend' => $this->calculateTrend('antenatal', $startDate),
         ],
@@ -352,13 +361,23 @@ class LgaOfficerDashboard extends Component
   private function getDemographicData()
   {
     try {
-      $ageGroups = Antenatal::whereIn('registration_facility_id', $this->facilityIds)
+      $activatedPatientIds = DinActivation::query()
+        ->whereIn('facility_id', $this->facilityIds)
+        ->whereNotNull('patient_id')
+        ->select('patient_id');
+
+      $ageGroups = Patient::query()
+        ->where(function ($query) use ($activatedPatientIds) {
+          $query->whereIn('facility_id', $this->facilityIds)
+            ->orWhereIn('id', $activatedPatientIds);
+        })
+        ->whereNotNull('date_of_birth')
         ->selectRaw('
                     CASE
-                        WHEN age < 18 THEN "Under 18"
-                        WHEN age BETWEEN 18 AND 24 THEN "18-24"
-                        WHEN age BETWEEN 25 AND 34 THEN "25-34"
-                        WHEN age >= 35 THEN "35+"
+                        WHEN TIMESTAMPDIFF(YEAR, date_of_birth, CURDATE()) < 18 THEN "Under 18"
+                        WHEN TIMESTAMPDIFF(YEAR, date_of_birth, CURDATE()) BETWEEN 18 AND 24 THEN "18-24"
+                        WHEN TIMESTAMPDIFF(YEAR, date_of_birth, CURDATE()) BETWEEN 25 AND 34 THEN "25-34"
+                        WHEN TIMESTAMPDIFF(YEAR, date_of_birth, CURDATE()) >= 35 THEN "35+"
                         ELSE "Unknown"
                     END as age_group,
                     COUNT(*) as count
@@ -378,14 +397,13 @@ class LgaOfficerDashboard extends Component
   private function getPerformanceMetrics($startDate)
   {
     try {
-      $facilityPatients = Antenatal::whereIn('registration_facility_id', $this->facilityIds)
-        ->distinct('user_id')
-        ->count('user_id');
+      $facilityPatients = $this->getUniquePatientCountForFacilities($this->facilityIds);
 
-      $activePregnancies = Antenatal::whereIn('registration_facility_id', $this->facilityIds)
+      $activePregnancies = Antenatal::whereIn('facility_id', $this->facilityIds)
+        ->where('is_active', true)
         ->whereDate('edd', '>', Carbon::now())
-        ->distinct('user_id')
-        ->count('user_id');
+        ->distinct('patient_id')
+        ->count('patient_id');
 
       $antenatalCoverage = $facilityPatients > 0
         ? round(($activePregnancies / $facilityPatients) * 100, 1)
@@ -440,7 +458,7 @@ class LgaOfficerDashboard extends Component
         ];
       }
 
-      $overdueCount = Antenatal::whereIn('registration_facility_id', $this->facilityIds)
+      $overdueCount = Antenatal::whereIn('facility_id', $this->facilityIds)
         ->whereDate('edd', '<', Carbon::now())
         ->whereDoesntHave('user.deliveries', function ($query) {
           $query->whereIn('facility_id', $this->facilityIds);
@@ -521,15 +539,17 @@ class LgaOfficerDashboard extends Component
         ];
       }
 
-      $recentAttendees = DailyAttendance::whereIn('facility_id', $this->facilityIds)
+      $recentAttendees = DinActivation::whereIn('facility_id', $this->facilityIds)
         ->whereDate('visit_date', '>=', Carbon::now()->subDays(30))
-        ->distinct('user_id')
-        ->pluck('user_id');
+        ->whereNotNull('patient_id')
+        ->distinct('patient_id')
+        ->pluck('patient_id');
 
-      $totalActivePatients = Antenatal::whereIn('registration_facility_id', $this->facilityIds)
+      $totalActivePatients = Antenatal::whereIn('facility_id', $this->facilityIds)
+        ->where('is_active', true)
         ->whereDate('edd', '>', Carbon::now())
-        ->distinct('user_id')
-        ->count('user_id');
+        ->distinct('patient_id')
+        ->count('patient_id');
 
       $inactivePatients = max(0, $totalActivePatients - $recentAttendees->count());
 
@@ -559,10 +579,8 @@ class LgaOfficerDashboard extends Component
 
         $breakdown[$ward] = [
           'facility_count' => count($wardFacilityIds),
-          'total_patients' => Antenatal::whereIn('registration_facility_id', $wardFacilityIds)
-            ->distinct('user_id')
-            ->count('user_id'),
-          'new_registrations' => Antenatal::whereIn('registration_facility_id', $wardFacilityIds)
+          'total_patients' => $this->getUniquePatientCountForFacilities($wardFacilityIds),
+          'new_registrations' => Antenatal::whereIn('facility_id', $wardFacilityIds)
             ->where('created_at', '>=', $startDate)
             ->count(),
           'total_deliveries' => Delivery::whereIn('facility_id', $wardFacilityIds)->count(),
@@ -587,11 +605,9 @@ class LgaOfficerDashboard extends Component
       $facilityScores = [];
 
       foreach ($this->facilities as $facility) {
-        $patients = Antenatal::where('registration_facility_id', $facility->id)
-          ->distinct('user_id')
-          ->count('user_id');
+        $patients = $this->getUniquePatientCountForFacilities([(int) $facility->id]);
 
-        $newReg = Antenatal::where('registration_facility_id', $facility->id)
+        $newReg = Antenatal::where('facility_id', $facility->id)
           ->where('created_at', '>=', $startDate)
           ->count();
 
@@ -630,11 +646,9 @@ class LgaOfficerDashboard extends Component
       $facilityScores = [];
 
       foreach ($this->facilities as $facility) {
-        $patients = Antenatal::where('registration_facility_id', $facility->id)
-          ->distinct('user_id')
-          ->count('user_id');
+        $patients = $this->getUniquePatientCountForFacilities([(int) $facility->id]);
 
-        $newReg = Antenatal::where('registration_facility_id', $facility->id)
+        $newReg = Antenatal::where('facility_id', $facility->id)
           ->where('created_at', '>=', $startDate)
           ->count();
 
@@ -667,6 +681,120 @@ class LgaOfficerDashboard extends Component
     }
   }
 
+  private function getFacilityComparisonRows($startDate): array
+  {
+    try {
+      $rows = [];
+      foreach ($this->facilities as $facility) {
+        $patients = $this->getUniquePatientCountForFacilities([(int) $facility->id]);
+
+        $newRegistrations = (int) Antenatal::where('facility_id', $facility->id)
+          ->where('created_at', '>=', $startDate)
+          ->count();
+
+        $deliveries = (int) Delivery::where('facility_id', $facility->id)
+          ->where('created_at', '>=', $startDate)
+          ->count();
+
+        $attendance = (int) DailyAttendance::where('facility_id', $facility->id)
+          ->where('visit_date', '>=', $startDate)
+          ->count();
+
+        $score = ($patients * 2) + ($newRegistrations * 3) + ($deliveries * 2) + $attendance;
+
+        $rows[] = [
+          'facility' => (string) ($facility->name ?? 'N/A'),
+          'ward' => (string) ($facility->ward ?? 'N/A'),
+          'patients' => $patients,
+          'new_registrations' => $newRegistrations,
+          'deliveries' => $deliveries,
+          'attendance' => $attendance,
+          'score' => $score,
+        ];
+      }
+
+      usort($rows, fn($a, $b) => ($b['score'] <=> $a['score']));
+      return $rows;
+    } catch (\Exception $e) {
+      Log::error('LGA facility comparison rows failed: ' . $e->getMessage());
+      return [];
+    }
+  }
+
+  private function getOverdueReportRows($startDate): array
+  {
+    try {
+      $expectedModules = [
+        'attendance',
+        'doctor_assessment',
+        'anc',
+        'child_health',
+        'laboratory',
+        'prescriptions',
+        'invoices',
+        'referrals',
+        'visits',
+        'reminders',
+        'family_planning',
+      ];
+
+      $activityRows = Activity::query()
+        ->whereIn('facility_id', $this->facilityIds)
+        ->where('created_at', '>=', $startDate)
+        ->selectRaw('facility_id, module, MAX(created_at) as last_activity_at')
+        ->groupBy('facility_id', 'module')
+        ->get()
+        ->groupBy('facility_id');
+
+      $rows = [];
+      foreach ($this->facilities as $facility) {
+        $facilityActivities = collect($activityRows->get($facility->id, []));
+        $covered = $facilityActivities
+          ->pluck('module')
+          ->filter(fn($module) => in_array((string) $module, $expectedModules, true))
+          ->unique()
+          ->count();
+
+        $coveragePercent = count($expectedModules) > 0
+          ? (int) round(($covered / count($expectedModules)) * 100)
+          : 0;
+
+        $lastActivityAt = $facilityActivities
+          ->pluck('last_activity_at')
+          ->filter()
+          ->map(fn($value) => Carbon::parse($value))
+          ->sortDesc()
+          ->first();
+
+        $daysSince = $lastActivityAt ? $lastActivityAt->diffInDays(now()) : null;
+        $isOverdue = $daysSince === null || $daysSince > 7 || $coveragePercent < 60;
+
+        $rows[] = [
+          'facility' => (string) ($facility->name ?? 'N/A'),
+          'ward' => (string) ($facility->ward ?? 'N/A'),
+          'coverage_percent' => $coveragePercent,
+          'covered_modules' => $covered,
+          'expected_modules' => count($expectedModules),
+          'last_activity_at' => $lastActivityAt,
+          'days_since' => $daysSince,
+          'status' => $isOverdue ? 'Overdue' : 'On Track',
+        ];
+      }
+
+      usort($rows, function ($a, $b) {
+        if ($a['status'] === $b['status']) {
+          return ($b['days_since'] ?? -1) <=> ($a['days_since'] ?? -1);
+        }
+        return $a['status'] === 'Overdue' ? -1 : 1;
+      });
+
+      return $rows;
+    } catch (\Exception $e) {
+      Log::error('LGA overdue report rows failed: ' . $e->getMessage());
+      return [];
+    }
+  }
+
   private function calculateTrend($register, $startDate)
   {
     try {
@@ -678,7 +806,7 @@ class LgaOfficerDashboard extends Component
         'attendance' => DailyAttendance::class,
       };
 
-      $facilityColumn = $register === 'antenatal' ? 'registration_facility_id' : 'facility_id';
+      $facilityColumn = $register === 'antenatal' ? 'facility_id' : 'facility_id';
 
       $dateColumn = match ($register) {
         'delivery' => 'created_at',
@@ -709,10 +837,12 @@ class LgaOfficerDashboard extends Component
   private function calculateHighRiskCases()
   {
     try {
-      return Antenatal::whereIn('registration_facility_id', $this->facilityIds)
+      return Antenatal::whereIn('facility_id', $this->facilityIds)
         ->where(function ($query) {
-          $query->where('age', '<', 18)
-            ->orWhere('age', '>', 35)
+          $query->whereHas('patient', function ($patientQuery) {
+            $patientQuery->whereRaw('TIMESTAMPDIFF(YEAR, date_of_birth, CURDATE()) < 18')
+              ->orWhereRaw('TIMESTAMPDIFF(YEAR, date_of_birth, CURDATE()) > 35');
+          })
             ->orWhere('heart_disease', 1)
             ->orWhere('kidney_disease', 1)
             ->orWhere('family_hypertension', 1)
@@ -738,10 +868,12 @@ class LgaOfficerDashboard extends Component
   private function calculateHighRiskCasesForFacilities($facilityIds)
   {
     try {
-      return Antenatal::whereIn('registration_facility_id', $facilityIds)
+      return Antenatal::whereIn('facility_id', $facilityIds)
         ->where(function ($query) {
-          $query->where('age', '<', 18)
-            ->orWhere('age', '>', 35)
+          $query->whereHas('patient', function ($patientQuery) {
+            $patientQuery->whereRaw('TIMESTAMPDIFF(YEAR, date_of_birth, CURDATE()) < 18')
+              ->orWhereRaw('TIMESTAMPDIFF(YEAR, date_of_birth, CURDATE()) > 35');
+          })
             ->orWhere('heart_disease', 1)
             ->orWhere('kidney_disease', 1)
             ->orWhere('family_hypertension', 1)
@@ -773,6 +905,8 @@ class LgaOfficerDashboard extends Component
       'ward_breakdown' => [],
       'top_facilities' => [],
       'bottom_facilities' => [],
+      'facility_comparison_rows' => [],
+      'overdue_report_rows' => [],
     ];
   }
 
@@ -808,21 +942,43 @@ class LgaOfficerDashboard extends Component
     $this->wardBreakdown = [];
     $this->topFacilities = [];
     $this->bottomFacilities = [];
+    $this->facilityComparisonRows = [];
+    $this->overdueReportRows = [];
   }
 
   public function forceRefresh()
   {
-    $cacheKey = "lga_dashboard_{$this->lga_id}_{$this->selectedTimeframe}_{$this->selectedRegister}_*";
-    Cache::forget($cacheKey);
-    $this->js('window.location.reload()');
+    $this->refreshData();
   }
 
   public function refreshData()
   {
-    $cacheKey = "lga_dashboard_{$this->lga_id}_{$this->selectedTimeframe}_{$this->selectedRegister}_" . now()->format('YmdH');
+    $cacheKey = "lga_dashboard_" . self::CACHE_VERSION . "_{$this->lga_id}_{$this->selectedTimeframe}_{$this->selectedRegister}_" . now()->format('YmdH');
     Cache::forget($cacheKey);
     $this->loadDashboardData();
     toastr()->info('Dashboard data refreshed successfully.');
+  }
+
+  private function getUniquePatientCountForFacilities(array $facilityIds): int
+  {
+    if (empty($facilityIds)) {
+      return 0;
+    }
+
+    $registeredIds = Patient::query()
+      ->whereIn('facility_id', $facilityIds)
+      ->pluck('id');
+
+    $activatedIds = DinActivation::query()
+      ->whereIn('facility_id', $facilityIds)
+      ->whereNotNull('patient_id')
+      ->pluck('patient_id');
+
+    return $registeredIds
+      ->merge($activatedIds)
+      ->filter()
+      ->unique()
+      ->count();
   }
 
   public function render()

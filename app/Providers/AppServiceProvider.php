@@ -8,7 +8,10 @@ use App\Observers\ActivityObserver;
 use App\Observers\DinActivationObserver;
 use App\Services\DashboardMetricsService;
 use App\Services\PredictiveAnalyticsService;
+use App\Services\Ui\NavbarContextService;
 use Illuminate\Support\Facades\Vite;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\View;
 use App\Services\RiskAssessmentService;
 use Illuminate\Support\ServiceProvider;
 use App\Services\DiagnosticAssistantService;
@@ -39,6 +42,12 @@ class AppServiceProvider extends ServiceProvider
         ];
       }
       return [];
+    });
+
+    View::composer('layouts.sections.navbar.*Navbar-partial', function ($view): void {
+      $user = Auth::user();
+      $context = app(NavbarContextService::class)->build($user);
+      $view->with('navbarContext', $context);
     });
   }
 }

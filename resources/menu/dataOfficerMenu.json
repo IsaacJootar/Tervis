@@ -7,10 +7,10 @@
       "slug": "patient-workspace"
     },
     {
-      "url": "/workspaces/drug-catalog",
-      "name": "Drug Catalog",
-      "icon": "menu-icon icon-base ti tabler-pill",
-      "slug": "workspaces-drug-catalog-management"
+      "url": "/workspaces/pending-queues",
+      "name": "Pending Queues",
+      "icon": "menu-icon icon-base ti tabler-list-check",
+      "slug": "workspaces-pending-queues"
     },
     {
       "url": "/registers/general-patients-register",

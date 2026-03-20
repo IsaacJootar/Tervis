@@ -41,6 +41,23 @@
       ]
     },
     {
+      "name": "Governance",
+      "icon": "menu-icon icon-base ti tabler-shield-check",
+      "slug": ["central-audit-trail", "central-platform-notifications"],
+      "submenu": [
+        {
+          "url": "/central/audit-trail",
+          "name": "Audit Trail",
+          "slug": "central-audit-trail"
+        },
+        {
+          "url": "/central/platform-notifications",
+          "name": "Platform Notifications",
+          "slug": "central-platform-notifications"
+        }
+      ]
+    },
+    {
       "url": "/account/settings",
       "name": "Account Settings",
       "icon": "menu-icon icon-base ti tabler-user-cog",

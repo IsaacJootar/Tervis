@@ -38,9 +38,12 @@ use App\Livewire\Registers\AntenatalRegister;
 use App\Livewire\Workspaces\patientWorkspace;
 use App\Livewire\Central\CreateAdministrators;
 use App\Livewire\Central\CentralAdminDashboard;
+use App\Livewire\Central\CentralAuditTrail;
+use App\Livewire\Central\CentralPlatformNotifications;
 use App\Livewire\Central\FacilityModuleManagement;
 use App\Livewire\Central\RolePermissionsManagement;
 use App\Livewire\Workspaces\WorkspaceDashboard;
+use App\Livewire\Workspaces\PendingQueues;
 use App\Livewire\Workspaces\Modules\Attendance;
 use App\Livewire\Workspaces\Modules\Activities;
 use App\Livewire\Workspaces\Modules\Appointments;
@@ -83,6 +86,8 @@ Route::middleware(['auth', 'role.redirect'])->prefix('central')->group(function 
   Route::get('/facility-module-management', FacilityModuleManagement::class)->middleware('permission.check:central.module_access.manage')->name('central-facility-module-management');
   Route::get('/roles-permissions', RolePermissionsManagement::class)->middleware('permission.check:central.roles_permissions.manage')->name('central-role-permissions');
   Route::get('/central-admin-dashboard', CentralAdminDashboard::class)->middleware('permission.check:central.dashboard.view')->name('central-admin-dashboard');
+  Route::get('/audit-trail', CentralAuditTrail::class)->middleware('permission.check:central.audit_trail.view')->name('central-audit-trail');
+  Route::get('/platform-notifications', CentralPlatformNotifications::class)->middleware('permission.check:central.notifications.view')->name('central-platform-notifications');
   Route::redirect('/central-admin/users', '/central/create-administrators');
 });
 
@@ -311,6 +316,7 @@ Route::middleware(['auth', 'role.redirect'])->prefix('avo')->group(function () {
 Route::middleware(['auth', 'role.redirect'])->prefix('workspaces')->group(function () {
 
   Route::get('/patient-workspace', PatientWorkspace::class)->middleware('permission.check:workspace.dashboard.view')->name('patient-workspace');
+  Route::get('/pending-queues', PendingQueues::class)->middleware('permission.check:workspace.dashboard.view')->name('workspaces-pending-queues');
 
   Route::get('/drug-catalog', DrugCatalog::class)
     ->middleware(['permission.check:workspace.drug_catalog.manage', 'module.enabled:prescriptions'])

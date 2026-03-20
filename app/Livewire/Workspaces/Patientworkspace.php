@@ -5,6 +5,9 @@ namespace App\Livewire\Workspaces;
 use Exception;
 use App\Models\Patient;
 use App\Models\Facility;
+use App\Models\LabTestOrder;
+use App\Models\Prescription;
+use App\Models\Reminder;
 use App\Models\Registrations\DinActivation;
 use Livewire\Component;
 use Illuminate\Support\Facades\Auth;
@@ -62,6 +65,9 @@ class PatientWorkspace extends Component
   public $facility_lga;
   public $facility_ward;
   public $officer_name;
+  public $pending_lab_orders_count = 0;
+  public $pending_prescriptions_count = 0;
+  public $due_reminders_count = 0;
 
   // ============================================
   // MOUNT
@@ -79,6 +85,22 @@ class PatientWorkspace extends Component
       $this->facility_state = $facility?->stateRelation?->name ?? 'N/A';
       $this->facility_lga = $facility?->lgaRelation?->name ?? 'N/A';
       $this->facility_ward = $facility?->ward ?? 'N/A';
+
+      $this->pending_lab_orders_count = (int) LabTestOrder::query()
+        ->where('facility_id', $this->facility_id)
+        ->where('status', 'pending')
+        ->count();
+
+      $this->pending_prescriptions_count = (int) Prescription::query()
+        ->where('facility_id', $this->facility_id)
+        ->where('status', 'pending')
+        ->count();
+
+      $this->due_reminders_count = (int) Reminder::query()
+        ->where('facility_id', $this->facility_id)
+        ->whereIn('status', ['pending', 'queued'])
+        ->whereDate('reminder_date', '<=', now()->toDateString())
+        ->count();
     }
   }
 

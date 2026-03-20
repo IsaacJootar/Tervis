@@ -181,3 +181,30 @@ Done criteria:
    - Added automated role-menu configuration tests:
      - URL path must map to registered route URI.
      - Leaf `slug` must map to registered route name.
+
+## 7) Phase 3 Completed: Central Governance + Role Workflow Additions
+
+1. Central governance pages:
+   - Added `/central/audit-trail` and `/central/platform-notifications`.
+   - Wired permission checks:
+     - `central.audit_trail.view`
+     - `central.notifications.view`
+   - Added Central sidebar governance links.
+2. State/LGA monitoring upgrades:
+   - State dashboard: facility performance table + report submission completeness monitor (activity-based).
+   - LGA dashboard: facility comparison + overdue report tracker by facility.
+3. Facility Admin oversight shortcut:
+   - Facility admin can open patient workspace via guarded `workspace.dashboard.view`.
+   - Role middleware updated to allow `workspaces/*` for Facility Administrator.
+4. Data Officer quick queue workflow:
+   - Added `/workspaces/pending-queues` with pending lab, prescription, and reminder lists.
+   - Added sidebar link in data officer menu.
+5. Verification Officer workflow polish:
+   - DIN activations now include `Export Today's Check-Ins` CSV.
+   - Added activation history table (last 30 days).
+   - Removed malformed/placeholder row action.
+6. Patient account workflow clarity:
+   - Patient portal now includes explicit `Open Account Settings` CTA.
+7. Core navbar template rule respected:
+   - Navbar framework/structure was restored unchanged after user directive.
+   - No core navbar template replacement retained in this phase.

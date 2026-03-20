@@ -135,140 +135,175 @@
 
     {{-- DIN VERIFICATION MODAL --}}
     <div wire:ignore.self class="modal fade" id="dinVerificationModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-lg modal-dialog-centered" style="max-width: 500px;">
+        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable" style="max-width: 560px;">
             <div class="modal-content">
                 <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title">DIN Verification</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
                         wire:click="exit"></button>
                 </div>
-                <div class="modal-body" style="padding: 1.5rem 2.5rem 2.5rem;">
-                    <div class="text-center mb-4">
-                        <h3 class="mb-3"><i class="menu-icon icon-base ti tabler-checklist me-1 text-success"
-                                style="font-size: 1.2rem;"></i>
-                            Verify Patient for ANC</h3>
-                        <p class="text-muted mb-2">Enter the Patient's 8-digit DIN to proceed with ANC registration.</p>
-
-                        {{-- New Patient Link --}}
-                        <div class="alert alert-info py-2 mb-3">
-                            <small class="d-block mb-1">Don't have a DIN yet?</small>
-                            <button wire:click="openRegistrationModal" type="button"
-                                class="btn btn-sm btn-outline-primary" data-bs-dismiss="modal" data-bs-toggle="modal"
-                                data-bs-target="#antenatalRegistrationModal">
-                                <i class="bx bx-user-plus me-1"></i>Register New Patient
-                            </button>
+                <div class="modal-body px-4 pb-4">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Enter 8-Digit DIN <span class="text-danger">*</span></label>
+                        <div
+                            class="auth-input-wrapper d-flex align-items-center justify-content-between numeral-mask-wrapper mb-2">
+                            @for ($i = 0; $i < 8; $i++)
+                                <input type="tel" inputmode="numeric"
+                                    class="form-control auth-input h-px-50 text-center numeral-mask mx-sm-1 my-2"
+                                    maxlength="1" {{ $i === 0 ? 'autofocus' : '' }}
+                                    x-on:input="handleInput($event, {{ $i }})"
+                                    x-on:keydown="handleBackspace($event, {{ $i }})" />
+                            @endfor
                         </div>
+                        <input type="hidden" x-model="din" />
+                        @error('din')
+                            <span class="text-danger">{{ $message }}</span>
+                        @enderror
                     </div>
-                    <form onSubmit="return false">
-                        @csrf
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Enter 8-Digit DIN <span
-                                    class="text-danger">*</span></label>
-                            <div
-                                class="auth-input-wrapper d-flex align-items-center justify-content-between numeral-mask-wrapper mb-3">
-                                @for ($i = 0; $i < 8; $i++)
-                                    <input type="tel"
-                                        class="form-control auth-input h-px-50 text-center numeral-mask mx-sm-1 my-2"
-                                        maxlength="1" {{ $i === 0 ? 'autofocus' : '' }}
-                                        x-on:input="handleInput($event, {{ $i }})"
-                                        x-on:keydown="handleBackspace($event, {{ $i }})" />
-                                @endfor
-                            </div>
-                            <input type="hidden" x-model="din" />
-                            @error('din')
-                                <span class="text-danger">{{ $message }}</span>
-                            @enderror
-                        </div>
-                        <div class="text-center mb-3">
-                            <button wire:click="verifyPatient" type="button" class="btn btn-primary w-100"
-                                :disabled="din.length !== 8" id="verify-btn">
-                                <span wire:loading.remove wire:target="verifyPatient">
-                                    <i class="bx bx-check me-1"></i>Verify
-                                </span>
-                                <span wire:loading wire:target="verifyPatient">
-                                    <span class="spinner-border spinner-border-sm" role="status"
-                                        aria-hidden="true"></span>
-                                    Verifying...
-                                </span>
-                            </button>
-                            <button wire:click="exit" type="button" class="btn btn-label-secondary w-100 mt-2"
-                                data-bs-dismiss="modal" aria-label="Close">
-                                <i class="bx bx-x me-1"></i>Cancel
-                            </button>
-                        </div>
 
-                        {{-- SCENARIO 1: Patient has ACTIVE ANC - show message only --}}
-                        @if ($hasActiveAncRegistration)
-                            <div class="text-center mt-3">
-                                <span class="badge bg-label-danger mb-2">ðŸ«ƒ Patient Found: Active Pregnancy In
-                                    Progress</span>
-                                <div class="card p-3 bg-light">
-                                    <p class="mb-1"><strong>Name:</strong> {{ $first_name }} {{ $last_name }}
-                                    </p>
-                                    <p class="mb-1"><strong>Current Pregnancy:</strong> #{{ $pregnancy_number - 1 }}
-                                    </p>
-                                    <p class="mb-0"><strong>Registration Facility:</strong>
-                                        {{ $patient_registration_facility }}</p>
+                    <div class="d-grid gap-2 mb-3">
+                        <button wire:click="verifyPatient" type="button" class="btn btn-primary"
+                            :disabled="din.length !== 8" id="verify-btn" wire:target="verifyPatient"
+                            wire:loading.attr="disabled">
+                            <span wire:loading.remove wire:target="verifyPatient">
+                                <i class="bx bx-search me-1"></i>Verify DIN
+                            </span>
+                            <span wire:loading wire:target="verifyPatient">
+                                <span class="spinner-border spinner-border-sm me-1" role="status"
+                                    aria-hidden="true"></span>Verifying...
+                            </span>
+                        </button>
+                        <button wire:click="exit" type="button" class="btn btn-label-secondary"
+                            data-bs-dismiss="modal" aria-label="Close">
+                            <i class="bx bx-x me-1"></i>Cancel
+                        </button>
+                    </div>
+
+                    <div class="alert alert-info py-2 mb-3">
+                        <small class="d-block mb-1">No DIN yet?</small>
+                        <button wire:click="openRegistrationModal" type="button"
+                            class="btn btn-sm btn-outline-primary" data-bs-dismiss="modal" data-bs-toggle="modal"
+                            data-bs-target="#antenatalRegistrationModal">
+                            <i class="bx bx-user-plus me-1"></i>Register New Patient
+                        </button>
+                    </div>
+
+                    @if ($hasActiveAncRegistration)
+                        <div class="verification-card verification-warning">
+                            <span class="badge bg-label-warning mb-2"><i class="bx bx-info-circle me-1"></i>Active ANC Registration Found</span>
+                            <div class="row g-2 mt-1">
+                                <div class="col-md-6">
+                                    <div class="verified-item">
+                                        <span class="verified-label">Name</span>
+                                        <span class="verified-value">{{ $first_name }} {{ $last_name }}</span>
+                                    </div>
                                 </div>
-                                <div class="alert alert-warning mt-3 mb-0">
-                                    <strong>This patient has an active pregnancy.</strong><br>
-                                    Cannot register a new pregnancy until the current one is completed.
+                                <div class="col-md-6">
+                                    <div class="verified-item">
+                                        <span class="verified-label">Current Pregnancy</span>
+                                        <span class="verified-value">#{{ $pregnancy_number - 1 }}</span>
+                                    </div>
                                 </div>
+                                <div class="col-md-12">
+                                    <div class="verified-item">
+                                        <span class="verified-label">Registered At</span>
+                                        <span class="verified-value">{{ $patient_registration_facility }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="alert alert-warning mt-3 mb-0">
+                                Patient has an active pregnancy record. Use ANC follow-up workflow instead of new registration.
+                            </div>
+                            <div class="d-grid gap-2 mt-3">
                                 <a href="{{ route('workspace-dashboard', ['patientId' => $patient_id]) }}"
-                                    class="btn btn-primary w-100 mt-3">
+                                    class="btn btn-primary">
                                     <i class="bx bx-tachometer me-1"></i>Go to Patient Dashboard
                                 </a>
-                                <button type="button" class="btn btn-secondary w-100 mt-3" data-bs-dismiss="modal"
-                                    wire:click="exit">
+                                <button type="button" class="btn btn-outline-primary" wire:click="openDinModal">
+                                    <i class="bx bx-refresh me-1"></i>Try Another DIN
+                                </button>
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" wire:click="exit">
                                     <i class="bx bx-x me-1"></i>Close
                                 </button>
                             </div>
-                        @endif
+                        </div>
+                    @endif
 
-                        {{-- SCENARIO 2: Patient NOT found - NEW PATIENT (can register via ANC entry point) --}}
-                        @if ($isNewPatient)
-                            <div class="text-center mt-3">
-                                <span class="badge bg-label-warning mb-2">âš ï¸ DIN Not Found - New Patient</span>
-                                <div class="alert alert-info">
-                                    <p class="mb-0"><strong>This patient does not exist in the system.</strong></p>
-                                    <p class="mb-0">Click below to register a new patient through ANC.</p>
-                                </div>
+                    @if ($isNewPatient)
+                        <div class="verification-card verification-danger">
+                            <span class="badge bg-label-danger mb-2"><i class="bx bx-error-circle me-1"></i>DIN Not Found</span>
+                            <p class="mb-1"><strong>Patient is not yet registered in the system.</strong></p>
+                            <p class="mb-0">Proceed to ANC patient registration.</p>
+                            <div class="d-grid gap-2 mt-3">
                                 <button wire:click="openRegistrationModal" type="button"
-                                    class="btn btn-primary w-100 mt-3" data-bs-dismiss="modal" data-bs-toggle="modal"
+                                    class="btn btn-primary" data-bs-dismiss="modal" data-bs-toggle="modal"
                                     data-bs-target="#antenatalRegistrationModal">
                                     <i class="bx bx-user-plus me-1"></i>Proceed to New Patient Registration
                                 </button>
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" wire:click="exit">
+                                    <i class="bx bx-x me-1"></i>Close
+                                </button>
                             </div>
-                        @endif
+                        </div>
+                    @endif
 
-                        {{-- SCENARIO 3: VERIFIED PATIENT (DIN found, no active ANC) --}}
-                        @if ($isPatientVerified)
-                            <div class="text-center mt-3">
-                                <span class="badge bg-label-success mb-2">âœ… Patient Successfully Verified</span>
-                                <div class="card p-3 bg-light">
-                                    <p class="mb-1"><strong>Name:</strong> {{ $first_name }} {{ $last_name }}
-                                    </p>
-                                    <p class="mb-1"><strong>Registration Facility:</strong>
-                                        {{ $patient_registration_facility }}</p>
-                                    <p class="mb-0"><strong>This will be:</strong> Pregnancy
-                                        #{{ $pregnancy_number }}</p>
-                                    @if ($pregnancy_number > 1)
-                                        <p class="mb-0 mt-2 text-muted"><small>Previous pregnancies:
-                                                {{ $pregnancy_number - 1 }}</small></p>
-                                    @endif
+                    @if ($isPatientVerified)
+                        <div class="verification-card verification-success">
+                            <span class="badge bg-label-success mb-2"><i class="bx bx-check-circle me-1"></i>Patient Verified</span>
+                            <div class="row g-2 mt-1">
+                                <div class="col-md-4">
+                                    <div class="verified-item">
+                                        <span class="verified-label">DIN</span>
+                                        <span class="verified-value">{{ $din }}</span>
+                                    </div>
                                 </div>
+                                <div class="col-md-8">
+                                    <div class="verified-item">
+                                        <span class="verified-label">Name</span>
+                                        <span class="verified-value">{{ $first_name }} {{ $last_name }}</span>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="verified-item">
+                                        <span class="verified-label">Pregnancy Number</span>
+                                        <span class="verified-value">#{{ $pregnancy_number }}</span>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="verified-item">
+                                        <span class="verified-label">Previous Pregnancies</span>
+                                        <span class="verified-value">{{ $pregnancy_number > 1 ? $pregnancy_number - 1 : 0 }}</span>
+                                    </div>
+                                </div>
+                                <div class="col-md-12">
+                                    <div class="verified-item">
+                                        <span class="verified-label">Registered At</span>
+                                        <span class="verified-value">{{ $patient_registration_facility }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="d-grid gap-2 mt-3">
                                 <button wire:click="openRegistrationModal" type="button"
-                                    class="btn btn-success w-100 mt-3" data-bs-dismiss="modal" data-bs-toggle="modal"
+                                    class="btn btn-success" data-bs-dismiss="modal" data-bs-toggle="modal"
                                     data-bs-target="#antenatalRegistrationModal">
                                     <i class="bx bx-arrow-right me-1"></i>Proceed to ANC Registration
                                 </button>
+                                <button type="button" class="btn btn-outline-primary" wire:click="openDinModal">
+                                    <i class="bx bx-user-plus me-1"></i>Access Another Patient
+                                </button>
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" wire:click="exit">
+                                    <i class="bx bx-x me-1"></i>Close
+                                </button>
                             </div>
-                        @endif
-                    </form>
+                        </div>
+                    @endif
                 </div>
             </div>
         </div>
     </div>
     {{-- End DIN Verification Modal --}}
+
+    @include('_partials.din-verification-style')
 
     {{-- ANC REGISTRATION MODAL (COMPLETE FORM) --}}
     <div wire:ignore.self class="modal fade" id="antenatalRegistrationModal" tabindex="-1" aria-hidden="true">
@@ -862,3 +897,4 @@
 
 </div>
 {{-- End of Alpine DataTable wrapper --}}
+

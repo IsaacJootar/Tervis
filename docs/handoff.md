@@ -953,3 +953,63 @@
 - Extended permission middleware tests:
   - `tests/Feature/RolePermissionMiddlewareTest.php`
   - Added assertions for `account.settings.manage` default allow and explicit override deny behavior.
+
+## 2026-03-20 - Phase 3 Central Governance + Role Workflow Additions
+
+- Added central governance Livewire modules:
+  - `app/Livewire/Central/CentralAuditTrail.php`
+  - `app/Livewire/Central/CentralPlatformNotifications.php`
+  - views:
+    - `resources/views/livewire/central/central-audit-trail.blade.php`
+    - `resources/views/livewire/central/central-platform-notifications.blade.php`
+- New central routes:
+  - `/central/audit-trail` (`central-audit-trail`)
+  - `/central/platform-notifications` (`central-platform-notifications`)
+- Permission keys added and wired:
+  - `central.audit_trail.view`
+  - `central.notifications.view`
+- Central menu updated:
+  - `resources/menu/centralAdminMenu.json` now includes Governance links.
+- State/LGA dashboard upgrades:
+  - State dashboard now exposes facility performance + completeness monitor.
+  - LGA dashboard now exposes facility comparison + overdue tracker.
+  - updated classes:
+    - `app/Livewire/Core/StateOfficerDashboard.php`
+    - `app/Livewire/Core/LgaOfficerDashboard.php`
+  - updated views:
+    - `resources/views/livewire/core/state-officer-dashboard.blade.php`
+    - `resources/views/livewire/core/lga-officer-dashboard.blade.php`
+- Facility admin oversight shortcut:
+  - `Facility Administrator` can now access workspace dashboard entrypoints (`workspace.dashboard.view`).
+  - updated:
+    - `app/Http/Middleware/UserRoleMiddleware.php`
+    - `app/Services/Security/RolePermissionService.php`
+    - `resources/menu/facilityAdminMenu.json`
+    - `resources/views/livewire/core/facility-admin-dashboard.blade.php`
+- Data officer pending queue workflow:
+  - Added `PendingQueues` module:
+    - `app/Livewire/Workspaces/PendingQueues.php`
+    - `resources/views/livewire/workspaces/pending-queues.blade.php`
+  - route:
+    - `/workspaces/pending-queues` (`workspaces-pending-queues`)
+  - menu:
+    - `resources/menu/dataOfficerMenu.json`
+  - patient-workspace now shows pending queue counts + quick link.
+- Verification officer workflow polish:
+  - DIN activations now support CSV export for today.
+  - Added activation history table (last 30 days).
+  - Removed malformed placeholder action in row dropdown.
+  - updated:
+    - `app/Livewire/Avo/DinActivations.php`
+    - `resources/views/livewire/avo/din-activations.blade.php`
+- Patient portal account security CTA:
+  - `resources/views/livewire/patient/portal.blade.php`
+- User-directed rollback completed:
+  - Navbar core template structure was restored unchanged after a temporary refactor attempt.
+  - no shared navbar framework replacement remains.
+  - restored files:
+    - `resources/views/layouts/sections/navbar/*Navbar-partial.blade.php`
+- Legacy central compatibility redirects retained:
+  - `/central-admin/notifications` continues to redirect to `/central/central-admin-dashboard` for backward-compatibility.
+- Validation run:
+  - `php artisan test` => `58 passed`.

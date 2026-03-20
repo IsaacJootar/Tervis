@@ -5,10 +5,12 @@ namespace App\Livewire\Core;
 use Carbon\Carbon;
 use App\Models\Facility;
 use App\Models\Antenatal;
+use App\Models\Patient;
 use App\Models\Delivery;
 use App\Models\DailyAttendance;
 use App\Models\PostnatalRecord;
 use App\Models\TetanusVaccination;
+use App\Models\Registrations\DinActivation;
 use Livewire\Component;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
@@ -16,6 +18,8 @@ use Illuminate\Support\Facades\Log;
 
 class FacilityAdminDashboard extends Component
 {
+  private const CACHE_VERSION = 'v2';
+
   public $facility_id, $facility_name, $state_name, $lga_name, $ward_name, $user;
   public $selectedTimeframe = '30'; // a month for now
   public $selectedRegister = 'all'; // default to all registers
@@ -91,7 +95,7 @@ class FacilityAdminDashboard extends Component
 
     try {
       // Improved cache key with hour timestamp for automatic hourly refresh
-      $cacheKey = "dashboard_data_{$this->facility_id}_{$this->selectedTimeframe}_{$this->selectedRegister}_" . now()->format('YmdH');
+      $cacheKey = "dashboard_data_" . self::CACHE_VERSION . "_{$this->facility_id}_{$this->selectedTimeframe}_{$this->selectedRegister}_" . now()->format('YmdH');
 
       $data = Cache::remember($cacheKey, 1800, function () {
         return $this->calculateDashboardMetrics();
@@ -136,14 +140,13 @@ class FacilityAdminDashboard extends Component
   {
     try {
       $startDate = Carbon::now()->subDays($this->selectedTimeframe);
-      $this->totalPatients = (int) Antenatal::where('registration_facility_id', $this->facility_id)
-        ->distinct('user_id')
-        ->count('user_id');
-      $this->newRegistrations = (int) Antenatal::where('registration_facility_id', $this->facility_id)
+      $this->totalPatients = $this->getFacilityUniquePatientCount();
+      $this->newRegistrations = (int) Patient::where('facility_id', $this->facility_id)
         ->where('created_at', '>=', $startDate)
         ->count();
       $this->totalDeliveries = (int) Delivery::where('facility_id', $this->facility_id)->count();
-      $this->activePregnancies = (int) Antenatal::where('registration_facility_id', $this->facility_id)
+      $this->activePregnancies = (int) Antenatal::where('facility_id', $this->facility_id)
+        ->where('is_active', true)
         ->whereDate('edd', '>', Carbon::now())
         ->count();
       $this->todaysAttendance = (int) DailyAttendance::where('facility_id', $this->facility_id)
@@ -218,7 +221,7 @@ class FacilityAdminDashboard extends Component
 
         // Only calculate data for selected register or all, just the 3 for now, at the basis of admin dash view
         if ($this->selectedRegister === 'all' || $this->selectedRegister === 'antenatal') {
-          $antenatalCount = Antenatal::where('registration_facility_id', $this->facility_id)
+          $antenatalCount = Antenatal::where('facility_id', $this->facility_id)
             ->whereDate('created_at', $date)
             ->count();
           $antenatalData[] = $antenatalCount;
@@ -270,18 +273,16 @@ class FacilityAdminDashboard extends Component
         $startDate = Carbon::parse($startDate);
       }
 
-      // Count unique patients through antenatal registrations (correct way for now)
-      $totalPatients = Antenatal::where('registration_facility_id', $this->facility_id)
-        ->distinct('user_id')
-        ->count('user_id');
+      $totalPatients = $this->getFacilityUniquePatientCount();
 
-      $newRegistrations = Antenatal::where('registration_facility_id', $this->facility_id)
+      $newRegistrations = Patient::where('facility_id', $this->facility_id)
         ->where('created_at', '>=', $startDate)
         ->count();
 
       $totalDeliveries = Delivery::where('facility_id', $this->facility_id)->count();
 
-      $activePregnancies = Antenatal::where('registration_facility_id', $this->facility_id)
+      $activePregnancies = Antenatal::where('facility_id', $this->facility_id)
+        ->where('is_active', true)
         ->whereDate('edd', '>', Carbon::now())
         ->count();
 
@@ -310,8 +311,8 @@ class FacilityAdminDashboard extends Component
     try {
       return [
         'antenatal' => [
-          'total' => Antenatal::where('registration_facility_id', $this->facility_id)->count(),
-          'this_period' => Antenatal::where('registration_facility_id', $this->facility_id)
+          'total' => Antenatal::where('facility_id', $this->facility_id)->count(),
+          'this_period' => Antenatal::where('facility_id', $this->facility_id)
             ->where('created_at', '>=', $startDate)->count(),
           'trend' => $this->calculateTrend('antenatal', $startDate),
         ],
@@ -355,13 +356,23 @@ class FacilityAdminDashboard extends Component
   private function getDemographicData()
   {
     try {
-      $ageGroups = Antenatal::where('registration_facility_id', $this->facility_id)
+      $activatedPatientIds = DinActivation::query()
+        ->where('facility_id', $this->facility_id)
+        ->whereNotNull('patient_id')
+        ->select('patient_id');
+
+      $ageGroups = Patient::query()
+        ->where(function ($query) use ($activatedPatientIds) {
+          $query->where('facility_id', $this->facility_id)
+            ->orWhereIn('id', $activatedPatientIds);
+        })
+        ->whereNotNull('date_of_birth')
         ->selectRaw('
                     CASE
-                        WHEN age < 18 THEN "Under 18"
-                        WHEN age BETWEEN 18 AND 24 THEN "18-24"
-                        WHEN age BETWEEN 25 AND 34 THEN "25-34"
-                        WHEN age >= 35 THEN "35+"
+                        WHEN TIMESTAMPDIFF(YEAR, date_of_birth, CURDATE()) < 18 THEN "Under 18"
+                        WHEN TIMESTAMPDIFF(YEAR, date_of_birth, CURDATE()) BETWEEN 18 AND 24 THEN "18-24"
+                        WHEN TIMESTAMPDIFF(YEAR, date_of_birth, CURDATE()) BETWEEN 25 AND 34 THEN "25-34"
+                        WHEN TIMESTAMPDIFF(YEAR, date_of_birth, CURDATE()) >= 35 THEN "35+"
                         ELSE "Unknown"
                     END as age_group,
                     COUNT(*) as count
@@ -383,14 +394,12 @@ class FacilityAdminDashboard extends Component
     try {
       // 1. ANTENATAL COVERAGE - Percentage of pregnant women in catchment area (same facility) who have antenatal records
       // IMPROVED: Compare facility patients against active pregnancies instead of total system patients
-      $facilityPatients = Antenatal::where('registration_facility_id', $this->facility_id)
-        ->distinct('user_id')
-        ->count('user_id');
+      $facilityPatients = $this->getFacilityUniquePatientCount();
 
-      $activePregnancies = Antenatal::where('registration_facility_id', $this->facility_id)
+      $activePregnancies = Antenatal::where('facility_id', $this->facility_id)
         ->whereDate('edd', '>', Carbon::now())
-        ->distinct('user_id')
-        ->count('user_id');
+        ->distinct('patient_id')
+        ->count('patient_id');
 
       $antenatalCoverage = $facilityPatients > 0
         ? round(($activePregnancies / $facilityPatients) * 100, 1)
@@ -453,7 +462,7 @@ class FacilityAdminDashboard extends Component
       }
 
       // Overdue deliveries -
-      $overdueCount = Antenatal::where('registration_facility_id', $this->facility_id)
+      $overdueCount = Antenatal::where('facility_id', $this->facility_id)
         ->whereDate('edd', '<', Carbon::now())
         ->whereDoesntHave('user.deliveries', function ($query) {
           $query->where('facility_id', $this->facility_id);
@@ -543,15 +552,16 @@ class FacilityAdminDashboard extends Component
 
       // ATTENDANCE RISKS
       // Patients with no recent attendance (inactive for 30+ days)
-      $recentAttendees = DailyAttendance::where('facility_id', $this->facility_id)
+      $recentAttendees = DinActivation::where('facility_id', $this->facility_id)
         ->whereDate('visit_date', '>=', Carbon::now()->subDays(30))
-        ->distinct('user_id')
-        ->pluck('user_id');
+        ->whereNotNull('patient_id')
+        ->distinct('patient_id')
+        ->pluck('patient_id');
 
-      $totalActivePatients = Antenatal::where('registration_facility_id', $this->facility_id)
+      $totalActivePatients = Antenatal::where('facility_id', $this->facility_id)
         ->whereDate('edd', '>', Carbon::now()) // Still pregnant
-        ->distinct('user_id')
-        ->count('user_id');
+        ->distinct('patient_id')
+        ->count('patient_id');
 
       $inactivePatients = max(0, $totalActivePatients - $recentAttendees->count());
 
@@ -583,7 +593,7 @@ class FacilityAdminDashboard extends Component
         'attendance' => DailyAttendance::class,
       };
 
-      $facilityColumn = $register === 'antenatal' ? 'registration_facility_id' : 'facility_id';
+      $facilityColumn = 'facility_id';
 
       $dateColumn = match ($register) {
         'delivery' => 'created_at',
@@ -617,10 +627,12 @@ class FacilityAdminDashboard extends Component
 
       // Includes: age (<18 or >35), heart disease, kidney disease, family hypertension,
       // bleeding, anemia (Hb <11), sickle cell (genotype with S), and hypertension (BP >= 140/90)
-      return Antenatal::where('registration_facility_id', $this->facility_id)
+      return Antenatal::where('facility_id', $this->facility_id)
         ->where(function ($query) {
-          $query->where('age', '<', 18)
-            ->orWhere('age', '>', 35)
+          $query->whereHas('patient', function ($patientQuery) {
+            $patientQuery->whereRaw('TIMESTAMPDIFF(YEAR, date_of_birth, CURDATE()) < 18')
+              ->orWhereRaw('TIMESTAMPDIFF(YEAR, date_of_birth, CURDATE()) > 35');
+          })
             ->orWhere('heart_disease', 1)
             ->orWhere('kidney_disease', 1)
             ->orWhere('family_hypertension', 1)
@@ -701,10 +713,28 @@ class FacilityAdminDashboard extends Component
 
   public function refreshData()
   {
-    $cacheKey = "dashboard_data_{$this->facility_id}_{$this->selectedTimeframe}_{$this->selectedRegister}_" . now()->format('YmdH');
+    $cacheKey = "dashboard_data_" . self::CACHE_VERSION . "_{$this->facility_id}_{$this->selectedTimeframe}_{$this->selectedRegister}_" . now()->format('YmdH');
     Cache::forget($cacheKey);
     $this->loadDashboardData();
     toastr()->info('Dashboard data refreshed successfully.');
+  }
+
+  private function getFacilityUniquePatientCount(): int
+  {
+    $registeredIds = Patient::query()
+      ->where('facility_id', $this->facility_id)
+      ->pluck('id');
+
+    $activatedIds = DinActivation::query()
+      ->where('facility_id', $this->facility_id)
+      ->whereNotNull('patient_id')
+      ->pluck('patient_id');
+
+    return $registeredIds
+      ->merge($activatedIds)
+      ->filter()
+      ->unique()
+      ->count();
   }
 
 

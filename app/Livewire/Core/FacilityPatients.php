@@ -31,47 +31,126 @@ class FacilityPatients extends Component
       ])->layout('layouts.facilityAdminLayout');
     }
 
-    // Get all patients who have attendance records in this facility
+    // Build patient list from facility registrations + facility activations
+    // so cross-facility recognized patients still appear when they visit this facility.
+    $registeredPatientIds = Patient::query()
+      ->where('facility_id', $this->facility_id)
+      ->pluck('id');
+
+    $activatedPatientIds = DB::table('din_activations')
+      ->where('facility_id', $this->facility_id)
+      ->whereNotNull('patient_id')
+      ->distinct()
+      ->pluck('patient_id');
+
+    $patientIds = $registeredPatientIds
+      ->merge($activatedPatientIds)
+      ->filter()
+      ->unique()
+      ->values();
+
+    if ($patientIds->isEmpty()) {
+      return view('livewire.core.facility-patients', [
+        'patients' => collect(),
+      ])->layout('layouts.facilityAdminLayout');
+    }
+
     $patients = Patient::query()
       ->select([
-        'patients.id',
-        'patients.din',
-        'patients.first_name',
-        'patients.last_name',
-        'patients.phone',
-        'patients.email',
-        'patients.created_at'
+        'id',
+        'din',
+        'first_name',
+        'last_name',
+        'phone',
+        'email',
+        'created_at',
       ])
-      ->whereExists(function ($query) {
-        $query->select(DB::raw(1))
-          ->from('daily_attendances')
-          ->whereColumn('daily_attendances.user_id', 'patients.id')
-          ->where('daily_attendances.facility_id', $this->facility_id);
-      })
-      ->with([
-        'dailyAttendances',
-        'antenatal',
-        'tetanusVaccinations',
-        'postnatalRecords',
-        'deliveries',
-        'clinicalNotes'
+      ->whereIn('id', $patientIds)
+      ->get();
+
+    $visitStats = DB::table('visits')
+      ->select([
+        'patient_id',
+        DB::raw('COUNT(*) as visit_count'),
+        DB::raw('MAX(visit_date) as last_visit_date'),
       ])
+      ->where('facility_id', $this->facility_id)
+      ->whereIn('patient_id', $patientIds)
+      ->groupBy('patient_id')
       ->get()
-      ->map(function ($patient) {
-        $lastVisit = DB::table('daily_attendances')
-          ->where('user_id', $patient->id)
-          ->where('facility_id', $this->facility_id)
-          ->orderBy('visit_date', 'desc')
-          ->first();
+      ->keyBy('patient_id');
 
-        $patient->attendance_count = $patient->dailyAttendances->count();
-        $patient->antenatal_count = $patient->antenatal ? 1 : 0;
-        $patient->tetanus_count = $patient->tetanusVaccinations->count();
-        $patient->postnatal_count = $patient->postnatalRecords->count();
-        $patient->delivery_count = $patient->deliveries->count();
-        $patient->clinical_notes_count = $patient->clinicalNotes->count();
+    $activationStats = DB::table('din_activations')
+      ->select([
+        'patient_id',
+        DB::raw('COUNT(*) as attendance_count'),
+        DB::raw('MAX(visit_date) as last_visit_date'),
+      ])
+      ->where('facility_id', $this->facility_id)
+      ->whereIn('patient_id', $patientIds)
+      ->groupBy('patient_id')
+      ->get()
+      ->keyBy('patient_id');
 
-        $patient->last_visit_date = $lastVisit ? $lastVisit->visit_date : null;
+    $antenatalCounts = DB::table('antenatal_registrations')
+      ->select('patient_id', DB::raw('COUNT(*) as total'))
+      ->where('facility_id', $this->facility_id)
+      ->whereIn('patient_id', $patientIds)
+      ->groupBy('patient_id')
+      ->pluck('total', 'patient_id');
+
+    $tetanusCounts = DB::table('tetanus_vaccinations')
+      ->select('patient_id', DB::raw('COUNT(*) as total'))
+      ->where('facility_id', $this->facility_id)
+      ->whereIn('patient_id', $patientIds)
+      ->groupBy('patient_id')
+      ->pluck('total', 'patient_id');
+
+    $postnatalCounts = DB::table('postnatal_records')
+      ->select('patient_id', DB::raw('COUNT(*) as total'))
+      ->where('facility_id', $this->facility_id)
+      ->whereIn('patient_id', $patientIds)
+      ->groupBy('patient_id')
+      ->pluck('total', 'patient_id');
+
+    $deliveryCounts = DB::table('deliveries')
+      ->select('patient_id', DB::raw('COUNT(*) as total'))
+      ->where('facility_id', $this->facility_id)
+      ->whereIn('patient_id', $patientIds)
+      ->groupBy('patient_id')
+      ->pluck('total', 'patient_id');
+
+    // Clinical notes are now primarily captured in doctor_assessments for patient-scoped workflows.
+    $clinicalCounts = DB::table('doctor_assessments')
+      ->select('patient_id', DB::raw('COUNT(*) as total'))
+      ->where('facility_id', $this->facility_id)
+      ->whereIn('patient_id', $patientIds)
+      ->groupBy('patient_id')
+      ->pluck('total', 'patient_id');
+
+    $patients = $patients
+      ->map(function ($patient) use (
+        $visitStats,
+        $activationStats,
+        $antenatalCounts,
+        $tetanusCounts,
+        $postnatalCounts,
+        $deliveryCounts,
+        $clinicalCounts
+      ) {
+        $visitSnapshot = $visitStats->get($patient->id);
+        $activationSnapshot = $activationStats->get($patient->id);
+
+        $attendanceCount = (int) ($visitSnapshot->visit_count ?? $activationSnapshot->attendance_count ?? 0);
+        $lastVisitDate = $visitSnapshot->last_visit_date ?? $activationSnapshot->last_visit_date ?? null;
+
+        $patient->attendance_count = $attendanceCount;
+        $patient->antenatal_count = (int) ($antenatalCounts[$patient->id] ?? 0);
+        $patient->tetanus_count = (int) ($tetanusCounts[$patient->id] ?? 0);
+        $patient->postnatal_count = (int) ($postnatalCounts[$patient->id] ?? 0);
+        $patient->delivery_count = (int) ($deliveryCounts[$patient->id] ?? 0);
+        $patient->clinical_notes_count = (int) ($clinicalCounts[$patient->id] ?? 0);
+        $patient->last_visit_date = $lastVisitDate;
 
         $patient->total_visits = $patient->attendance_count +
           $patient->antenatal_count +
@@ -82,7 +161,10 @@ class FacilityPatients extends Component
 
         return $patient;
       })
-      ->sortByDesc('last_visit_date');
+      ->sortByDesc(function ($patient) {
+        return $patient->last_visit_date ?? '0000-00-00';
+      })
+      ->values();
 
     return view('livewire.core.facility-patients', [
       'patients' => $patients,

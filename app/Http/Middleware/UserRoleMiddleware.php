@@ -64,7 +64,7 @@ class UserRoleMiddleware
       ],
 
       'Facility Administrator' => [
-        'prefixes' => ['core', 'analytics', 'account'],
+        'prefixes' => ['core', 'analytics', 'workspaces', 'account'],
         'index'     => 'facility-admin-dashboard',
       ],
 

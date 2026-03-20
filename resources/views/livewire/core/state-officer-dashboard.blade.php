@@ -274,6 +274,115 @@
         @endif
     </div>
 
+    <!-- Facility Performance + Report Completeness -->
+    <div class="row mb-4">
+        <div class="col-lg-7 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="bx bx-line-chart me-2"></i>Facility Performance Table
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Facility</th>
+                                    <th>LGA</th>
+                                    <th class="text-center">Patients</th>
+                                    <th class="text-center">New</th>
+                                    <th class="text-center">Deliveries</th>
+                                    <th class="text-center">Attendance</th>
+                                    <th class="text-center">Score</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse ($facilityPerformanceRows as $row)
+                                    <tr>
+                                        <td><strong>{{ $row['facility'] }}</strong></td>
+                                        <td>{{ $row['lga'] }}</td>
+                                        <td class="text-center">{{ number_format((int) $row['patients']) }}</td>
+                                        <td class="text-center">{{ number_format((int) $row['new_registrations']) }}</td>
+                                        <td class="text-center">{{ number_format((int) $row['deliveries']) }}</td>
+                                        <td class="text-center">{{ number_format((int) $row['attendance']) }}</td>
+                                        <td class="text-center"><span
+                                                class="badge bg-label-primary">{{ number_format((int) $row['score']) }}</span>
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="7" class="text-center text-muted py-3">No facility performance rows yet.</td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-5 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="bx bx-file-find me-2"></i>Report Submission Completeness
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Facility</th>
+                                    <th class="text-center">Coverage</th>
+                                    <th class="text-center">Last Activity</th>
+                                    <th class="text-center">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse ($reportCompletenessRows as $row)
+                                    <tr>
+                                        <td>
+                                            <strong>{{ $row['facility'] }}</strong>
+                                            <div class="small text-muted">{{ $row['lga'] }}</div>
+                                        </td>
+                                        <td class="text-center">
+                                            <span
+                                                class="badge bg-label-info">{{ (int) $row['coverage_percent'] }}%</span>
+                                            <div class="small text-muted">
+                                                {{ (int) $row['covered_modules'] }}/{{ (int) $row['expected_modules'] }}
+                                                modules
+                                            </div>
+                                        </td>
+                                        <td class="text-center">
+                                            @if ($row['last_activity_at'])
+                                                {{ $row['last_activity_at']->format('M d, Y') }}
+                                                <div class="small text-muted">{{ (int) $row['days_since'] }}d ago</div>
+                                            @else
+                                                <span class="text-muted">No activity</span>
+                                            @endif
+                                        </td>
+                                        <td class="text-center">
+                                            <span
+                                                class="badge {{ $row['status'] === 'On Track' ? 'bg-label-success' : 'bg-label-warning' }}">
+                                                {{ $row['status'] }}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="4" class="text-center text-muted py-3">No completeness rows available.</td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Register Statistics -->
     <div class="row mb-4">
         <div class="col-12">

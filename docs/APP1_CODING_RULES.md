@@ -107,6 +107,10 @@ Primary UI reference for design decisions:
    - Primary create/open actions must have loading states.
    - Every stat/metric card must include a visible icon; no icon-less placeholders or empty icon circles.
    - Hard rule: use inline SVG in `.metric-icon` for stat cards to avoid icon-font rendering failures.
+12. Core template preservation rule (hard rule):
+   - Do not replace or restructure core navbar template frameworks per role layout.
+   - If new navigation access is required, add/update route-linked menu/sidebar entries first.
+   - Navbar partial edits must be minimal and non-structural unless explicitly approved by product owner.
 
 ## 4) Interaction Rules
 

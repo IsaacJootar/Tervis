@@ -24,6 +24,8 @@ class RolePermissionService
       ['key' => 'central.facilities.manage', 'label' => 'Manage Facilities', 'group' => 'central'],
       ['key' => 'central.module_access.manage', 'label' => 'Manage Facility Module Access', 'group' => 'central'],
       ['key' => 'central.roles_permissions.manage', 'label' => 'Manage Roles & Permissions', 'group' => 'central'],
+      ['key' => 'central.audit_trail.view', 'label' => 'View Central Audit Trail', 'group' => 'central'],
+      ['key' => 'central.notifications.view', 'label' => 'View Platform Notifications', 'group' => 'central'],
 
       ['key' => 'analytics.view', 'label' => 'View Analytics Dashboards', 'group' => 'analytics'],
 
@@ -174,6 +176,8 @@ class RolePermissionService
         'central/create-facility' => 'central.facilities.manage',
         'central/facility-module-management' => 'central.module_access.manage',
         'central/roles-permissions' => 'central.roles_permissions.manage',
+        'central/audit-trail' => 'central.audit_trail.view',
+        'central/platform-notifications' => 'central.notifications.view',
         default => null,
       };
     }
@@ -218,6 +222,10 @@ class RolePermissionService
 
     if (str_starts_with($path, 'workspaces/')) {
       if ($path === 'workspaces/patient-workspace') {
+        return 'workspace.dashboard.view';
+      }
+
+      if ($path === 'workspaces/pending-queues') {
         return 'workspace.dashboard.view';
       }
 
@@ -379,6 +387,8 @@ class RolePermissionService
       'central.facilities.manage',
       'central.module_access.manage',
       'central.roles_permissions.manage',
+      'central.audit_trail.view',
+      'central.notifications.view',
     ];
 
     $allCoreFacility = [
@@ -412,13 +422,12 @@ class RolePermissionService
       'workspace.family_planning.manage',
       'workspace.health_insurance.manage',
       'workspace.referrals.manage',
-      'workspace.drug_catalog.manage',
     ];
 
     return [
       'Central Admin' => array_merge($allAuthenticated, $allCentral),
       'Central Administrator' => array_merge($allAuthenticated, $allCentral),
-      'Facility Administrator' => array_merge($allAuthenticated, $allCoreFacility, ['analytics.view']),
+      'Facility Administrator' => array_merge($allAuthenticated, $allCoreFacility, ['analytics.view', 'workspace.dashboard.view', 'workspace.drug_catalog.manage']),
       'State Data Administrator' => array_merge($allAuthenticated, ['core.state_dashboard.view', 'core.reports.view', 'analytics.view']),
       'State Administrator' => array_merge($allAuthenticated, ['core.state_dashboard.view', 'core.reports.view', 'analytics.view']),
       'LGA Officer' => array_merge($allAuthenticated, ['core.lga_dashboard.view', 'core.reports.view', 'analytics.view']),
