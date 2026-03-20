@@ -119,6 +119,8 @@ Done criteria:
 1. Complete 187-field NHMIS mapping matrix.
 2. Replace heuristic mappings with structured source fields where possible.
 3. Add mapping verification checklist and regression tests.
+4. Reports Hub performance hardening (completed: preloaded NHMIS context reuse, select-only report queries, grouped facility aggregation for immunization summaries, additional facility/date composite indexes, heavy-window timing logs).
+5. MPDSR surveillance hardening (completed: death surveillance analytics rebuilt from delivery records, response issue queue added, facility/date/death-type filtering aligned, CSV surveillance export enabled, and printable MPDSR review sheet enabled at `/analytics/mpdsr-report-dashboard/print`).
 
 Done criteria:
 - Monthly report has clear source traceability for each mapped field.
@@ -142,6 +144,7 @@ Done criteria:
    - `docs/APP1_MODULE_STATUS.md`
    - `docs/monthly-report-gap-check.md` (if aggregation affected)
    - `docs/handoff.md`
+   - `docs/APP1_PRODUCTION_HARDENING_PASS.md` (final pre-go-live stage)
 5. Table/UI enforcement:
    - Every operational table must ship with pagination + export controls.
    - Multi-metric summaries should use distinct, readable tinted cards (Flowdesk-inspired palette, no gold default).

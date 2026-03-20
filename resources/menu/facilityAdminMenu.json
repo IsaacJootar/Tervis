@@ -122,6 +122,11 @@
           "url": "/analytics/monthly-report-dashboard",
           "name": "Monthly NHMIS Report",
           "slug": "monthly-report-dashboard"
+        },
+        {
+          "url": "/analytics/mpdsr-report-dashboard",
+          "name": "MPDSR Surveillance",
+          "slug": "mpdsr-report-dashboard"
         }
       ]
     }

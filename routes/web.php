@@ -291,6 +291,10 @@ Route::middleware(['auth', 'role.redirect', 'permission.check:analytics.view'])-
   Route::get('/batch-diagnostics-dashboard', BatchDiagnosticDashboard::class)->name('batch-diagnostics-dashboard');
   Route::get('/batch-predictive-dashboard', BatchPredictiveDashboard::class)->name('batch-predictive-dashboard');
   Route::get('/mpdsr-report-dashboard', MpdsrReportDashboard::class)->name('mpdsr-report-dashboard');
+  Route::get('/mpdsr-report-dashboard/print', function () {
+    $payload = session('mpdsr_review_print_payload', []);
+    return view('analytics.mpdsr-review-print', compact('payload'));
+  })->name('mpdsr-report-dashboard-print');
   Route::get('/monthly-report-dashboard', MonthlyReportDashboard::class)->name('monthly-report-dashboard');
 });
 

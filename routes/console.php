@@ -4,6 +4,7 @@ use App\Models\Activity;
 use App\Models\Registrations\DinActivation;
 use App\Services\Communication\ReminderDispatchService;
 use App\Services\Reports\NhmisFieldRegistry;
+use App\Services\Seeding\RichFacilityDataGenerator;
 use App\Services\Visits\VisitCollationService;
 use Illuminate\Foundation\Console\ClosureCommand;
 use Illuminate\Foundation\Inspiring;
@@ -116,3 +117,34 @@ Artisan::command('nhmis:sync-matrix {--path=docs/nhmis-field-matrix.json}', func
     $this->line('Status counts: ' . json_encode($statusCounts));
     $this->line('Path: ' . base_path($path !== '' ? $path : NhmisFieldRegistry::DEFAULT_MATRIX_PATH));
 })->purpose('Generate canonical 187-field NHMIS matrix JSON from template + key registry metadata.');
+
+Artisan::command('seed:rich-facility-data
+  {--facilityId= : Existing facility id to seed into}
+  {--patients=350 : Number of patients to generate}
+  {--months=18 : Date spread in past months}
+  {--staff=50 : Additional users/staff to generate}
+  {--catalog=130 : Target drug catalog count}
+  {--beds=90 : Target bed count}', function () {
+  /** @var ClosureCommand $this */
+  $options = [
+    'facility_id' => $this->option('facilityId') !== null ? (int) $this->option('facilityId') : null,
+    'patients' => (int) $this->option('patients'),
+    'months' => (int) $this->option('months'),
+    'staff' => (int) $this->option('staff'),
+    'catalog' => (int) $this->option('catalog'),
+    'beds' => (int) $this->option('beds'),
+  ];
+
+  $this->warn('Starting high-volume rich data seeding. This appends records into your existing facility data.');
+
+  /** @var RichFacilityDataGenerator $generator */
+  $generator = app(RichFacilityDataGenerator::class);
+  $summary = $generator->run($options);
+
+  $this->info('Rich facility seeding completed.');
+  $this->line('Facility: ' . ($summary['facility_name'] ?? '-') . ' (ID: ' . ($summary['facility_id'] ?? '-') . ')');
+  $this->table(
+    ['Metric', 'Value'],
+    collect($summary)->map(fn($v, $k) => [$k, (string) $v])->values()->all()
+  );
+})->purpose('Seed realistic high-volume records across modules into an existing active facility for serious workflow/report testing.');

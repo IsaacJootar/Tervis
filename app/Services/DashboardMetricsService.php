@@ -40,26 +40,24 @@ class DashboardMetricsService
       return $this->getEmptyMetrics($scope);
     }
 
-    $cacheKey = $this->getCacheKey($scope, $facilityId);
-
-    return cache()->remember($cacheKey, 3600, function () use ($facilityIds, $scope) {
-      return [
-        'total_patients' => $this->getTotalUniquePatients($facilityIds),
-        'today_visits' => $this->getTodayVisits($facilityIds),
-        'high_risk_pregnancies' => $this->getHighRiskPregnancies($facilityIds),
-        'upcoming_deliveries' => $this->getUpcomingDeliveries($facilityIds),
-        'monthly_trends' => $this->getMonthlyTrends($facilityIds),
-        'risk_alerts' => $this->getRiskAlerts($facilityIds),
-        'facility_performance' => $this->getFacilityPerformance($facilityIds),
-        'facility_info' => $this->getFacilityInfo($scope),
-        'service_coverage' => $this->getServiceCoverageMetrics($facilityIds),
-        'patient_journey' => $this->getPatientJourneyMetrics($facilityIds),
-        'clinical_outcomes' => $this->getClinicalOutcomeMetrics($facilityIds),
-        'vaccination_coverage' => $this->getVaccinationCoverageMetrics($facilityIds),
-        'ai_predictions' => $this->getAIPredictionsMetrics($facilityIds),
-        'scope_info' => $scope,
-      ];
-    });
+    // Do not cache this payload in DB cache store:
+    // high-risk lists can become very large and exceed MySQL max_allowed_packet.
+    return [
+      'total_patients' => $this->getTotalUniquePatients($facilityIds),
+      'today_visits' => $this->getTodayVisits($facilityIds),
+      'high_risk_pregnancies' => $this->getHighRiskPregnancies($facilityIds),
+      'upcoming_deliveries' => $this->getUpcomingDeliveries($facilityIds),
+      'monthly_trends' => $this->getMonthlyTrends($facilityIds),
+      'risk_alerts' => $this->getRiskAlerts($facilityIds),
+      'facility_performance' => $this->getFacilityPerformance($facilityIds),
+      'facility_info' => $this->getFacilityInfo($scope),
+      'service_coverage' => $this->getServiceCoverageMetrics($facilityIds),
+      'patient_journey' => $this->getPatientJourneyMetrics($facilityIds),
+      'clinical_outcomes' => $this->getClinicalOutcomeMetrics($facilityIds),
+      'vaccination_coverage' => $this->getVaccinationCoverageMetrics($facilityIds),
+      'ai_predictions' => $this->getAIPredictionsMetrics($facilityIds),
+      'scope_info' => $scope,
+    ];
   }
 
   private function getCacheKey($scope, $specificFacilityId = null)
@@ -112,8 +110,13 @@ class DashboardMetricsService
     return [
       'total_predictions' => $predictions->count(),
       'latest_predictions' => $predictions->take(10)->map(function ($prediction) {
+        $user = $prediction->user;
         return (object)[
-          'user' => $prediction->user,
+          'user' => (object) [
+            'first_name' => $user?->first_name ?? 'Unknown',
+            'last_name' => $user?->last_name ?? 'Patient',
+            'din' => $user?->din ?? $user?->DIN ?? 'N/A',
+          ],
           'risk_level' => $prediction->risk_level,
           'total_risk_score' => $prediction->total_risk_score,
           'assessment_date' => Carbon::parse($prediction->assessment_date),
@@ -245,7 +248,24 @@ class DashboardMetricsService
           })
           ->orWhere('genotype', 'LIKE', '%S%');
       })
-      ->with(['patient', 'facility'])
+      ->select([
+        'id',
+        'patient_id',
+        'facility_id',
+        'lmp',
+        'edd',
+        'blood_pressure',
+        'hemoglobin',
+        'genotype',
+        'heart_disease',
+        'kidney_disease',
+        'family_hypertension',
+        'bleeding',
+      ])
+      ->with([
+        'patient:id,din,first_name,middle_name,last_name,date_of_birth,phone',
+        'facility:id,name',
+      ])
       ->get()
       ->map(function ($antenatal) {
         $patient = $antenatal->patient;
@@ -263,14 +283,18 @@ class DashboardMetricsService
 
         $riskFactors = $this->identifyComprehensiveRiskFactors($antenatal, $patient, $delivery, $postnatal);
 
-        $antenatal->setAttribute('patient_name', $this->resolvePatientName($patient));
-        $antenatal->setAttribute('patient_din', $this->resolveDin($patient));
-        $antenatal->setAttribute('patient_age', $patient?->age);
-        $antenatal->setAttribute('gestational_age_label', $this->calculateGestationalAge($antenatal->lmp));
-        $antenatal->setAttribute('risk_factors', $riskFactors);
-        $antenatal->setAttribute('risk_factor_count', count($riskFactors));
-
-        return $antenatal;
+        return (object) [
+          'id' => (int) $antenatal->id,
+          'patient_id' => (int) $antenatal->patient_id,
+          'facility_id' => (int) $antenatal->facility_id,
+          'patient_name' => $this->resolvePatientName($patient),
+          'patient_din' => $this->resolveDin($patient),
+          'patient_age' => $patient?->age,
+          'gestational_age_label' => $this->calculateGestationalAge($antenatal->lmp),
+          'risk_factors' => $riskFactors,
+          'risk_factor_count' => count($riskFactors),
+          'edd' => $antenatal->edd,
+        ];
       });
   }
 
@@ -658,7 +682,7 @@ class DashboardMetricsService
     if ($antenatal->family_hypertension) $factors[] = 'Family history of hypertension';
     if ($antenatal->bleeding) $factors[] = 'Bleeding during pregnancy';
     if ($antenatal->hemoglobin < 11) $factors[] = 'Anemia';
-    if (strpos($antenatal->genotype, 'S') !== false) $factors[] = 'Sickle cell trait/disease';
+    if (strpos((string) $antenatal->genotype, 'S') !== false) $factors[] = 'Sickle cell trait/disease';
 
     $bp = $this->parseBloodPressure($antenatal->blood_pressure);
     if ($bp && ($bp['systolic'] >= 140 || $bp['diastolic'] >= 90)) {
@@ -667,7 +691,7 @@ class DashboardMetricsService
 
     if ($delivery) {
       if ($delivery->mod === 'CS') $factors[] = 'Cesarean delivery';
-      if ($delivery->blood_loss > 500) $factors[] = 'Excessive blood loss';
+      if (is_numeric($delivery->blood_loss) && (float) $delivery->blood_loss > 500) $factors[] = 'Excessive blood loss';
       if (!empty($delivery->complications)) $factors[] = 'Delivery complications';
       if ($delivery->still_birth) $factors[] = 'Stillbirth history';
     }

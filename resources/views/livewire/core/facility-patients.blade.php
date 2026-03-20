@@ -64,8 +64,8 @@
                                         <div>
                                             <h6 class="mb-0">{{ $patient->first_name }} {{ $patient->last_name }}</h6>
                                             <small class="text-muted">
-                                                @if ($patient->DIN)
-                                                    DIN: {{ $patient->DIN }}
+                                                @if (!empty($patient->din))
+                                                    DIN: {{ $patient->din }}
                                                 @else
                                                     ID: {{ $patient->id }}
                                                 @endif

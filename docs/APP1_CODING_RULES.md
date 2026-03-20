@@ -131,6 +131,10 @@ Primary UI reference for design decisions:
    - `docs/monthly-report-gap-check.md`
    - `docs/handoff.md`
 3. Avoid heuristic-only mappings where structured fields can be added.
+4. Reports Hub performance rule:
+   - use select-only query columns for report datasets (avoid `select *` on report windows),
+   - reuse preloaded collections where the same report generation pass would otherwise re-query identical windows,
+   - ensure facility/date composite indexes exist for high-frequency report filters.
 
 ## 7) Testing and Handover Rules
 

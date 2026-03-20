@@ -176,6 +176,7 @@ class FacilityReports extends Component
     }
 
     try {
+      $startedAt = microtime(true);
       [$columns, $rows] = $this->runReport($this->selected_report);
       $definition = $this->report_catalog[$this->selected_report];
 
@@ -190,8 +191,20 @@ class FacilityReports extends Component
       $this->show_results = true;
 
       $this->persistPrintablePayload($definition, $columns, $rows);
-      $this->appendHistory($definition['name'], $this->result_count);
+      $durationMs = (int) round((microtime(true) - $startedAt) * 1000);
+      $this->appendHistory($definition['name'], $this->result_count, $durationMs);
       $this->refreshCardStats();
+
+      if ($durationMs >= 1500) {
+        Log::info('Reports hub heavy query window', [
+          'report' => $this->selected_report,
+          'rows' => $this->result_count,
+          'duration_ms' => $durationMs,
+          'facility_ids' => $this->getFacilityIds(),
+          'date_from' => $this->date_from,
+          'date_to' => $this->date_to,
+        ]);
+      }
 
       $this->notify('success', 'Report generated successfully.');
     } catch (\Throwable $e) {
@@ -475,13 +488,15 @@ class FacilityReports extends Component
     /** @var NhmisFieldValueResolver $valueResolver */
     $valueResolver = app(NhmisFieldValueResolver::class);
     $templateFields = $registry->loadOrSyncMatrix();
-    $keyValues = $this->buildNhmisSummaryKeyValues($facilityIds, $this->date_from, $this->date_to);
+    $preloadedContext = [];
+    $keyValues = $this->buildNhmisSummaryKeyValues($facilityIds, $this->date_from, $this->date_to, $preloadedContext);
     $resolvedValues = $valueResolver->resolveValues(
       $facilityIds,
       $this->date_from,
       $this->date_to,
       $keyValues,
-      $templateFields
+      $templateFields,
+      $preloadedContext
     );
 
     $columns = [
@@ -512,7 +527,7 @@ class FacilityReports extends Component
     return [$columns, $rows];
   }
 
-  private function buildNhmisSummaryKeyValues(array $facilityIds, string $from, string $to): array
+  private function buildNhmisSummaryKeyValues(array $facilityIds, string $from, string $to, ?array &$preloadedContext = null): array
   {
     $fromDate = Carbon::parse($from)->startOfDay();
     $toDate = Carbon::parse($to)->endOfDay();
@@ -520,17 +535,56 @@ class FacilityReports extends Component
     $immunization = ImmunizationRecord::query()
       ->whereIn('facility_id', $facilityIds)
       ->whereBetween('visit_date', [$from, $to])
-      ->get();
+      ->get([
+        'id',
+        'patient_id',
+        'linked_child_id',
+        'bcg_date',
+        'opv0_date',
+        'opv1_date',
+        'opv2_date',
+        'opv3_date',
+        'penta1_date',
+        'penta2_date',
+        'penta3_date',
+        'pcv1_date',
+        'pcv2_date',
+        'pcv3_date',
+        'ipv1_date',
+        'ipv2_date',
+        'mr1_date',
+        'mr2_date',
+        'yf_date',
+        'hepb0_date',
+        'hpv_date',
+      ]);
 
     $nutrition = NutritionRecord::query()
       ->whereIn('facility_id', $facilityIds)
       ->whereBetween('visit_date', [$from, $to])
-      ->get();
+      ->get([
+        'id',
+        'patient_id',
+        'linked_child_id',
+        'age_group',
+        'infant_feeding',
+        'muac_value_mm',
+        'muac_class',
+        'admission_status',
+      ]);
 
     $activity = ChildHealthActivityRecord::query()
       ->whereIn('facility_id', $facilityIds)
       ->whereBetween('visit_date', [$from, $to])
-      ->get();
+      ->get([
+        'id',
+        'patient_id',
+        'linked_child_id',
+        'vaccination_dates',
+        'breastfeeding_entries',
+        'weight_entries',
+        'aefi_cases',
+      ]);
 
     $summary = [
       'immunization.bcg' => 0,
@@ -665,11 +719,12 @@ class FacilityReports extends Component
         ->count();
     });
 
+    $prescriptions = collect();
     if (Schema::hasTable('prescriptions')) {
       $prescriptions = Prescription::query()
         ->whereIn('facility_id', $facilityIds)
         ->whereBetween('prescribed_date', [$from, $to])
-        ->get(['status']);
+        ->get(['id', 'status']);
 
       $summary['pharmacy.prescriptions_total'] = $prescriptions->count();
       $summary['pharmacy.prescriptions_dispensed'] = $prescriptions->where('status', 'dispensed')->count();
@@ -677,14 +732,25 @@ class FacilityReports extends Component
       $summary['pharmacy.prescriptions_partial'] = $prescriptions->where('status', 'partial')->count();
     }
 
+    $dispenseLines = collect();
     if (Schema::hasTable('drug_dispense_lines')) {
       $dispenseLines = DrugDispenseLine::query()
         ->whereIn('facility_id', $facilityIds)
         ->whereBetween('dispensed_date', [$from, $to])
-        ->get(['quantity']);
+        ->get(['id', 'quantity']);
 
       $summary['pharmacy.dispense_lines'] = $dispenseLines->count();
       $summary['pharmacy.dispensed_quantity_total'] = (float) $dispenseLines->sum(fn($line) => (float) ($line->quantity ?? 0));
+    }
+
+    if (is_array($preloadedContext)) {
+      $preloadedContext = [
+        'immunization' => $immunization,
+        'nutrition' => $nutrition,
+        'activity' => $activity,
+        'prescriptions' => $prescriptions,
+        'dispense_lines' => $dispenseLines,
+      ];
     }
 
     return $summary;
@@ -750,6 +816,26 @@ class FacilityReports extends Component
   private function reportDailyAncRegister(): array
   {
     $rows = AntenatalRegistration::query()
+      ->select([
+        'id',
+        'patient_id',
+        'facility_id',
+        'registration_date',
+        'kahn_test',
+        'special_instructions',
+        'comments',
+        'special_points',
+        'urine_analysis',
+        'pregnancy_status',
+        'parity',
+        'pregnancy_number',
+        'lmp',
+        'gestational_age_weeks',
+        'weight',
+        'height',
+        'blood_pressure',
+        'hemoglobin',
+      ])
       ->with(['patient:id,din,first_name,last_name,date_of_birth', 'facility:id,name'])
       ->whereIn('facility_id', $this->getFacilityIds())
       ->whereBetween('registration_date', [$this->date_from, $this->date_to])
@@ -885,6 +971,7 @@ class FacilityReports extends Component
   private function reportAncFollowUpRegister(): array
   {
     $rows = AntenatalFollowUpAssessment::query()
+      ->select(['id', 'patient_id', 'facility_id', 'visit_date', 'bp', 'weight', 'next_return_date'])
       ->with(['patient:id,din,first_name,last_name', 'facility:id,name'])
       ->whereIn('facility_id', $this->getFacilityIds())
       ->whereBetween('visit_date', [$this->date_from, $this->date_to])
@@ -915,6 +1002,24 @@ class FacilityReports extends Component
   private function reportDailyFamilyPlanningRegister(): array
   {
     $rows = FamilyPlanningRegistration::query()
+      ->select([
+        'id',
+        'patient_id',
+        'facility_id',
+        'registration_date',
+        'client_reg_number',
+        'weight',
+        'blood_pressure',
+        'referral_source',
+        'children_born_alive',
+        'contraceptive_selected',
+        'prior_contraceptive',
+        'brand_size_model',
+        'cycle_duration',
+        'other_observations',
+        'next_appointment',
+        'last_menstrual_period',
+      ])
       ->with(['patient:id,din,first_name,last_name,phone,date_of_birth,gender', 'facility:id,name'])
       ->withCount('followUps')
       ->whereIn('facility_id', $this->getFacilityIds())
@@ -1083,6 +1188,38 @@ class FacilityReports extends Component
   private function reportChildImmunizationRegister(): array
   {
     $rows = ImmunizationRecord::query()
+      ->select([
+        'id',
+        'patient_id',
+        'linked_child_id',
+        'facility_id',
+        'visit_date',
+        'immunization_card_no',
+        'follow_up_address',
+        'follow_up_phone',
+        'hepb0_date',
+        'opv0_date',
+        'bcg_date',
+        'opv1_date',
+        'penta1_date',
+        'pcv1_date',
+        'rota1_date',
+        'opv2_date',
+        'penta2_date',
+        'pcv2_date',
+        'rota2_date',
+        'opv3_date',
+        'penta3_date',
+        'pcv3_date',
+        'ipv1_date',
+        'vita1_date',
+        'vita2_date',
+        'mr1_date',
+        'yf_date',
+        'mena_date',
+        'mr2_date',
+        'comments',
+      ])
       ->with(['patient:id,din,first_name,last_name,date_of_birth,gender', 'linkedChild:id,first_name,last_name,date_of_birth,gender', 'facility:id,name'])
       ->whereIn('facility_id', $this->getFacilityIds())
       ->whereBetween('visit_date', [$this->date_from, $this->date_to])
@@ -1185,13 +1322,30 @@ class FacilityReports extends Component
       ->get($facilityColumns);
 
     $records = ImmunizationRecord::query()
+      ->select([
+        'id',
+        'facility_id',
+        'patient_id',
+        'linked_child_id',
+        'hepb0_date',
+        'opv0_date',
+        'bcg_date',
+        'opv1_date',
+        'penta1_date',
+        'pcv1_date',
+        'rota1_date',
+        'opv2_date',
+        'penta2_date',
+        'pcv2_date',
+      ])
       ->with(['patient:id,date_of_birth', 'linkedChild:id,date_of_birth'])
       ->whereIn('facility_id', $this->getFacilityIds())
       ->whereBetween('visit_date', [$this->date_from, $this->date_to])
       ->get();
 
-    $rows = $facilities->values()->map(function ($facility, $index) use ($records) {
-      $facilityRows = $records->where('facility_id', $facility->id)->values();
+    $recordsByFacility = $records->groupBy('facility_id');
+    $rows = $facilities->values()->map(function ($facility, $index) use ($recordsByFacility) {
+      $facilityRows = $recordsByFacility->get($facility->id, collect())->values();
       $facilityType = strtolower(trim((string) ($facility->ownership ?? $facility->type ?? '')));
 
       return [
@@ -1283,6 +1437,24 @@ class FacilityReports extends Component
       ->get(['id', 'name']);
 
     $records = ImmunizationRecord::query()
+      ->select([
+        'id',
+        'facility_id',
+        'patient_id',
+        'linked_child_id',
+        'rota3_date',
+        'opv3_date',
+        'penta3_date',
+        'pcv3_date',
+        'rota2_date',
+        'ipv1_date',
+        'vita1_date',
+        'vita2_date',
+        'mr1_date',
+        'yf_date',
+        'mena_date',
+        'mr2_date',
+      ])
       ->with(['patient:id,date_of_birth', 'linkedChild:id,date_of_birth'])
       ->whereIn('facility_id', $this->getFacilityIds())
       ->whereBetween('visit_date', [$this->date_from, $this->date_to])
@@ -1291,11 +1463,13 @@ class FacilityReports extends Component
     $tt = TetanusVaccination::query()
       ->whereIn('facility_id', $this->getFacilityIds())
       ->whereBetween('dose_date', [$this->date_from, $this->date_to])
-      ->get(['facility_id', 'current_tt_dose']);
+      ->get(['id', 'facility_id', 'current_tt_dose']);
 
-    $rows = $facilities->values()->map(function ($facility, $index) use ($records, $tt) {
-      $facilityRows = $records->where('facility_id', $facility->id)->values();
-      $ttRows = $tt->where('facility_id', $facility->id);
+    $recordsByFacility = $records->groupBy('facility_id');
+    $ttByFacility = $tt->groupBy('facility_id');
+    $rows = $facilities->values()->map(function ($facility, $index) use ($recordsByFacility, $ttByFacility) {
+      $facilityRows = $recordsByFacility->get($facility->id, collect())->values();
+      $ttRows = $ttByFacility->get($facility->id, collect());
 
       return [
         'sn' => $index + 1,
@@ -1393,7 +1567,17 @@ class FacilityReports extends Component
 
   private function countDoseByAgeBand($records, string $field, string $band): int
   {
-    return $records->filter(function ($record) use ($field, $band) {
+    static $cachedBoundaries = [];
+    $cacheKey = (string) $this->date_from . '|' . (string) $this->date_to;
+    if (!isset($cachedBoundaries[$cacheKey])) {
+      $cachedBoundaries[$cacheKey] = [
+        Carbon::parse($this->date_from)->startOfDay(),
+        Carbon::parse($this->date_to)->endOfDay(),
+      ];
+    }
+    [$fromBoundary, $toBoundary] = $cachedBoundaries[$cacheKey];
+
+    return $records->filter(function ($record) use ($field, $band, $fromBoundary, $toBoundary) {
       $doseDate = $record->{$field} ?? null;
       if (empty($doseDate)) {
         return false;
@@ -1411,7 +1595,7 @@ class FacilityReports extends Component
         return false;
       }
 
-      if ($vaxDate->lt(Carbon::parse($this->date_from)) || $vaxDate->gt(Carbon::parse($this->date_to))) {
+      if ($vaxDate->lt($fromBoundary) || $vaxDate->gt($toBoundary)) {
         return false;
       }
 
@@ -1443,6 +1627,28 @@ class FacilityReports extends Component
   private function reportNutritionGrowthRegister(): array
   {
     $records = NutritionRecord::query()
+      ->select([
+        'id',
+        'patient_id',
+        'linked_child_id',
+        'facility_id',
+        'visit_date',
+        'age_group',
+        'infant_feeding',
+        'complementary_feeding',
+        'counselling_topics',
+        'supplementary_feeding_groups',
+        'otp_provider',
+        'admission_status',
+        'outcome_status',
+        'support_group_referred',
+        'height_cm',
+        'weight_kg',
+        'oedema',
+        'muac_class',
+        'growth_status',
+        'mnp_given',
+      ])
       ->with(['patient:id,din,first_name,last_name,date_of_birth,gender', 'linkedChild:id,first_name,last_name,date_of_birth,gender', 'facility:id,name'])
       ->whereIn('facility_id', $this->getFacilityIds())
       ->whereBetween('visit_date', [$this->date_from, $this->date_to])
@@ -1591,6 +1797,16 @@ class FacilityReports extends Component
   private function reportVaccinationScheduleRegister(): array
   {
     $rows = ChildHealthActivityRecord::query()
+      ->select([
+        'id',
+        'patient_id',
+        'facility_id',
+        'visit_date',
+        'vaccination_dates',
+        'weight_entries',
+        'breastfeeding_entries',
+        'aefi_cases',
+      ])
       ->with(['patient:id,din,first_name,last_name', 'facility:id,name'])
       ->whereIn('facility_id', $this->getFacilityIds())
       ->whereBetween('visit_date', [$this->date_from, $this->date_to])
@@ -1629,6 +1845,16 @@ class FacilityReports extends Component
   private function reportLaboratoryRegister(): array
   {
     $rows = LabTest::query()
+      ->select([
+        'id',
+        'patient_id',
+        'facility_id',
+        'visit_date',
+        'lab_no',
+        'specimen',
+        'examination',
+        'officer_name',
+      ])
       ->with(['patient:id,din,first_name,last_name', 'facility:id,name'])
       ->whereIn('facility_id', $this->getFacilityIds())
       ->whereBetween('visit_date', [$this->date_from, $this->date_to])
@@ -1661,6 +1887,16 @@ class FacilityReports extends Component
   private function reportPrescriptionDispensingRegister(): array
   {
     $rows = Prescription::query()
+      ->select([
+        'id',
+        'patient_id',
+        'facility_id',
+        'prescribed_date',
+        'drug_name',
+        'quantity_prescribed',
+        'quantity_dispensed',
+        'status',
+      ])
       ->with(['patient:id,din,first_name,last_name', 'facility:id,name'])
       ->whereIn('facility_id', $this->getFacilityIds())
       ->whereBetween('prescribed_date', [$this->date_from, $this->date_to])
@@ -1693,6 +1929,15 @@ class FacilityReports extends Component
   private function reportReferralsRegister(): array
   {
     $rows = Referral::query()
+      ->select([
+        'id',
+        'patient_id',
+        'facility_id',
+        'referral_date',
+        'referred_to',
+        'service_provided',
+        'follow_up_needed',
+      ])
       ->with(['patient:id,din,first_name,last_name', 'facility:id,name'])
       ->whereIn('facility_id', $this->getFacilityIds())
       ->whereBetween('referral_date', [$this->date_from, $this->date_to])
@@ -1723,6 +1968,17 @@ class FacilityReports extends Component
   private function reportInvoicesPaymentsRegister(): array
   {
     $rows = Invoice::query()
+      ->select([
+        'id',
+        'patient_id',
+        'facility_id',
+        'invoice_date',
+        'invoice_code',
+        'total_amount',
+        'amount_paid',
+        'outstanding_amount',
+        'status',
+      ])
       ->with(['patient:id,din,first_name,last_name', 'facility:id,name'])
       ->whereIn('facility_id', $this->getFacilityIds())
       ->whereBetween('invoice_date', [$this->date_from, $this->date_to])
@@ -1754,7 +2010,7 @@ class FacilityReports extends Component
     ], $rows];
   }
 
-  private function appendHistory(string $reportName, int $rows): void
+  private function appendHistory(string $reportName, int $rows, int $durationMs = 0): void
   {
     $scopeLabel = $this->selectedFacilityId
       ? optional(Facility::find($this->selectedFacilityId))->name
@@ -1768,6 +2024,7 @@ class FacilityReports extends Component
       'date_to' => $this->date_to,
       'scope' => $scopeLabel ?: 'Scope',
       'records' => $rows,
+      'duration_ms' => $durationMs,
       'generated_by' => trim((Auth::user()->first_name ?? '') . ' ' . (Auth::user()->last_name ?? '')),
     ]);
 

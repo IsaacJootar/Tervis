@@ -30,12 +30,19 @@ class NhmisFieldValueResolver
     return range(1, 185);
   }
 
-  public function resolveValues(array $facilityIds, string $from, string $to, array $keyValues, array $matrix): array
+  public function resolveValues(
+    array $facilityIds,
+    string $from,
+    string $to,
+    array $keyValues,
+    array $matrix,
+    array $preloadedContext = []
+  ): array
   {
     $fromDate = Carbon::parse($from)->startOfDay();
     $toDate = Carbon::parse($to)->endOfDay();
 
-    $ctx = $this->loadContext($facilityIds, $fromDate, $toDate);
+    $ctx = $this->loadContext($facilityIds, $fromDate, $toDate, $preloadedContext);
     $values = [];
 
     foreach ($matrix as $row) {
@@ -54,81 +61,89 @@ class NhmisFieldValueResolver
     return $values;
   }
 
-  private function loadContext(array $facilityIds, Carbon $fromDate, Carbon $toDate): array
+  private function loadContext(array $facilityIds, Carbon $fromDate, Carbon $toDate, array $preloadedContext = []): array
   {
+    $load = function (string $key, callable $queryLoader) use ($preloadedContext): Collection {
+      $candidate = $preloadedContext[$key] ?? null;
+      if ($candidate instanceof Collection) {
+        return $candidate;
+      }
+      return $queryLoader();
+    };
+
     return [
-      'attendance' => DailyAttendance::query()
+      'attendance' => $load('attendance', fn() => DailyAttendance::query()
         ->whereIn('facility_id', $facilityIds)
         ->whereBetween('visit_date', [$fromDate->toDateString(), $toDate->toDateString()])
-        ->get(),
-      'inpatient_admissions' => InpatientAdmission::query()
+        ->get()),
+      'inpatient_admissions' => $load('inpatient_admissions', fn() => InpatientAdmission::query()
         ->whereIn('facility_id', $facilityIds)
         ->whereBetween('admitted_at', [$fromDate, $toDate])
-        ->get(),
-      'inpatient_discharges' => InpatientAdmission::query()
+        ->get()),
+      'inpatient_discharges' => $load('inpatient_discharges', fn() => InpatientAdmission::query()
         ->whereIn('facility_id', $facilityIds)
         ->whereBetween('discharged_at', [$fromDate, $toDate])
-        ->get(),
-      'antenatal' => AntenatalRegistration::query()
+        ->get()),
+      'antenatal' => $load('antenatal', fn() => AntenatalRegistration::query()
         ->whereIn('facility_id', $facilityIds)
         ->whereBetween('registration_date', [$fromDate->toDateString(), $toDate->toDateString()])
-        ->get(),
-      'anc_followups' => AntenatalFollowUpAssessment::query()
+        ->get()),
+      'anc_followups' => $load('anc_followups', fn() => AntenatalFollowUpAssessment::query()
         ->whereIn('facility_id', $facilityIds)
         ->whereBetween('visit_date', [$fromDate->toDateString(), $toDate->toDateString()])
-        ->get(),
-      'deliveries' => Delivery::query()
+        ->get()),
+      'deliveries' => $load('deliveries', fn() => Delivery::query()
         ->whereIn('facility_id', $facilityIds)
         ->whereBetween('dodel', [$fromDate->toDateString(), $toDate->toDateString()])
-        ->get(),
-      'postnatal' => PostnatalRecord::query()
+        ->get()),
+      'postnatal' => $load('postnatal', fn() => PostnatalRecord::query()
         ->whereIn('facility_id', $facilityIds)
         ->whereBetween('visit_date', [$fromDate->toDateString(), $toDate->toDateString()])
-        ->get(),
-      'tetanus' => TetanusVaccination::query()
+        ->get()),
+      'tetanus' => $load('tetanus', fn() => TetanusVaccination::query()
         ->whereIn('facility_id', $facilityIds)
         ->whereBetween('visit_date', [$fromDate->toDateString(), $toDate->toDateString()])
-        ->get(),
-      'immunization' => ImmunizationRecord::query()
+        ->get()),
+      'immunization' => $load('immunization', fn() => ImmunizationRecord::query()
         ->whereIn('facility_id', $facilityIds)
         ->whereBetween('visit_date', [$fromDate->toDateString(), $toDate->toDateString()])
-        ->get(),
-      'activity' => ChildHealthActivityRecord::query()
+        ->get()),
+      'activity' => $load('activity', fn() => ChildHealthActivityRecord::query()
         ->whereIn('facility_id', $facilityIds)
         ->whereBetween('visit_date', [$fromDate->toDateString(), $toDate->toDateString()])
-        ->get(),
-      'nutrition' => NutritionRecord::query()
+        ->get()),
+      'nutrition' => $load('nutrition', fn() => NutritionRecord::query()
         ->whereIn('facility_id', $facilityIds)
         ->whereBetween('visit_date', [$fromDate->toDateString(), $toDate->toDateString()])
-        ->get(),
-      'lab' => LabTest::query()
+        ->get()),
+      'lab' => $load('lab', fn() => LabTest::query()
         ->whereIn('facility_id', $facilityIds)
         ->whereBetween('visit_date', [$fromDate->toDateString(), $toDate->toDateString()])
-        ->get(),
-      'doctor' => DoctorAssessment::query()
+        ->get()),
+      'doctor' => $load('doctor', fn() => DoctorAssessment::query()
         ->whereIn('facility_id', $facilityIds)
         ->whereBetween('visit_date', [$fromDate->toDateString(), $toDate->toDateString()])
-        ->get(),
-      'fp_regs' => FamilyPlanningRegistration::query()
+        ->get()),
+      'fp_regs' => $load('fp_regs', fn() => FamilyPlanningRegistration::query()
         ->whereIn('facility_id', $facilityIds)
         ->whereBetween('registration_date', [$fromDate->toDateString(), $toDate->toDateString()])
-        ->get(),
-      'fp_followups' => FamilyPlanningFollowUp::query()
+        ->get()),
+      'fp_followups' => $load('fp_followups', fn() => FamilyPlanningFollowUp::query()
         ->whereIn('facility_id', $facilityIds)
         ->whereBetween('visit_date', [$fromDate->toDateString(), $toDate->toDateString()])
-        ->get(),
-      'referrals' => Referral::query()
+        ->get()),
+      'referrals' => $load('referrals', fn() => Referral::query()
         ->whereIn('facility_id', $facilityIds)
         ->whereBetween('referral_date', [$fromDate->toDateString(), $toDate->toDateString()])
-        ->get(),
-      'prescriptions' => Prescription::query()
+        ->get()),
+      'prescriptions' => $load('prescriptions', fn() => Prescription::query()
         ->whereIn('facility_id', $facilityIds)
         ->whereBetween('prescribed_date', [$fromDate->toDateString(), $toDate->toDateString()])
-        ->get(),
-      'dispense_lines' => DrugDispenseLine::query()
+        ->get()),
+      'dispense_lines' => $load('dispense_lines', fn() => DrugDispenseLine::query()
         ->whereIn('facility_id', $facilityIds)
         ->whereBetween('dispensed_date', [$fromDate->toDateString(), $toDate->toDateString()])
-        ->get(),
+        ->get()),
     ];
   }
 

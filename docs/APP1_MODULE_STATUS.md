@@ -44,7 +44,7 @@ Note: Vision text mentions both "7 modules" and "8 management modules" in differ
 | Laboratory Management | Implemented | Facility operations module delivered at `/core/laboratory-operations` with pending order intake queue, sample tracking, processing batches, QC logs, reagent inventory/movements, and equipment calibration-maintenance logs. |
 | Staff Management | Implemented | Unified facility-scoped staff module delivered at `/core/staff-management` (create/update profile, designation-role alignment, activate/disable, department assignment, password reset, and audit trail) with legacy Data Officer routes redirected to avoid duplicate modules. |
 | Facility Administration | Implemented | Dedicated module delivered at `/core/facility-administration` with facility profile settings, service catalog CRUD, fee schedule CRUD (active schedule control), module access status view, and administration audit trail. |
-| Reporting & Analytics | Implemented | Dedicated Reports Hub delivered at `/core/reports-hub` with section/report-name/date/facility filters, generation history, DataTables pagination/export, CSV export, and printable template report view; monthly NHMIS key mapping includes immunization, child-health, and pharmacy indicators, and now uses canonical matrix registry (`app/Services/Reports/NhmisFieldRegistry.php` + `docs/nhmis-field-matrix.json`) plus per-row fallback resolver hardening (`app/Services/Reports/NhmisFieldValueResolver.php`). |
+| Reporting & Analytics | Implemented | Dedicated Reports Hub delivered at `/core/reports-hub` with section/report-name/date/facility filters, generation history, DataTables pagination/export, CSV export, and printable template report view; monthly NHMIS key mapping includes immunization, child-health, and pharmacy indicators, and now uses canonical matrix registry (`app/Services/Reports/NhmisFieldRegistry.php` + `docs/nhmis-field-matrix.json`) plus per-row fallback resolver hardening (`app/Services/Reports/NhmisFieldValueResolver.php`). MPDSR surveillance was hardened at `/analytics/mpdsr-report-dashboard` with real death signal extraction, cause/time/facility analytics, surveillance issue queue, CSV surveillance export, and printable review sheet route (`/analytics/mpdsr-report-dashboard/print`). |
 
 ## 3) Integration Bridges (Vision-Critical)
 
@@ -122,12 +122,18 @@ Note: Vision text mentions both "7 modules" and "8 management modules" in differ
     - de-duplication of same-subject/same-date dose entries across Immunization + Vaccination Schedule sources
     - facility-scope isolation validated against cross-facility noise records
     - repeat generation of a narrower window after wider window run verifies no carry-over drift
+  - Reports Hub performance hardening validation:
+    - query tuning in `FacilityReports` (select-only queries + grouped facility reductions)
+    - NHMIS resolver preload support to avoid duplicate context reloads
+    - composite index migration for report date filters (`2026_03_19_120000_add_reports_hub_performance_indexes.php`)
+  - Reports Hub smoke coverage (`tests/Feature/ReportsHubSmokeTest.php`):
+    - all configured report keys generate successfully without exceptions
   - module access middleware isolation now runs without skip for second-facility setup (`tests/Feature/ModuleEnabledMiddlewareTest.php`).
   - child health + health insurance workflow transitions and validations (`tests/Feature/ChildHealthInsuranceWorkflowTest.php`).
-- Remaining gap: optional mega-scale load benchmarking and SQL profiling (>10k seeded records/window) for capacity planning.
+- Remaining gap: optional periodic mega-scale benchmark reruns in production-like datasets for capacity planning.
 
 ## 5) Immediate Priority Recommendation
 
-1. Add optional mega-scale (>10k rows/window) performance benchmark profile for Reports Hub monthly generation.
+1. Run periodic mega-scale (>10k rows/window) benchmark reruns in staging/production-like data windows.
 2. Maintain mapping coverage as new template keys or module fields are introduced.
 3. Keep strict-scope gate tests updated when new one-time registers are introduced.

@@ -781,3 +781,109 @@
   - `docs/APP1_WORKFLOW_ROADMAP.md`
   - `docs/APP1_MODULE_STATUS.md`
   - `docs/handoff.md`
+
+## Update (2026-03-19, Reports Hub Performance Hardening)
+- Applied performance optimizations to Reports Hub generation flow:
+  - `FacilityReports` now reuses preloaded NHMIS datasets when resolving monthly matrix values (avoids duplicate context queries in same request).
+  - Report data loaders now use select-only columns for high-volume windows (reduced memory pressure for report generation and CSV export).
+  - Immunization summary/tally report builders now group records by facility once, removing repeated collection scans per facility row.
+  - `countDoseByAgeBand` now caches report date boundaries per request window to reduce repeated Carbon parsing.
+  - Added generation timing capture (`duration_ms`) in report history and heavy-window log entry (`>=1500ms`) for operational profiling.
+- Added report filter indexes migration:
+  - `database/migrations/2026_03_19_120000_add_reports_hub_performance_indexes.php`
+  - New composite indexes:
+    - `antenatal_follow_up_assessments(facility_id, visit_date)`
+    - `family_planning_registrations(facility_id, registration_date)`
+    - `invoices(facility_id, invoice_date)`
+    - `tetanus_vaccinations(facility_id, dose_date)`
+- Files updated:
+  - `app/Livewire/Core/FacilityReports.php`
+  - `app/Services/Reports/NhmisFieldValueResolver.php`
+  - `database/migrations/2026_03_19_120000_add_reports_hub_performance_indexes.php`
+  - `docs/APP1_CODING_RULES.md`
+  - `docs/APP1_WORKFLOW_ROADMAP.md`
+  - `docs/APP1_MODULE_STATUS.md`
+  - `docs/handoff.md`
+- Validation run:
+  - `php artisan migrate`
+  - `php artisan route:list`
+  - `php artisan view:cache`
+  - `php artisan test` (all passing)
+  - Added regression safety: `tests/Feature/ReportsHubSmokeTest.php` validates all configured report keys generate successfully.
+
+## Update (2026-03-19, MPDSR Surveillance Reporting Hardening)
+- Rebuilt `MpdsrReportDashboard` for true surveillance reporting workflow:
+  - real maternal/perinatal death extraction from delivery records
+  - robust death classification (`maternal`, `stillbirth`, `early neonatal`) with tolerant flag parsing
+  - summary surveillance metrics (MMR, PMR, review coverage, critical issue counts)
+  - facility/cause/time analytics generated from filtered surveillance collections
+  - actionable surveillance issue queue with severity and recommended response actions
+  - CSV surveillance export (`exportSurveillanceCsv`) for response/report circulation
+- Updated MPDSR blade UI:
+  - added clear surveillance filter bar and export controls
+  - replaced icon-font stat icons with inline SVG in metric cards
+  - added DataTables multi-table wiring for surveillance/facility/maternal/perinatal tables
+  - retained trend and cause charts with safe re-render hooks
+- Facility Admin navigation:
+  - added MPDSR link under Reports & Analytics in `resources/menu/facilityAdminMenu.json`
+- Added test coverage:
+  - `tests/Feature/MpdsrSurveillanceDashboardTest.php`
+  - verifies computed maternal/perinatal metrics and CSV export path
+- Validation run:
+  - `php artisan test tests/Feature/MpdsrSurveillanceDashboardTest.php`
+  - `php artisan test` (all passing)
+  - `php artisan route:list`
+  - `php artisan view:cache`
+
+## Update (2026-03-19, Printable MPDSR Review Sheet)
+- Added printable MPDSR review flow from dashboard action:
+  - new Livewire action `openPrintableReview()` in `app/Livewire/Analytics/MpdsrReportDashboard.php`
+  - persists current filter + computed surveillance payload in session (`mpdsr_review_print_payload`)
+  - redirects to dedicated print route.
+- Added print route:
+  - `GET /analytics/mpdsr-report-dashboard/print` named `mpdsr-report-dashboard-print`
+  - wired in `routes/web.php` under analytics middleware.
+- Added printable view:
+  - `resources/views/analytics/mpdsr-review-print.blade.php`
+  - includes print toolbar, filter metadata, summary KPIs, surveillance issues table, facility summary, maternal/perinatal case tables, and review sign-off lines.
+- Updated dashboard UI:
+  - added `Open Printable Review Sheet` button with loading state in `resources/views/livewire/analytics/mpdsr-report-dashboard.blade.php`.
+- Test coverage:
+  - extended `tests/Feature/MpdsrSurveillanceDashboardTest.php` with:
+    - Livewire print action redirect assertion
+    - printable route HTTP 200/content assertion.
+- Validation run:
+  - `php -l app/Livewire/Analytics/MpdsrReportDashboard.php`
+  - `php -l routes/web.php`
+  - `php -l resources/views/analytics/mpdsr-review-print.blade.php`
+  - `php artisan test --filter=MpdsrSurveillanceDashboardTest`
+  - `php artisan test` (all passing)
+  - `php artisan route:list --name=mpdsr-report-dashboard`
+
+## Update (2026-03-19, High-Volume Rich Data Seeding Command)
+- Added reusable rich seeding generator service:
+  - `app/Services/Seeding/RichFacilityDataGenerator.php`
+- Added artisan command for realistic high-volume append seeding into existing facility scope:
+  - `php artisan seed:rich-facility-data --facilityId=1 --patients=220 --months=24 --staff=40 --catalog=180 --beds=130`
+  - Command is wired in `routes/console.php`.
+- Seed profile includes non-demo realistic records across:
+  - users/staff and patient users
+  - patient + general registrations
+  - ANC + ANC follow-ups + TT + deliveries + postnatal
+  - family planning + follow-ups
+  - DIN activations + daily attendance
+  - doctor assessments + lab orders + lab tests + lab samples
+  - prescriptions + dispense lines + stock movement bridge
+  - invoices + invoice lines + payments + allocations
+  - linked children + immunization + nutrition + child activity register
+  - referrals + reminders + reminder dispatch logs
+  - activities timeline
+  - bed/admission and lab operations support datasets
+  - visits/visit_events via sync collation after seed
+- Safety behavior:
+  - append-only (no table truncation)
+  - unique-code retry guards for constrained fields
+  - stock auto-restock + retry before seeded issue events
+- Verification:
+  - command completed successfully with summary table output
+  - `php artisan test` passed after command wiring and execution.
