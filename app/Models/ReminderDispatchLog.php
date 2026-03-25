@@ -21,6 +21,12 @@ class ReminderDispatchLog extends Model
     'subject',
     'message',
     'provider_message',
+    'provider_message_id',
+    'provider_http_code',
+    'delivery_status',
+    'delivery_message',
+    'delivery_payload',
+    'delivery_updated_at',
     'provider_payload',
     'sent_at',
     'failed_at',
@@ -28,6 +34,8 @@ class ReminderDispatchLog extends Model
 
   protected $casts = [
     'provider_payload' => 'array',
+    'delivery_payload' => 'array',
+    'delivery_updated_at' => 'datetime',
     'sent_at' => 'datetime',
     'failed_at' => 'datetime',
   ];
@@ -47,4 +55,3 @@ class ReminderDispatchLog extends Model
     return $this->belongsTo(Facility::class);
   }
 }
-

@@ -12,11 +12,14 @@ use App\Models\Registrations\FamilyPlanningRegistration;
 use App\Models\TetanusVaccination;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Schema;
 
 class ReminderDispatchService
 {
+  private static ?bool $hasProviderTrackingColumns = null;
+
   public function __construct(
-    private readonly SmsPlaceholderService $smsService,
+    private readonly SmsDispatchService $smsService,
     private readonly EmailPlaceholderService $emailService,
   ) {
   }
@@ -361,7 +364,15 @@ class ReminderDispatchService
   }
 
   /**
-   * @param  array{ok:bool,status:string,provider:string,message:string,payload:array<string,mixed>}  $result
+   * @param  array{
+   *   ok:bool,
+   *   status:string,
+   *   provider:string,
+   *   message:string,
+   *   payload:array<string,mixed>,
+   *   provider_message_id?:string|null,
+   *   http_code?:int|null
+   * }  $result
    */
   private function storeDispatchLog(
     Reminder $reminder,
@@ -371,7 +382,7 @@ class ReminderDispatchService
     ?string $message,
     array $result
   ): void {
-    ReminderDispatchLog::query()->create([
+    $payload = [
       'reminder_id' => $reminder->id,
       'patient_id' => $reminder->patient_id,
       'facility_id' => $reminder->facility_id,
@@ -385,6 +396,26 @@ class ReminderDispatchService
       'provider_payload' => (array) ($result['payload'] ?? []),
       'sent_at' => !empty($result['ok']) ? now() : null,
       'failed_at' => !empty($result['ok']) ? null : now(),
-    ]);
+    ];
+
+    if ($this->hasProviderTrackingColumns()) {
+      $payload['provider_message_id'] = isset($result['provider_message_id']) ? (string) $result['provider_message_id'] : null;
+      $payload['provider_http_code'] = isset($result['http_code']) ? (int) $result['http_code'] : null;
+    }
+
+    ReminderDispatchLog::query()->create($payload);
+  }
+
+  private function hasProviderTrackingColumns(): bool
+  {
+    if (self::$hasProviderTrackingColumns !== null) {
+      return self::$hasProviderTrackingColumns;
+    }
+
+    self::$hasProviderTrackingColumns = Schema::hasTable('reminder_dispatch_logs')
+      && Schema::hasColumn('reminder_dispatch_logs', 'provider_message_id')
+      && Schema::hasColumn('reminder_dispatch_logs', 'provider_http_code');
+
+    return self::$hasProviderTrackingColumns;
   }
 }

@@ -30,7 +30,7 @@ class RolePermissionService
       ['key' => 'analytics.view', 'label' => 'View Analytics Dashboards', 'group' => 'analytics'],
 
       ['key' => 'registers.manage', 'label' => 'Access Registration Entry Points', 'group' => 'registers'],
-      ['key' => 'avo.din_activation.manage', 'label' => 'Manage DIN Activations', 'group' => 'verification'],
+      ['key' => 'activations.din_activation.manage', 'label' => 'Manage DIN Activations', 'group' => 'verification'],
 
       ['key' => 'core.facility_dashboard.view', 'label' => 'View Facility Admin Dashboard', 'group' => 'core'],
       ['key' => 'core.state_dashboard.view', 'label' => 'View State Officer Dashboard', 'group' => 'core'],
@@ -110,6 +110,17 @@ class RolePermissionService
 
       if ($row) {
         return (bool) $row->is_allowed;
+      }
+
+      // Backward compatibility for renamed verification permission key.
+      if ($permissionKey === 'activations.din_activation.manage') {
+        $legacyRow = RolePermission::query()
+          ->where('role_name', $roleName)
+          ->where('permission_key', 'avo.din_activation.manage')
+          ->first();
+        if ($legacyRow) {
+          return (bool) $legacyRow->is_allowed;
+        }
       }
     }
 
@@ -212,8 +223,8 @@ class RolePermissionService
       return 'analytics.view';
     }
 
-    if ($path === 'avo/din-activations') {
-      return 'avo.din_activation.manage';
+    if ($path === 'activations/din-activations' || $path === 'avo/din-activations') {
+      return 'activations.din_activation.manage';
     }
 
     if (str_starts_with($path, 'registers/')) {
@@ -434,7 +445,7 @@ class RolePermissionService
       'LGA Data Administrator' => array_merge($allAuthenticated, ['core.lga_dashboard.view', 'core.reports.view', 'analytics.view']),
       'LGA Administrator' => array_merge($allAuthenticated, ['core.lga_dashboard.view', 'core.reports.view', 'analytics.view']),
       'Data Officer' => array_merge($allAuthenticated, $allWorkspace, ['registers.manage']),
-      'Verification Officer' => array_merge($allAuthenticated, ['avo.din_activation.manage']),
+      'Verification Officer' => array_merge($allAuthenticated, ['activations.din_activation.manage']),
       'Patient' => $allAuthenticated,
     ];
   }

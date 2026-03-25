@@ -3,7 +3,7 @@
 use App\Livewire\Login;
 
 //
-use App\Livewire\Avo\DinActivations;
+use App\Livewire\Activations\DinActivations;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -73,11 +73,18 @@ use App\Livewire\Account\Settings as AccountSettings;
 use App\Livewire\Registers\FamilyPlanningRegister;
 use App\Livewire\Registers\GeneralPatientsRegister;
 use App\Livewire\Patient\Portal as PatientPortal;
+use App\Http\Controllers\Webhooks\TermiiDeliveryWebhookController;
 use App\Http\Controllers\language\LanguageController;
 use App\Livewire\Workspaces\Modules\ANC\TetanusVaccinations;
+use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
 
 // Login
 Route::get('/login', Login::class)->name('login');
+
+// Provider callbacks (non-authenticated, token-protected)
+Route::post('/webhooks/termii/delivery', TermiiDeliveryWebhookController::class)
+  ->withoutMiddleware([ValidateCsrfToken::class])
+  ->name('webhooks.termii.delivery');
 
 // Central Admin, this is like our main central system for the tenancy
 Route::middleware(['auth', 'role.redirect'])->prefix('central')->group(function () {
@@ -305,10 +312,16 @@ Route::middleware(['auth', 'role.redirect', 'permission.check:analytics.view'])-
 });
 
 
-// Patient Din Activation and Workspace routes with middleware
-Route::middleware(['auth', 'role.redirect'])->prefix('avo')->group(function () {
+// Patient DIN Activation routes
+Route::middleware(['auth', 'role.redirect'])->prefix('activations')->group(function () {
+  Route::get('/din-activations', DinActivations::class)
+    ->middleware('permission.check:activations.din_activation.manage')
+    ->name('din-activations');
+});
 
-  Route::get('/din-activations', DinActivations::class)->middleware('permission.check:avo.din_activation.manage')->name('din-activations');
+// Legacy AVO path compatibility
+Route::middleware(['auth', 'role.redirect'])->prefix('avo')->group(function () {
+  Route::redirect('/din-activations', '/activations/din-activations');
 });
 
 

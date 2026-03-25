@@ -17,11 +17,11 @@
             </div>
             @if ($canManageReminders)
                 <div class="d-flex gap-2">
-                    <button type="button" class="btn btn-outline-primary" wire:click="syncFacilitySources" wire:loading.attr="disabled" wire:target="syncFacilitySources">
+                    <button type="button" class="btn btn-outline-primary btn-loading-stable" wire:click="syncFacilitySources" wire:loading.attr="disabled" wire:target="syncFacilitySources">
                         <span wire:loading.remove wire:target="syncFacilitySources"><i class="bx bx-refresh me-1"></i>Sync Facility Sources</span>
                         <span wire:loading wire:target="syncFacilitySources"><span class="spinner-border spinner-border-sm me-1"></span>Syncing...</span>
                     </button>
-                    <button type="button" class="btn btn-primary" wire:click="dispatchDueFacility" wire:loading.attr="disabled" wire:target="dispatchDueFacility">
+                    <button type="button" class="btn btn-primary btn-loading-stable" wire:click="dispatchDueFacility" wire:loading.attr="disabled" wire:target="dispatchDueFacility">
                         <span wire:loading.remove wire:target="dispatchDueFacility"><i class="bx bx-send me-1"></i>Dispatch Due</span>
                         <span wire:loading wire:target="dispatchDueFacility"><span class="spinner-border spinner-border-sm me-1"></span>Dispatching...</span>
                     </button>
@@ -30,7 +30,7 @@
                             Hide AI Assistant
                         </button>
                     @else
-                        <button type="button" class="btn btn-outline-dark" wire:click="useAiAssistant" wire:loading.attr="disabled" wire:target="useAiAssistant">
+                        <button type="button" class="btn btn-outline-dark btn-loading-stable" wire:click="useAiAssistant" wire:loading.attr="disabled" wire:target="useAiAssistant">
                             <span wire:loading.remove wire:target="useAiAssistant"><i class="bx bx-bot me-1"></i>Use AI Assistant</span>
                             <span wire:loading wire:target="useAiAssistant"><span class="spinner-border spinner-border-sm me-1"></span>Opening...</span>
                         </button>
@@ -200,17 +200,17 @@
                             <td>
                                 @if ($canManageReminders)
                                     <div class="d-flex gap-1">
-                                        <button type="button" class="btn btn-sm btn-light text-dark border" wire:click="dispatchSingle({{ $reminder->id }})" wire:loading.attr="disabled" wire:target="dispatchSingle({{ $reminder->id }})">
+                                        <button type="button" class="btn btn-sm btn-light text-dark border btn-loading-stable-sm" wire:click="dispatchSingle({{ $reminder->id }})" wire:loading.attr="disabled" wire:target="dispatchSingle({{ $reminder->id }})">
                                             <span wire:loading.remove wire:target="dispatchSingle({{ $reminder->id }})">Send</span>
                                             <span wire:loading wire:target="dispatchSingle({{ $reminder->id }})"><span class="spinner-border spinner-border-sm"></span></span>
                                         </button>
                                         @if ($reminder->status !== 'canceled')
-                                            <button type="button" class="btn btn-sm btn-light text-dark border" wire:click="cancelReminder({{ $reminder->id }})" wire:loading.attr="disabled" wire:target="cancelReminder({{ $reminder->id }})">
+                                            <button type="button" class="btn btn-sm btn-light text-dark border btn-loading-stable-sm" wire:click="cancelReminder({{ $reminder->id }})" wire:loading.attr="disabled" wire:target="cancelReminder({{ $reminder->id }})">
                                                 <span wire:loading.remove wire:target="cancelReminder({{ $reminder->id }})">Cancel</span>
                                                 <span wire:loading wire:target="cancelReminder({{ $reminder->id }})"><span class="spinner-border spinner-border-sm"></span></span>
                                             </button>
                                         @else
-                                            <button type="button" class="btn btn-sm btn-light text-dark border" wire:click="requeueReminder({{ $reminder->id }})" wire:loading.attr="disabled" wire:target="requeueReminder({{ $reminder->id }})">
+                                            <button type="button" class="btn btn-sm btn-light text-dark border btn-loading-stable-sm" wire:click="requeueReminder({{ $reminder->id }})" wire:loading.attr="disabled" wire:target="requeueReminder({{ $reminder->id }})">
                                                 <span wire:loading.remove wire:target="requeueReminder({{ $reminder->id }})">Requeue</span>
                                                 <span wire:loading wire:target="requeueReminder({{ $reminder->id }})"><span class="spinner-border spinner-border-sm"></span></span>
                                             </button>
@@ -241,6 +241,7 @@
                         <th>Channel</th>
                         <th>Recipient</th>
                         <th>Status</th>
+                        <th>Delivery</th>
                         <th>Provider Message</th>
                     </tr>
                 </thead>
@@ -264,10 +265,22 @@
                             <td>{{ strtoupper($log->channel) }}</td>
                             <td>{{ $log->recipient ?: 'N/A' }}</td>
                             <td><span class="badge bg-label-{{ $statusClass }}">{{ ucfirst($log->status) }}</span></td>
+                            <td>
+                                @php
+                                    $delivery = trim((string) ($log->delivery_status ?? ''));
+                                    $deliveryClass = match (strtolower($delivery)) {
+                                        'delivered', 'sent', 'success', 'successful' => 'success',
+                                        'failed', 'undelivered', 'rejected', 'error' => 'danger',
+                                        'queued', 'pending' => 'warning',
+                                        default => 'secondary',
+                                    };
+                                @endphp
+                                <span class="badge bg-label-{{ $deliveryClass }}">{{ $delivery !== '' ? ucfirst($delivery) : 'N/A' }}</span>
+                            </td>
                             <td>{{ $log->provider_message ?: 'N/A' }}</td>
                         </tr>
                     @empty
-                        <tr><td colspan="7" class="text-center py-4 text-muted">No dispatch logs found in this facility.</td></tr>
+                        <tr><td colspan="8" class="text-center py-4 text-muted">No dispatch logs found in this facility.</td></tr>
                     @endforelse
                 </tbody>
             </table>
@@ -351,6 +364,20 @@
             letter-spacing: 0.05em;
             font-weight: 700;
             color: #64748b;
+        }
+
+        .btn-loading-stable {
+            min-width: 170px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-loading-stable-sm {
+            min-width: 74px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
         }
     </style>
 

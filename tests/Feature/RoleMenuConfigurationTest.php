@@ -18,7 +18,7 @@ class RoleMenuConfigurationTest extends TestCase
             resource_path('menu/dataOfficerMenu.json'),
             resource_path('menu/stateOfficerMenu.json'),
             resource_path('menu/lgaOfficerMenu.json'),
-            resource_path('menu/avoOfficerMenu.json'),
+            resource_path('menu/activationsOfficerMenu.json'),
             resource_path('menu/patientMenu.json'),
         ];
     }
@@ -106,4 +106,3 @@ class RoleMenuConfigurationTest extends TestCase
         }
     }
 }
-

@@ -26,7 +26,7 @@ Status legend:
 | 10. Invoices & Payments | `workspaces/{patientId}/invoices` (`workspaces-invoices`) | Implemented | Invoice creation from prescriptions + payment recording workflow active. |
 | 11. Appointments | `workspaces/{patientId}/appointments` (`workspaces-appointments`) | Implemented | Aggregated from Doctor Assessment, TT, ANC follow-up, and Family Planning next-visit fields. |
 | 12. Referrals | `workspaces/{patientId}/referrals` (`workspaces-referrals`) | Implemented | Referral form module with services checklist, outcome tracking, and history table. |
-| 13. Reminders & Alerts | `workspaces/{patientId}/reminders` (`workspaces-reminders`) | Implemented | Reminder workspace with module-date sync and placeholder SMS/Email dispatch logs. |
+| 13. Reminders & Alerts | `workspaces/{patientId}/reminders` (`workspaces-reminders`) | Implemented | Reminder workspace with module-date sync, facility-admin dispatch flow, Termii SMS (config-enabled), and dispatch/delivery logs. |
 | 14. Family Planning | `workspaces/{patientId}/family-planning` (`workspaces-family-planning`) | Implemented | Follow-up assessment workspace for subsequent visits; one-time baseline remains in `registers/family-planning-register`. |
 | 15. Health Insurance | `workspaces/{patientId}/health-insurance` (`workspaces-health-insurance`) | Implemented | Patient insurance management hub for activate/deactivate, provider/plan/expiry updates, and audit history. Initial NHIS capture is now aligned across all 3 register entry points. |
 | 16. Visits | `workspaces/{patientId}/visits` (`workspaces-visits`) | Implemented | Auto-collates facility-scoped visit sessions from DIN activations + activity timeline events. |

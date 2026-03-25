@@ -26,7 +26,8 @@ Aligned to: HMS Vision Architecture v2.0 (Nov 2025)
    - Appointments module auto-collates next-visit dates from Doctor Assessment, TT, ANC follow-up, and Family Planning.
 8. Reminder orchestration:
    - Reminders module syncs due dates from Doctor Assessment, TT, ANC follow-up, and Family Planning.
-   - Due reminders dispatch through placeholder SMS/Email services with per-channel dispatch logs.
+   - Due reminders dispatch through configured SMS/Email channels (Termii SMS when enabled) with per-channel dispatch logs.
+   - Delivery callback endpoint updates provider delivery status back into dispatch logs.
 9. AI Assistant advisory layer:
    - Key modules expose `Use AI Assistant` -> side panel suggestions -> `Hide AI Assistant`.
    - Suggestions are predictive/flagging/advisory only (no auto-submit or auto-complete actions).
@@ -80,13 +81,13 @@ Aligned to: HMS Vision Architecture v2.0 (Nov 2025)
 ## 3) Execution Plan (Next Modules, In Order)
 
 ## Phase A: Close Remaining Patient Dashboard Core
-1. Reminders module (Section 13) - completed with placeholder delivery stack.
+1. Reminders module (Section 13) - completed with facility-owned delivery stack (Termii-ready).
 
 Done criteria:
 - Routed module pages exist from dashboard.
 - CRUD and workflow transitions completed.
 - Loading states and feedback implemented.
-- Placeholder dispatch command available: `php artisan reminders:dispatch-due --sync`.
+- Dispatch command available: `php artisan reminders:dispatch-due --sync`.
 
 ## Phase B: Complete Patient Support and Longitudinal Tracking
 1. Family Planning workspace activity module (Section 14 alignment) - completed

@@ -35,4 +35,13 @@ return [
         ],
     ],
 
+    'termii' => [
+        'enabled' => env('TERMII_ENABLED', false),
+        'base_url' => env('TERMII_BASE_URL', 'https://api.ng.termii.com'),
+        'api_key' => env('TERMII_API_KEY'),
+        'sender_id' => env('TERMII_SENDER_ID', 'CUREVA'),
+        'channel' => env('TERMII_CHANNEL', 'generic'),
+        'webhook_token' => env('TERMII_WEBHOOK_TOKEN'),
+    ],
+
 ];

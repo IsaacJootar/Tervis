@@ -98,6 +98,12 @@ High-priority pages to benchmark:
 - user-safe toasts/messages for failed submissions,
 - no raw SQL errors shown to users.
 
+5. Reminder provider readiness:
+- if `TERMII_ENABLED=true`, verify `TERMII_API_KEY` and approved `TERMII_SENDER_ID` are configured,
+- verify `reminders:dispatch-due --sync` runs successfully,
+- verify webhook token is configured (`TERMII_WEBHOOK_TOKEN`) and callback endpoint is reachable,
+- verify failed dispatch entries include provider diagnostics in `reminder_dispatch_logs`.
+
 ### E) UX and Workflow Hardening
 
 1. Confirm all long forms/modals follow template behavior:

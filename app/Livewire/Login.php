@@ -2,15 +2,13 @@
 
 namespace App\Livewire;
 
-use Livewire\Component;
-use Illuminate\Support\Str;
-use Livewire\Attributes\Title;
-use Illuminate\Auth\Events\Lockout;
+use App\Helpers\Helpers;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\RateLimiter;
-use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\Session;
-use App\Helpers\Helpers;
+use Illuminate\Support\Str;
+use Livewire\Attributes\Title;
+use Livewire\Component;
 
 #[Title('User Login')]
 class Login extends Component
@@ -34,79 +32,81 @@ class Login extends Component
 
   public function login()
   {
-    $this->ensureIsNotRateLimited();
-
-    $validated = $this->validate([
-      'username' => 'required|string|max:200',
-      'password' => 'required'
-    ]);
-
-    if (Auth::attempt($validated)) {
-      Session::regenerate();
-
-      $user = Auth::user();
-
-      // Check account status - prevent disabled accounts from logging in
-      if ($user->account_status === 'disabled') {
-
-        throw ValidationException::withMessages([
-          'message' => 'Your account has been disabled. Please contact your facility administrator.',
-        ]);
-      }
-      $role = $user->role;
-
-      // Define role-based redirect paths
-      $roleRoutes = [
-        'Central Admin' => 'central-admin-dashboard',
-        'Central Administrator' => 'central-admin-dashboard',
-        'State Data Administrator' => 'state-officer-dashboard',
-        'State Administrator' => 'state-officer-dashboard',
-        'LGA Officer' => 'lga-officer-dashboard',
-        'LGA Data Administrator' => 'lga-officer-dashboard',
-        'LGA Administrator' => 'lga-officer-dashboard',
-        'Facility Administrator' => 'facility-admin-dashboard',
-        'Data Officer' => 'patient-workspace',
-        'Verification Officer' => 'din-activations',
-        'Patient' => 'patient-dashboard'
-      ];
-
-      if ($role && isset($roleRoutes[$role])) {
-        toastr()->info('You are successfully logged in as ' . $role);
-        return redirect()->intended(route($roleRoutes[$role]));
-      }
-    }
-
-    if (! Auth::attempt($this->only(['username', 'password']))) {
-      RateLimiter::hit($this->throttleKey());
-
-      throw ValidationException::withMessages([
-        'message' => 'The Username or Password provided does not match our records.',
+    if (RateLimiter::tooManyAttempts($this->throttleKey(), 5)) {
+      $seconds = RateLimiter::availableIn($this->throttleKey());
+      $message = trans('auth.throttle', [
+        'seconds' => $seconds,
+        'minutes' => ceil($seconds / 60),
       ]);
-    }
-
-    RateLimiter::clear($this->throttleKey());
-  }
-
-  protected function ensureIsNotRateLimited(): void
-  {
-    if (! RateLimiter::tooManyAttempts($this->throttleKey(), 5)) {
+      toastr()->error($message);
+      $this->addError('message', $message);
       return;
     }
 
-    event(new Lockout(request()));
-
-    $seconds = RateLimiter::availableIn($this->throttleKey());
-
-    throw ValidationException::withMessages([
-      'username' => trans('auth.throttle', [
-        'seconds' => $seconds,
-        'minutes' => ceil($seconds / 60),
-      ]),
+    $validated = $this->validate([
+      'username' => 'required|string|max:200',
+      'password' => 'required',
+      'remember' => 'nullable|boolean',
     ]);
+
+    $attempted = Auth::attempt([
+      'username' => (string) $validated['username'],
+      'password' => (string) $validated['password'],
+    ], (bool) $this->remember);
+
+    if (!$attempted) {
+      RateLimiter::hit($this->throttleKey());
+      $message = 'The Username or Password provided does not match our records.';
+      toastr()->error($message);
+      $this->addError('message', $message);
+      return;
+    }
+
+    RateLimiter::clear($this->throttleKey());
+    Session::regenerate();
+
+    $user = Auth::user();
+    if (!$user || $user->account_status === 'disabled' || !$user->is_active) {
+      Auth::logout();
+      Session::invalidate();
+      Session::regenerateToken();
+      $message = 'Your account has been disabled. Please contact your facility administrator.';
+      toastr()->error($message);
+      $this->addError('message', $message);
+      return;
+    }
+
+    $roleRoutes = [
+      'Central Admin' => 'central-admin-dashboard',
+      'Central Administrator' => 'central-admin-dashboard',
+      'State Data Administrator' => 'state-officer-dashboard',
+      'State Administrator' => 'state-officer-dashboard',
+      'LGA Officer' => 'lga-officer-dashboard',
+      'LGA Data Administrator' => 'lga-officer-dashboard',
+      'LGA Administrator' => 'lga-officer-dashboard',
+      'Facility Administrator' => 'facility-admin-dashboard',
+      'Data Officer' => 'patient-workspace',
+      'Verification Officer' => 'din-activations',
+      'Patient' => 'patient-dashboard',
+    ];
+
+    $role = (string) $user->role;
+    if ($role !== '' && isset($roleRoutes[$role])) {
+      toastr()->info('You are successfully logged in as ' . $role);
+      return redirect()->intended(route($roleRoutes[$role]));
+    }
+
+    Auth::logout();
+    Session::invalidate();
+    Session::regenerateToken();
+    $message = 'Role route is not configured for this account.';
+    toastr()->error($message);
+    $this->addError('message', $message);
   }
 
   protected function throttleKey(): string
   {
-    return Str::transliterate(Str::lower($this->username) . '|' . request()->ip());
+    return Str::transliterate(Str::lower((string) $this->username) . '|' . request()->ip());
   }
 }
+

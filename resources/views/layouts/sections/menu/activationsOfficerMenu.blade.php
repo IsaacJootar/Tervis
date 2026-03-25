@@ -1,4 +1,4 @@
-{{-- resources/views/layouts/sections/menu/avoOfficerMenu.blade.php --}}
+{{-- resources/views/layouts/sections/menu/activationsOfficerMenu.blade.php --}}
 @php
     use App\Services\Security\RolePermissionService;
     use Illuminate\Support\Facades\Route;
@@ -10,7 +10,7 @@
     $menuData = json_decode(file_get_contents($menuDataPath));
 @endphp
 
-<aside id="layout-menu" class="layout-menu menu-vertical menu avo-officer-menu"
+<aside id="layout-menu" class="layout-menu menu-vertical menu activations-officer-menu"
     @foreach ($configData['menuAttributes'] as $attribute => $value)
   {{ $attribute }}="{{ $value }}" @endforeach>
 

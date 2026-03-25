@@ -9,6 +9,7 @@ use App\Services\Visits\VisitCollationService;
 use Illuminate\Foundation\Console\ClosureCommand;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Schedule;
 
 Artisan::command('inspire', function () {
     /** @var ClosureCommand $this */
@@ -50,7 +51,7 @@ Artisan::command('reminders:dispatch-due {--facilityId=} {--patientId=} {--sync}
 
     $result = $service->dispatchDueGlobal($facilityId, $patientId);
     $this->info("Reminders dispatch complete. Total {$result['total']}, sent {$result['sent']}, failed {$result['failed']}, skipped {$result['skipped']}.");
-})->purpose('Dispatch due reminders using placeholder SMS/Email channels.');
+})->purpose('Dispatch due reminders using configured SMS/Email channels.');
 
 Artisan::command('visits:backfill {--facilityId=} {--patientId=} {--from=} {--to=}', function () {
     /** @var ClosureCommand $this */
@@ -148,3 +149,15 @@ Artisan::command('seed:rich-facility-data
     collect($summary)->map(fn($v, $k) => [$k, (string) $v])->values()->all()
   );
 })->purpose('Seed realistic high-volume records across modules into an existing active facility for serious workflow/report testing.');
+
+if ((bool) config('termii.auto_dispatch_enabled', false)) {
+    $command = 'reminders:dispatch-due';
+    if ((bool) config('termii.auto_dispatch_with_sync', true)) {
+        $command .= ' --sync';
+    }
+
+    Schedule::command($command)
+        ->everyFiveMinutes()
+        ->withoutOverlapping()
+        ->runInBackground();
+}

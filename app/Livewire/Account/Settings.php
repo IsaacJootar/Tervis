@@ -118,10 +118,9 @@ class Settings extends Component
       'LGA Officer', 'LGA Data Administrator', 'LGA Administrator' => 'layouts.lgaOfficerLayout',
       'Facility Administrator' => 'layouts.facilityAdminLayout',
       'Data Officer' => 'layouts.dataOfficerLayout',
-      'Verification Officer' => 'layouts.avoOfficerLayout',
+      'Verification Officer' => 'layouts.activationsOfficerLayout',
       'Patient' => 'layouts.patientLayout',
       default => 'layouts.facilityAdminLayout',
     };
   }
 }
-

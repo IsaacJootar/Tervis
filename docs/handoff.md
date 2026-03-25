@@ -1013,3 +1013,55 @@
   - `/central-admin/notifications` continues to redirect to `/central/central-admin-dashboard` for backward-compatibility.
 - Validation run:
   - `php artisan test` => `58 passed`.
+
+## 2026-03-21 - Termii SMS Dispatch + Delivery Callback (Facility-Owned)
+
+- Reminder SMS provider upgrade implemented:
+  - `app/Services/Communication/SmsDispatchService.php` (provider switch)
+  - `app/Services/Communication/TermiiSmsService.php` (live Termii send)
+  - `app/Services/Communication/ReminderDispatchService.php` now uses provider switch service.
+- Termii config/env added:
+  - `config/termii.php`
+  - `.env.example` keys:
+    - `TERMII_ENABLED`
+    - `TERMII_BASE_URL`
+    - `TERMII_API_KEY`
+    - `TERMII_SENDER_ID`
+    - `TERMII_CHANNEL`
+    - `TERMII_MESSAGE_TYPE`
+    - `TERMII_TIMEOUT_SECONDS`
+    - `TERMII_WEBHOOK_TOKEN`
+    - `REMINDER_AUTO_DISPATCH`
+    - `REMINDER_AUTO_DISPATCH_WITH_SYNC`
+- Dispatch log provider tracking added:
+  - migration: `database/migrations/2026_03_21_120000_add_provider_tracking_to_reminder_dispatch_logs_table.php`
+  - model update: `app/Models/ReminderDispatchLog.php`
+  - stores provider message id + provider HTTP code.
+- Termii delivery callback integration added:
+  - service: `app/Services/Communication/TermiiDeliveryWebhookService.php`
+  - controller: `app/Http/Controllers/Webhooks/TermiiDeliveryWebhookController.php`
+  - route: `POST /webhooks/termii/delivery` (`webhooks.termii.delivery`)
+  - CSRF excluded for webhook route and token-protected via `TERMII_WEBHOOK_TOKEN`.
+  - Callback updates delivery status in `reminder_dispatch_logs` and syncs reminder status when delivered/failed.
+- Delivery tracking fields added:
+  - migration: `database/migrations/2026_03_21_130000_add_delivery_tracking_to_reminder_dispatch_logs_table.php`
+  - fields:
+    - `delivery_status`
+    - `delivery_message`
+    - `delivery_payload`
+    - `delivery_updated_at`
+- Facility Admin visibility:
+  - Dispatch Log table now shows `Delivery` status badge in:
+    - `resources/views/livewire/core/facility-reminders-hub.blade.php`
+- Scheduler wiring:
+  - `routes/console.php` now supports optional auto-dispatch every 5 minutes when `REMINDER_AUTO_DISPATCH=true`.
+- Documentation updates:
+  - `docs/APP1_USER_GUIDE_REMINDERS_HUB.md`
+  - `docs/APP1_PRODUCTION_HARDENING_PASS.md`
+  - `docs/APP1_MODULE_STATUS.md`
+  - `docs/APP1_WORKFLOW_ROADMAP.md`
+- Validation run:
+  - `php artisan route:list | rg "webhooks/termii/delivery|facility-reminders-hub"`
+  - `php artisan migrate --pretend --path=database/migrations/2026_03_21_120000_add_provider_tracking_to_reminder_dispatch_logs_table.php`
+  - `php artisan migrate --pretend --path=database/migrations/2026_03_21_130000_add_delivery_tracking_to_reminder_dispatch_logs_table.php`
+  - `php artisan test tests/Feature/TermiiDeliveryWebhookRouteTest.php tests/Unit/TermiiSmsServiceTest.php tests/Unit/SmsDispatchServiceTest.php` (`6 passed`)

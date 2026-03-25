@@ -269,7 +269,7 @@ class NavbarContextService
       'Data Officer' => 'dataOfficerMenu.json',
       'State Data Administrator', 'State Administrator' => 'stateOfficerMenu.json',
       'LGA Officer', 'LGA Data Administrator', 'LGA Administrator' => 'lgaOfficerMenu.json',
-      'Verification Officer' => 'avoOfficerMenu.json',
+      'Verification Officer' => 'activationsOfficerMenu.json',
       'Patient' => 'patientMenu.json',
       default => null,
     };

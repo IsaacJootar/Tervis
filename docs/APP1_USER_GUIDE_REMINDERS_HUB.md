@@ -1,6 +1,6 @@
 # APP1 User Guide: Reminders & Notifications Hub
 
-Last updated: 2026-03-16
+Last updated: 2026-03-21
 
 ## 1) Purpose
 
@@ -12,8 +12,12 @@ The Facility Reminders Hub is the facility-admin control center for reminders.
 
 This hub is used to:
 - Pull appointment/return dates from clinical modules into the reminder queue.
-- Send due reminders (SMS/Email placeholder dispatch for now).
+- Send due reminders (SMS via Termii when enabled, Email placeholder for now).
 - Monitor queue status and dispatch logs.
+
+Ownership and scope:
+- Facility Admin handles reminder sync/dispatch/log monitoring for their own facility scope.
+- Central dashboards can monitor summaries, but dispatch control remains facility-level.
 
 ## 2) Core Actions and Correct Order
 
@@ -69,10 +73,33 @@ Why order matters:
 - `failed`: dispatch attempted but failed.
 - `canceled`: intentionally stopped by user.
 
-## 6) Important Current Behavior
+## 6) SMS Provider Behavior (Termii)
 
-- SMS/Email delivery is currently a placeholder simulation, not a live telecom/email provider.
-- Dispatch logs are still saved and auditable.
+SMS dispatch is provider-based:
+- If `TERMII_ENABLED=true`, SMS dispatch uses Termii.
+- If `TERMII_ENABLED=false`, SMS dispatch uses placeholder simulation.
+- Email dispatch is still placeholder simulation.
+
+Required env keys for live SMS:
+- `TERMII_ENABLED=true`
+- `TERMII_API_KEY=...`
+- `TERMII_SENDER_ID=...` (approved sender id)
+- Optional tuning:
+  - `TERMII_CHANNEL=generic`
+  - `TERMII_TIMEOUT_SECONDS=15`
+
+Dispatch logs store provider diagnostics including:
+- provider name
+- provider message
+- provider message id
+- provider HTTP code
+- delivery callback status (when provider callback is configured)
+
+Termii delivery callback endpoint:
+- `POST /webhooks/termii/delivery`
+- token protection:
+  - set `TERMII_WEBHOOK_TOKEN`
+  - send header `X-Webhook-Token: <token>`
 
 ## 7) Troubleshooting
 
@@ -92,8 +119,13 @@ Why order matters:
   - `resources/views/livewire/core/facility-reminders-hub.blade.php`
 - Sync + dispatch service:
   - `app/Services/Communication/ReminderDispatchService.php`
-- Placeholder channels:
+- SMS providers:
+  - `app/Services/Communication/SmsDispatchService.php`
+  - `app/Services/Communication/TermiiSmsService.php`
   - `app/Services/Communication/SmsPlaceholderService.php`
+- Email placeholder:
   - `app/Services/Communication/EmailPlaceholderService.php`
 - Route:
   - `routes/web.php` (`/core/reminders-notifications-hub`)
+- Console command/scheduler:
+  - `routes/console.php` (`reminders:dispatch-due`)

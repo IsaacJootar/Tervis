@@ -74,7 +74,7 @@ class UserRoleMiddleware
       ],
 
       'Verification Officer' => [
-        'prefixes' => ['avo', 'account'],
+        'prefixes' => ['activations', 'avo', 'account'],
         'index'     => 'din-activations',
       ],
 

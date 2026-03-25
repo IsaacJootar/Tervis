@@ -1,5 +1,4 @@
 ﻿<div>
-    <x-input-error-messages />
     <!-- Content -->
     <div class="container-xxl">
         <div class="authentication-wrapper authentication-basic py-0"
@@ -19,16 +18,20 @@
                         <form wire:submit.prevent="login">
                             @csrf
 
+                            @error('message')
+                                <div class="alert alert-danger py-2 mb-3">{{ $message }}</div>
+                            @enderror
+
                             <div class="mb-4">
                                 <label for="username" class="form-label">Username<strong style="color: red">*</strong></label>
-                                <input wire:model='username' type="text" class="form-control" id="email"
+                                <input wire:model.defer='username' type="text" class="form-control" id="username"
                                     placeholder="Enter your username" autofocus>
                             </div>
 
                             <div class="mb-4 form-password-toggle form-control-validation">
                                 <label class="form-label" for="password">Password <strong class="text-danger">*</strong></label>
                                 <div class="input-group input-group-merge">
-                                    <input wire:model="password" id="password" type="password" class="form-control"
+                                    <input wire:model.defer="password" id="password" type="password" class="form-control"
                                         name="password" placeholder="••••••••••••" aria-describedby="password" />
                                     <span class="input-group-text cursor-pointer" id="togglePassword">
                                         <i class="icon-base ti tabler-eye-off" id="toggleIcon"></i>
@@ -39,7 +42,7 @@
                             <div class="my-4">
                                 <div class="d-flex justify-content-between">
                                     <div class="form-check mb-0 ms-2">
-                                        <input type="checkbox" class="form-check-input" id="remember-me" />
+                                        <input type="checkbox" class="form-check-input" id="remember-me" wire:model="remember" />
                                         <label class="form-check-label" for="remember-me"> Remember Me </label>
                                     </div>
                                 </div>
