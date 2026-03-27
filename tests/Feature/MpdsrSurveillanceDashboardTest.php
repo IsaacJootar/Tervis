@@ -151,11 +151,7 @@ class MpdsrSurveillanceDashboardTest extends TestCase
 
   private function ensureFacilityId(): int
   {
-    $facilityId = (int) DB::table('facilities')->value('id');
-    if ($facilityId > 0) {
-      return $facilityId;
-    }
-
+    // Always create a dedicated facility so the assertions are not affected by pre-existing rows.
     $token = Str::upper(Str::random(5));
     $now = now();
 

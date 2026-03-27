@@ -5,8 +5,9 @@ Generated on: 2026-03-21
 Login field:
 - Use `username` (not email) on the login form.
 
-Default password for all accounts below:
-- `Cureva@12345`
+Security notice:
+- Shared passwords should not be stored in the repository.
+- Request current staging or UAT credentials from the project owner or deployment administrator.
 
 ## Central Admin
 1. Username: `centraladmin_test1`
@@ -57,4 +58,3 @@ Default password for all accounts below:
 1. Username: `patient_test1`
 2. Username: `patient_test2`
 3. Username: `patient_test3`
-

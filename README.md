@@ -1,10 +1,10 @@
-# **Tervis Health Platform**
+# **Cureva Health Platform**
 ### AI-Powered Smart Data Automation for Health Facilities
 
-**Tervis** is an AI-powered, multi-tenant digital health platform designed for primary and secondary healthcare facilities.  
+**Cureva** is an AI-powered, multi-tenant digital health platform designed for primary and secondary healthcare facilities.  
 It replaces manual record-keeping systems with intelligent, structured, and automated health data management.
 
-Built for hospitals, maternity centers, clinics, and health administrators, Tervis enables real-time patient data capture, analytics, and decision support.
+Built for hospitals, maternity centers, clinics, and health administrators, Cureva enables real-time patient data capture, analytics, and decision support.
 
 ---
 
@@ -62,7 +62,7 @@ Replaces manual registers such as:
 ---
 
 ## 🏗️ Technology Stack
-Tervis is built using modern, scalable technologies:
+Cureva is built using modern, scalable technologies:
 
 - **Laravel** — Backend framework  
 - **Livewire** — Dynamic frontend  

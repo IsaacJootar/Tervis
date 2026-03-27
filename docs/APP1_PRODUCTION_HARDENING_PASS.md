@@ -1,7 +1,7 @@
 # APP1 Production Hardening Pass (Final Pre-Go-Live)
 
 Last updated: 2026-03-20
-System: Cureva (App1, Laravel 11)
+System: Cureva (App1, Laravel 12)
 
 ## 1) Purpose
 
@@ -61,8 +61,9 @@ Run it in this order:
 1. Enforce server-side pagination on operational tables.
 2. Replace in-memory heavy loops with SQL aggregates where possible.
 3. Ensure analytics payloads do not cache huge serialized model graphs.
-4. Move expensive report generation to queued jobs where needed.
-5. Add/confirm query timing logs for heavy reports and dashboards.
+4. Store printable report payloads by lightweight snapshot reference instead of large session blobs.
+5. Move expensive report generation to queued jobs where needed.
+6. Add/confirm query timing logs for heavy reports and dashboards.
 
 High-priority pages to benchmark:
 - `/analytics/real-time-dashboard`
@@ -100,7 +101,7 @@ High-priority pages to benchmark:
 
 5. Reminder provider readiness:
 - if `TERMII_ENABLED=true`, verify `TERMII_API_KEY` and approved `TERMII_SENDER_ID` are configured,
-- verify `reminders:dispatch-due --sync` runs successfully,
+- verify `reminders:dispatch-due --sync` runs successfully and queued jobs are consumed by a healthy worker,
 - verify webhook token is configured (`TERMII_WEBHOOK_TOKEN`) and callback endpoint is reachable,
 - verify failed dispatch entries include provider diagnostics in `reminder_dispatch_logs`.
 

@@ -17,6 +17,7 @@ use App\Models\LabTest;
 use App\Models\NutritionRecord;
 use App\Models\PostnatalRecord;
 use App\Models\Prescription;
+use App\Models\ReportSnapshot;
 use App\Models\Referral;
 use App\Models\Registrations\AntenatalRegistration;
 use App\Models\Registrations\FamilyPlanningRegistration;
@@ -29,6 +30,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Str;
 use Livewire\Component;
 
 class FacilityReports extends Component
@@ -297,7 +299,7 @@ class FacilityReports extends Component
       $summaryKeyValues = $this->buildNhmisSummaryKeyValues($this->getFacilityIds(), $this->date_from, $this->date_to);
     }
 
-    session()->put('reports_hub_print_payload', [
+    $payload = [
       'title' => $definition['name'] ?? 'Facility Report',
       'report_key' => $this->selected_report,
       'description' => $definition['description'] ?? '',
@@ -315,7 +317,27 @@ class FacilityReports extends Component
       'generated_by' => $officerName,
       'generated_by_role' => $officerRole,
       'summary_key_values' => $summaryKeyValues,
+    ];
+
+    $previousSnapshotKey = (string) session('reports_hub_print_snapshot_key', '');
+    if ($previousSnapshotKey !== '') {
+      ReportSnapshot::query()
+        ->when($user?->id, fn($query) => $query->where('created_by_user_id', (int) $user->id))
+        ->where('snapshot_key', $previousSnapshotKey)
+        ->delete();
+    }
+
+    $snapshot = ReportSnapshot::query()->create([
+      'snapshot_key' => (string) Str::uuid(),
+      'report_key' => $this->selected_report,
+      'created_by_user_id' => $user?->id,
+      'payload' => $payload,
+      'expires_at' => now()->addHours(12),
     ]);
+
+    // Keep only a lightweight lookup key in session so large result sets do not bloat session storage.
+    session()->put('reports_hub_print_snapshot_key', $snapshot->snapshot_key);
+    session()->forget('reports_hub_print_payload');
   }
 
   private function resolveScopeLabel(): string

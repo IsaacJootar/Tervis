@@ -7,6 +7,7 @@ use App\Models\ReminderDispatchLog;
 use App\Models\User;
 use App\Services\DataScopeService;
 use App\Services\Security\RolePermissionService;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Schema;
 
@@ -138,6 +139,25 @@ class NavbarContextService
       return ['count' => 0, 'items' => [], 'failed_count' => 0];
     }
 
+    $cacheKey = $this->alertsCacheKey($user, $limit);
+
+    try {
+      // Keep navbar alerts fresh while avoiding repeated count/list queries on every page render.
+      return Cache::remember($cacheKey, now()->addSeconds(60), fn() => $this->buildAlertsPayload($user, $limit));
+    } catch (\Throwable $e) {
+      return $this->buildAlertsPayload($user, $limit);
+    }
+  }
+
+  /**
+   * @return array{count:int,items:array<int,array{title:string,subtitle:string,status:string}>,failed_count:int}
+   */
+  private function buildAlertsPayload(User $user, int $limit): array
+  {
+    if (!Schema::hasTable('reminders')) {
+      return ['count' => 0, 'items' => [], 'failed_count' => 0];
+    }
+
     $baseQuery = Reminder::query()
       ->with(['patient:id,first_name,last_name,din', 'facility:id,name'])
       ->select(['id', 'facility_id', 'patient_id', 'title', 'reminder_date', 'reminder_time', 'status'])
@@ -184,6 +204,32 @@ class NavbarContextService
     ];
   }
 
+  private function alertsCacheKey(User $user, int $limit): string
+  {
+    $scope = $this->alertsScopeKey($user);
+    return 'navbar_alerts:user:' . (int) $user->id . ':limit:' . $limit . ':scope:' . $scope;
+  }
+
+  private function alertsScopeKey(User $user): string
+  {
+    $role = (string) ($user->role ?? '');
+
+    if (in_array($role, ['Central Admin', 'Central Administrator'], true)) {
+      return 'central';
+    }
+
+    if (in_array($role, ['State Data Administrator', 'State Administrator', 'LGA Officer', 'LGA Data Administrator', 'LGA Administrator'], true)) {
+      $facilityIds = $this->scopedFacilityIds();
+      return 'facilities:' . sha1(implode(',', $facilityIds));
+    }
+
+    if ($role === 'Patient') {
+      return 'patient:' . sha1(trim((string) $user->phone) . '|' . trim((string) $user->email));
+    }
+
+    return 'facility:' . (int) ($user->facility_id ?? 0);
+  }
+
   private function applyScopeToReminders($query, User $user): void
   {
     $role = (string) ($user->role ?? '');
@@ -193,8 +239,7 @@ class NavbarContextService
     }
 
     if (in_array($role, ['State Data Administrator', 'State Administrator', 'LGA Officer', 'LGA Data Administrator', 'LGA Administrator'], true)) {
-      $scope = $this->scopeService->getUserScope();
-      $facilityIds = array_values(array_filter((array) ($scope['facility_ids'] ?? []), fn($id) => (int) $id > 0));
+      $facilityIds = $this->scopedFacilityIds();
       if (count($facilityIds) === 0) {
         $query->whereRaw('1 = 0');
         return;
@@ -242,8 +287,7 @@ class NavbarContextService
     }
 
     if (in_array($role, ['State Data Administrator', 'State Administrator', 'LGA Officer', 'LGA Data Administrator', 'LGA Administrator'], true)) {
-      $scope = $this->scopeService->getUserScope();
-      $facilityIds = array_values(array_filter((array) ($scope['facility_ids'] ?? []), fn($id) => (int) $id > 0));
+      $facilityIds = $this->scopedFacilityIds();
       if (count($facilityIds) === 0) {
         $query->whereRaw('1 = 0');
         return;
@@ -259,6 +303,15 @@ class NavbarContextService
     }
 
     $query->whereRaw('1 = 0');
+  }
+
+  /**
+   * @return array<int,int>
+   */
+  private function scopedFacilityIds(): array
+  {
+    $scope = $this->scopeService->getUserScope();
+    return array_values(array_filter((array) ($scope['facility_ids'] ?? []), fn($id) => (int) $id > 0));
   }
 
   private function menuFileForRole(string $role): ?string

@@ -10,6 +10,7 @@ use App\Models\LinkedChild;
 use App\Models\NutritionRecord;
 use App\Models\Patient;
 use App\Models\Prescription;
+use App\Models\ReportSnapshot;
 use App\Models\User;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
@@ -398,7 +399,17 @@ class MonthlyNhmisSummaryDriftTest extends TestCase
 
   private function extractSummaryKeyValues(): array
   {
-    $payload = session('reports_hub_print_payload', []);
+    $snapshotKey = (string) session('reports_hub_print_snapshot_key', '');
+    $this->assertNotSame('', $snapshotKey);
+    $this->assertNull(session('reports_hub_print_payload'));
+
+    $snapshot = ReportSnapshot::query()
+      ->where('snapshot_key', $snapshotKey)
+      ->first();
+
+    $this->assertNotNull($snapshot);
+
+    $payload = (array) ($snapshot->payload ?? []);
     $this->assertNotEmpty($payload);
 
     $summary = (array) ($payload['summary_key_values'] ?? []);

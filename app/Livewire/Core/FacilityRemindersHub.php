@@ -73,8 +73,8 @@ class FacilityRemindersHub extends Component
 
   public function dispatchDueFacility(): void
   {
-    $result = app(ReminderDispatchService::class)->dispatchDueGlobal((int) $this->facility_id, null);
-    toastr()->success("Dispatch complete: {$result['sent']} sent, {$result['failed']} failed, {$result['skipped']} skipped.");
+    $result = app(ReminderDispatchService::class)->queueDueGlobal((int) $this->facility_id, null);
+    toastr()->success("Dispatch queued: {$result['queued']} of {$result['total']} due reminders.");
     $this->refreshAiAssistantIfOpen();
   }
 

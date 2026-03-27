@@ -147,7 +147,24 @@ Route::middleware(['auth', 'role.redirect'])->prefix('core')->group(function () 
   Route::get('/facility-reports', FacilityReports::class)->middleware(['permission.check:core.reports.view', 'module.enabled:reports'])->name('patient-reports');
   Route::get('/reports-hub', FacilityReports::class)->middleware(['permission.check:core.reports.view', 'module.enabled:reports'])->name('reports-hub');
   Route::get('/reports-hub/print', function () {
-    $payload = session('reports_hub_print_payload', []);
+    $snapshotKey = (string) (request('snapshot') ?: session('reports_hub_print_snapshot_key', ''));
+    $payload = [];
+
+    if ($snapshotKey !== '') {
+      $snapshotQuery = \App\Models\ReportSnapshot::query()
+        ->where('snapshot_key', $snapshotKey)
+        ->where(function ($query) {
+          $query->whereNull('expires_at')
+            ->orWhere('expires_at', '>', now());
+        });
+
+      if (Auth::check()) {
+        $snapshotQuery->where('created_by_user_id', (int) Auth::id());
+      }
+
+      $snapshot = $snapshotQuery->first();
+      $payload = (array) ($snapshot?->payload ?? []);
+    }
 
     if (($payload['report_key'] ?? null) === 'monthly_nhmis_summary') {
       $templatePath = resource_path('MONTHLY NHMIS REPORT.html');

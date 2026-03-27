@@ -49,9 +49,9 @@ Artisan::command('reminders:dispatch-due {--facilityId=} {--patientId=} {--sync}
         }
     }
 
-    $result = $service->dispatchDueGlobal($facilityId, $patientId);
-    $this->info("Reminders dispatch complete. Total {$result['total']}, sent {$result['sent']}, failed {$result['failed']}, skipped {$result['skipped']}.");
-})->purpose('Dispatch due reminders using configured SMS/Email channels.');
+    $result = $service->queueDueGlobal($facilityId, $patientId);
+    $this->info("Reminders queued. Total {$result['total']}, queued {$result['queued']}.");
+})->purpose('Queue due reminders for worker-based SMS/Email dispatch.');
 
 Artisan::command('visits:backfill {--facilityId=} {--patientId=} {--from=} {--to=}', function () {
     /** @var ClosureCommand $this */

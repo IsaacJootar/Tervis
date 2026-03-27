@@ -2,6 +2,7 @@
 
 namespace App\Services\Communication;
 
+use App\Jobs\DispatchReminderJob;
 use App\Models\AntenatalFollowUpAssessment;
 use App\Models\DoctorAssessment;
 use App\Models\FamilyPlanningFollowUp;
@@ -62,6 +63,42 @@ class ReminderDispatchService
   public function dispatchDueForPatient(int $patientId, int $facilityId): array
   {
     return $this->dispatchDueGlobal($facilityId, $patientId);
+  }
+
+  /**
+   * @return array{total:int,queued:int}
+   */
+  public function queueDueGlobal(?int $facilityId = null, ?int $patientId = null): array
+  {
+    $query = Reminder::query()
+      ->whereIn('status', ['pending', 'failed'])
+      ->whereDate('reminder_date', '<=', today());
+
+    if ($facilityId) {
+      $query->where('facility_id', $facilityId);
+    }
+
+    if ($patientId) {
+      $query->where('patient_id', $patientId);
+    }
+
+    $total = (clone $query)->count();
+    $queued = 0;
+
+    foreach ((clone $query)->lazyById(200) as $reminder) {
+      $reminder->status = 'queued';
+      $reminder->queued_at = now();
+      $reminder->failed_at = null;
+      $reminder->save();
+
+      DispatchReminderJob::dispatch((int) $reminder->id);
+      $queued++;
+    }
+
+    return [
+      'total' => $total,
+      'queued' => $queued,
+    ];
   }
 
   /**
