@@ -54,3 +54,8 @@ yarn-error.log
 !/public/assets/*
 
 !/resources/assets/vendor/js/template-customizer.js
+
+# ===============================
+# INTERNAL DOCS (KEEP LOCAL, DO NOT TRACK)
+# ===============================
+/docs/*.md
