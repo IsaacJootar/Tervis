@@ -28,7 +28,12 @@
                 <div class="metric-card metric-card-violet h-100">
                     <div class="d-flex align-items-center justify-content-between">
                         <div class="metric-label">Facilities</div>
-                        <span class="metric-icon"><i class="bx bx-buildings"></i></span>
+                        <span class="metric-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="none">
+                                <path d="M4.5 19.5V6.8c0-.7.6-1.3 1.3-1.3h4.4c.7 0 1.3.6 1.3 1.3v12.7M13.5 19.5V4.8c0-.7.6-1.3 1.3-1.3h3.4c.7 0 1.3.6 1.3 1.3v14.7M8 9h.01M8 12h.01M8 15h.01M17 8h.01M17 11h.01M17 14h.01"
+                                    stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                        </span>
                     </div>
                     <div class="metric-value">{{ $facilityCount }}</div>
                     <div class="small">Within your scope</div>
@@ -38,7 +43,14 @@
                 <div class="metric-card metric-card-rose h-100">
                     <div class="d-flex align-items-center justify-content-between">
                         <div class="metric-label">Need Attention</div>
-                        <span class="metric-icon"><i class="bx bx-error-circle"></i></span>
+                        <span class="metric-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="none">
+                                <path d="M12 4.5l8 14H4l8-14z" stroke="currentColor" stroke-width="1.7"
+                                    stroke-linejoin="round" />
+                                <path d="M12 9v4M12 15.5h.01" stroke="currentColor" stroke-width="1.8"
+                                    stroke-linecap="round" />
+                            </svg>
+                        </span>
                     </div>
                     <div class="metric-value">{{ $attentionFacilities }}</div>
                     <div class="small">Facilities with high-risk queue</div>
@@ -48,7 +60,14 @@
                 <div class="metric-card metric-card-amber h-100">
                     <div class="d-flex align-items-center justify-content-between">
                         <div class="metric-label">High-Risk Patients</div>
-                        <span class="metric-icon"><i class="bx bx-user-voice"></i></span>
+                        <span class="metric-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="none">
+                                <path d="M12 12a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z" stroke="currentColor"
+                                    stroke-width="1.7" />
+                                <path d="M5 19.2c1.4-2.4 4-3.7 7-3.7s5.6 1.3 7 3.7" stroke="currentColor"
+                                    stroke-width="1.7" stroke-linecap="round" />
+                            </svg>
+                        </span>
                     </div>
                     <div class="metric-value">{{ $highRiskTotal }}</div>
                     <div class="small">Current batch queue</div>
@@ -58,7 +77,14 @@
                 <div class="metric-card metric-card-sky h-100">
                     <div class="d-flex align-items-center justify-content-between">
                         <div class="metric-label">Lookback Window</div>
-                        <span class="metric-icon"><i class="bx bx-calendar"></i></span>
+                        <span class="metric-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="none">
+                                <rect x="4.5" y="5.5" width="15" height="14" rx="2" stroke="currentColor"
+                                    stroke-width="1.6" />
+                                <path d="M8 3.8v3M16 3.8v3M8 11h8M8 14h5" stroke="currentColor"
+                                    stroke-width="1.6" stroke-linecap="round" />
+                            </svg>
+                        </span>
                     </div>
                     <div class="metric-value">{{ (int) $daysBack }}</div>
                     <div class="small">Days analyzed</div>
@@ -124,10 +150,32 @@
                                                             <i class="bx bx-map me-1"></i>{{ $stat['lga'] }}
                                                         </small>
                                                     </div>
-                                                    <span
-                                                        class="badge {{ $stat['needs_attention'] ? 'bg-label-warning' : 'bg-label-success' }} fs-6">
-                                                        {{ $stat['high_risk_patients'] }}
-                                                    </span>
+                                                    <div class="text-end">
+                                                        <span class="metric-icon mb-2" aria-hidden="true">
+                                                            @if ($stat['needs_attention'])
+                                                                <svg viewBox="0 0 24 24" fill="none">
+                                                                    <path d="M12 4.5l8 14H4l8-14z" stroke="currentColor"
+                                                                        stroke-width="1.7" stroke-linejoin="round" />
+                                                                    <path d="M12 9v4M12 15.5h.01" stroke="currentColor"
+                                                                        stroke-width="1.8" stroke-linecap="round" />
+                                                                </svg>
+                                                            @else
+                                                                <svg viewBox="0 0 24 24" fill="none">
+                                                                    <circle cx="12" cy="12" r="8.5"
+                                                                        stroke="currentColor" stroke-width="1.7" />
+                                                                    <path d="M8.5 12.5l2.5 2.5 4.5-5"
+                                                                        stroke="currentColor" stroke-width="1.8"
+                                                                        stroke-linecap="round" stroke-linejoin="round" />
+                                                                </svg>
+                                                            @endif
+                                                        </span>
+                                                        <div>
+                                                            <span
+                                                                class="badge {{ $stat['needs_attention'] ? 'bg-label-warning' : 'bg-label-success' }} fs-6">
+                                                                {{ $stat['high_risk_patients'] }}
+                                                            </span>
+                                                        </div>
+                                                    </div>
                                                 </div>
 
                                                 <p class="mb-3 text-muted small">
@@ -192,28 +240,69 @@
                             <div class="row mb-4">
                                 <div class="col-md-3">
                                     <div class="metric-card metric-card-violet h-100">
-                                        <div class="metric-label">Total Patients</div>
+                                        <div class="d-flex align-items-center justify-content-between">
+                                            <div class="metric-label">Total Patients</div>
+                                            <span class="metric-icon" aria-hidden="true">
+                                                <svg viewBox="0 0 24 24" fill="none">
+                                                    <path d="M12 12a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z"
+                                                        stroke="currentColor" stroke-width="1.7" />
+                                                    <path d="M5 19.2c1.4-2.4 4-3.7 7-3.7s5.6 1.3 7 3.7"
+                                                        stroke="currentColor" stroke-width="1.7"
+                                                        stroke-linecap="round" />
+                                                </svg>
+                                            </span>
+                                        </div>
                                         <div class="metric-value">{{ $batchResults['total_patients'] }}</div>
                                         <div class="small">Processed in this run</div>
                                     </div>
                                 </div>
                                 <div class="col-md-3">
                                     <div class="metric-card metric-card-emerald h-100">
-                                        <div class="metric-label">Successful</div>
+                                        <div class="d-flex align-items-center justify-content-between">
+                                            <div class="metric-label">Successful</div>
+                                            <span class="metric-icon" aria-hidden="true">
+                                                <svg viewBox="0 0 24 24" fill="none">
+                                                    <circle cx="12" cy="12" r="8.5" stroke="currentColor"
+                                                        stroke-width="1.7" />
+                                                    <path d="M8.5 12.5l2.5 2.5 4.5-5" stroke="currentColor"
+                                                        stroke-width="1.8" stroke-linecap="round"
+                                                        stroke-linejoin="round" />
+                                                </svg>
+                                            </span>
+                                        </div>
                                         <div class="metric-value">{{ $batchResults['success_count'] }}</div>
                                         <div class="small">Generated summaries</div>
                                     </div>
                                 </div>
                                 <div class="col-md-3">
                                     <div class="metric-card metric-card-amber h-100">
-                                        <div class="metric-label">Failed</div>
+                                        <div class="d-flex align-items-center justify-content-between">
+                                            <div class="metric-label">Failed</div>
+                                            <span class="metric-icon" aria-hidden="true">
+                                                <svg viewBox="0 0 24 24" fill="none">
+                                                    <circle cx="12" cy="12" r="8.5" stroke="currentColor"
+                                                        stroke-width="1.7" />
+                                                    <path d="M9 9l6 6M15 9l-6 6" stroke="currentColor"
+                                                        stroke-width="1.8" stroke-linecap="round" />
+                                                </svg>
+                                            </span>
+                                        </div>
                                         <div class="metric-value">{{ $batchResults['failure_count'] }}</div>
                                         <div class="small">Generation failures</div>
                                     </div>
                                 </div>
                                 <div class="col-md-3">
                                     <div class="metric-card metric-card-sky h-100">
-                                        <div class="metric-label">Facilities</div>
+                                        <div class="d-flex align-items-center justify-content-between">
+                                            <div class="metric-label">Facilities</div>
+                                            <span class="metric-icon" aria-hidden="true">
+                                                <svg viewBox="0 0 24 24" fill="none">
+                                                    <path d="M4.5 19.5V6.8c0-.7.6-1.3 1.3-1.3h4.4c.7 0 1.3.6 1.3 1.3v12.7M13.5 19.5V4.8c0-.7.6-1.3 1.3-1.3h3.4c.7 0 1.3.6 1.3 1.3v14.7M8 9h.01M8 12h.01M8 15h.01M17 8h.01M17 11h.01M17 14h.01"
+                                                        stroke="currentColor" stroke-width="1.6"
+                                                        stroke-linecap="round" stroke-linejoin="round" />
+                                                </svg>
+                                            </span>
+                                        </div>
                                         <div class="metric-value">{{ $batchResults['facility_count'] }}</div>
                                         <div class="small">Covered by this run</div>
                                     </div>

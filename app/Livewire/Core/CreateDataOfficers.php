@@ -4,6 +4,7 @@ namespace App\Livewire\Core;
 
 use App\Models\Facility;
 use App\Models\User;
+use App\Services\Users\StaffWelcomeEmailService;
 use Livewire\Component;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
@@ -13,7 +14,7 @@ use Illuminate\Validation\ValidationException;
 
 class CreateDataOfficers extends Component
 {
-  public $first_name, $last_name, $email, $username, $password, $password_confirmation, $designation, $facility_id;
+  public $first_name, $last_name, $email, $phone, $username, $password, $password_confirmation, $designation, $facility_id;
   public $modal_flag = false;
   public $data_officer_id;
 
@@ -25,6 +26,7 @@ class CreateDataOfficers extends Component
     'first_name' => 'required|string|max:255',
     'last_name' => 'required|string|max:255',
     'email' => 'nullable|email',
+    'phone' => 'nullable|string|max:20',
     'username' => 'required|string|unique:users,username',
     'password' => 'required|string|min:8|confirmed',
     'designation' => 'required|in:Nurse,Doctor,Midwife,Lab Attendant,Verification Officer,Volunteer',
@@ -86,6 +88,7 @@ class CreateDataOfficers extends Component
         'first_name'   => $this->first_name,
         'last_name'    => $this->last_name,
         'email'        => $this->email ?: null,
+        'phone'        => $this->phone ?: null,
         'username'     => $username,
         'password'     => Hash::make($this->password),
         'role'         => $role, // Logic applied here
@@ -95,7 +98,13 @@ class CreateDataOfficers extends Component
         'updated_at'   => now(),
       ];
 
-      User::create($userData);
+      $user = User::create($userData);
+
+      app(StaffWelcomeEmailService::class)->sendForNewAccount(
+        $user,
+        $this->password,
+        Facility::query()->whereKey($this->facility_id)->value('name')
+      );
 
       // Clear relevant caches
       $this->clearDataOfficerCaches();
@@ -126,7 +135,7 @@ class CreateDataOfficers extends Component
   public function edit($id)
   {
     // Use select to limit fields retrieved
-    $user = User::select('id', 'first_name', 'last_name', 'email', 'username', 'designation', 'facility_id', 'role')
+    $user = User::select('id', 'first_name', 'last_name', 'email', 'phone', 'username', 'designation', 'facility_id', 'role')
       ->findOrFail($id);
 
     if (!in_array($user->role, ['Data Officer', 'Verification Officer']) || $user->facility_id !== $this->facility_id) {
@@ -137,6 +146,7 @@ class CreateDataOfficers extends Component
     $this->first_name = $user->first_name;
     $this->last_name = $user->last_name;
     $this->email = $user->email;
+    $this->phone = $user->phone;
     $this->username = $user->username;
     $this->designation = $user->designation;
     $this->password = null;
@@ -152,6 +162,7 @@ class CreateDataOfficers extends Component
         'first_name' => 'required|string|max:255',
         'last_name' => 'required|string|max:255',
         'email' => 'nullable|email',
+        'phone' => 'nullable|string|max:20',
         'username' => 'required|string|unique:users,username,' . $this->data_officer_id,
         'designation' => 'required|in:Nurse,Doctor,Midwife,Lab Attendant,Verification Officer,Volunteer',
       ];
@@ -186,6 +197,7 @@ class CreateDataOfficers extends Component
         'first_name' => $this->first_name,
         'last_name' => $this->last_name,
         'email' => $this->email ?: null,
+        'phone' => $this->phone ?: null,
         'username' => $this->username,
         'role' => $role,
         'designation' => $this->designation,
@@ -280,6 +292,7 @@ class CreateDataOfficers extends Component
       'first_name',
       'last_name',
       'email',
+      'phone',
       'username',
       'password',
       'password_confirmation',

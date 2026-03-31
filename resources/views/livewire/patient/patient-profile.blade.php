@@ -1,43 +1,25 @@
-@php
-    use Carbon\Carbon;
-@endphp
 @section('title', 'My Profile')
 
 <div>
-    <div class="card mb-4">
-        <div class="card-body">
-            <div class="d-flex flex-column flex-lg-row justify-content-between align-items-start gap-3">
-                <div>
-                    <h5 class="mb-1 d-flex align-items-center gap-2">
-                        <i class='bx bx-user text-primary'></i>
-                        My Profile
-                    </h5>
-                    <div class="small text-muted">{{ Carbon::today()->format('l, F j, Y') }}</div>
-                    <div class="d-flex flex-wrap gap-2 mt-2">
-                        <span class="badge bg-label-primary"><i class="bx bx-id-card me-1"></i>DIN:
-                            {{ $user->DIN }}</span>
-                        <span class="badge bg-label-success"><i class="bx bx-calendar me-1"></i>Joined:
-                            {{ Carbon::parse($user->created_at)->format('M Y') }}</span>
-                        <span class="badge bg-label-info"><i class="bx bx-building me-1"></i>{{ $registration_facility_name }}</span>
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="card portal-section-card">
+                <div class="card-header border-0 pb-0 d-flex justify-content-between align-items-center gap-3">
+                    <div>
+                        <div class="d-flex align-items-center gap-2 mb-1">
+                            <span class="portal-section-icon">
+                                <svg viewBox="0 0 24 24" fill="none">
+                                    <circle cx="12" cy="8" r="3.5" stroke="currentColor" stroke-width="1.8" />
+                                    <path d="M5 19c1.8-3 4.2-4.5 7-4.5S17.2 16 19 19" stroke="currentColor"
+                                        stroke-width="1.8" stroke-linecap="round" />
+                                </svg>
+                            </span>
+                            <h6 class="portal-section-title mb-0">Profile Information</h6>
+                        </div>
+                        <small class="text-muted">Keep your patient account details accurate and easy to recognise across the system.</small>
                     </div>
-                </div>
-                <div>
-                    <a href="{{ route('patient-dashboard') }}" class="btn btn-outline-dark">
-                        <i class="bx bx-arrow-left me-1"></i>Back to Dashboard
-                    </a>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="row">
-        <!-- Profile Information -->
-        <div class="col-md-8">
-            <div class="card">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="card-title mb-0">Profile Information</h5>
                     @if (!$edit_mode)
-                        <button type="button" class="btn btn-primary" wire:click="toggleEditMode">
+                        <button type="button" class="btn btn-dark" wire:click="toggleEditMode">
                             <i class="bx bx-edit me-1"></i>Edit Profile
                         </button>
                     @endif
@@ -45,12 +27,10 @@
                 <div class="card-body">
                     <form wire:submit.prevent="updateProfile">
                         <div class="row g-3">
-                            <!-- Basic Information -->
                             <div class="col-md-6">
                                 <label class="form-label fw-bold">First Name</label>
                                 @if ($edit_mode)
-                                    <input wire:model="first_name" type="text" class="form-control"
-                                        placeholder="Enter first name">
+                                    <input wire:model="first_name" type="text" class="form-control" placeholder="Enter first name">
                                     @error('first_name')
                                         <span class="text-danger">{{ $message }}</span>
                                     @enderror
@@ -61,8 +41,7 @@
                             <div class="col-md-6">
                                 <label class="form-label fw-bold">Last Name</label>
                                 @if ($edit_mode)
-                                    <input wire:model="last_name" type="text" class="form-control"
-                                        placeholder="Enter last name">
+                                    <input wire:model="last_name" type="text" class="form-control" placeholder="Enter last name">
                                     @error('last_name')
                                         <span class="text-danger">{{ $message }}</span>
                                     @enderror
@@ -73,8 +52,7 @@
                             <div class="col-md-6">
                                 <label class="form-label fw-bold">Email Address</label>
                                 @if ($edit_mode)
-                                    <input wire:model="email" type="email" class="form-control"
-                                        placeholder="Enter email address">
+                                    <input wire:model="email" type="email" class="form-control" placeholder="Enter email address">
                                     @error('email')
                                         <span class="text-danger">{{ $message }}</span>
                                     @enderror
@@ -85,8 +63,7 @@
                             <div class="col-md-6">
                                 <label class="form-label fw-bold">Phone Number</label>
                                 @if ($edit_mode)
-                                    <input wire:model="phone" type="text" class="form-control"
-                                        placeholder="Enter phone number">
+                                    <input wire:model="phone" type="text" class="form-control" placeholder="Enter phone number">
                                     @error('phone')
                                         <span class="text-danger">{{ $message }}</span>
                                     @enderror
@@ -94,10 +71,8 @@
                                     <p class="form-control-static">{{ $user->phone ?? 'Not provided' }}</p>
                                 @endif
                             </div>
-
-                            <!-- Read-only Information -->
                             <div class="col-md-4">
-                                <label class="form-label fw-bold">DIN (Patient ID)</label>
+                                <label class="form-label fw-bold">DIN</label>
                                 <p class="form-control-static">
                                     <span class="badge bg-label-primary fs-6">{{ $user->DIN }}</span>
                                 </p>
@@ -113,43 +88,13 @@
                                 </p>
                             </div>
 
-                            <!-- Password Change Section (only in edit mode) -->
-                            @if ($edit_mode)
-                                <div class="col-12">
-                                    <hr class="my-4">
-                                    <h6 class="text-muted mb-3">Change Password (Optional)</h6>
-                                </div>
-                                <div class="col-md-4">
-                                    <label class="form-label">Current Password</label>
-                                    <input readonly wire:model="current_password" type="password" class="form-control"
-                                        placeholder="Enter current password">
-                                    @error('current_password')
-                                        <span class="text-danger">{{ $message }}</span>
-                                    @enderror
-                                </div>
-                                <div class="col-md-4">
-                                    <label class="form-label">New Password</label>
-                                    <input readonly wire:model="new_password" type="password" class="form-control"
-                                        placeholder="Enter new password">
-                                    @error('new_password')
-                                        <span class="text-danger">{{ $message }}</span>
-                                    @enderror
-                                </div>
-                                <div class="col-md-4">
-                                    <label class="form-label">Confirm New Password</label>
-                                    <input readonly wire:model="new_password_confirmation" type="password"
-                                        class="form-control" placeholder="Confirm new password">
-                                </div>
-                            @endif
-
-                            <!-- Action Buttons -->
                             @if ($edit_mode)
                                 <div class="col-12 mt-4">
                                     <div class="d-flex gap-2">
-                                        <button type="submit" class="btn btn-primary">
+                                        <button type="submit" class="btn btn-dark">
                                             <i class="bx bx-check me-1"></i>Save Changes
                                         </button>
-                                        <button type="button" class="btn btn-secondary" wire:click="toggleEditMode">
+                                        <button type="button" class="btn btn-outline-secondary" wire:click="toggleEditMode">
                                             <i class="bx bx-x me-1"></i>Cancel
                                         </button>
                                     </div>
@@ -161,56 +106,71 @@
             </div>
         </div>
 
-        <!-- Additional Information -->
-        <div class="col-md-4">
-            <!-- Account Summary -->
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h5 class="card-title mb-0">Account Summary</h5>
+        <div class="col-lg-4">
+            <div class="card portal-section-card mb-4">
+                <div class="card-header border-0 pb-0">
+                    <div class="d-flex align-items-center gap-2 mb-1">
+                        <span class="portal-section-icon">
+                            <svg viewBox="0 0 24 24" fill="none">
+                                <rect x="5" y="5" width="14" height="14" rx="3" stroke="currentColor"
+                                    stroke-width="1.8" />
+                                <path d="M8.5 10.5h7M8.5 13.5h7" stroke="currentColor" stroke-width="1.8"
+                                    stroke-linecap="round" />
+                            </svg>
+                        </span>
+                        <h6 class="portal-section-title mb-0">Account Summary</h6>
+                    </div>
+                    <small class="text-muted">A quick account overview aligned with the newer Cureva portal style.</small>
                 </div>
                 <div class="card-body">
                     <div class="d-flex align-items-center mb-3">
                         <i class="bx bx-calendar-plus bx-sm text-primary me-2"></i>
                         <div>
-                            <small class="text-muted">Member Since</small>
-                            <div class="fw-semibold">{{ Carbon::parse($user->created_at)->format('F d, Y') }}</div>
+                            <small class="text-muted d-block">Member Since</small>
+                            <div class="fw-semibold">{{ $user->created_at?->format('F d, Y') }}</div>
                         </div>
                     </div>
                     <div class="d-flex align-items-center mb-3">
                         <i class="bx bx-building bx-sm text-success me-2"></i>
                         <div>
-                            <small class="text-muted">Registration Facility</small>
+                            <small class="text-muted d-block">Registration Facility</small>
                             <div class="fw-semibold">{{ $registration_facility_name }}</div>
                         </div>
                     </div>
-                    @if ($antenatal_record)
-                        <div class="d-flex align-items-center">
-                            <i class="bx bx-map bx-sm text-info me-2"></i>
-                            <div>
-                                <small class="text-muted">Address</small>
-                                <div class="fw-semibold">{{ $antenatal_record->address ?? 'Not provided' }}</div>
-                            </div>
+                    <div class="d-flex align-items-center mb-3">
+                        <i class="bx bx-shield-quarter bx-sm text-info me-2"></i>
+                        <div>
+                            <small class="text-muted d-block">Portal Access</small>
+                            <div class="fw-semibold">Patient Self-Service</div>
                         </div>
-                    @endif
+                    </div>
+                    <a href="{{ route('account-settings') }}" class="btn btn-outline-dark w-100">
+                        <i class="bx bx-cog me-1"></i>Open Account Settings
+                    </a>
                 </div>
             </div>
 
-            <!-- Medical Information -->
             @if ($antenatal_record)
-                <div class="card">
-                    <div class="card-header">
-                        <h5 class="card-title mb-0">Medical Information</h5>
+                <div class="card portal-section-card">
+                    <div class="card-header border-0 pb-0">
+                        <div class="d-flex align-items-center gap-2 mb-1">
+                            <span class="portal-section-icon">
+                                <svg viewBox="0 0 24 24" fill="none">
+                                    <path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="1.8"
+                                        stroke-linecap="round" />
+                                    <rect x="4" y="4" width="16" height="16" rx="4" stroke="currentColor"
+                                        stroke-width="1.8" />
+                                </svg>
+                            </span>
+                            <h6 class="portal-section-title mb-0">Medical Snapshot</h6>
+                        </div>
+                        <small class="text-muted">Important details from the patient’s active antenatal record.</small>
                     </div>
                     <div class="card-body">
                         <div class="mb-3">
-                            <small class="text-muted">Age</small>
-                            <div class="fw-semibold">{{ $antenatal_record->age }} years</div>
-                        </div>
-                        <div class="mb-3">
                             <small class="text-muted">Blood Group</small>
                             <div class="fw-semibold">
-                                <span
-                                    class="badge bg-label-primary">{{ $antenatal_record->blood_group_rhesus ?? 'N/A' }}</span>
+                                <span class="badge bg-label-primary">{{ $antenatal_record->blood_group_rhesus ?? 'N/A' }}</span>
                             </div>
                         </div>
                         <div class="mb-3">
@@ -228,12 +188,17 @@
                             <div class="fw-semibold">{{ $antenatal_record->ethnic_group ?? 'Not specified' }}</div>
                         </div>
                         @if ($antenatal_record->consultant)
-                            <div class="mb-3">
+                            <div class="mb-0">
                                 <small class="text-muted">Consultant</small>
                                 <div class="fw-semibold">{{ $antenatal_record->consultant }}</div>
                             </div>
                         @endif
                     </div>
+                </div>
+            @else
+                <div class="portal-empty">
+                    <i class="bx bx-file bx-md mb-2"></i>
+                    <p class="mb-0">No antenatal snapshot is available for this patient yet.</p>
                 </div>
             @endif
         </div>

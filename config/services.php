@@ -25,7 +25,9 @@ return [
     ],
 
     'resend' => [
-        'key' => env('RESEND_KEY'),
+        // Accept the Laravel-standard key name while keeping the older local
+        // variable as a fallback so existing environments do not break.
+        'key' => env('RESEND_API_KEY', env('RESEND_KEY')),
     ],
 
     'slack' => [

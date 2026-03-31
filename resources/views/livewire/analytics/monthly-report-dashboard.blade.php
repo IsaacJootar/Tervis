@@ -89,7 +89,13 @@
                 <div class="metric-card metric-card-violet h-100">
                     <div class="d-flex align-items-center justify-content-between">
                         <div class="metric-label">Attendance</div>
-                        <span class="metric-icon"><i class="bx bx-group"></i></span>
+                        <span class="metric-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="none">
+                                <path d="M12 12a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z" stroke="currentColor" stroke-width="1.7" />
+                                <path d="M5 19.2c1.4-2.4 4-3.7 7-3.7s5.6 1.3 7 3.7" stroke="currentColor" stroke-width="1.7"
+                                    stroke-linecap="round" />
+                            </svg>
+                        </span>
                     </div>
                     <div class="metric-value">{{ $summaryStats['total_attendance'] ?? 0 }}</div>
                     <div class="small">Total monthly encounters</div>
@@ -99,7 +105,14 @@
                 <div class="metric-card metric-card-sky h-100">
                     <div class="d-flex align-items-center justify-content-between">
                         <div class="metric-label">Deliveries</div>
-                        <span class="metric-icon"><i class="bx bx-home-heart"></i></span>
+                        <span class="metric-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="none">
+                                <path d="M6 13h10a3 3 0 0 0 0-6H9" stroke="currentColor" stroke-width="1.8"
+                                    stroke-linecap="round" />
+                                <circle cx="9" cy="18" r="1.8" stroke="currentColor" stroke-width="1.6" />
+                                <circle cx="16" cy="18" r="1.8" stroke="currentColor" stroke-width="1.6" />
+                            </svg>
+                        </span>
                     </div>
                     <div class="metric-value">{{ $summaryStats['total_deliveries'] ?? 0 }}</div>
                     <div class="small">C/S rate: {{ $summaryStats['cesarean_rate'] ?? 0 }}%</div>
@@ -109,7 +122,12 @@
                 <div class="metric-card metric-card-rose h-100">
                     <div class="d-flex align-items-center justify-content-between">
                         <div class="metric-label">Maternal Deaths</div>
-                        <span class="metric-icon"><i class="bx bx-heart-circle"></i></span>
+                        <span class="metric-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="none">
+                                <path d="M12 20s-6-3.8-8-7.2C2.2 9.7 4 6 7.7 6c1.8 0 3.1.9 4.3 2.4C13.2 6.9 14.5 6 16.3 6 20 6 21.8 9.7 20 12.8 18 16.2 12 20 12 20z"
+                                    stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" />
+                            </svg>
+                        </span>
                     </div>
                     <div class="metric-value">{{ $summaryStats['maternal_deaths'] ?? 0 }}</div>
                     <div class="small">Stillbirth rate: {{ $summaryStats['stillbirth_rate'] ?? 0 }} / 1,000</div>
@@ -119,7 +137,14 @@
                 <div class="metric-card metric-card-amber h-100">
                     <div class="d-flex align-items-center justify-content-between">
                         <div class="metric-label">Vaccinations</div>
-                        <span class="metric-icon"><i class="bx bx-injection"></i></span>
+                        <span class="metric-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="none">
+                                <path d="M12 4l7 3v5c0 4.4-2.8 6.9-7 8-4.2-1.1-7-3.6-7-8V7l7-3z" stroke="currentColor"
+                                    stroke-width="1.7" />
+                                <path d="M12 9v6M9 12h6" stroke="currentColor" stroke-width="1.7"
+                                    stroke-linecap="round" />
+                            </svg>
+                        </span>
                     </div>
                     <div class="metric-value">{{ $summaryStats['total_vaccinations'] ?? 0 }}</div>
                     <div class="small">Total doses reported</div>

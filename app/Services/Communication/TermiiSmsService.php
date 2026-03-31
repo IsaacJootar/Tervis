@@ -47,12 +47,14 @@ class TermiiSmsService
     }
 
     $baseUrl = rtrim((string) config('termii.base_url', 'https://api.ng.termii.com'), '/');
+    $channel = $this->resolveChannel($context);
+
     $payload = [
       'to' => $normalizedTo,
       'from' => (string) config('termii.sender_id', 'CUREVA'),
       'sms' => $message,
       'type' => (string) config('termii.message_type', 'plain'),
-      'channel' => (string) config('termii.channel', 'generic'),
+      'channel' => $channel,
       'api_key' => $apiKey,
     ];
 
@@ -138,5 +140,14 @@ class TermiiSmsService
 
     return '';
   }
-}
 
+  private function resolveChannel(array $context): string
+  {
+    $requested = strtolower(trim((string) ($context['channel'] ?? '')));
+    if (in_array($requested, ['dnd', 'generic', 'whatsapp', 'voice'], true)) {
+      return $requested;
+    }
+
+    return (string) config('termii.channel', 'generic');
+  }
+}

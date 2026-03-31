@@ -155,6 +155,14 @@ class Patient extends Model
     return $this->belongsTo(Facility::class);
   }
 
+  /**
+   * Patient portal account linked to this clinical patient record.
+   */
+  public function portalAccount(): HasOne
+  {
+    return $this->hasOne(User::class);
+  }
+
   public function state(): BelongsTo
   {
     return $this->belongsTo(State::class);

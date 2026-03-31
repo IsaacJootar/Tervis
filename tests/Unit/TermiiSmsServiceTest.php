@@ -41,6 +41,40 @@ class TermiiSmsServiceTest extends TestCase
     });
   }
 
+  public function test_it_supports_dnd_channel_and_plus_prefixed_international_numbers(): void
+  {
+    config()->set('termii.base_url', 'https://api.ng.termii.com');
+    config()->set('termii.api_key', 'test-key');
+    config()->set('termii.sender_id', 'Cureva');
+    config()->set('termii.channel', 'generic');
+    config()->set('termii.message_type', 'plain');
+    config()->set('termii.timeout_seconds', 10);
+
+    Http::fake([
+      'https://api.ng.termii.com/api/sms/send' => Http::response([
+        'message' => 'Successfully Sent',
+        'message_id' => 'dnd-123',
+      ], 200),
+    ]);
+
+    $result = app(TermiiSmsService::class)->send('+2348058787875', 'Welcome to Cureva', [
+      'channel' => 'dnd',
+    ]);
+
+    $this->assertTrue($result['ok']);
+    $this->assertSame('sent', $result['status']);
+    $this->assertSame('termii-sms', $result['provider']);
+    $this->assertSame('dnd-123', $result['provider_message_id']);
+
+    Http::assertSent(function ($request) {
+      $data = $request->data();
+      return $request->url() === 'https://api.ng.termii.com/api/sms/send'
+        && ($data['to'] ?? null) === '2348058787875'
+        && ($data['from'] ?? null) === 'Cureva'
+        && ($data['channel'] ?? null) === 'dnd';
+    });
+  }
+
   public function test_it_fails_when_termii_api_key_is_missing(): void
   {
     config()->set('termii.api_key', '');
@@ -53,4 +87,3 @@ class TermiiSmsServiceTest extends TestCase
     $this->assertStringContainsString('TERMII_API_KEY is missing', $result['message']);
   }
 }
-

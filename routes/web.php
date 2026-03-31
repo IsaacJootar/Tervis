@@ -35,7 +35,7 @@ use App\Livewire\Core\StateOfficerDashboard;
 use App\Livewire\Analytics\RealTimeDashboard;
 use App\Livewire\Core\FacilityAdminDashboard;
 use App\Livewire\Registers\AntenatalRegister;
-use App\Livewire\Workspaces\patientWorkspace;
+use App\Livewire\Workspaces\PatientWorkspace;
 use App\Livewire\Central\CreateAdministrators;
 use App\Livewire\Central\CentralAdminDashboard;
 use App\Livewire\Central\CentralAuditTrail;
@@ -466,6 +466,22 @@ Route::middleware(['auth', 'role.redirect'])->prefix('patient')->group(function 
     ->defaults('section', 'profile')
     ->name('patient-profile');
 
+  Route::get('/patient-attendance', PatientPortal::class)
+    ->defaults('section', 'attendance')
+    ->name('patient-attendance');
+
+  Route::get('/patient-activities', PatientPortal::class)
+    ->defaults('section', 'activities')
+    ->name('patient-activities');
+
+  Route::get('/patient-appointments', PatientPortal::class)
+    ->defaults('section', 'appointments')
+    ->name('patient-appointments');
+
+  Route::get('/patient-visits', PatientPortal::class)
+    ->defaults('section', 'visits')
+    ->name('patient-visits');
+
   Route::get('/patient-antenatal', PatientPortal::class)
     ->defaults('section', 'antenatal')
     ->name('patient-antenatal');
@@ -481,6 +497,38 @@ Route::middleware(['auth', 'role.redirect'])->prefix('patient')->group(function 
   Route::get('/patient-tetanus', PatientPortal::class)
     ->defaults('section', 'tetanus')
     ->name('patient-tetanus');
+
+  Route::get('/patient-assessments', PatientPortal::class)
+    ->defaults('section', 'assessments')
+    ->name('patient-assessments');
+
+  Route::get('/patient-reminders', PatientPortal::class)
+    ->defaults('section', 'reminders')
+    ->name('patient-reminders');
+
+  Route::get('/patient-laboratory', PatientPortal::class)
+    ->defaults('section', 'laboratory')
+    ->name('patient-laboratory');
+
+  Route::get('/patient-prescriptions', PatientPortal::class)
+    ->defaults('section', 'prescriptions')
+    ->name('patient-prescriptions');
+
+  Route::get('/patient-invoices', PatientPortal::class)
+    ->defaults('section', 'invoices')
+    ->name('patient-invoices');
+
+  Route::get('/patient-referrals', PatientPortal::class)
+    ->defaults('section', 'referrals')
+    ->name('patient-referrals');
+
+  Route::get('/patient-family-planning', PatientPortal::class)
+    ->defaults('section', 'family-planning')
+    ->name('patient-family-planning');
+
+  Route::get('/patient-health-insurance', PatientPortal::class)
+    ->defaults('section', 'health-insurance')
+    ->name('patient-health-insurance');
 });
 
 // Registers routes with middleware

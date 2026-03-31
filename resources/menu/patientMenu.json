@@ -13,6 +13,30 @@
       "slug": "patient-profile"
     },
     {
+      "url": "/patient/patient-attendance",
+      "name": "Attendance",
+      "icon": "menu-icon icon-base ti tabler-clock-hour-4",
+      "slug": "patient-attendance"
+    },
+    {
+      "url": "/patient/patient-activities",
+      "name": "Activities",
+      "icon": "menu-icon icon-base ti tabler-activity",
+      "slug": "patient-activities"
+    },
+    {
+      "url": "/patient/patient-appointments",
+      "name": "Appointments",
+      "icon": "menu-icon icon-base ti tabler-calendar-event",
+      "slug": "patient-appointments"
+    },
+    {
+      "url": "/patient/patient-visits",
+      "name": "Visits",
+      "icon": "menu-icon icon-base ti tabler-walk",
+      "slug": "patient-visits"
+    },
+    {
       "url": "/patient/patient-antenatal",
       "name": "Antenatal Records",
       "icon": "menu-icon icon-base ti tabler-stethoscope",
@@ -35,6 +59,54 @@
       "name": "Tetanus Records",
       "icon": "menu-icon icon-base ti tabler-vaccine",
       "slug": "patient-tetanus"
+    },
+    {
+      "url": "/patient/patient-assessments",
+      "name": "Assessments",
+      "icon": "menu-icon icon-base ti tabler-user-heart",
+      "slug": "patient-assessments"
+    },
+    {
+      "url": "/patient/patient-reminders",
+      "name": "Reminders",
+      "icon": "menu-icon icon-base ti tabler-bell",
+      "slug": "patient-reminders"
+    },
+    {
+      "url": "/patient/patient-laboratory",
+      "name": "Laboratory",
+      "icon": "menu-icon icon-base ti tabler-test-pipe",
+      "slug": "patient-laboratory"
+    },
+    {
+      "url": "/patient/patient-prescriptions",
+      "name": "Prescriptions",
+      "icon": "menu-icon icon-base ti tabler-pill",
+      "slug": "patient-prescriptions"
+    },
+    {
+      "url": "/patient/patient-invoices",
+      "name": "Invoices",
+      "icon": "menu-icon icon-base ti tabler-receipt",
+      "slug": "patient-invoices"
+    },
+    {
+      "url": "/patient/patient-referrals",
+      "name": "Referrals",
+      "icon": "menu-icon icon-base ti tabler-arrows-transfer-up",
+      "slug": "patient-referrals"
+    },
+    {
+      "url": "/patient/patient-family-planning",
+      "name": "Family Planning",
+      "icon": "menu-icon icon-base ti tabler-users-group",
+      "slug": "patient-family-planning"
+    },
+    {
+      "url": "/patient/patient-health-insurance",
+      "name": "Health Insurance",
+      "icon": "menu-icon icon-base ti tabler-shield-check",
+      "slug": "patient-health-insurance"
     },
     {
       "url": "/account/settings",

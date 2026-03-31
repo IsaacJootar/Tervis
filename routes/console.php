@@ -1,8 +1,10 @@
 <?php
 
 use App\Models\Activity;
+use App\Models\Patient;
 use App\Models\Registrations\DinActivation;
 use App\Services\Communication\ReminderDispatchService;
+use App\Services\Patients\PatientPortalAccountService;
 use App\Services\Reports\NhmisFieldRegistry;
 use App\Services\Seeding\RichFacilityDataGenerator;
 use App\Services\Visits\VisitCollationService;
@@ -149,6 +151,58 @@ Artisan::command('seed:rich-facility-data
     collect($summary)->map(fn($v, $k) => [$k, (string) $v])->values()->all()
   );
 })->purpose('Seed realistic high-volume records across modules into an existing active facility for serious workflow/report testing.');
+
+Artisan::command('patients:backfill-portal-accounts {--patientId=} {--dry-run}', function () {
+    /** @var ClosureCommand $this */
+    $patientId = $this->option('patientId') ? (int) $this->option('patientId') : null;
+    $dryRun = (bool) $this->option('dry-run');
+
+    /** @var PatientPortalAccountService $service */
+    $service = app(PatientPortalAccountService::class);
+
+    $query = Patient::query()
+        ->when($patientId, fn($q) => $q->where('id', $patientId))
+        ->with('portalAccount')
+        ->orderBy('id');
+
+    $totalPatients = (clone $query)->count();
+    if ($totalPatients === 0) {
+        $this->warn('No patients found for portal-account backfill.');
+        return;
+    }
+
+    $processed = 0;
+    $alreadyLinked = 0;
+    $createdOrLinked = 0;
+
+    $query->chunkById(200, function ($patients) use (&$processed, &$alreadyLinked, &$createdOrLinked, $service, $dryRun) {
+        foreach ($patients as $patient) {
+            $processed++;
+
+            if ($patient->portalAccount) {
+                $alreadyLinked++;
+                continue;
+            }
+
+            if (!$dryRun) {
+                $service->ensureForPatient($patient);
+            }
+
+            $createdOrLinked++;
+        }
+    });
+
+    $mode = $dryRun ? 'Dry run complete.' : 'Patient portal account backfill complete.';
+    $this->info($mode);
+    $this->table(
+        ['Metric', 'Value'],
+        [
+            ['patients_scanned', (string) $processed],
+            ['already_linked', (string) $alreadyLinked],
+            ['created_or_linked', (string) $createdOrLinked],
+        ]
+    );
+})->purpose('Create or link missing patient portal accounts for existing patients using DIN credentials.');
 
 if ((bool) config('termii.auto_dispatch_enabled', false)) {
     $command = 'reminders:dispatch-due';

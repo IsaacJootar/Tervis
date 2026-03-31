@@ -124,4 +124,19 @@ class DataScopeService
     //if id is one(single facility or more[array of stores facility IDS])
     return is_array($facilityIds) ? $facilityIds : [$facilityIds];
   }
+
+  /**
+   * Check whether a facility belongs to the authenticated user's scope.
+   */
+  public function isFacilityInScope($facilityId): bool
+  {
+    if (blank($facilityId)) {
+      return false;
+    }
+
+    $facilityId = (int) $facilityId;
+    $scopedFacilityIds = array_map('intval', $this->getUserScope()['facility_ids'] ?? []);
+
+    return in_array($facilityId, $scopedFacilityIds, true);
+  }
 }

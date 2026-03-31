@@ -13,6 +13,7 @@ use App\Models\Facility;
 use App\Models\Patient;
 use Carbon\Carbon;
 use App\Models\RiskPrediction;
+use Illuminate\Support\Facades\Log;
 
 
 class DashboardMetricsService
@@ -26,15 +27,26 @@ class DashboardMetricsService
 
   public function getRealTimeMetrics($facilityId = null)
   {
-    // If facilityId is provided, use it for specific facility view
-    // Otherwise, use user's scope (facility/lga/state)
-    if ($facilityId) {
-      $facilityIds = [$facilityId];
-      $scope = ['scope_type' => 'facility', 'facility_ids' => $facilityIds];
-    } else {
-      $scope = $this->scopeService->getUserScope();
-      $facilityIds = $scope['facility_ids'];
+    $scope = $this->scopeService->getUserScope();
+
+    // Only allow facility drill-down inside the authenticated user's scope.
+    if (!blank($facilityId)) {
+      $facilityId = (int) $facilityId;
+
+      if ($this->scopeService->isFacilityInScope($facilityId)) {
+        $scope['scope_type'] = 'facility';
+        $scope['facility_ids'] = [$facilityId];
+        $scope['selected_facility_id'] = $facilityId;
+      } else {
+        Log::warning('Dashboard facility selection rejected outside user scope.', [
+          'user_id' => optional(auth()->user())->id,
+          'facility_id' => $facilityId,
+          'scope_facility_ids' => $scope['facility_ids'] ?? [],
+        ]);
+      }
     }
+
+    $facilityIds = $scope['facility_ids'] ?? [];
 
     if (empty($facilityIds)) {
       return $this->getEmptyMetrics($scope);
@@ -98,7 +110,7 @@ class DashboardMetricsService
 
     $predictions = RiskPrediction::whereIn('facility_id', $facilityIds)
       ->where('assessment_date', '>=', now()->subDays(30))
-      ->with('user')
+      ->with(['user', 'facility:id,name'])
       ->orderBy('assessment_date', 'desc')
       ->get();
 

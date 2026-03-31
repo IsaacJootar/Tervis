@@ -46,6 +46,7 @@
             </div>
             <div class="flex-grow-1">
                 <h4 class="mb-1">Access Patient Workspace</h4>
+                <div class="text-muted small">Welcome, {{ $officer_name ?? 'Officer' }}</div>
                 <div class="text-muted small">{{ Carbon::now('Africa/Lagos')->format('l, F j, Y, h:i A') }}</div>
                 <div class="d-flex flex-wrap gap-2 mt-2">
                     <span class="badge bg-label-primary">Facility: {{ $facility_name ?? 'N/A' }}</span>

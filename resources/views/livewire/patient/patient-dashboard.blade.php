@@ -4,131 +4,20 @@
 @section('title', 'Patient Dashboard')
 
 <div>
-    <div class="card mb-4">
-        <div class="card-body">
-            <div class="d-flex flex-column flex-lg-row justify-content-between align-items-start gap-3">
-                <div>
-                    <h5 class="mb-1 d-flex align-items-center gap-2">
-                        <i class='bx bx-user-circle text-primary'></i>
-                        Welcome, {{ $user->first_name }} {{ $user->last_name }}
-                    </h5>
-                    <div class="small text-muted">{{ Carbon::today()->format('l, F j, Y') }}</div>
-                    <div class="d-flex flex-wrap gap-2 mt-2">
-                        <span class="badge bg-label-primary"><i class="bx bx-id-card me-1"></i>DIN:
-                            {{ $user->DIN }}</span>
-                        <span class="badge bg-label-success"><i class="bx bx-calendar-check me-1"></i>{{ $next_appointments }}
-                            Total Visits</span>
-                        <span class="badge bg-label-info"><i class="bx bx-building me-1"></i>{{ $registration_facility_name }}</span>
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="card portal-section-card h-100">
+                <div class="card-header border-0 pb-0">
+                    <div class="d-flex align-items-center gap-2 mb-1">
+                        <span class="portal-section-icon">
+                            <svg viewBox="0 0 24 24" fill="none">
+                                <path d="M12 4v16M7 9.5h10" stroke="currentColor" stroke-width="1.8"
+                                    stroke-linecap="round" />
+                            </svg>
+                        </span>
+                        <h6 class="portal-section-title mb-0">Recent Medical Activities</h6>
                     </div>
-                </div>
-                <div class="d-flex flex-wrap gap-2">
-                    <a href="{{ route('patient-antenatal') }}" class="btn btn-outline-primary">
-                        <i class="bx bx-plus-medical me-1"></i>Antenatal
-                    </a>
-                    <a href="{{ route('patient-deliveries') }}" class="btn btn-outline-success">
-                        <i class="bx bx-baby-carriage me-1"></i>Deliveries
-                    </a>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Statistics Cards -->
-    <div class="row mb-4">
-        <div class="col-xl-2 col-lg-4 col-md-6 col-sm-6 col-12 mb-4">
-            <div class="card h-100 bg-primary">
-                <div class="card-body text-white">
-                    <div class="d-flex align-items-center justify-content-between mb-3">
-                        <div class="avatar flex-shrink-0 bg-white bg-opacity-20 rounded">
-                            <i class="bx bx-plus-medical bx-sm text-white p-2"></i>
-                        </div>
-                        <h3 class="card-title mb-0 text-white">{{ $antenatal_count }}</h3>
-                    </div>
-                    <span class="fw-semibold text-white-50">Antenatal Records</span>
-                </div>
-            </div>
-        </div>
-        <div class="col-xl-2 col-lg-4 col-md-6 col-sm-6 col-12 mb-4">
-            <div class="card h-100 bg-success">
-                <div class="card-body text-white">
-                    <div class="d-flex align-items-center justify-content-between mb-3">
-                        <div class="avatar flex-shrink-0 bg-white bg-opacity-20 rounded">
-                            <i class="bx bx-baby-carriage bx-sm text-white p-2"></i>
-                        </div>
-                        <h3 class="card-title mb-0 text-white">{{ $delivery_count }}</h3>
-                    </div>
-                    <span class="fw-semibold text-white-50">Deliveries</span>
-                </div>
-            </div>
-        </div>
-        <div class="col-xl-2 col-lg-4 col-md-6 col-sm-6 col-12 mb-4">
-            <div class="card h-100 bg-info">
-                <div class="card-body text-white">
-                    <div class="d-flex align-items-center justify-content-between mb-3">
-                        <div class="avatar flex-shrink-0 bg-white bg-opacity-20 rounded">
-                            <i class="bx bx-heart bx-sm text-white p-2"></i>
-                        </div>
-                        <h3 class="card-title mb-0 text-white">{{ $postnatal_count }}</h3>
-                    </div>
-                    <span class="fw-semibold text-white-50">Postnatal Visits</span>
-                </div>
-            </div>
-        </div>
-        <div class="col-xl-2 col-lg-4 col-md-6 col-sm-6 col-12 mb-4">
-            <div class="card h-100 bg-warning">
-                <div class="card-body text-white">
-                    <div class="d-flex align-items-center justify-content-between mb-3">
-                        <div class="avatar flex-shrink-0 bg-white bg-opacity-20 rounded">
-                            <i class="bx bx-shield-plus bx-sm text-white p-2"></i>
-                        </div>
-                        <h3 class="card-title mb-0 text-white">{{ $tetanus_count }}/5</h3>
-                    </div>
-                    <span class="fw-semibold text-white-50">Tetanus Doses</span>
-                </div>
-            </div>
-        </div>
-        <div class="col-xl-2 col-lg-4 col-md-6 col-sm-6 col-12 mb-4">
-            <div class="card h-100 bg-secondary">
-                <div class="card-body text-white">
-                    <div class="d-flex align-items-center justify-content-between mb-3">
-                        <div class="avatar flex-shrink-0 bg-white bg-opacity-20 rounded">
-                            <i class="bx bx-calendar-check bx-sm text-white p-2"></i>
-                        </div>
-                        <h3 class="card-title mb-0 text-white">{{ $attendance_count }}</h3>
-                    </div>
-                    <span class="fw-semibold text-white-50">Total Visits</span>
-                </div>
-            </div>
-        </div>
-        <div class="col-xl-2 col-lg-4 col-md-6 col-sm-6 col-12 mb-4">
-            <div class="card h-100 bg-{{ $protection_status['color'] }}">
-                <div class="card-body text-white">
-                    <div class="d-flex align-items-center justify-content-between mb-3">
-                        <div class="avatar flex-shrink-0 bg-white bg-opacity-20 rounded">
-                            <i class="bx bx-shield-check bx-sm text-white p-2"></i>
-                        </div>
-                        <div class="text-end">
-                            <div class="progress mb-2" style="height: 6px; background: rgba(255,255,255,0.3);">
-                                <div class="progress-bar bg-white" role="progressbar"
-                                    style="width: {{ $protection_status['percentage'] }}%"
-                                    aria-valuenow="{{ $protection_status['percentage'] }}" aria-valuemin="0"
-                                    aria-valuemax="100"></div>
-                            </div>
-                            <small class="text-white">{{ $protection_status['percentage'] }}%</small>
-                        </div>
-                    </div>
-                    <span class="fw-semibold text-white-50">{{ $protection_status['status'] }}</span>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Recent Activities -->
-    <div class="row">
-        <div class="col-md-8 mb-4">
-            <div class="card">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="card-title mb-0">Recent Medical Activities</h5>
+                    <small class="text-muted">A clear timeline of your latest care interactions across the patient portal.</small>
                 </div>
                 <div class="card-body">
                     @if ($recent_activities && $recent_activities->count() > 0)
@@ -141,51 +30,76 @@
                                     <div class="timeline-event">
                                         <div class="timeline-header border-bottom pb-2 mb-2">
                                             <h6 class="mb-1">{{ $activity['title'] }}</h6>
-                                            <small
-                                                class="text-muted">{{ Carbon::parse($activity['date'])->format('M d, Y') }}</small>
+                                            <small class="text-muted">{{ Carbon::parse($activity['date'])->format('M d, Y') }}</small>
                                         </div>
-                                        <p class="mb-2">{{ $activity['description'] }}</p>
+                                        <p class="mb-0">{{ $activity['description'] }}</p>
                                     </div>
                                 </li>
                             @endforeach
                         </ul>
                     @else
-                        <div class="text-center py-4">
-                            <i class="bx bx-calendar bx-lg text-muted mb-2"></i>
-                            <p class="text-muted">No recent activities found</p>
+                        <div class="portal-empty">
+                            <i class="bx bx-calendar bx-lg mb-2"></i>
+                            <p class="mb-0">No recent activities have been recorded yet.</p>
                         </div>
                     @endif
                 </div>
             </div>
         </div>
 
-        <!-- Quick Actions -->
-        <div class="col-md-4 mb-4">
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="card-title mb-0">Quick Actions</h5>
+        <div class="col-lg-4">
+            <div class="card portal-section-card h-100">
+                <div class="card-header border-0 pb-0">
+                    <div class="d-flex align-items-center gap-2 mb-1">
+                        <span class="portal-section-icon">
+                            <svg viewBox="0 0 24 24" fill="none">
+                                <rect x="5" y="5" width="14" height="14" rx="3" stroke="currentColor"
+                                    stroke-width="1.8" />
+                                <path d="M8.5 10.5h7M8.5 13.5h7" stroke="currentColor" stroke-width="1.8"
+                                    stroke-linecap="round" />
+                            </svg>
+                        </span>
+                        <h6 class="portal-section-title mb-0">Care Navigator</h6>
+                    </div>
+                    <small class="text-muted">Move quickly between the core patient record sections using the same modern flow.</small>
                 </div>
                 <div class="card-body">
-                    <div class="d-grid gap-3">
+                    <div class="d-grid gap-3 portal-action-list">
+                        <a href="{{ route('patient-attendance') }}" class="btn btn-outline-dark">
+                            <span><i class="bx bx-time-five me-2"></i>Attendance Timeline</span>
+                            <i class="bx bx-chevron-right"></i>
+                        </a>
+                        <a href="{{ route('patient-appointments') }}" class="btn btn-outline-primary">
+                            <span><i class="bx bx-calendar-event me-2"></i>Appointments</span>
+                            <i class="bx bx-chevron-right"></i>
+                        </a>
+                        <a href="{{ route('patient-visits') }}" class="btn btn-outline-secondary">
+                            <span><i class="bx bx-walk me-2"></i>Visit History</span>
+                            <i class="bx bx-chevron-right"></i>
+                        </a>
                         <a href="{{ route('patient-antenatal') }}" class="btn btn-outline-primary">
-                            <i class="bx bx-plus-medical me-2"></i>
-                            View Antenatal Records
+                            <span><i class="bx bx-plus-medical me-2"></i>Antenatal Records</span>
+                            <i class="bx bx-chevron-right"></i>
                         </a>
                         <a href="{{ route('patient-deliveries') }}" class="btn btn-outline-success">
-                            <i class="bx bx-baby-carriage me-2"></i>
-                            View Delivery History
+                            <span><i class="bx bx-baby-carriage me-2"></i>Delivery History</span>
+                            <i class="bx bx-chevron-right"></i>
                         </a>
                         <a href="{{ route('patient-postnatal') }}" class="btn btn-outline-info">
-                            <i class="bx bx-heart me-2"></i>
-                            View Postnatal Care
+                            <span><i class="bx bx-heart me-2"></i>Postnatal Care</span>
+                            <i class="bx bx-chevron-right"></i>
                         </a>
                         <a href="{{ route('patient-tetanus') }}" class="btn btn-outline-warning">
-                            <i class="bx bx-shield-plus me-2"></i>
-                            View Tetanus Records
+                            <span><i class="bx bx-shield-plus me-2"></i>Tetanus Records</span>
+                            <i class="bx bx-chevron-right"></i>
                         </a>
                         <a href="{{ route('patient-profile') }}" class="btn btn-outline-secondary">
-                            <i class="bx bx-user me-2"></i>
-                            View Profile
+                            <span><i class="bx bx-user me-2"></i>Profile Details</span>
+                            <i class="bx bx-chevron-right"></i>
+                        </a>
+                        <a href="{{ route('patient-activities') }}" class="btn btn-outline-dark">
+                            <span><i class="bx bx-pulse me-2"></i>Activity Log</span>
+                            <i class="bx bx-chevron-right"></i>
                         </a>
                     </div>
                 </div>

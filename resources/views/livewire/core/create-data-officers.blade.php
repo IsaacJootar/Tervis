@@ -142,6 +142,14 @@
                                         @enderror
                                     </div>
                                     <div class="col-md-6">
+                                        <label class="form-label">Phone Number</label>
+                                        <input wire:model.live="phone" type="text" class="form-control"
+                                            placeholder="Enter phone number for SMS (optional)">
+                                        @error('phone')
+                                            <span class="text-danger">{{ $message }}</span>
+                                        @enderror
+                                    </div>
+                                    <div class="col-md-6">
                                         <label class="form-label">Username <span class="text-danger">*</span></label>
                                         <input wire:model.live="username" type="text" class="form-control"
                                             placeholder="Enter username">

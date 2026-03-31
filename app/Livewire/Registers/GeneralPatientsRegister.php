@@ -10,6 +10,7 @@ use App\Models\Patient;
 use Livewire\Component;
 use App\Models\Facility;
 use App\Models\Registrations\GeneralPatientsRegistration;
+use App\Services\Patients\PatientPortalAccountService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
@@ -320,6 +321,8 @@ class GeneralPatientsRegister extends Component
 
         $patient = Patient::create($patientData);
       }
+
+      app(PatientPortalAccountService::class)->ensureForPatient($patient);
 
       if (GeneralPatientsRegistration::where('patient_id', $patient->id)->exists()) {
         throw ValidationException::withMessages([

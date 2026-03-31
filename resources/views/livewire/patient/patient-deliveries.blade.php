@@ -4,37 +4,22 @@
 @section('title', 'My Delivery Records')
 
 <div>
-    <div class="card mb-4">
-        <div class="card-body">
-            <div class="d-flex flex-column flex-lg-row justify-content-between align-items-start gap-3">
-                <div>
-                    <h5 class="mb-1 d-flex align-items-center gap-2">
-                        <i class='bx bx-baby-carriage text-primary'></i>
-                        My Delivery Records
-                    </h5>
-                    <div class="small text-muted">{{ Carbon::today()->format('l, F j, Y') }}</div>
-                    <div class="d-flex flex-wrap gap-2 mt-2">
-                        <span class="badge bg-label-dark"><i class="bx bx-folder me-1"></i>{{ $deliveries->count() }}
-                            Total</span>
-                        <span class="badge bg-label-success"><i class="bx bx-calendar me-1"></i>Latest:
-                            {{ $deliveries->first() ? Carbon::parse($deliveries->first()->dodel)->format('M d, Y') : 'N/A' }}</span>
-                        <span class="badge bg-label-primary"><i class="bx bx-id-card me-1"></i>{{ $user->DIN }}</span>
-                    </div>
-                </div>
-                <div>
-                    <a href="{{ route('patient-dashboard') }}" class="btn btn-outline-dark">
-                        <i class="bx bx-arrow-left me-1"></i>Back to Dashboard
-                    </a>
-                </div>
+    <div class="card portal-section-card">
+        <div class="card-header border-0 pb-0">
+            <div class="d-flex align-items-center gap-2 mb-1">
+                <span class="portal-section-icon">
+                    <svg viewBox="0 0 24 24" fill="none">
+                        <path d="M7 14h10l-1.2-4.2A3 3 0 0012.9 7h-1.8a3 3 0 00-2.9 2.2L7 14z" stroke="currentColor" stroke-width="1.8" />
+                        <circle cx="9" cy="17.5" r="1.5" fill="currentColor" />
+                        <circle cx="15" cy="17.5" r="1.5" fill="currentColor" />
+                    </svg>
+                </span>
+                <h6 class="portal-section-title mb-0">Delivery History</h6>
             </div>
+            <small class="text-muted">A clear list of recorded deliveries, outcomes, and facility context.</small>
         </div>
-    </div>
-
-    <!-- DataTable with Records -->
-    <!-- DataTable with Records -->
-    <div class="card">
-        <div class="card-datatable table-responsive pt-0">
-            <table id="dataTable" class="table">
+        <div class="table-responsive pt-0">
+            <table class="table align-middle mb-0">
                 <thead class="table-dark">
                     <tr>
                         <th>Delivery Date</th>
@@ -78,8 +63,10 @@
                     @empty
                         <tr>
                             <td colspan="7" class="text-center py-4">
-                                <i class="bx bx-baby-carriage bx-lg text-muted mb-2"></i>
-                                <p class="text-muted">No delivery records found</p>
+                                <div class="portal-empty d-inline-block w-100">
+                                    <i class="bx bx-baby-carriage bx-lg mb-2"></i>
+                                    <p class="mb-0">No delivery records have been recorded yet.</p>
+                                </div>
                             </td>
                         </tr>
                     @endforelse

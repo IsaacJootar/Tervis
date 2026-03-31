@@ -50,8 +50,7 @@
                     </div>
                 </div>
                 <div class="text-lg-end">
-                    <div class="small text-muted">Signed in as</div>
-                    <div class="fw-semibold">{{ trim(($user->first_name ?? '') . ' ' . ($user->last_name ?? '')) }}</div>
+                    <div class="small text-muted">Welcome, {{ trim(($user->first_name ?? '') . ' ' . ($user->last_name ?? '')) }}</div>
                     <div class="small text-muted">{{ now('Africa/Lagos')->format('D, M j, Y h:i A') }}</div>
                 </div>
             </div>

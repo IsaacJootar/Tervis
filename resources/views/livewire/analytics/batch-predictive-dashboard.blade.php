@@ -37,7 +37,12 @@
                 <div class="metric-card metric-card-violet h-100">
                     <div class="d-flex align-items-center justify-content-between">
                         <div class="metric-label">Facilities</div>
-                        <span class="metric-icon"><i class="bx bx-buildings"></i></span>
+                        <span class="metric-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="none">
+                                <path d="M4.5 19.5V6.8c0-.7.6-1.3 1.3-1.3h4.4c.7 0 1.3.6 1.3 1.3v12.7M13.5 19.5V4.8c0-.7.6-1.3 1.3-1.3h3.4c.7 0 1.3.6 1.3 1.3v14.7M8 9h.01M8 12h.01M8 15h.01M17 8h.01M17 11h.01M17 14h.01"
+                                    stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                        </span>
                     </div>
                     <div class="metric-value">{{ $facilityCount }}</div>
                     <div class="small">In your scope</div>
@@ -47,7 +52,14 @@
                 <div class="metric-card metric-card-sky h-100">
                     <div class="d-flex align-items-center justify-content-between">
                         <div class="metric-label">Horizon</div>
-                        <span class="metric-icon"><i class="bx bx-calendar"></i></span>
+                        <span class="metric-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="none">
+                                <rect x="4.5" y="5.5" width="15" height="14" rx="2" stroke="currentColor"
+                                    stroke-width="1.6" />
+                                <path d="M8 3.8v3M16 3.8v3M8 11h8M8 14h5" stroke="currentColor"
+                                    stroke-width="1.6" stroke-linecap="round" />
+                            </svg>
+                        </span>
                     </div>
                     <div class="metric-value">{{ (int) $predictionHorizon }}</div>
                     <div class="small">Days forecast window</div>
@@ -57,7 +69,14 @@
                 <div class="metric-card metric-card-amber h-100">
                     <div class="d-flex align-items-center justify-content-between">
                         <div class="metric-label">Scope</div>
-                        <span class="metric-icon"><i class="bx bx-map"></i></span>
+                        <span class="metric-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="none">
+                                <path d="M4.5 6.5l5-2 5 2 5-2v13l-5 2-5-2-5 2v-13z" stroke="currentColor"
+                                    stroke-width="1.6" stroke-linejoin="round" />
+                                <path d="M9.5 4.5v13M14.5 6.5v13" stroke="currentColor" stroke-width="1.6"
+                                    stroke-linecap="round" />
+                            </svg>
+                        </span>
                     </div>
                     <div class="metric-value">{{ !empty($selectedFacilityId) ? '1' : (int) $facilityCount }}</div>
                     <div class="small">{{ $scopeLabel }}</div>
@@ -67,7 +86,18 @@
                 <div class="metric-card metric-card-emerald h-100">
                     <div class="d-flex align-items-center justify-content-between">
                         <div class="metric-label">Active Panels</div>
-                        <span class="metric-icon"><i class="bx bx-layout"></i></span>
+                        <span class="metric-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="none">
+                                <rect x="4.5" y="5" width="6.5" height="6.5" rx="1.3" stroke="currentColor"
+                                    stroke-width="1.6" />
+                                <rect x="13" y="5" width="6.5" height="6.5" rx="1.3" stroke="currentColor"
+                                    stroke-width="1.6" />
+                                <rect x="4.5" y="12.5" width="6.5" height="6.5" rx="1.3" stroke="currentColor"
+                                    stroke-width="1.6" />
+                                <rect x="13" y="12.5" width="6.5" height="6.5" rx="1.3" stroke="currentColor"
+                                    stroke-width="1.6" />
+                            </svg>
+                        </span>
                     </div>
                     <div class="metric-value">{{ $activePanels }}</div>
                     <div class="small">Prediction sections enabled</div>
@@ -135,7 +165,39 @@
                                             <div
                                                 class="card border-{{ $level === 'critical' ? 'danger' : ($level === 'high' ? 'warning' : ($level === 'moderate' ? 'info' : 'success')) }}">
                                                 <div class="card-body text-center">
-                                                    <h6 class="text-uppercase text-muted">{{ $level }} Risk</h6>
+                                                    <div class="d-flex align-items-center justify-content-between mb-3">
+                                                        <h6 class="text-uppercase text-muted mb-0">{{ $level }} Risk</h6>
+                                                        <span class="metric-icon" aria-hidden="true">
+                                                            @if ($level === 'critical')
+                                                                <svg viewBox="0 0 24 24" fill="none">
+                                                                    <path d="M12 4.5l8 14H4l8-14z" stroke="currentColor" stroke-width="1.7"
+                                                                        stroke-linejoin="round" />
+                                                                    <path d="M12 9v4M12 15.5h.01" stroke="currentColor" stroke-width="1.8"
+                                                                        stroke-linecap="round" />
+                                                                </svg>
+                                                            @elseif ($level === 'high')
+                                                                <svg viewBox="0 0 24 24" fill="none">
+                                                                    <path d="M5 16l4.2-4.2 3.1 3.1L19 8.2" stroke="currentColor" stroke-width="1.8"
+                                                                        stroke-linecap="round" stroke-linejoin="round" />
+                                                                    <path d="M14.5 8.2H19v4.5" stroke="currentColor" stroke-width="1.8"
+                                                                        stroke-linecap="round" stroke-linejoin="round" />
+                                                                </svg>
+                                                            @elseif ($level === 'moderate')
+                                                                <svg viewBox="0 0 24 24" fill="none">
+                                                                    <path d="M6 12h12" stroke="currentColor" stroke-width="1.8"
+                                                                        stroke-linecap="round" />
+                                                                </svg>
+                                                            @else
+                                                                <svg viewBox="0 0 24 24" fill="none">
+                                                                    <circle cx="12" cy="12" r="8.5" stroke="currentColor"
+                                                                        stroke-width="1.7" />
+                                                                    <path d="M8.5 12.5l2.5 2.5 4.5-5" stroke="currentColor"
+                                                                        stroke-width="1.8" stroke-linecap="round"
+                                                                        stroke-linejoin="round" />
+                                                                </svg>
+                                                            @endif
+                                                        </span>
+                                                    </div>
                                                     <h3 class="mb-2">
                                                         {{ $data['predicted_value'] }}
                                                         <small class="text-muted fs-6">cases</small>
@@ -199,7 +261,36 @@
                                     @foreach ($predictions['service_utilization'] as $service => $data)
                                         <div class="col-md-4 mb-3">
                                             <div class="border rounded p-3">
-                                                <h6 class="text-uppercase text-muted mb-3">{{ ucfirst($service) }}</h6>
+                                                <div class="d-flex align-items-center justify-content-between mb-3">
+                                                    <h6 class="text-uppercase text-muted mb-0">{{ ucfirst($service) }}</h6>
+                                                    <span class="metric-icon" aria-hidden="true">
+                                                        @if ($service === 'antenatal')
+                                                            <svg viewBox="0 0 24 24" fill="none">
+                                                                <path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="1.8"
+                                                                    stroke-linecap="round" />
+                                                            </svg>
+                                                        @elseif ($service === 'delivery')
+                                                            <svg viewBox="0 0 24 24" fill="none">
+                                                                <path d="M6 13h10a3 3 0 0 0 0-6H9" stroke="currentColor" stroke-width="1.8"
+                                                                    stroke-linecap="round" />
+                                                                <circle cx="9" cy="18" r="1.8" stroke="currentColor" stroke-width="1.6" />
+                                                                <circle cx="16" cy="18" r="1.8" stroke="currentColor" stroke-width="1.6" />
+                                                            </svg>
+                                                        @elseif ($service === 'postnatal')
+                                                            <svg viewBox="0 0 24 24" fill="none">
+                                                                <path d="M12 20s-6-3.8-8-7.2C2.2 9.7 4 6 7.7 6c1.8 0 3.1.9 4.3 2.4C13.2 6.9 14.5 6 16.3 6 20 6 21.8 9.7 20 12.8 18 16.2 12 20 12 20z"
+                                                                    stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" />
+                                                            </svg>
+                                                        @else
+                                                            <svg viewBox="0 0 24 24" fill="none">
+                                                                <rect x="4.5" y="5.5" width="15" height="14" rx="2" stroke="currentColor"
+                                                                    stroke-width="1.6" />
+                                                                <path d="M8 3.8v3M16 3.8v3M8.5 12.2l2.1 2.1 4.4-4.4" stroke="currentColor"
+                                                                    stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+                                                            </svg>
+                                                        @endif
+                                                    </span>
+                                                </div>
                                                 <div class="d-flex justify-content-between align-items-end mb-2">
                                                     <div>
                                                         <small class="text-muted d-block">Current Average</small>
@@ -414,21 +505,53 @@
                                 <div class="row mb-3">
                                     <div class="col-md-4">
                                         <div class="text-center p-3 border rounded">
-                                            <h6 class="text-muted">Peak Risk Month</h6>
+                                            <div class="d-flex align-items-center justify-content-between mb-2">
+                                                <h6 class="text-muted mb-0">Peak Risk Month</h6>
+                                                <span class="metric-icon" aria-hidden="true">
+                                                    <svg viewBox="0 0 24 24" fill="none">
+                                                        <path d="M5 16l4.2-4.2 3.1 3.1L19 8.2" stroke="currentColor" stroke-width="1.8"
+                                                            stroke-linecap="round" stroke-linejoin="round" />
+                                                        <path d="M14.5 8.2H19v4.5" stroke="currentColor" stroke-width="1.8"
+                                                            stroke-linecap="round" stroke-linejoin="round" />
+                                                    </svg>
+                                                </span>
+                                            </div>
                                             <h4>{{ \Carbon\Carbon::create()->month($predictions['seasonal_patterns']['peak_risk_month'])->format('F') }}
                                             </h4>
                                         </div>
                                     </div>
                                     <div class="col-md-4">
                                         <div class="text-center p-3 border rounded">
-                                            <h6 class="text-muted">Lowest Risk Month</h6>
+                                            <div class="d-flex align-items-center justify-content-between mb-2">
+                                                <h6 class="text-muted mb-0">Lowest Risk Month</h6>
+                                                <span class="metric-icon" aria-hidden="true">
+                                                    <svg viewBox="0 0 24 24" fill="none">
+                                                        <path d="M5 13.8l4.2 4.2 3.1-3.1L19 21.6" stroke="currentColor" stroke-width="1.8"
+                                                            stroke-linecap="round" stroke-linejoin="round" />
+                                                        <path d="M14.5 21.6H19v-4.5" stroke="currentColor" stroke-width="1.8"
+                                                            stroke-linecap="round" stroke-linejoin="round" />
+                                                    </svg>
+                                                </span>
+                                            </div>
                                             <h4>{{ \Carbon\Carbon::create()->month($predictions['seasonal_patterns']['lowest_risk_month'])->format('F') }}
                                             </h4>
                                         </div>
                                     </div>
                                     <div class="col-md-4">
                                         <div class="text-center p-3 border rounded">
-                                            <h6 class="text-muted">Seasonal Variance</h6>
+                                            <div class="d-flex align-items-center justify-content-between mb-2">
+                                                <h6 class="text-muted mb-0">Seasonal Variance</h6>
+                                                <span class="metric-icon" aria-hidden="true">
+                                                    <svg viewBox="0 0 24 24" fill="none">
+                                                        <path d="M6 17l3.5-4.5 2.8 2.8L18 8" stroke="currentColor" stroke-width="1.8"
+                                                            stroke-linecap="round" stroke-linejoin="round" />
+                                                        <circle cx="6" cy="17" r="1.2" fill="currentColor" />
+                                                        <circle cx="9.5" cy="12.5" r="1.2" fill="currentColor" />
+                                                        <circle cx="12.3" cy="15.3" r="1.2" fill="currentColor" />
+                                                        <circle cx="18" cy="8" r="1.2" fill="currentColor" />
+                                                    </svg>
+                                                </span>
+                                            </div>
                                             <h4>{{ $predictions['seasonal_patterns']['seasonal_variance'] }}%</h4>
                                         </div>
                                     </div>

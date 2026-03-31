@@ -254,25 +254,22 @@
         color: #fff !important;
     }
 
-    #toast-container > .toast-success {
-        background-color: #16a34a !important;
-    }
-
-    #toast-container > .toast-error {
-        background-color: #b91c1c !important;
-    }
-
-    #toast-container > .toast-warning {
-        background-color: #d97706 !important;
-    }
-
+    /* Uniform toast palette:
+       success shares the same blue treatment as info,
+       warning/attention shares the same red treatment as error. */
+    #toast-container > .toast-success,
     #toast-container > .toast-info {
         background-color: #0284c7 !important;
     }
+
+    #toast-container > .toast-error,
+    #toast-container > .toast-warning {
+        background-color: #b91c1c !important;
+    }
+
 </style>
 <!-- DataTables CSS -->
 
 <!-- app CSS -->
 @vite(['resources/css/app.css'])
 <!-- END: app CSS-->
-

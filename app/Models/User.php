@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Patient;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -26,6 +27,7 @@ class User extends Authenticatable
     'department_id',
     'lga_id',
     'state_id',
+    'patient_id',
     'is_active',
   ];
 
@@ -43,6 +45,7 @@ class User extends Authenticatable
     'department_id' => 'integer',
     'lga_id' => 'integer',
     'state_id' => 'integer',
+    'patient_id' => 'integer',
   ];
 
   /**
@@ -75,6 +78,14 @@ class User extends Authenticatable
   public function state(): BelongsTo
   {
     return $this->belongsTo(State::class);
+  }
+
+  /**
+   * Get the linked patient record for patient-portal accounts.
+   */
+  public function patient(): BelongsTo
+  {
+    return $this->belongsTo(Patient::class);
   }
 
   /**
@@ -115,5 +126,41 @@ class User extends Authenticatable
   public function getFullNameAttribute(): string
   {
     return "{$this->first_name} {$this->last_name}";
+  }
+
+  /**
+   * Expose DIN on patient portal accounts.
+   * For the current rollout, patient usernames are DIN values.
+   */
+  public function getDinAttribute(): ?string
+  {
+    if ($this->patient?->din) {
+      return (string) $this->patient->din;
+    }
+
+    if ($this->role === 'Patient' && preg_match('/^\d{8}$/', (string) $this->username)) {
+      return (string) $this->username;
+    }
+
+    $patient = Patient::query()
+      ->where('facility_id', $this->facility_id)
+      ->where('first_name', $this->first_name)
+      ->where('last_name', $this->last_name)
+      ->orderBy('id')
+      ->first();
+
+    return $patient?->din;
+  }
+
+  /**
+   * Backward compatibility for legacy uppercase DIN references in views/services.
+   */
+  public function getAttribute($key)
+  {
+    if ($key === 'DIN') {
+      return $this->getDinAttribute();
+    }
+
+    return parent::getAttribute($key);
   }
 }

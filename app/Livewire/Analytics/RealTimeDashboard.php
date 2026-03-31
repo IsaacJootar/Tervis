@@ -22,19 +22,26 @@ class RealTimeDashboard extends Component
   public $lastRefresh;
   public $selectedFacilityId = null;
   public $facilities = [];
+  public $scopeFacilityIds = [];
 
   protected $dashboardService;
   protected $riskService;
+  protected $scopeService;
 
 
   public function __construct()
   {
     $this->facilities = collect([]);
   }
-  public function boot(DashboardMetricsService $dashboardService, RiskAssessmentService $riskService)
+  public function boot(
+    DashboardMetricsService $dashboardService,
+    RiskAssessmentService $riskService,
+    DataScopeService $scopeService
+  )
   {
     $this->dashboardService = $dashboardService;
     $this->riskService = $riskService;
+    $this->scopeService = $scopeService;
   }
 
   public function mount()
@@ -42,12 +49,12 @@ class RealTimeDashboard extends Component
     $user = Auth::user();
 
     // Load available facilities based on scope
-    $scopeService = app(DataScopeService::class);
-    $scope = $scopeService->getUserScope();
+    $scope = $this->scopeService->getUserScope();
+    $this->scopeFacilityIds = array_map('intval', $scope['facility_ids'] ?? []);
 
     // Always initialize as a collection
-    if (count($scope['facility_ids'] ?? []) > 1) {
-      $this->facilities = Facility::whereIn('id', $scope['facility_ids'])
+    if (count($this->scopeFacilityIds) > 1) {
+      $this->facilities = Facility::whereIn('id', $this->scopeFacilityIds)
         ->select('id', 'name', 'lga', 'state')
         ->orderBy('name')
         ->get();
@@ -68,6 +75,7 @@ class RealTimeDashboard extends Component
   public function loadMetrics()
   {
     try {
+      $this->normalizeSelectedFacilityId();
       $this->metrics = $this->dashboardService->getRealTimeMetrics($this->selectedFacilityId);
       $this->lastRefresh = now()->format('g:i A');
 
@@ -86,6 +94,33 @@ class RealTimeDashboard extends Component
   public function updatedSelectedFacilityId()
   {
     $this->loadMetrics();
+  }
+
+  /**
+   * Prevent facility drill-down outside the authenticated user's scope.
+   */
+  private function normalizeSelectedFacilityId(): void
+  {
+    if (blank($this->selectedFacilityId)) {
+      $this->selectedFacilityId = null;
+      return;
+    }
+
+    $facilityId = (int) $this->selectedFacilityId;
+
+    if (!in_array($facilityId, $this->scopeFacilityIds, true)) {
+      Log::warning('Real-time dashboard attempted out-of-scope facility filter.', [
+        'user_id' => Auth::id(),
+        'facility_id' => $facilityId,
+        'scope_facility_ids' => $this->scopeFacilityIds,
+      ]);
+
+      $this->selectedFacilityId = null;
+      toastr()->warning('Selected facility is outside your assigned scope. Showing all facilities instead.');
+      return;
+    }
+
+    $this->selectedFacilityId = $facilityId;
   }
 
   public function refreshData()

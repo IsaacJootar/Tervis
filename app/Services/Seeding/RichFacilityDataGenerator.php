@@ -471,15 +471,17 @@ class RichFacilityDataGenerator
     $patientUserId = $this->insertUser([
       'first_name' => $first,
       'last_name' => $last,
-      'username' => $this->uniqueUsername($first, $last),
+      // Patient portal login uses DIN for this rollout.
+      'username' => $din,
       'email' => $this->uniqueEmail($first, $last),
       'phone' => $this->faker->numerify('080########'),
-      'password' => Hash::make('Pass@1234'),
+      'password' => Hash::make($din),
       'role' => 'Patient',
       'designation' => 'Patient',
       'facility_id' => $this->ctx['facility_id'],
       'state_id' => $this->ctx['state_id'],
       'lga_id' => $this->ctx['lga_id'],
+      'patient_id' => $patientId,
       'is_active' => true,
     ]);
 

@@ -6,6 +6,7 @@ use App\Models\Facility;
 use App\Models\User;
 use App\Models\State;
 use App\Models\Lga;
+use App\Services\Users\StaffWelcomeEmailService;
 use Livewire\Component;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Cache;
@@ -15,7 +16,7 @@ use Illuminate\Validation\ValidationException;
 
 class CreateAdministrators extends Component
 {
-  public $first_name, $last_name, $email, $password, $password_confirmation, $role, $designation, $facility_id, $state_id, $lga_id;
+  public $first_name, $last_name, $email, $phone, $password, $password_confirmation, $role, $designation, $facility_id, $state_id, $lga_id;
   public $modal_flag = false;
   public $admin_id;
 
@@ -31,6 +32,7 @@ class CreateAdministrators extends Component
       'first_name' => 'required|string|max:255',
       'last_name' => 'required|string|max:255',
       'email' => 'required|email|unique:users,email',
+      'phone' => 'nullable|string|max:20',
       'password' => 'required|string|min:8|confirmed',
       'role' => 'required|in:Facility Administrator,LGA Officer,State Data Administrator',
       'designation' => 'required|in:Facility Data Administrator,LGA Data Administrator,State Data Administrator',
@@ -161,6 +163,7 @@ class CreateAdministrators extends Component
         'last_name' => $this->last_name,
         'username' => $username,
         'email' => $this->email,
+        'phone' => $this->phone ?: null,
         'password' => Hash::make($this->password),
         'role' => $this->role,
         'designation' => $this->designation,
@@ -171,7 +174,15 @@ class CreateAdministrators extends Component
         'updated_at' => now(),
       ];
 
-      User::create($userData);
+      $user = User::create($userData);
+
+      if ($user->role === 'Facility Administrator') {
+        app(StaffWelcomeEmailService::class)->sendForNewAccount(
+          $user,
+          $this->password,
+          $this->resolveAssignmentLabel($user)
+        );
+      }
 
       // Clear relevant caches
       $this->clearAdminCaches();
@@ -204,13 +215,14 @@ class CreateAdministrators extends Component
   public function edit($id)
   {
     // Use select to limit fields retrieved
-    $admin = User::select('id', 'first_name', 'last_name', 'email', 'role', 'designation', 'facility_id', 'state_id', 'lga_id')
+    $admin = User::select('id', 'first_name', 'last_name', 'email', 'phone', 'role', 'designation', 'facility_id', 'state_id', 'lga_id')
       ->findOrFail($id);
 
     $this->admin_id = $id;
     $this->first_name = $admin->first_name;
     $this->last_name = $admin->last_name;
     $this->email = $admin->email;
+    $this->phone = $admin->phone;
     $this->role = $admin->role;
     $this->designation = $admin->designation;
     $this->facility_id = $admin->facility_id;
@@ -241,6 +253,7 @@ class CreateAdministrators extends Component
         'first_name' => 'required|string|max:255',
         'last_name' => 'required|string|max:255',
         'email' => 'required|email|unique:users,email,' . $this->admin_id,
+        'phone' => 'nullable|string|max:20',
         'role' => 'required|in:Facility Administrator,LGA Officer,State Data Administrator',
         'designation' => 'required|in:Facility Data Administrator,LGA Data Administrator,State Data Administrator',
         'facility_id' => [
@@ -304,6 +317,7 @@ class CreateAdministrators extends Component
         'first_name' => $this->first_name,
         'last_name' => $this->last_name,
         'email' => $this->email,
+        'phone' => $this->phone ?: null,
         'role' => $this->role,
         'designation' => $this->designation,
         'facility_id' => $this->role === 'Facility Administrator' ? $this->facility_id : null,
@@ -398,12 +412,33 @@ class CreateAdministrators extends Component
     }
   }
 
+  private function resolveAssignmentLabel(User $user): ?string
+  {
+    if ($user->role === 'Facility Administrator') {
+      return Facility::query()->whereKey($user->facility_id)->value('name');
+    }
+
+    if ($user->role === 'LGA Officer') {
+      $state = State::query()->whereKey($user->state_id)->value('name');
+      $lga = Lga::query()->whereKey($user->lga_id)->value('name');
+
+      return trim(collect([$state, $lga])->filter()->implode(' / '));
+    }
+
+    if ($user->role === 'State Data Administrator') {
+      return State::query()->whereKey($user->state_id)->value('name');
+    }
+
+    return null;
+  }
+
   private function resetForm()
   {
     $this->reset([
       'first_name',
       'last_name',
       'email',
+      'phone',
       'password',
       'password_confirmation',
       'role',

@@ -4,37 +4,21 @@
 @section('title', 'My Antenatal Records')
 
 <div>
-    <div class="card mb-4">
-        <div class="card-body">
-            <div class="d-flex flex-column flex-lg-row justify-content-between align-items-start gap-3">
-                <div>
-                    <h5 class="mb-1 d-flex align-items-center gap-2">
-                        <i class='bx bx-plus-medical text-primary'></i>
-                        My Antenatal Records
-                    </h5>
-                    <div class="small text-muted">{{ Carbon::today()->format('l, F j, Y') }}</div>
-                    <div class="d-flex flex-wrap gap-2 mt-2">
-                        <span class="badge bg-label-dark"><i class="bx bx-folder me-1"></i>{{ $antenatal_records->count() }}
-                            Total</span>
-                        <span class="badge bg-label-success"><i class="bx bx-calendar me-1"></i>Latest:
-                            {{ $antenatal_records->first() ? Carbon::parse($antenatal_records->first()->date_of_booking)->format('M d, Y') : 'N/A' }}</span>
-                        <span class="badge bg-label-info"><i class="bx bx-building me-1"></i>{{ $registration_facility_name }}</span>
-                        <span class="badge bg-label-primary"><i class="bx bx-id-card me-1"></i>{{ $user->DIN }}</span>
-                    </div>
-                </div>
-                <div>
-                    <a href="{{ route('patient-dashboard') }}" class="btn btn-outline-dark">
-                        <i class="bx bx-arrow-left me-1"></i>Back to Dashboard
-                    </a>
-                </div>
+    <div class="card portal-section-card">
+        <div class="card-header border-0 pb-0">
+            <div class="d-flex align-items-center gap-2 mb-1">
+                <span class="portal-section-icon">
+                    <svg viewBox="0 0 24 24" fill="none">
+                        <path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+                        <rect x="4" y="4" width="16" height="16" rx="4" stroke="currentColor" stroke-width="1.8" />
+                    </svg>
+                </span>
+                <h6 class="portal-section-title mb-0">Antenatal Timeline</h6>
             </div>
+            <small class="text-muted">Every antenatal registration tied to this patient, with quick drill-down into each booking.</small>
         </div>
-    </div>
-
-    <!-- DataTable with Records -->
-    <div class="card">
-        <div class="card-datatable table-responsive pt-0" wire:ignore>
-            <table id="dataTable" class="table">
+        <div class="table-responsive pt-0">
+            <table class="table align-middle mb-0">
                 <thead class="table-dark">
                     <tr>
                         <th>Unit No.</th>
@@ -67,21 +51,28 @@
                     @empty
                         <tr>
                             <td colspan="7" class="text-center py-4">
-                                <i class="bx bx-folder-open bx-lg text-muted mb-2"></i>
-                                <p class="text-muted">No antenatal records found</p>
+                                <div class="portal-empty d-inline-block w-100">
+                                    <i class="bx bx-folder-open bx-lg mb-2"></i>
+                                    <p class="mb-0">No antenatal records are available for this patient yet.</p>
+                                </div>
                             </td>
                         </tr>
                     @endforelse
                 </tbody>
             </table>
         </div>
+        @if ($antenatal_records->hasPages())
+            <div class="card-body pt-3">
+                {{ $antenatal_records->links() }}
+            </div>
+        @endif
     </div>
 
     <!-- Antenatal View Modal -->
     <div wire:ignore.self class="modal fade" id="antenatalViewModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
             <div class="modal-content">
-                <div class="modal-header">
+                <div class="modal-header border-0 pb-0">
                     <h4 class="modal-title">Antenatal Record Details</h4>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
                         wire:click="closeModal"></button>
@@ -333,6 +324,4 @@
             });
         });
     </script>
-
-    @include('_partials.datatables-init')
 </div>

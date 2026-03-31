@@ -42,6 +42,7 @@
                 <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
                     <div>
                         <h4 class="mb-1">Workspace Dashboard</h4>
+                        <div class="text-muted small">Welcome, {{ $officer_name ?? 'Officer' }}</div>
                         <div class="text-muted small">
                             {{ Carbon::now('Africa/Lagos')->format('l, F j, Y') }} | Checked in at {{ $activation_time }}
                         </div>

@@ -144,6 +144,11 @@
                             @error('email') <span class="text-danger small">{{ $message }}</span> @enderror
                         </div>
                         <div class="col-md-6">
+                            <label class="form-label">Phone Number</label>
+                            <input wire:model.live="phone" type="text" class="form-control" placeholder="Enter phone number for SMS">
+                            @error('phone') <span class="text-danger small">{{ $message }}</span> @enderror
+                        </div>
+                        <div class="col-md-6">
                             <label class="form-label">Password <span class="text-danger">{{ $modal_flag ? '(optional on update)' : '*' }}</span></label>
                             <input wire:model="password" type="password" class="form-control" placeholder="Enter password">
                             @error('password') <span class="text-danger small">{{ $message }}</span> @enderror

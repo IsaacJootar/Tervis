@@ -1,9 +1,15 @@
-﻿<div>
+<div>
+    <style>
+        .authentication-wrapper .app-brand-logo .brand-wordmark {
+            height: 42px;
+            max-width: 220px;
+        }
+    </style>
     <!-- Content -->
     <div class="container-xxl">
         <div class="authentication-wrapper authentication-basic py-0"
-            style="align-items:flex-start; min-height:100vh; padding-top:0;">
-            <div class="authentication-inner py-0" style="margin-top:-.9rem;">
+            style="align-items:center; min-height:100vh; padding-top:4vh;">
+            <div class="authentication-inner py-0" style="margin-top:0;">
                 <!-- Login -->
                 <div class="card">
                     <div class="card-body p-3">
@@ -49,10 +55,17 @@
                             </div>
 
                             <div class="mb-2">
-                                <x-app-loader target="login" type="submit" icon="bx-log-in" loadingText="Logging in..."
-                                    class="d-grid w-100">
-                                    Login In
-                                </x-app-loader>
+                                <button type="submit" class="btn btn-primary d-grid w-100"
+                                    wire:loading.attr="disabled" wire:target="login">
+                                    <span wire:loading.remove wire:target="login">
+                                        <i class="bx bx-log-in me-1"></i>
+                                        Login In
+                                    </span>
+                                    <span wire:loading wire:target="login" style="display:none;">
+                                        <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                                        Logging in...
+                                    </span>
+                                </button>
                             </div>
                         </form>
 

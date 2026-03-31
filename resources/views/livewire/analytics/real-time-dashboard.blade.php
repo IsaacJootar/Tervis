@@ -366,7 +366,7 @@
                                                         {{ $prediction->user->first_name }}
                                                         {{ $prediction->user->last_name }}
                                                         <br><small
-                                                            class="text-muted">{{ $prediction->user->DIN }}</small>
+                                                            class="text-muted">{{ $prediction->user->din ?? 'N/A' }}</small>
                                                     </td>
                                                     <td>
                                                         <span

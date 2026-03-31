@@ -10,6 +10,7 @@ use App\Models\Patient;
 use App\Models\Facility;
 use Livewire\Component;
 use App\Models\Registrations\AntenatalRegistration;
+use App\Services\Patients\PatientPortalAccountService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
@@ -553,7 +554,11 @@ class AntenatalRegister extends Component
         $patient = Patient::create($patientData);
         $this->patient_id = $patient->id;
         $this->pregnancy_number = 1; // First pregnancy for new patient
+      } else {
+        $patient = Patient::findOrFail($this->patient_id);
       }
+
+      app(PatientPortalAccountService::class)->ensureForPatient($patient);
 
       if (AntenatalRegistration::where('patient_id', $this->patient_id)->exists()) {
         throw ValidationException::withMessages([

@@ -13,6 +13,7 @@
         <div class="card-body d-flex flex-wrap align-items-center justify-content-between gap-3">
             <div>
                 <h4 class="mb-1"><i class="bx bx-shield-quarter me-1"></i>Central Admin Dashboard</h4>
+                <div class="text-muted small">Welcome, {{ trim(($authUser->first_name ?? '') . ' ' . ($authUser->last_name ?? '')) }}</div>
                 <div class="text-muted small">{{ Carbon::now('Africa/Lagos')->format('l, F j, Y, h:i A') }}</div>
                 <div class="text-muted small mt-1">Cross-facility visibility, module governance, and dispatch monitoring.</div>
             </div>

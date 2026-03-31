@@ -4,36 +4,20 @@
 @section('title', 'My Postnatal Records')
 
 <div>
-    <div class="card mb-4">
-        <div class="card-body">
-            <div class="d-flex flex-column flex-lg-row justify-content-between align-items-start gap-3">
-                <div>
-                    <h5 class="mb-1 d-flex align-items-center gap-2">
-                        <i class='bx bx-heart text-primary'></i>
-                        My Postnatal Records
-                    </h5>
-                    <div class="small text-muted">{{ Carbon::today()->format('l, F j, Y') }}</div>
-                    <div class="d-flex flex-wrap gap-2 mt-2">
-                        <span class="badge bg-label-dark"><i class="bx bx-folder me-1"></i>{{ $postnatal_records->count() }}
-                            Total</span>
-                        <span class="badge bg-label-success"><i class="bx bx-calendar me-1"></i>Latest:
-                            {{ $postnatal_records->first() ? Carbon::parse($postnatal_records->first()->visit_date)->format('M d, Y') : 'N/A' }}</span>
-                        <span class="badge bg-label-primary"><i class="bx bx-id-card me-1"></i>{{ $user->DIN }}</span>
-                    </div>
-                </div>
-                <div>
-                    <a href="{{ route('patient-dashboard') }}" class="btn btn-outline-dark">
-                        <i class="bx bx-arrow-left me-1"></i>Back to Dashboard
-                    </a>
-                </div>
+    <div class="card portal-section-card">
+        <div class="card-header border-0 pb-0">
+            <div class="d-flex align-items-center gap-2 mb-1">
+                <span class="portal-section-icon">
+                    <svg viewBox="0 0 24 24" fill="none">
+                        <path d="M12 20s-6.5-3.8-6.5-9A3.5 3.5 0 019 8.1c1.3 0 2.3.6 3 1.6.7-1 1.7-1.6 3-1.6a3.5 3.5 0 013.5 2.9c0 5.2-6.5 9-6.5 9z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" />
+                    </svg>
+                </span>
+                <h6 class="portal-section-title mb-0">Postnatal Follow-Up</h6>
             </div>
+            <small class="text-muted">Your postnatal visit record, outcomes, and recovery checkpoints in one place.</small>
         </div>
-    </div>
-
-    <!-- DataTable with Records -->
-    <div class="card">
-        <div class="card-datatable table-responsive pt-0">
-            <table id="dataTable" class="table">
+        <div class="table-responsive pt-0">
+            <table class="table align-middle mb-0">
                 <thead class="table-dark">
                     <tr>
                         <th>Visit Date</th>
@@ -79,8 +63,10 @@
                     @empty
                         <tr>
                             <td colspan="7" class="text-center py-4">
-                                <i class="bx bx-heart bx-lg text-muted mb-2"></i>
-                                <p class="text-muted">No postnatal records found</p>
+                                <div class="portal-empty d-inline-block w-100">
+                                    <i class="bx bx-heart bx-lg mb-2"></i>
+                                    <p class="mb-0">No postnatal records have been recorded yet.</p>
+                                </div>
                             </td>
                         </tr>
                     @endforelse

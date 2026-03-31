@@ -4,38 +4,20 @@
 @section('title', 'My Tetanus Records')
 
 <div>
-    <div class="card mb-4">
-        <div class="card-body">
-            <div class="d-flex flex-column flex-lg-row justify-content-between align-items-start gap-3">
-                <div>
-                    <h5 class="mb-1 d-flex align-items-center gap-2">
-                        <i class='bx bx-shield-plus text-primary'></i>
-                        My Tetanus Vaccination Records
-                    </h5>
-                    <div class="small text-muted">{{ Carbon::today()->format('l, F j, Y') }}</div>
-                    <div class="d-flex flex-wrap gap-2 mt-2">
-                        <span class="badge bg-label-success"><i class="bx bx-shield-check me-1"></i>{{ $doses_completed }}/5
-                            Doses</span>
-                        <span class="badge bg-label-warning"><i class="bx bx-calendar me-1"></i>Next Due:
-                            {{ $next_due_dose }}</span>
-                        <span class="badge bg-label-primary"><i class="bx bx-id-card me-1"></i>{{ $user->DIN }}</span>
-                    </div>
-                </div>
-                <div>
-                    <a href="{{ route('patient-dashboard') }}" class="btn btn-outline-dark">
-                        <i class="bx bx-arrow-left me-1"></i>Back to Dashboard
-                    </a>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Protection Status Card -->
     <div class="row mb-4">
         <div class="col-12">
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="card-title mb-0">Tetanus Protection Status</h5>
+            <div class="card portal-section-card">
+                <div class="card-header border-0 pb-0">
+                    <div class="d-flex align-items-center gap-2 mb-1">
+                        <span class="portal-section-icon">
+                            <svg viewBox="0 0 24 24" fill="none">
+                                <path d="M12 4l6 2.5v4.8c0 4.2-2.6 7.8-6 8.7-3.4-.9-6-4.5-6-8.7V6.5L12 4z" stroke="currentColor" stroke-width="1.8" />
+                                <path d="M9.5 12.2l1.7 1.7 3.3-3.6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                        </span>
+                        <h6 class="portal-section-title mb-0">Tetanus Protection Status</h6>
+                    </div>
+                    <small class="text-muted">A modern summary of dose completion, protection level, and next action.</small>
                 </div>
                 <div class="card-body">
                     <div class="row align-items-center">
@@ -98,10 +80,21 @@
         </div>
     </div>
 
-    <!-- DataTable with Records -->
-    <div class="card">
-        <div class="card-datatable table-responsive pt-0">
-            <table id="dataTable" class="table">
+    <div class="card portal-section-card">
+        <div class="card-header border-0 pb-0">
+            <div class="d-flex align-items-center gap-2 mb-1">
+                <span class="portal-section-icon">
+                    <svg viewBox="0 0 24 24" fill="none">
+                        <rect x="5" y="5" width="14" height="14" rx="3" stroke="currentColor" stroke-width="1.8" />
+                        <path d="M8.5 10.5h7M8.5 13.5h7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+                    </svg>
+                </span>
+                <h6 class="portal-section-title mb-0">Vaccination History</h6>
+            </div>
+            <small class="text-muted">Every tetanus record captured for this patient, with dose-level detail.</small>
+        </div>
+        <div class="table-responsive pt-0">
+            <table class="table align-middle mb-0">
                 <thead class="table-dark">
                     <tr>
                         <th>Visit Date</th>
@@ -147,8 +140,10 @@
                     @empty
                         <tr>
                             <td colspan="7" class="text-center py-4">
-                                <i class="bx bx-shield bx-lg text-muted mb-2"></i>
-                                <p class="text-muted">No tetanus vaccination records found</p>
+                                <div class="portal-empty d-inline-block w-100">
+                                    <i class="bx bx-shield bx-lg mb-2"></i>
+                                    <p class="mb-0">No tetanus vaccination records are available yet.</p>
+                                </div>
                             </td>
                         </tr>
                     @endforelse
